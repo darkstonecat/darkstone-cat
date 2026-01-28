@@ -29,7 +29,7 @@ export default async function LocaleLayout({
  
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className="bg-brand-beige text-zinc-800">
+      <body className="text-zinc-800">
         <NextIntlClientProvider messages={messages}>
           <SmoothScroll>
             {children}

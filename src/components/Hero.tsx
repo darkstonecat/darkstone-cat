@@ -10,7 +10,7 @@ import { useScroll, useTransform, Transition } from "motion/react";
 export default function Hero() {
   const t = useTranslations("hero");
   const containerRef = useRef<HTMLDivElement>(null);
- 
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
@@ -37,7 +37,7 @@ export default function Hero() {
 
 
   return (
-    <div ref={containerRef} className="h-[200vh] relative bg-brand-beige">
+    <div ref={containerRef} className="h-[150vh] relative">
       <m.section
         style={{ opacity: opacityHero }}
         id="hero"
@@ -45,7 +45,7 @@ export default function Hero() {
       >
         <m.div
           style= {{ scale: scaleLogo }}
-          className="relative aspect-square h-[45vh] max-w-[1024px] min-w-[200px]"
+          className="relative aspect-square h-[45vh] max-w-5xl min-w-50"
         >
           <m.div 
             initial={{ opacity: 0, y: 50, scale: 0.5 }}
