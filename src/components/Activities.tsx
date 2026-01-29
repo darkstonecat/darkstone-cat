@@ -11,9 +11,11 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight} from "lucide-react";
+import { useThemeSection } from "@/hooks/useThemeSection";
 
 export default function Activities() {
   const t = useTranslations("activities");
+  const sectionRef = useThemeSection("#EEE8DC", "#1c1917");
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
@@ -109,13 +111,13 @@ export default function Activities() {
   ];
 
   return (
-    <section id="activities" className="py-24 overflow-hidden">
+    <section ref={sectionRef} id="activities" className="py-24 overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="text-center mb-6">
-          <h2 className="mb-6 text-4xl font-bold tracking-tight text-stone-900 md:text-5xl">
+          <h2 className="mb-6 text-4xl font-bold tracking-tight md:text-5xl">
             {t("title")}
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-xl leading-relaxed text-stone-600">
+          <p className="mx-auto mt-6 max-w-2xl text-xl leading-relaxed opacity-60">
             {t("text")}
           </p>
           <div className="flex items-center justify-center my-2">
@@ -191,11 +193,11 @@ export default function Activities() {
 
                     {/* Content Area (No background, integrated) */}
                     <div className="w-full md:w-1/2 text-left space-y-6">
-                      <h3 className="text-4xl md:text-5xl font-bold text-stone-900">
+                      <h3 className="text-4xl md:text-5xl font-bold">
                         {t(`items.${item.id}.title`)}
                       </h3>
                       <div className="h-1.5 w-20 rounded-full bg-stone-300"></div>
-                      <p className="text-xl text-stone-600 leading-relaxed">
+                      <p className="text-xl opacity-60 leading-relaxed">
                         {t(`items.${item.id}.description`)}
                       </p>
                     </div>

@@ -10,7 +10,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 
 export default function HomePage() {
   return (
-    <main className="relative min-h-screen text-stone-custom font-sans selection:bg-stone-300">
+    <main className="relative min-h-screen font-sans selection:bg-stone-300">
         <NavBar />
         <Hero />
         <About />

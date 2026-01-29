@@ -24,10 +24,10 @@ export default function LanguageSwitcher() {
         <button
           key={lang.code}
           onClick={() => handleLanguageChange(lang.code)}
-          className={`transition-colors duration-200 ${
+          className={`transition-opacity duration-200 ${
             locale === lang.code
-              ? "text-stone-900 underline decoration-2 underline-offset-4"
-              : "text-stone-500 hover:text-stone-800"
+              ? "opacity-100 underline decoration-2 underline-offset-4"
+              : "opacity-50 hover:opacity-100"
           }`}
         >
           {lang.label}

@@ -5,11 +5,13 @@ import { useTranslations } from "next-intl";
 import * as m from "motion/react-client";
 import { useRef } from "react";
 import { useScroll, useTransform, Transition } from "motion/react";
+import { useThemeSection } from "@/hooks/useThemeSection";
 
 
 export default function Hero() {
   const t = useTranslations("hero");
   const containerRef = useRef<HTMLDivElement>(null);
+  useThemeSection("#EEE8DC", "#1c1917", containerRef);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -72,7 +74,7 @@ export default function Hero() {
             ...textBounceTransition,
             delay: 0.2,
           }}
-          className="w-full font-extrabold tracking-tight text-stone-900 text-[clamp(2rem,6vw,8rem)] leading-none"
+          className="w-full font-extrabold tracking-tight text-[clamp(2rem,6vw,8rem)] leading-none"
         >
           Darkstone Catalunya
         </m.h1>
@@ -88,7 +90,7 @@ export default function Hero() {
               ...textBounceTransition,
               delay: 0.4,
             }}
-            className="mt-6 max-w-2xl text-xl font-light text-stone-600 md:text-2xl origin-bottom"
+            className="mt-6 max-w-2xl text-xl font-light opacity-60 md:text-2xl origin-bottom"
           >
             {t("tagline")}
           </m.p>
@@ -100,7 +102,7 @@ export default function Hero() {
               ...textBounceTransition, 
               delay: 0.55 
             }}
-            className="mt-4 max-w-lg text-stone-500 origin-bottom"
+            className="mt-4 max-w-lg opacity-50 origin-bottom"
           >
             {t("description")}
           </m.p>

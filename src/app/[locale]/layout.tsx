@@ -5,6 +5,8 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import '@/styles/globals.css';
 import SmoothScroll from "@/components/SmoothScroll";
+import FixedBackground from "@/components/FixedBackground";
+import ThemeProvider from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Darkstone Cat",
@@ -20,20 +22,23 @@ export default async function LocaleLayout({
   params: Promise<{locale: string}>;
 }) {
   const { locale } = await params;
-  
+
   if (!['ca', 'es', 'en'].includes(locale)) {
     notFound();
   }
- 
+
   const messages = await getMessages();
- 
+
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className="text-zinc-800">
+      <body>
+        <FixedBackground />
         <NextIntlClientProvider messages={messages}>
-          <SmoothScroll>
-            {children}
-          </SmoothScroll>
+          <ThemeProvider>
+            <SmoothScroll>
+              {children}
+            </SmoothScroll>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

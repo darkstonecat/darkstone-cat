@@ -2,18 +2,20 @@
 
 import { useTranslations } from "next-intl";
 import { Clock, Calendar } from "lucide-react";
+import { useThemeSection } from "@/hooks/useThemeSection";
 
 export default function Schedule() {
   const t = useTranslations("schedule");
+  const sectionRef = useThemeSection("#FFFFFF", "#1c1917");
 
   return (
-    <section id="schedule" className="py-24">
+    <section ref={sectionRef} id="schedule" className="py-24">
       <div className="container mx-auto px-6">
         <div className="flex flex-col items-center text-center mb-16">
-          <h2 className="text-4xl font-bold tracking-tight text-stone-900 md:text-5xl mb-6">
+          <h2 className="text-4xl font-bold tracking-tight md:text-5xl mb-6">
             {t("title")}
           </h2>
-          <p className="max-w-2xl text-xl text-stone-600">
+          <p className="max-w-2xl text-xl opacity-60">
             {t("general_info")}
           </p>
         </div>

@@ -1,19 +1,23 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import { FaTelegram } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
+import { useThemeSection } from "@/hooks/useThemeSection";
 
 export default function JoinUs() {
   const t = useTranslations("join_us");
+  const sectionRef = useThemeSection("#FFFFFF", "#1c1917");
 
   return (
-    <section id="join-us" className="py-24">
+    <section ref={sectionRef} id="join-us" className="py-24">
       <div className="container mx-auto px-6">
         <div className="flex flex-col items-center text-center mb-16">
-          <h2 className="text-4xl font-bold tracking-tight text-stone-900 md:text-5xl mb-6">
+          <h2 className="text-4xl font-bold tracking-tight md:text-5xl mb-6">
             {t("title")}
           </h2>
-          <p className="max-w-2xl text-xl text-stone-600">
+          <p className="max-w-2xl text-xl opacity-60">
             {t("subtitle")}
           </p>
         </div>
