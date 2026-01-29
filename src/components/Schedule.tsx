@@ -7,7 +7,7 @@ export default function Schedule() {
   const t = useTranslations("schedule");
 
   return (
-    <section id="schedule" className="py-24 bg-brand-beige">
+    <section id="schedule" className="py-24">
       <div className="container mx-auto px-6">
         <div className="flex flex-col items-center text-center mb-16">
           <h2 className="text-4xl font-bold tracking-tight text-stone-900 md:text-5xl mb-6">
