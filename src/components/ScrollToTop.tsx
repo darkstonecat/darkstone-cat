@@ -1,29 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLenis } from "./SmoothScroll";
 
 export default function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
+  const lenis = useLenis();
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.scrollY > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+    if (!lenis) return;
+
+    const toggleVisibility = ({ scroll }: { scroll: number }) => {
+      setIsVisible(scroll > 300);
     };
 
-    window.addEventListener("scroll", toggleVisibility);
+    lenis.on("scroll", toggleVisibility);
 
-    return () => window.removeEventListener("scroll", toggleVisibility);
-  }, []);
+    return () => {
+      lenis.off("scroll", toggleVisibility);
+    };
+  }, [lenis]);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    lenis?.scrollTo(0);
   };
 
   return (

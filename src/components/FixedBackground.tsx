@@ -22,7 +22,7 @@ export default function FixedBackground() {
 
       {/* Parallax texture layer */}
       <motion.div
-        className="pointer-events-none absolute inset-x-0 -top-[150px] bottom-0 h-[calc(100%+500px)] opacity-[0.07]"
+        className="pointer-events-none absolute inset-x-0 -top-[150px] bottom-0 h-[calc(200%)] opacity-[0.07]"
         initial={false}
         animate={{ filter: invertTexture ? "invert(1)" : "invert(0)" }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
