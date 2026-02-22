@@ -8,6 +8,8 @@ import {
   AnimatePresence,
   useScroll,
   useMotionValueEvent,
+  useTransform,
+  type MotionValue,
 } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useThemeSection } from "@/hooks/useThemeSection";
@@ -19,6 +21,7 @@ const ACTIVITY_ITEMS = [
       "/images/photos/boardgames_finspan.webp",
       "/images/photos/boardgames_darws.webp",
       "/images/photos/boardgames_magicboardgame.webp",
+      "/images/photos/boardgames_witchstone.webp",
     ],
   },
   {
@@ -27,6 +30,7 @@ const ACTIVITY_ITEMS = [
       "/images/photos/rol_miseries2.webp",
       "/images/photos/rol_bc.webp",
       "/images/photos/rol_carton.webp",
+      "/images/photos/rol_miseries.webp",
     ],
   },
   {
@@ -49,42 +53,85 @@ const ACTIVITY_ITEMS = [
 
 const ITEM_COUNT = ACTIVITY_ITEMS.length;
 
-// --- Photo Collage (Desktop) ---
-// Vertical column of 3 images filling the available height
+// --- Organic Parallax Gallery (Desktop) ---
+// Photos scattered like prints on a table, with scroll-driven parallax depth
 
-function PhotoCollage({ images }: { images: readonly string[] }) {
+function OrganicParallaxGallery({
+  images,
+  scrollYProgress,
+}: {
+  images: readonly string[];
+  scrollYProgress: MotionValue<number>;
+}) {
+  // Parallax: each layer moves at a different rate for 3D depth
+  const bgY = useTransform(scrollYProgress, [0, 1], [40, -40]);
+  const fgY = useTransform(scrollYProgress, [0, 1], [-30, 30]);
+
   return (
-    <div className="flex flex-col gap-3 h-full">
-      <div className="flex-2 relative rounded-2xl overflow-hidden shadow-lg min-h-0">
-        <Image
-          src={images[0]}
-          alt=""
-          fill
-          className="object-cover"
-          sizes="(min-width: 768px) 33vw"
-          priority
-        />
-      </div>
-      <div className="flex-1 flex gap-3 min-h-0">
-        <div className="flex-1 relative rounded-2xl overflow-hidden shadow-lg">
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Background photo — top-left, behind everything */}
+      <motion.div
+        style={{ x: bgY }}
+        className="absolute w-[45%] aspect-[4/3] -top-[2%] -left-[3%] z-0 -rotate-6"
+      >
+        <div className="relative w-full h-full rounded-lg border-4 border-white shadow-2xl overflow-hidden">
           <Image
             src={images[1]}
             alt=""
             fill
             className="object-cover"
-            sizes="(min-width: 768px) 17vw"
+            sizes="(min-width: 768px) 25vw"
           />
         </div>
-        <div className="flex-1 relative rounded-2xl overflow-hidden shadow-lg">
+      </motion.div>
+
+      {/* Central photo — largest, centered */}
+      <div className="relative w-[65%] aspect-[4/3] z-10 rotate-2">
+        <div className="relative w-full h-full rounded-lg border-4 border-white shadow-2xl overflow-hidden">
+          <Image
+            src={images[0]}
+            alt=""
+            fill
+            className="object-cover"
+            sizes="(min-width: 768px) 40vw"
+            priority
+          />
+        </div>
+      </div>
+
+      {/* Foreground photo — bottom-right, on top */}
+      <motion.div
+        style={{ x: fgY }}
+        className="absolute w-[42%] aspect-[4/3] -bottom-[2%] -right-[3%] z-20 rotate-4"
+      >
+        <div className="relative w-full h-full rounded-lg border-4 border-white shadow-2xl overflow-hidden">
           <Image
             src={images[2 % images.length]}
             alt=""
             fill
             className="object-cover"
-            sizes="(min-width: 768px) 17vw"
+            sizes="(min-width: 768px) 22vw"
           />
         </div>
-      </div>
+      </motion.div>
+
+      {/* Optional 4th photo — small accent, tucked behind top-right */}
+      {images.length > 3 && (
+        <motion.div
+          style={{ x: bgY }}
+          className="absolute w-[30%] aspect-[4/3] -top-[5%] right-[8%] -z-10 rotate-8"
+        >
+          <div className="relative w-full h-full rounded-lg border-4 border-white shadow-2xl overflow-hidden">
+            <Image
+              src={images[3]}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="(min-width: 768px) 15vw"
+            />
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }
@@ -162,29 +209,23 @@ function DesktopGallery({ t }: { t: ReturnType<typeof useTranslations> }) {
             </p>
           </div>
 
-          {/* 3-column grid — fills remaining height */}
-          <div className="grid grid-cols-12 gap-8 items-center flex-1 min-h-0">
+          {/* 2-column layout — fills remaining height */}
+          <div className="grid grid-cols-12 gap-8 flex-1 min-h-0">
             {/* Left Column: Navigation titles */}
-            <nav className="col-span-3 space-y-2">
+            <nav className="col-span-3 flex flex-col justify-center space-y-2">
               {ACTIVITY_ITEMS.map((item, index) => {
                 const isActive = index === activeIndex;
                 return (
                   <motion.div
                     key={item.id}
-                    className="relative cursor-default rounded-xl px-5 py-4 transition-colors duration-300"
+                    className="relative cursor-default px-5 py-4 transition-colors duration-300"
                     animate={{
                       opacity: isActive ? 1 : 0.4,
                     }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                   >
                     <span
-                      className={cn(
-                        "text-lg font-semibold transition-all duration-300",
-                        isActive
-                          ? "text-stone-900"
-                          : "text-stone-400"
-                      )}
-                    >
+                      className="text-4xl font-semibold transition-all duration-300">
                       {t(`items.${item.id}.title`)}
                     </span>
                   </motion.div>
@@ -192,9 +233,10 @@ function DesktopGallery({ t }: { t: ReturnType<typeof useTranslations> }) {
               })}
             </nav>
 
-            {/* Center Column: Photo Collage */}
-            <div className="col-span-5 h-full">
-              <div className="relative h-full">
+            {/* Right Column: Images on top, text below */}
+            <div className="col-span-9 flex flex-col h-full min-h-0">
+              {/* Images area — takes most of the space, unclipped */}
+              <div className="relative flex-3 min-h-0">
                 <AnimatePresence mode="popLayout" custom={direction}>
                   <motion.div
                     key={activeItem.id}
@@ -206,15 +248,16 @@ function DesktopGallery({ t }: { t: ReturnType<typeof useTranslations> }) {
                     transition={slideTransition}
                     className="absolute inset-0"
                   >
-                    <PhotoCollage images={activeItem.images} />
+                    <OrganicParallaxGallery
+                      images={activeItem.images}
+                      scrollYProgress={scrollYProgress}
+                    />
                   </motion.div>
                 </AnimatePresence>
               </div>
-            </div>
 
-            {/* Right Column: Description — masked/clipped */}
-            <div className="col-span-4 h-full overflow-hidden relative">
-              <div className="absolute inset-0 flex flex-col justify-center">
+              {/* Text area — masked/clipped */}
+              <div className="relative shrink-0 min-h-0">
                 <AnimatePresence mode="popLayout" custom={direction}>
                   <motion.div
                     key={activeItem.id}
@@ -224,13 +267,12 @@ function DesktopGallery({ t }: { t: ReturnType<typeof useTranslations> }) {
                     animate="center"
                     exit="exit"
                     transition={slideTransition}
-                    className="space-y-5"
+                    className="space-y-3 py-2"
                   >
-                    <h3 className="text-3xl lg:text-4xl font-bold text-stone-900">
+                    <h3 className="text-2xl lg:text-3xl font-bold text-stone-900">
                       {t(`items.${activeItem.id}.title`)}
                     </h3>
-                    <div className="h-1.5 w-16 rounded-full bg-stone-300" />
-                    <p className="text-lg leading-relaxed text-stone-600">
+                    <p className="text-base lg:text-lg leading-relaxed text-stone-600 max-w-2xl">
                       {t(`items.${activeItem.id}.description`)}
                     </p>
                   </motion.div>
@@ -273,7 +315,7 @@ function MobileGallery({ t }: { t: ReturnType<typeof useTranslations> }) {
             >
               {/* Photo grid: hero + 2 thumbnails */}
               <div className="grid grid-cols-2 grid-rows-2 gap-2 aspect-[4/3]">
-                <div className="row-span-2 relative rounded-xl overflow-hidden shadow-lg">
+                <div className="row-span-2 relative overflow-hidden shadow-lg">
                   <Image
                     src={item.images[0]}
                     alt=""
@@ -282,7 +324,7 @@ function MobileGallery({ t }: { t: ReturnType<typeof useTranslations> }) {
                     sizes="50vw"
                   />
                 </div>
-                <div className="relative rounded-xl overflow-hidden shadow-lg">
+                <div className="relative overflow-hidden shadow-lg">
                   <Image
                     src={item.images[1]}
                     alt=""
@@ -291,7 +333,7 @@ function MobileGallery({ t }: { t: ReturnType<typeof useTranslations> }) {
                     sizes="50vw"
                   />
                 </div>
-                <div className="relative rounded-xl overflow-hidden shadow-lg">
+                <div className="relative overflow-hidden shadow-lg">
                   <Image
                     src={item.images[2 % item.images.length]}
                     alt=""
@@ -307,7 +349,6 @@ function MobileGallery({ t }: { t: ReturnType<typeof useTranslations> }) {
                 <h3 className="text-2xl font-bold text-stone-900">
                   {t(`items.${item.id}.title`)}
                 </h3>
-                <div className="h-1 w-12 rounded-full bg-stone-300 mx-auto" />
                 <p className="text-base leading-relaxed text-stone-600 max-w-md mx-auto">
                   {t(`items.${item.id}.description`)}
                 </p>
