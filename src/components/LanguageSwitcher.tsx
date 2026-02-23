@@ -2,11 +2,18 @@
 
 import { usePathname, useRouter } from "@/i18n/routing";
 import { useLocale } from "next-intl";
+import { useThemeStore } from "@/stores/useThemeStore";
 
-export default function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  colorOverride?: string;
+}
+
+export default function LanguageSwitcher({ colorOverride }: LanguageSwitcherProps) {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const textColor = useThemeStore((s) => s.textColor);
+  const color = colorOverride ?? textColor;
 
   const languages = [
     { code: "ca", label: "CAT" },
@@ -24,6 +31,7 @@ export default function LanguageSwitcher() {
         <button
           key={lang.code}
           onClick={() => handleLanguageChange(lang.code)}
+          style={{ color }}
           className={`transition-opacity duration-200 ${
             locale === lang.code
               ? "opacity-100 underline decoration-2 underline-offset-4"
