@@ -14,16 +14,11 @@
     "cta": "See Activities"
   },
   "about": {
-    "section_label": "01 — Who we are",
     "title": "Who are we?",
-    "text": "Darkstone Catalunya is a non-profit association dedicated to promoting board games and role-playing games. Our goal is to create a meeting point for players of all levels in an inclusive and friendly environment.",
-    "pill_founded": "Founded in 2024",
-    "pill_location": "Terrassa",
-    "pill_free": "Free to join",
-    "highlight1": "Promoting Catalan",
-    "highlight1_desc": "We promote the use of the Catalan language in the gaming sphere.",
-    "highlight2": "Open Library",
-    "highlight2_desc": "We have a wide collection of games available to members."
+    "text": "Darkstone Catalunya is a non-profit association dedicated to promoting board games and role-playing games.",
+    "card1_text": "We want to create a meeting point for all players.",
+    "card2_text": "Foster an inclusive and friendly environment.",
+    "card3_text": "Become a local reference for alternative leisure."
   },
   "activities": {
     "section_label": "02 — What we do",

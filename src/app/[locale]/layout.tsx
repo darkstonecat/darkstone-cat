@@ -5,8 +5,6 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import '@/styles/globals.css';
 import SmoothScroll from "@/components/SmoothScroll";
-import FixedBackground from "@/components/FixedBackground";
-import ThemeProvider from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Darkstone Catalunya — Associació de jocs de taula i rol",
@@ -53,13 +51,10 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body>
-        <FixedBackground />
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider>
-            <SmoothScroll>
-              {children}
-            </SmoothScroll>
-          </ThemeProvider>
+          <SmoothScroll>
+            {children}
+          </SmoothScroll>
         </NextIntlClientProvider>
       </body>
     </html>

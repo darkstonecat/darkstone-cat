@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { motion } from "motion/react";
-import { useThemeSection } from "@/hooks/useThemeSection";
 import TextReveal from "@/components/TextReveal";
 import MagneticButton from "@/components/MagneticButton";
 
@@ -11,17 +10,13 @@ export default function Location() {
   const t = useTranslations("location");
   const t_sched = useTranslations("schedule");
   const [mapLoaded, setMapLoaded] = useState(false);
-  const sectionRef = useThemeSection("#1c1917", "#FAFAF9", {
-    invertTexture: true,
-  });
   const mapSrc =
     "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d746.2896975282518!2d2.0026901364326446!3d41.56580783124514!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12a493005ac30167%3A0x86e7aad1b1aa8d36!2sDarkstone%20Catalunya!5e0!3m2!1sca!2ses!4v1765521866880!5m2!1sca!2ses";
 
   return (
     <section
-      ref={sectionRef}
       id="location"
-      className="relative flex min-h-screen items-center py-20"
+      className="relative flex min-h-screen items-center bg-stone-custom py-20 text-stone-white-hover"
     >
       <div className="container mx-auto px-6">
         <div className="flex flex-col gap-12 lg:flex-row lg:items-stretch">

@@ -5,14 +5,12 @@ import { useTranslations } from "next-intl";
 import * as m from "motion/react-client";
 import { useRef } from "react";
 import { useScroll, useTransform, Transition } from "motion/react";
-import { useThemeSection } from "@/hooks/useThemeSection";
 import MagneticButton from "@/components/MagneticButton";
 
 
 export default function Hero() {
   const t = useTranslations("hero");
   const containerRef = useRef<HTMLDivElement>(null);
-  useThemeSection("#EEE8DC", "#1c1917", containerRef);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -33,14 +31,14 @@ export default function Hero() {
 
   const logoBounceTransition: Transition = {
     type: "spring",
-    stiffness: 200, 
+    stiffness: 200,
     damping: 10,
     mass: 1.6,
   };
 
 
   return (
-    <div ref={containerRef} className="h-[150vh] relative">
+    <div ref={containerRef} className="relative h-[150vh] bg-brand-beige text-stone-custom">
       <m.section
         style={{ opacity: opacityHero }}
         id="hero"
@@ -50,7 +48,7 @@ export default function Hero() {
           style= {{ scale: scaleLogo }}
           className="relative aspect-square h-[35vh] md:h-[45vh] max-w-5xl"
         >
-          <m.div 
+          <m.div
             initial={{ opacity: 0, y: 50, scale: 0.5 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={ logoBounceTransition }
@@ -67,7 +65,7 @@ export default function Hero() {
           </m.div>
         </m.div>
 
-        <m.h1 
+        <m.h1
           style={{ scale: scaleTitle }}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -79,12 +77,12 @@ export default function Hero() {
         >
           Darkstone Catalunya
         </m.h1>
-        
+
         <m.div
           style={{ opacity: opacityText, y: yText }}
           className="flex flex-col items-center"
         >
-          <m.p 
+          <m.p
             initial={{ opacity: 0, y: 50, rotate: -6 }}
             animate={{ opacity: 1, y: 0, rotate: 0 }}
             transition={{
@@ -96,23 +94,23 @@ export default function Hero() {
             {t("tagline")}
           </m.p>
 
-          <m.p 
+          <m.p
             initial={{ opacity: 0, y: 50, rotate: -3 }}
             animate={{ opacity: 1, y: 0, rotate: 0 }}
-            transition={{ 
-              ...textBounceTransition, 
-              delay: 0.55 
+            transition={{
+              ...textBounceTransition,
+              delay: 0.55
             }}
             className="mt-4 max-w-lg opacity-50 origin-bottom"
           >
             {t("description")}
           </m.p>
 
-          <m.div 
+          <m.div
             initial={{ opacity: 0, y: 50, rotate: 6 }}
             animate={{ opacity: 1, y: 0, rotate: 0 }}
-            transition={{ 
-              ...textBounceTransition, 
+            transition={{
+              ...textBounceTransition,
               delay: 0.7
             }}
             className="mt-10 origin-bottom"

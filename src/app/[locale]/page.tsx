@@ -9,6 +9,7 @@ import JoinUs from "@/components/JoinUs";
 import Location from "@/components/Location";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import SectionDivider from "@/components/SectionDivider";
 
 export default function HomePage() {
   return (
@@ -18,9 +19,12 @@ export default function HomePage() {
         <NavBar />
         <Hero />
         <About />
+        <SectionDivider topColor="#EEE8DC" bottomColor="#1C1917" variant="wave" />
         <Activities />
         <Schedule />
+        <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="curve" flip />
         <JoinUs />
+        <SectionDivider topColor="#EEE8DC" bottomColor="#1C1917" variant="tilt" />
         <Location />
         <Footer />
         <ScrollToTop />

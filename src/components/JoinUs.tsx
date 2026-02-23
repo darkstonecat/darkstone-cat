@@ -4,21 +4,16 @@ import { useTranslations } from "next-intl";
 import { FaTelegram } from "react-icons/fa";
 import Image from "next/image";
 import { motion } from "motion/react";
-import { useThemeSection } from "@/hooks/useThemeSection";
 import TextReveal from "@/components/TextReveal";
 import MagneticButton from "@/components/MagneticButton";
 
 export default function JoinUs() {
   const t = useTranslations("join_us");
-  const sectionRef = useThemeSection("#1C1917", "#FAFAF9", {
-    invertTexture: true,
-  });
 
   return (
     <section
-      ref={sectionRef}
       id="join-us"
-      className="flex min-h-screen flex-col items-center justify-center py-24"
+      className="flex min-h-screen flex-col items-center justify-center bg-brand-beige py-24 text-stone-custom"
     >
       {/* CTA Zone */}
       <div className="container mx-auto px-6">

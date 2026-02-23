@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter } from "@/i18n/routing";
 import { useLocale } from "next-intl";
-import { useThemeStore } from "@/stores/useThemeStore";
 
 interface LanguageSwitcherProps {
   colorOverride?: string;
@@ -12,8 +11,7 @@ export default function LanguageSwitcher({ colorOverride }: LanguageSwitcherProp
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const textColor = useThemeStore((s) => s.textColor);
-  const color = colorOverride ?? textColor;
+  const color = colorOverride ?? "currentColor";
 
   const languages = [
     { code: "ca", label: "CAT" },

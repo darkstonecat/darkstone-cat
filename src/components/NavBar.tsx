@@ -3,9 +3,8 @@
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { useThemeStore } from "@/stores/useThemeStore";
 import { useLenis } from "./SmoothScroll";
 import LanguageSwitcher from "./LanguageSwitcher";
 
@@ -17,15 +16,28 @@ const NAV_SECTIONS = [
   { id: "location", key: "location" },
 ] as const;
 
+// Maps sections to their color scheme (must match section bg/text classes)
+const SECTION_THEMES: Record<string, { text: string; bg: string }> = {
+  "": { text: "#1c1917", bg: "#EEE8DC" },
+  about: { text: "#1c1917", bg: "#EEE8DC" },
+  activities: { text: "#FAFAF9", bg: "#1C1917" },
+  schedule: { text: "#FAFAF9", bg: "#1C1917" },
+  "join-us": { text: "#1c1917", bg: "#EEE8DC" },
+  location: { text: "#FAFAF9", bg: "#1C1917" },
+};
+
 export default function NavBar() {
   const t = useTranslations("nav");
   const lenis = useLenis();
-  const textColor = useThemeStore((s) => s.textColor);
-  const backgroundColor = useThemeStore((s) => s.backgroundColor);
 
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const theme = useMemo(
+    () => SECTION_THEMES[activeSection] ?? SECTION_THEMES[""],
+    [activeSection]
+  );
 
   // Track scroll position for backdrop and active section
   useEffect(() => {
@@ -95,11 +107,14 @@ export default function NavBar() {
   return (
     <>
       <motion.nav
-        className="fixed top-0 left-0 right-0 z-50 transition-[backdrop-filter,background-color] duration-500"
-        style={{
+        className="fixed top-0 left-0 right-0 z-50 transition-[backdrop-filter] duration-500"
+        animate={{
           backgroundColor: scrolled
-            ? `color-mix(in srgb, ${backgroundColor} 80%, transparent)`
+            ? `color-mix(in srgb, ${theme.bg} 80%, transparent)`
             : "transparent",
+        }}
+        transition={{ duration: 0.4 }}
+        style={{
           backdropFilter: scrolled ? "blur(12px)" : "none",
           WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
         }}
@@ -117,7 +132,8 @@ export default function NavBar() {
             </div>
             <motion.span
               className="text-xl font-bold tracking-tight"
-              style={{ color: textColor }}
+              animate={{ color: theme.text }}
+              transition={{ duration: 0.4 }}
             >
               Darkstone
               <span className="font-light opacity-50">.cat</span>
@@ -127,12 +143,13 @@ export default function NavBar() {
           {/* Desktop nav links */}
           <div className="hidden items-center gap-1 md:flex">
             {NAV_SECTIONS.map((section) => (
-              <button
+              <motion.button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
                 className="relative px-3 py-2 text-sm font-medium transition-opacity duration-200"
+                animate={{ color: theme.text }}
+                transition={{ duration: 0.4 }}
                 style={{
-                  color: textColor,
                   opacity: activeSection === section.id ? 1 : 0.55,
                 }}
               >
@@ -142,7 +159,7 @@ export default function NavBar() {
                   <motion.div
                     layoutId="nav-indicator"
                     className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full"
-                    style={{ backgroundColor: textColor }}
+                    animate={{ backgroundColor: theme.text }}
                     transition={{
                       type: "spring",
                       stiffness: 350,
@@ -150,11 +167,11 @@ export default function NavBar() {
                     }}
                   />
                 )}
-              </button>
+              </motion.button>
             ))}
 
             <div className="ml-4 pl-4 border-l border-current/15">
-              <LanguageSwitcher />
+              <LanguageSwitcher colorOverride={theme.text} />
             </div>
           </div>
 
@@ -167,7 +184,7 @@ export default function NavBar() {
             <div className="flex w-6 flex-col items-end gap-[6px]">
               <motion.span
                 className="block h-[2px] rounded-full"
-                style={{ backgroundColor: mobileOpen ? "#FAFAF9" : textColor }}
+                style={{ backgroundColor: mobileOpen ? "#FAFAF9" : theme.text }}
                 animate={{
                   width: mobileOpen ? 24 : 24,
                   rotate: mobileOpen ? 45 : 0,
@@ -177,7 +194,7 @@ export default function NavBar() {
               />
               <motion.span
                 className="block h-[2px] rounded-full"
-                style={{ backgroundColor: mobileOpen ? "#FAFAF9" : textColor }}
+                style={{ backgroundColor: mobileOpen ? "#FAFAF9" : theme.text }}
                 animate={{
                   width: mobileOpen ? 0 : 16,
                   opacity: mobileOpen ? 0 : 1,
@@ -186,7 +203,7 @@ export default function NavBar() {
               />
               <motion.span
                 className="block h-[2px] rounded-full"
-                style={{ backgroundColor: mobileOpen ? "#FAFAF9" : textColor }}
+                style={{ backgroundColor: mobileOpen ? "#FAFAF9" : theme.text }}
                 animate={{
                   width: mobileOpen ? 24 : 20,
                   rotate: mobileOpen ? -45 : 0,

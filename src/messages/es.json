@@ -14,16 +14,11 @@
     "cta": "Ver Actividades"
   },
   "about": {
-    "section_label": "01 — Quiénes somos",
     "title": "¿Quiénes somos?",
-    "text": "Darkstone Catalunya es una asociación sin ánimo de lucro dedicada a la promoción de los juegos de mesa y rol. Nuestro objetivo es crear un punto de encuentro para jugadores de todos los niveles, en un ambiente inclusivo y amable.",
-    "pill_founded": "Fundada en 2024",
-    "pill_location": "Terrassa",
-    "pill_free": "Gratuita",
-    "highlight1": "Fomento del Catalán",
-    "highlight1_desc": "Promovemos el uso de la lengua catalana en el ámbito lúdico.",
-    "highlight2": "Ludoteca Abierta",
-    "highlight2_desc": "Disponemos de una amplia colección de juegos a disposición de los socios."
+    "text": "Darkstone Catalunya es una asociación sin ánimo de lucro dedicada a la promoción de los juegos de mesa y rol.",
+    "card1_text": "Queremos crear un punto de encuentro para todos los jugadores.",
+    "card2_text": "Fomentar un ambiente inclusivo y amable.",
+    "card3_text": "Convertirnos en un referente local del ocio alternativo."
   },
   "activities": {
     "section_label": "02 — Qué hacemos",

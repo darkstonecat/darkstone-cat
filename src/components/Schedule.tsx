@@ -2,20 +2,15 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
-import { useThemeSection } from "@/hooks/useThemeSection";
 import TextReveal from "@/components/TextReveal";
 
 export default function Schedule() {
   const t = useTranslations("schedule");
-  const sectionRef = useThemeSection("#1C1917", "#FAFAF9", {
-    invertTexture: true,
-  });
 
   return (
     <section
-      ref={sectionRef}
       id="schedule"
-      className="relative flex min-h-screen items-center justify-center overflow-hidden py-24"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-stone-custom py-24 text-stone-white-hover"
     >
       <div className="container mx-auto px-6">
         {/* Title */}

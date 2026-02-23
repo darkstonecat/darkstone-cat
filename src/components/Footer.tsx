@@ -6,7 +6,6 @@ import { useCallback } from "react";
 import { motion } from "motion/react";
 import { FaInstagram, FaTelegram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { useThemeSection } from "@/hooks/useThemeSection";
 import { useLenis } from "./SmoothScroll";
 
 const NAV_SECTIONS = [
@@ -39,9 +38,6 @@ export default function Footer() {
   const t = useTranslations("footer");
   const tNav = useTranslations("nav");
   const currentYear = new Date().getFullYear();
-  const footerRef = useThemeSection("#1c1917", "#FAFAF9", {
-    invertTexture: true,
-  });
   const lenis = useLenis();
 
   const scrollToSection = useCallback(
@@ -58,7 +54,7 @@ export default function Footer() {
   );
 
   return (
-    <footer ref={footerRef} className="pt-16 pb-10">
+    <footer className="bg-stone-custom pt-16 pb-10 text-stone-white-hover">
       {/* Gradient divider */}
       <div className="mx-auto mb-16 h-px w-full max-w-5xl bg-gradient-to-r from-transparent via-brand-red/30 to-transparent" />
 
