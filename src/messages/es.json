@@ -65,8 +65,10 @@
     "rights": "Todos los derechos reservados."
   },
   "join_us": {
-    "title": "Únete a nuestra comunidad",
-    "subtitle": "¡Conecta con nosotros y juega!",
+    "cta_title": "Hazte socio",
+    "cta_subtitle": "Es gratuito. Ven cualquier viernes o sábado.",
+    "cta_button": "Rellena el formulario de alta",
+    "subtitle": "Conecta con nosotros",
     "telegram_title": "Telegram",
     "telegram_description": "Tenemos un chat en Telegram donde hablamos de muchas cosas, hacemos planes y comentamos qué nos apetece jugar el fin de semana en Darkstone.",
     "join_telegram": "Unirse a Telegram",

@@ -65,8 +65,10 @@
     "rights": "Tots els drets reservats."
   },
   "join_us": {
-    "title": "Uneix-te a la nostra comunitat",
-    "subtitle": "Connecta amb nosaltres i juga!",
+    "cta_title": "Fes-te soci",
+    "cta_subtitle": "És gratuït. Vine qualsevol divendres o dissabte.",
+    "cta_button": "Emplena el formulari d'alta",
+    "subtitle": "Connecta amb nosaltres",
     "telegram_title": "Telegram",
     "telegram_description": "Tenim un xat a Telegram on parlem de moltes coses, fem plans i comentem què ens ve de gust jugar el cap de setmana a Darkstone.",
     "join_telegram": "Unir-se a Telegram",
