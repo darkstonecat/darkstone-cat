@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import ScrollProgress from "@/components/ScrollProgress";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Activities from "@/components/Activities";
@@ -11,6 +12,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 export default function HomePage() {
   return (
     <main className="relative min-h-screen font-sans selection:bg-stone-300">
+        <ScrollProgress />
         <NavBar />
         <Hero />
         <About />

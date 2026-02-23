@@ -5,6 +5,8 @@ import { FaTelegram } from "react-icons/fa";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { useThemeSection } from "@/hooks/useThemeSection";
+import TextReveal from "@/components/TextReveal";
+import MagneticButton from "@/components/MagneticButton";
 
 export default function JoinUs() {
   const t = useTranslations("join_us");
@@ -21,15 +23,11 @@ export default function JoinUs() {
       {/* CTA Zone */}
       <div className="container mx-auto px-6">
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-          <motion.h2
+          <TextReveal
+            text={t("cta_title")}
+            as="h2"
             className="text-5xl font-black tracking-tight md:text-7xl"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-          >
-            {t("cta_title")}
-          </motion.h2>
+          />
 
           <motion.p
             className="mt-6 text-lg opacity-50 md:text-xl"
@@ -41,21 +39,26 @@ export default function JoinUs() {
             {t("cta_subtitle")}
           </motion.p>
 
-          <motion.a
-            href="https://docs.google.com/forms/d/1OBM0vAOs0vvBioSeop4T0aYh__ysuNEOy36kprTJo7Q/viewform"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group mt-10 inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105"
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-10"
           >
-            {t("cta_button")}
-            <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
-              &rarr;
-            </span>
-          </motion.a>
+            <MagneticButton
+              as="a"
+              href="https://docs.google.com/forms/d/1OBM0vAOs0vvBioSeop4T0aYh__ysuNEOy36kprTJo7Q/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105"
+            >
+              {t("cta_button")}
+              <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                &rarr;
+              </span>
+            </MagneticButton>
+          </motion.div>
         </div>
 
         {/* Divider */}

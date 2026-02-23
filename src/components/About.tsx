@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { useThemeSection } from "@/hooks/useThemeSection";
+import TextReveal from "@/components/TextReveal";
 
 export default function About() {
   const t = useTranslations("about");
@@ -51,15 +52,12 @@ export default function About() {
           {t("section_label")}
         </motion.span>
 
-        <motion.h2
+        <TextReveal
+          text={t("title")}
+          as="h2"
           className="mt-4 text-5xl font-black leading-none tracking-tight md:text-6xl lg:text-7xl"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, delay: 0.05 }}
-        >
-          {t("title")}
-        </motion.h2>
+          delay={0.05}
+        />
 
         <motion.p
           className="mt-6 max-w-sm text-lg leading-relaxed opacity-60"

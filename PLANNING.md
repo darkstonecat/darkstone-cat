@@ -171,9 +171,9 @@
 | 3 | JoinUs + Fes-te soci CTA | Mitjana | ⭐⭐⭐⭐ | ✅ Fet |
 | 4 | Location pantalla completa | Fàcil | ⭐⭐⭐ | ✅ Fet |
 | 5 | Footer redissenyat | Fàcil | ⭐⭐⭐ | ✅ Fet |
-| 6 | About layout editorial + foto | Mitjana | ⭐⭐⭐⭐⭐ | Pendent |
-| 7 | Activities carrusel horitzontal | Alta | ⭐⭐⭐⭐⭐ | Pendent |
-| 8 | Micro-interaccions i polish | Alta | ⭐⭐⭐⭐⭐ | Pendent |
+| 6 | About layout editorial + foto | Mitjana | ⭐⭐⭐⭐⭐ | ✅ Fet |
+| 7 | Activities carrusel horitzontal | Alta | ⭐⭐⭐⭐⭐ | ✅ Fet |
+| 8 | Micro-interaccions i polish | Alta | ⭐⭐⭐⭐⭐ | ✅ Fet |
 | 9 | Animació de càrrega | Mitjana | ⭐⭐⭐⭐ | Pendent |
 | 10 | Responsive + optimització | Mitjana | ⭐⭐⭐ | Pendent |
 

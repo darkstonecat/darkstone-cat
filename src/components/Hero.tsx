@@ -6,6 +6,7 @@ import * as m from "motion/react-client";
 import { useRef } from "react";
 import { useScroll, useTransform, Transition } from "motion/react";
 import { useThemeSection } from "@/hooks/useThemeSection";
+import MagneticButton from "@/components/MagneticButton";
 
 
 export default function Hero() {
@@ -116,13 +117,14 @@ export default function Hero() {
             }}
             className="mt-10 origin-bottom"
           >
-            <a
+            <MagneticButton
+              as="a"
               href="#activities"
               className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-stone-900 px-8 py-3 font-medium text-stone-50 transition-all duration-300 hover:bg-stone-800 hover:shadow-lg hover:shadow-stone-500/30"
             >
               <span className="mr-2">{t("cta")}</span>
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-            </a>
+            </MagneticButton>
           </m.div>
         </m.div>
       </m.section>

@@ -4,6 +4,8 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { motion } from "motion/react";
 import { useThemeSection } from "@/hooks/useThemeSection";
+import TextReveal from "@/components/TextReveal";
+import MagneticButton from "@/components/MagneticButton";
 
 export default function Location() {
   const t = useTranslations("location");
@@ -31,9 +33,11 @@ export default function Location() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="mb-10 text-4xl font-bold tracking-tight md:text-6xl">
-              {t("title")}
-            </h2>
+            <TextReveal
+              text={t("title")}
+              as="h2"
+              className="mb-10 text-4xl font-bold tracking-tight md:text-6xl"
+            />
 
             <div className="space-y-8">
               <div>
@@ -61,7 +65,8 @@ export default function Location() {
                 </div>
               </div>
 
-              <a
+              <MagneticButton
+                as="a"
                 href="https://maps.google.com/?q=Darkstone+Catalunya"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -71,7 +76,7 @@ export default function Location() {
                 <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
                   &rarr;
                 </span>
-              </a>
+              </MagneticButton>
             </div>
           </motion.div>
 

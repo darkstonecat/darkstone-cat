@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { motion } from "motion/react";
 import { useThemeSection } from "@/hooks/useThemeSection";
+import TextReveal from "@/components/TextReveal";
 
 const CARDS = [
   { id: "board_games", image: "/images/photos/boardgames_finspan.webp" },
@@ -44,9 +45,11 @@ export default function Activities() {
           <span className="text-xs font-semibold uppercase tracking-[0.3em] opacity-40">
             {t("section_label")}
           </span>
-          <h2 className="mt-1 text-4xl font-black tracking-tight md:text-5xl">
-            {t("title")}
-          </h2>
+          <TextReveal
+            text={t("title")}
+            as="h2"
+            className="mt-1 text-4xl font-black tracking-tight md:text-5xl"
+          />
           <p className="mt-2 max-w-md text-sm opacity-50">
             {t("text")}
           </p>

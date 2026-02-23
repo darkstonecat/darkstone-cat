@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { useThemeSection } from "@/hooks/useThemeSection";
+import TextReveal from "@/components/TextReveal";
 
 export default function Schedule() {
   const t = useTranslations("schedule");
@@ -18,15 +19,11 @@ export default function Schedule() {
     >
       <div className="container mx-auto px-6">
         {/* Title */}
-        <motion.h2
+        <TextReveal
+          text={t("title")}
+          as="h2"
           className="mb-20 text-center text-4xl font-bold tracking-tight md:mb-28 md:text-6xl"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          {t("title")}
-        </motion.h2>
+        />
 
         {/* Schedule grid */}
         <div className="mx-auto flex max-w-5xl flex-col items-center md:flex-row">
