@@ -11,7 +11,7 @@ export default function FixedBackground() {
   const textureY = useTransform(scrollY, [0, 3000], [0, -300]);
 
   return (
-    <div className="fixed inset-0 -z-50 overflow-hidden">
+    <div aria-hidden="true" className="fixed inset-0 -z-50 overflow-hidden">
       {/* Animated background color layer */}
       <motion.div
         className="absolute inset-0"

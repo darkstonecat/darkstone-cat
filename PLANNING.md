@@ -175,7 +175,7 @@
 | 7 | Activities carrusel horitzontal | Alta | ⭐⭐⭐⭐⭐ | ✅ Fet |
 | 8 | Micro-interaccions i polish | Alta | ⭐⭐⭐⭐⭐ | ✅ Fet |
 | 9 | Animació de càrrega | Mitjana | ⭐⭐⭐⭐ | ✅ Fet |
-| 10 | Responsive + optimització | Mitjana | ⭐⭐⭐ | Pendent |
+| 10 | Responsive + optimització | Mitjana | ⭐⭐⭐ | ✅ Fet |
 
 **Ruta recomanada:** Pas 6 → Pas 7 → Pas 8 → Pas 10 → Pas 9
 

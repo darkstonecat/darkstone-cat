@@ -9,9 +9,30 @@ import FixedBackground from "@/components/FixedBackground";
 import ThemeProvider from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "Darkstone Cat",
-  description: "Darkstone Catalunya",
+  title: "Darkstone Catalunya — Associació de jocs de taula i rol",
+  description:
+    "Associació sense ànim de lucre dedicada als jocs de taula i jocs de rol a Terrassa. Veniu a jugar cada divendres i dissabte!",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
+  metadataBase: new URL("https://darkstone.cat"),
+  openGraph: {
+    title: "Darkstone Catalunya",
+    description:
+      "Associació de jocs de taula i rol a Terrassa. Espai per compartir l'afició, jugar i fomentar la llengua catalana.",
+    url: "https://darkstone.cat",
+    siteName: "Darkstone Catalunya",
+    locale: "ca_ES",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Darkstone Catalunya",
+    description:
+      "Associació de jocs de taula i rol a Terrassa.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default async function LocaleLayout({

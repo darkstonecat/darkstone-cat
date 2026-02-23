@@ -48,7 +48,7 @@ export default function Hero() {
       >
         <m.div
           style= {{ scale: scaleLogo }}
-          className="relative aspect-square h-[45vh] max-w-5xl min-w-50"
+          className="relative aspect-square h-[35vh] md:h-[45vh] max-w-5xl"
         >
           <m.div 
             initial={{ opacity: 0, y: 50, scale: 0.5 }}
