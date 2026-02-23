@@ -3,6 +3,8 @@ interface SectionDividerProps {
   bottomColor: string;
   variant?: "wave" | "curve" | "tilt";
   flip?: boolean;
+  /** Pull the divider up so it overlaps the previous section */
+  overlap?: boolean;
 }
 
 const PATHS = {
@@ -16,11 +18,12 @@ export default function SectionDivider({
   bottomColor,
   variant = "wave",
   flip = false,
+  overlap = false,
 }: SectionDividerProps) {
   return (
     <div
-      className="relative -mt-px w-full overflow-hidden"
-      style={{ backgroundColor: topColor, lineHeight: 0 }}
+      className={`relative w-full overflow-hidden ${overlap ? "-mt-16 z-20 md:-mt-24 lg:-mt-32" : "-mt-px"}`}
+      style={{ backgroundColor: overlap ? "transparent" : topColor, lineHeight: 0 }}
       aria-hidden="true"
     >
       <svg

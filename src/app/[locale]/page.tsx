@@ -19,7 +19,7 @@ export default function HomePage() {
         <NavBar />
         <Hero />
         <About />
-        <SectionDivider topColor="#EEE8DC" bottomColor="#1C1917" variant="wave" />
+        <SectionDivider topColor="#EEE8DC" bottomColor="#1C1917" variant="wave" overlap />
         <Activities />
         <Schedule />
         <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="curve" flip />
