@@ -33,8 +33,8 @@ export default function Location() {
                   Open Hours
                 </h3>
                 <div className="text-xl font-light space-y-1">
-                  <p>{t_sched("friday")}: {t_sched("friday_hours")}</p>
-                  <p>{t_sched("saturday")}: {t_sched("saturday_hours")}</p>
+                  <p>{t_sched("friday")}: {t_sched("friday_start")} — {t_sched("friday_end")}</p>
+                  <p>{t_sched("saturday")}: {t_sched("saturday_start")} — {t_sched("saturday_end")}</p>
                 </div>
               </div>
 

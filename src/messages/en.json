@@ -55,9 +55,11 @@
     "title": "When do we meet?",
     "friday": "Fridays",
     "saturday": "Saturdays",
-    "friday_hours": "4:00 PM - 8:00 PM",
-    "saturday_hours": "10:00 AM - 1:30 PM",
-    "general_info": "We generally meet on Friday afternoons and Saturday mornings."
+    "friday_start": "16:00",
+    "friday_end": "20:30",
+    "saturday_start": "10:00",
+    "saturday_end": "13:30",
+    "general_info": "We meet every Friday afternoon and Saturday morning at Centre Cívic Ca N'Aurell."
   },
   "footer": {
     "rights": "All rights reserved."

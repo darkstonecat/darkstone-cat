@@ -1,64 +1,95 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Clock, Calendar } from "lucide-react";
+import { motion } from "motion/react";
 import { useThemeSection } from "@/hooks/useThemeSection";
 
 export default function Schedule() {
   const t = useTranslations("schedule");
-  const sectionRef = useThemeSection("#FFFFFF", "#1c1917");
+  const sectionRef = useThemeSection("#1C1917", "#FAFAF9", {
+    invertTexture: true,
+  });
 
   return (
-    <section ref={sectionRef} id="schedule" className="py-24">
+    <section
+      ref={sectionRef}
+      id="schedule"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden py-24"
+    >
       <div className="container mx-auto px-6">
-        <div className="flex flex-col items-center text-center mb-16">
-          <h2 className="text-4xl font-bold tracking-tight md:text-5xl mb-6">
-            {t("title")}
-          </h2>
-          <p className="max-w-2xl text-xl opacity-60">
-            {t("general_info")}
-          </p>
+        {/* Title */}
+        <motion.h2
+          className="mb-20 text-center text-4xl font-bold tracking-tight md:mb-28 md:text-6xl"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          {t("title")}
+        </motion.h2>
+
+        {/* Schedule grid */}
+        <div className="mx-auto flex max-w-5xl flex-col items-center md:flex-row">
+          {/* Friday */}
+          <motion.div
+            className="flex flex-1 flex-col items-center gap-4 py-8"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+          >
+            <span className="text-xs font-semibold uppercase tracking-[0.3em] opacity-50">
+              {t("friday")}
+            </span>
+            <p className="text-center font-black leading-none text-[clamp(3rem,12vw,8rem)]">
+              {t("friday_start")}
+            </p>
+            <div className="my-1 h-px w-12 opacity-20 bg-current" />
+            <p className="text-center font-black leading-none text-[clamp(3rem,12vw,8rem)]">
+              {t("friday_end")}
+            </p>
+          </motion.div>
+
+          {/* Divider */}
+          <motion.div
+            className="my-8 h-px w-24 bg-current opacity-15 md:my-0 md:mx-8 md:h-48 md:w-px"
+            initial={{ scaleY: 0, scaleX: 0 }}
+            whileInView={{ scaleY: 1, scaleX: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          />
+
+          {/* Saturday */}
+          <motion.div
+            className="flex flex-1 flex-col items-center gap-4 py-8"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <span className="text-xs font-semibold uppercase tracking-[0.3em] opacity-50">
+              {t("saturday")}
+            </span>
+            <p className="text-center font-black leading-none text-[clamp(3rem,12vw,8rem)]">
+              {t("saturday_start")}
+            </p>
+            <div className="my-1 h-px w-12 opacity-20 bg-current" />
+            <p className="text-center font-black leading-none text-[clamp(3rem,12vw,8rem)]">
+              {t("saturday_end")}
+            </p>
+          </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Friday Card */}
-          <div className="group relative overflow-hidden rounded-[2.5rem] bg-white p-8 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-stone-100">
-            <div className="absolute top-0 right-0 -mr-8 -mt-8 h-32 w-32 rounded-full bg-stone-50 transition-transform duration-500 group-hover:scale-150" />
-            
-            <div className="relative flex flex-col items-center">
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
-                <Calendar className="h-8 w-8" />
-              </div>
-              <h3 className="text-2xl font-bold text-stone-900 mb-2">{t("friday")}</h3>
-              <div className="flex items-center gap-2 text-stone-500 mb-4">
-                <Clock className="h-4 w-4" />
-                <span className="text-sm font-medium uppercase tracking-wider">Afternoons</span>
-              </div>
-              <p className="text-3xl font-light text-stone-800">
-                {t("friday_hours")}
-              </p>
-            </div>
-          </div>
-
-          {/* Saturday Card */}
-          <div className="group relative overflow-hidden rounded-[2.5rem] bg-white p-8 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-stone-100">
-            <div className="absolute top-0 right-0 -mr-8 -mt-8 h-32 w-32 rounded-full bg-stone-50 transition-transform duration-500 group-hover:scale-150" />
-            
-            <div className="relative flex flex-col items-center">
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                <Calendar className="h-8 w-8" />
-              </div>
-              <h3 className="text-2xl font-bold text-stone-900 mb-2">{t("saturday")}</h3>
-              <div className="flex items-center gap-2 text-stone-500 mb-4">
-                <Clock className="h-4 w-4" />
-                <span className="text-sm font-medium uppercase tracking-wider">Mornings</span>
-              </div>
-              <p className="text-3xl font-light text-stone-800">
-                {t("saturday_hours")}
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Subtitle */}
+        <motion.p
+          className="mt-16 text-center text-lg opacity-40 md:mt-24"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 0.4 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+        >
+          {t("general_info")}
+        </motion.p>
       </div>
     </section>
   );

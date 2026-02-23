@@ -52,12 +52,14 @@
     "map": "Mapa"
   },
   "schedule": {
-    "title": "¿Cuando quedemos?",
+    "title": "¿Cuándo quedamos?",
     "friday": "Viernes",
     "saturday": "Sábados",
-    "friday_hours": "16:00 PM - 20:00 PM",
-    "saturday_hours": "10:00 AM - 13:30 PM",
-    "general_info": "Nos reunimos generalmente los viernes por la tarde y los sábados por la mañana."
+    "friday_start": "16:00",
+    "friday_end": "20:30",
+    "saturday_start": "10:00",
+    "saturday_end": "13:30",
+    "general_info": "Nos reunimos cada viernes por la tarde y cada sábado por la mañana en el Centre Cívic Ca N'Aurell."
   },
   "footer": {
     "rights": "Todos los derechos reservados."

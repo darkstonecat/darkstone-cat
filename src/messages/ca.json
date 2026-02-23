@@ -55,9 +55,11 @@
     "title": "Quan quedem?",
     "friday": "Divendres",
     "saturday": "Dissabtes",
-    "friday_hours": "16:00 PM - 20:00 PM",
-    "saturday_hours": "10:00 AM - 13:30 PM",
-    "general_info": "Ens trobem generalment els divendres a la tarda i els dissabtes al matí."
+    "friday_start": "16:00",
+    "friday_end": "20:30",
+    "saturday_start": "10:00",
+    "saturday_end": "13:30",
+    "general_info": "Ens trobem cada divendres a la tarda i cada dissabte al matí al Centre Cívic Ca N'Aurell."
   },
   "footer": {
     "rights": "Tots els drets reservats."
