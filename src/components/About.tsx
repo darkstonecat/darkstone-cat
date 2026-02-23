@@ -42,16 +42,6 @@ export default function About() {
 
       {/* Content */}
       <div className="flex w-full flex-col justify-center px-8 py-16 md:px-16 lg:order-1 lg:w-[45%] lg:py-24">
-        <motion.span
-          className="text-xs font-semibold uppercase tracking-[0.3em] opacity-40"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 0.4 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5 }}
-        >
-          {t("section_label")}
-        </motion.span>
-
         <TextReveal
           text={t("title")}
           as="h2"

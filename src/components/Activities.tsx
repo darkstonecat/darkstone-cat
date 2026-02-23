@@ -42,9 +42,6 @@ export default function Activities() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
         >
-          <span className="text-xs font-semibold uppercase tracking-[0.3em] opacity-40">
-            {t("section_label")}
-          </span>
           <TextReveal
             text={t("title")}
             as="h2"
