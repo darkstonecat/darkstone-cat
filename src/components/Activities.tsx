@@ -21,40 +21,46 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
     offset: ["start start", "end end"],
   });
 
-  const x = useTransform(scrollYProgress, [0, 1], ["0vw", "-200vw"]);
+  // 1 title slide (100vw) + 4 square cards (70vh) + 70% gaps (49vh each)
+  const x = useTransform(scrollYProgress, [0, 1], ["0vw", "-290vw"]);
 
   return (
-    <div ref={containerRef} className="hidden md:block relative h-[300vh]">
-      <div className="sticky top-0 h-screen overflow-hidden">
-        {/* Header */}
-        <div className="flex items-end justify-between px-16 pt-16 pb-8">
-          <motion.div
-            className="flex flex-col gap-1"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5 }}
-          >
+    <div ref={containerRef} className="hidden md:block relative h-[400vh]">
+      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
+        <motion.div
+          className="flex w-max items-center"
+          style={{ x }}
+        >
+          {/* Title slide */}
+          <div className="flex w-screen shrink-0 flex-col items-center justify-center text-center px-16">
             <TextReveal
               text={t("title")}
               as="h2"
-              className="text-4xl font-black leading-none md:text-5xl"
+              className="text-5xl font-black tracking-tight md:text-7xl"
+              delay={0.05}
             />
-            <p className="mt-1 text-sm opacity-60">{t("text")}</p>
-          </motion.div>
-        </div>
-
-        {/* Horizontal strip driven by vertical scroll */}
-        <motion.div
-          className="flex w-max gap-8 px-16"
-          style={{ x }}
-        >
-          {CARDS.map((card, i) => (
-            <article
-              key={card.id}
-              className="relative w-[70vw] shrink-0 overflow-hidden rounded-3xl"
+            <motion.p
+              className="mx-auto mt-6 max-w-xl text-lg leading-relaxed opacity-60"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 0.6 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <div className="relative h-[calc(100vh-16rem)]">
+              {t("text")}
+            </motion.p>
+          </div>
+
+          {/* Cards */}
+          {CARDS.map((card, i) => (
+            <motion.article
+              key={card.id}
+              className="relative w-[70vh] shrink-0 overflow-hidden rounded-3xl ml-[49vh] first:ml-[8vw]"
+              initial={{ scale: 0 }}
+              whileInView={{ scale: 1 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <div className="relative aspect-square max-h-[70vh]">
                 <Image
                   src={card.image}
                   alt={t(`items.${card.id}.title`)}
@@ -78,7 +84,7 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
                   </p>
                 </div>
               </div>
-            </article>
+            </motion.article>
           ))}
         </motion.div>
       </div>
@@ -91,7 +97,7 @@ function MobileActivities({ t }: { t: ReturnType<typeof useTranslations<"activit
     <div className="flex flex-col gap-5 px-6 py-16 md:hidden">
       {/* Header */}
       <motion.div
-        className="flex flex-col gap-1 pb-4"
+        className="flex flex-col items-center gap-1 pb-4 text-center"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
