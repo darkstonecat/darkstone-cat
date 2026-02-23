@@ -9,139 +9,105 @@
 
 ## Estat actual del projecte (febrer 2026)
 
-### ✅ Ja implementat
+### ✅ Completat
+- **Pas 1 — NavBar:** Backdrop blur, navegació per seccions, indicador actiu animat, menú hamburger mòbil amb circular reveal
+- **Pas 2 — Schedule:** Tipografia gegant sobre fons fosc, dues columnes amb divisor animat, horaris corregits
+- **Pas 3 — JoinUs:** CTA "Fes-te soci" amb formulari + cards Telegram/Ludoya redissenyades
+- **Pas 4 — Location:** Pantalla completa 40/60, skeleton loader, animacions d'entrada
+- **Pas 5 — Footer:** 3 columnes amb logo, nav links, icones socials amb spring hover
 - **Hero:** Parallax scroll-driven amb spring physics, staggered entrance, CTA animat
-- **About (Qui som):** Dual-column scrollytelling amb sticky title + whileInView reveals
-- **Activities (Què fem):** Galeria parallax amb fotos orgàniques (desktop) + cards apilades (mobile)
 - **FixedBackground:** Sistema de temes amb transició de color animada + textura parallax
 - **Lenis:** Smooth scroll integrat globalment via SmoothScroll context
-- **useThemeSection:** Hook personalitzat per canviar tema per secció
-- **ScrollToTop:** Botó flotant integrat amb Lenis
 - **i18n:** 3 idiomes (ca, es, en) amb next-intl i routing dinàmic `[locale]`
 
 ### 🟡 Funcional però millorable
-- **Schedule (Quan quedem):** Cards blanques amb hover — funcional però poc impactant
-- **JoinUs (Uneix-te):** Telegram + Ludoya cards — falta el CTA de "Fes-te soci"
-- **Location (On som):** Dual-column amb mapa, però sense min-h-screen ni animacions d'entrada
-- **NavBar:** Logo + language switcher — falta backdrop blur, indicador de secció activa, menú mòbil
+- **About (Qui som):** Dual-column scrollytelling — massa espai buit, falta element visual (foto), import incorrecte de `framer-motion`
+- **Activities (Què fem):** Galeria parallax orgànica — visualment interessant però confusa, relació foto-categoria poc clara
 
 ### 🔴 Per fer
-- **Footer:** Només text i links de text — necessita redisseny complet
-- **Animació de càrrega inicial:** No existeix
-- **Menú mòbil (hamburger):** No existeix
+- **Micro-interaccions globals**
+- **Animació de càrrega inicial**
+- **Audit responsive i optimització**
 
 ---
 
-## Pas 1 — NavBar premium amb menú mòbil
+## Pas 6 — Redisseny de `Qui som?` amb layout editorial
 
-**Objectiu:** Navegació fixa amb backdrop blur, indicador de secció activa, i menú hamburger per a mòbil amb animació d'obertura.
+**Objectiu:** Transformar la secció en un layout editorial asimètric amb foto d'ambient que ocupi mitja pantalla, eliminant l'excés d'espai buit i donant personalitat visual.
 
-**Context tècnic:** El component actual (`src/components/NavBar.tsx`) només té logo + LanguageSwitcher. Usa `motion/react` per a animacions.
+**Context tècnic:** Component actual a `src/components/About.tsx`. Usa dual-column scrollytelling amb sticky title. **Important:** Actualment importa de `framer-motion` — cal migrar a `motion/react`.
+
+**Problema actual:**
+- El títol "Qui som?" queda sol i desbalancejat a l'esquerra
+- Massa espai buit, el fons és idèntic al Hero — no hi ha canvi de "capítol"
+- No hi ha cap element visual (foto) que doni vida a la secció
 
 **Tasques:**
-1. Afegir `backdrop-blur-md bg-brand-beige/80` (o transparent segons tema) quan l'usuari fa scroll
-2. Afegir navegació amb links a les seccions (Qui som, Què fem, Quan quedem, Uneix-te, On som) — visibles en desktop, ocults en mòbil
-3. Implementar indicador de secció activa basat en scroll (línia animada sota l'element actiu)
-4. Crear menú hamburger per a mòbil:
-   - Icona animada (hamburger ↔ X) amb `motion/react`
-   - Panel fullscreen amb fons fosc, links de secció en tipografia gran i staggered entrance
-   - Tancament amb clic fora o al navegar
-5. El color del navbar ha de respectar el tema actiu del `useThemeStore` (text clar sobre fons fosc i viceversa)
-6. Afegir les traduccions necessàries a `src/messages/{ca,es,en}.json` (ja existeix `nav.menu_button`)
+1. Layout de dues columnes a pantalla completa (`min-h-screen flex`):
+   - **Columna esquerra (45%):** Contingut editorial centrat verticalment, `px-8 md:px-16 py-24`
+   - **Columna dreta (55%):** Foto d'ambient a `object-cover h-full` amb overlay gradient suau
+2. Contingut columna esquerra (de dalt a baix):
+   - Etiqueta petita: `01 — QUI SOM` en `text-xs tracking-[0.3em] opacity-40 uppercase`
+   - Títol: `text-6xl md:text-7xl font-black leading-none`
+   - Descripció: `text-lg opacity-60 max-w-sm`
+   - Pills/tags en fila: `Fundada el 2024` · `Terrassa` · `Gratuït` — border rounded-full
+   - Línia divisòria
+   - Subseccions: icona/emoji + nom + descripció breu (Foment del Català, Ludoteca Oberta)
+3. Foto columna dreta: Next.js `<Image>` amb fill, `object-cover`, src `/images/photos/egarajuga_taula.webp`
+   - Overlay gradient: `bg-gradient-to-l from-black/10 to-transparent`
+4. Animacions amb `motion/react` (NO `framer-motion`):
+   - Contingut esquerre: staggered fade + slide up amb `whileInView`
+   - Foto: fade in amb scale subtil
+5. Responsive: En mòbil, foto a dalt (h-[40vh]) i contingut a sota en stack vertical
+6. Tema: `useThemeSection` amb colors adequats (brand-beige fons, stone-custom text)
+7. Afegir traduccions per als pills a `src/messages/{ca,es,en}.json` (claus: `about.pill_founded`, `about.pill_location`, `about.pill_free`)
 
-**Important:** Usar `motion/react` (NO `framer-motion`). Usar `useLenis` per a smooth scroll a seccions.
+**Fotos disponibles:** `egarajuga_taula.webp`, `egarajuga_alcalde.webp`, `boardgames_darws.webp`
 
 ---
 
-## Pas 2 — Redisseny de `Quan quedem?` amb tipografia gegant
+## Pas 7 — Redisseny de `Què fem?` amb carrusel horitzontal
 
-**Objectiu:** Transformar la secció d'horaris en un moment visual impactant — tipografia oversized sobre fons fosc, estil editorial/brutalist.
+**Objectiu:** Substituir l'actual galeria parallax per un carrusel horitzontal immersiu amb snap, on cada categoria ocupa quasi tota la pantalla amb foto a full bleed.
 
-**Context tècnic:** Component actual a `src/components/Schedule.tsx`. Té cards blanques amb hover effects. Usa `useThemeSection` per al canvi de tema.
+**Context tècnic:** Component actual a `src/components/Activities.tsx`. Té una implementació complexa amb galeria parallax orgànica (desktop) i cards apilades (mobile). El component és gran (~400 línies).
+
+**Problema actual:**
+- Les fotos es solapen i la relació entre foto i categoria no és clara
+- La llista de categories a l'esquerra és funcional però poc atractiva
+- La secció no té narrativa clara — l'usuari no sap on mirar primer
 
 **Tasques:**
-1. Canviar el disseny a:
-   - Fons fosc via `useThemeSection` (color-stone-custom o similar)
-   - `min-h-screen` amb contingut centrat
-   - Títol de secció amb reveal animation (`motion/react` whileInView)
-   - Dues columnes simètriques amb divisor vertical animat
-   - Etiqueta uppercase petita: `DIVENDRES` / `DISSABTES`
-   - Horari en tipografia gegant: `text-[clamp(3rem,12vw,10rem)]` amb `font-black`
-   - Sense cards, sense icones — només tipografia i espai
-2. Animacions d'entrada:
-   - Títol: fade + slide up
-   - Horaris: staggered reveal amb clip-path o opacity
-   - Divisor vertical: height 0 → 100% animat
-3. Responsive: En mòbil, apilar verticalment amb separador horitzontal
-4. Horaris correctes: Divendres 16:00 — 20:30, Dissabtes 10:00 — 13:30
+1. Estructura general: `min-h-screen flex flex-col`
+   - **Capçalera (part superior):** Títol, descripció breu, botons de navegació ← →
+   - **Carrusel (part inferior, flex-1):** Scroll horitzontal amb snap
+2. Capçalera:
+   - Esquerra: etiqueta `02 — QUÈ FEM` + títol `text-5xl font-black` + descripció breu
+   - Dreta: dos botons circulars ← → que fan `scrollBy` al carrusel
+3. Carrusel (`overflow-x-auto snap-x snap-mandatory scroll-smooth`):
+   - Amagar scrollbar amb `.no-scrollbar` (ja existeix a globals.css)
+   - Cada card: `snap-start shrink-0 w-[72vw] md:w-[55vw] rounded-2xl overflow-hidden relative`
+   - Contingut de cada card:
+     - Next.js `<Image>` amb fill, `object-cover`
+     - Overlay gradient: `bg-gradient-to-t from-black/80 via-black/20 to-transparent`
+     - Número (top-right): `text-white/40 text-xs font-mono` (ex: "01 / 04")
+     - Text (bottom-left): títol `text-3xl font-black text-white` + descripció `text-white/75 text-sm`
+4. Les 4 cards en ordre:
+   - "Jocs de Taula" → `boardgames_finspan.webp`
+   - "Jocs de Rol" → `rol_miseries2.webp`
+   - "Esdeveniments i Tornejos" → `events_speedpainting.webp`
+   - "Egara Juga" → `egarajuga_sam.webp`
+5. Botons de navegació: `useRef<HTMLDivElement>` + `scrollBy({ left: ±cardWidth, behavior: 'smooth' })`
+6. Tema: `useThemeSection` amb `brand-beige` fons
+7. Responsive: Cards més amples en mòbil (`w-[85vw]`), capçalera apilada
+8. Usar textos de `activities.items.{board_games,rpg,events,egara}` de les traduccions existents
+9. Afegir etiqueta secció a traduccions si cal (`activities.section_label`)
+
+**Important:** Eliminar completament la implementació anterior (DesktopGallery, MobileGallery, parallax amb fotos orgàniques). El nou component ha de ser molt més simple i llegible.
 
 ---
 
-## Pas 3 — Redisseny de `Uneix-te` + CTA "Fes-te soci"
-
-**Objectiu:** Afegir la crida a l'acció principal de l'associació (fer-se soci) i millorar les cards de Telegram/Ludoya amb més personalitat visual.
-
-**Context tècnic:** Component actual a `src/components/JoinUs.tsx`. Només té Telegram + Ludoya. No existeix CTA de "Fes-te soci".
-
-**Formulari d'alta:** `https://docs.google.com/forms/d/1OBM0vAOs0vvBioSeop4T0aYh__ysuNEOy36kprTJo7Q/viewform`
-
-**Tasques:**
-1. Reestructurar la secció en dues zones:
-   - **Zona CTA (part superior):**
-     - Fons fosc amb gradient subtil o mesh gradient
-     - Títol gran: "Fes-te soci" amb text reveal animation
-     - Subtítol: "És gratuït. Vine qualsevol divendres o dissabte."
-     - Botó prominent amb hover magnètic (scale + glow) que obre el formulari en nova pestanya
-     - Text del botó: "Emplena el formulari d'alta →"
-   - **Zona canals (part inferior):**
-     - Card Telegram: fons `#229ED9`, icona gran de Telegram, hover amb elevació
-     - Card Ludoya: fons fosc amb accent brand-beige, logo Ludoya des de `/public/images/logos/`
-     - Ambdues amb `whileInView` staggered entrance
-2. Afegir traduccions a `src/messages/{ca,es,en}.json` per als nous textos (títol, subtítol, botó)
-3. `min-h-screen` amb contingut centrat verticalment
-4. Responsive: Cards apilades en mòbil, horitzontal en desktop
-
----
-
-## Pas 4 — Location a pantalla completa amb animacions
-
-**Objectiu:** Que la secció ocupi tota la pantalla amb animacions d'entrada i millor placeholder del mapa.
-
-**Context tècnic:** Component actual a `src/components/Location.tsx`. Ja té dual-column amb mapa, però sense min-h-screen i amb placeholder bàsic (emoji).
-
-**Tasques:**
-1. Afegir `min-h-screen` al wrapper
-2. Ajustar proporcions: columna info 40%, mapa 60% (desktop)
-3. Substituir el placeholder emoji del mapa per un skeleton loader elegant (pulsing gradient)
-4. Afegir animacions d'entrada amb `motion/react`:
-   - Títol i info: fade + slide des de l'esquerra
-   - Mapa: fade in amb scale subtil
-5. Millorar el botó CTA: text "Com arribar-hi →" amb hover animat
-6. En mòbil: mapa a sota amb alçada fixa (60vh)
-7. Verificar horaris correctes: Divendres 16:00 — 20:30
-
----
-
-## Pas 5 — Footer redissenyat
-
-**Objectiu:** Footer amb presència visual — logo, links de navegació, icones socials, i micro-interaccions.
-
-**Context tècnic:** Component actual a `src/components/Footer.tsx`. Només té copyright + links de text.
-
-**Tasques:**
-1. Layout a 3 columnes (desktop), stack (mòbil):
-   - **Esquerra:** Logo Darkstone + nom + tagline breu
-   - **Centre:** Links de navegació a seccions (mateixos que el NavBar)
-   - **Dreta:** Icones socials (Instagram, Twitter/X, Telegram) amb `react-icons` — hover amb scale i canvi de color
-2. Línia divisòria superior amb gradient subtil (brand-red → brand-orange → transparent)
-3. Copyright a la part inferior centrat
-4. Fons fosc (stone-custom) amb text clar
-5. Animació d'entrada: staggered fade-in de les 3 columnes amb `whileInView`
-6. Icones socials: hover amb `motion/react` spring animation (scale 1 → 1.15)
-
----
-
-## Pas 6 — Micro-interaccions i polish global
+## Pas 8 — Micro-interaccions i polish global
 
 **Objectiu:** Afegir detalls premium que eleven la qualitat percebuda a nivell awwwards — text reveals, hover states sofisticats, transicions entre seccions.
 
@@ -157,7 +123,7 @@
 
 ---
 
-## Pas 7 — Animació de càrrega inicial (page intro)
+## Pas 9 — Animació de càrrega inicial (page intro)
 
 **Objectiu:** Primera impressió impactant — una animació de 1-2 segons quan la pàgina carrega per primera vegada.
 
@@ -174,7 +140,7 @@
 
 ---
 
-## Pas 8 — Optimització i responsive final
+## Pas 10 — Optimització i responsive final
 
 **Objectiu:** Assegurar que tot funciona perfectament en mòbil, rendiment optimitzat, i accessibilitat bàsica.
 
@@ -198,18 +164,20 @@
 
 ## Resum i ordre d'execució
 
-| Pas | Nom | Dificultat | Impacte visual | Prioritat |
-|-----|-----|-----------|----------------|-----------|
-| 1 | NavBar premium + menú mòbil | Mitjana | ⭐⭐⭐⭐ | Alta |
-| 2 | Schedule tipografia gegant | Fàcil | ⭐⭐⭐⭐⭐ | Alta |
-| 3 | JoinUs + Fes-te soci CTA | Mitjana | ⭐⭐⭐⭐ | Alta |
-| 4 | Location pantalla completa | Fàcil | ⭐⭐⭐ | Mitjana |
-| 5 | Footer redissenyat | Fàcil | ⭐⭐⭐ | Mitjana |
-| 6 | Micro-interaccions i polish | Alta | ⭐⭐⭐⭐⭐ | Mitjana |
-| 7 | Animació de càrrega | Mitjana | ⭐⭐⭐⭐ | Baixa |
-| 8 | Responsive + optimització | Mitjana | ⭐⭐⭐ | Alta |
+| Pas | Nom | Dificultat | Impacte visual | Estat |
+|-----|-----|-----------|----------------|-------|
+| 1 | NavBar premium + menú mòbil | Mitjana | ⭐⭐⭐⭐ | ✅ Fet |
+| 2 | Schedule tipografia gegant | Fàcil | ⭐⭐⭐⭐⭐ | ✅ Fet |
+| 3 | JoinUs + Fes-te soci CTA | Mitjana | ⭐⭐⭐⭐ | ✅ Fet |
+| 4 | Location pantalla completa | Fàcil | ⭐⭐⭐ | ✅ Fet |
+| 5 | Footer redissenyat | Fàcil | ⭐⭐⭐ | ✅ Fet |
+| 6 | About layout editorial + foto | Mitjana | ⭐⭐⭐⭐⭐ | Pendent |
+| 7 | Activities carrusel horitzontal | Alta | ⭐⭐⭐⭐⭐ | Pendent |
+| 8 | Micro-interaccions i polish | Alta | ⭐⭐⭐⭐⭐ | Pendent |
+| 9 | Animació de càrrega | Mitjana | ⭐⭐⭐⭐ | Pendent |
+| 10 | Responsive + optimització | Mitjana | ⭐⭐⭐ | Pendent |
 
-**Ruta recomanada:** Pas 1 → Pas 2 → Pas 3 → Pas 5 → Pas 4 → Pas 8 → Pas 6 → Pas 7
+**Ruta recomanada:** Pas 6 → Pas 7 → Pas 8 → Pas 10 → Pas 9
 
 **Notes tècniques globals:**
 - Sempre usar `motion/react` (Motion v12), MAI `framer-motion` directament
@@ -221,4 +189,4 @@
 
 ---
 
-*Pla actualitzat — febrer 2026 — Darkstone Catalunya web v2*
+*Pla actualitzat — febrer 2026 — Darkstone Catalunya web v3*
