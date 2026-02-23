@@ -174,7 +174,7 @@
 | 6 | About layout editorial + foto | Mitjana | ⭐⭐⭐⭐⭐ | ✅ Fet |
 | 7 | Activities carrusel horitzontal | Alta | ⭐⭐⭐⭐⭐ | ✅ Fet |
 | 8 | Micro-interaccions i polish | Alta | ⭐⭐⭐⭐⭐ | ✅ Fet |
-| 9 | Animació de càrrega | Mitjana | ⭐⭐⭐⭐ | Pendent |
+| 9 | Animació de càrrega | Mitjana | ⭐⭐⭐⭐ | ✅ Fet |
 | 10 | Responsive + optimització | Mitjana | ⭐⭐⭐ | Pendent |
 
 **Ruta recomanada:** Pas 6 → Pas 7 → Pas 8 → Pas 10 → Pas 9
