@@ -48,8 +48,9 @@
     "address_title": "ADDRESS",
     "address": "Example Street, 123, Barcelona (Example)",
     "hours_title": "OPEN HOURS",
-    "hours": "Hours: Fridays 17:00 to 23:00 and Saturdays 10:00 to 23:00",
-    "map": "Map"
+    "hours": "Fridays 16:00 to 20:30 and Saturdays 10:00 to 13:30",
+    "map": "Map",
+    "cta": "Get directions"
   },
   "schedule": {
     "title": "When do we meet?",

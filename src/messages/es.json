@@ -48,8 +48,9 @@
     "address_title": "DIRECCIÓN",
     "address": "Calle del Ejemplo, 123, Barcelona (Ejemplo)",
     "hours_title": "HORARIO",
-    "hours": "Horario: Viernes de 17:00 a 23:00 y Sábados de 10:00 a 23:00",
-    "map": "Mapa"
+    "hours": "Viernes de 16:00 a 20:30 y Sábados de 10:00 a 13:30",
+    "map": "Mapa",
+    "cta": "Cómo llegar"
   },
   "schedule": {
     "title": "¿Cuándo quedamos?",

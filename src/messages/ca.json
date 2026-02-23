@@ -48,8 +48,9 @@
     "address_title": "ADREÇA",
     "address": "Plaça del Tint, 4, 08224 Terrassa, Barcelona",
     "hours_title": "HORARI",
-    "hours": "Divendres de 16:00 a 21:00 i Dissabtes de 10:00 a 14:00",
-    "map": "Mapa"
+    "hours": "Divendres de 16:00 a 20:30 i Dissabtes de 10:00 a 13:30",
+    "map": "Mapa",
+    "cta": "Com arribar-hi"
   },
   "schedule": {
     "title": "Quan quedem?",
