@@ -2,375 +2,126 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
-import {
-  motion,
-  AnimatePresence,
-  useScroll,
-  useMotionValueEvent,
-  useTransform,
-  type MotionValue,
-} from "motion/react";
-import { cn } from "@/lib/utils";
+import { useRef } from "react";
+import { motion } from "motion/react";
 import { useThemeSection } from "@/hooks/useThemeSection";
 
-const ACTIVITY_ITEMS = [
-  {
-    id: "board_games",
-    images: [
-      "/images/photos/boardgames_finspan.webp",
-      "/images/photos/boardgames_darws.webp",
-      "/images/photos/boardgames_magicboardgame.webp",
-      "/images/photos/boardgames_witchstone.webp",
-    ],
-  },
-  {
-    id: "rpg",
-    images: [
-      "/images/photos/rol_miseries2.webp",
-      "/images/photos/rol_bc.webp",
-      "/images/photos/rol_carton.webp",
-      "/images/photos/rol_miseries.webp",
-    ],
-  },
-  {
-    id: "events",
-    images: [
-      "/images/photos/events_blood.webp",
-      "/images/photos/events_speedpainting.webp",
-      "/images/photos/events_uglyswater.webp",
-    ],
-  },
-  {
-    id: "egara",
-    images: [
-      "/images/photos/egarajuga_sam.webp",
-      "/images/photos/egarajuga_alcalde.webp",
-      "/images/photos/egarajuga_taula.webp",
-    ],
-  },
+const CARDS = [
+  { id: "board_games", image: "/images/photos/boardgames_finspan.webp" },
+  { id: "rpg", image: "/images/photos/rol_miseries2.webp" },
+  { id: "events", image: "/images/photos/events_speedpainting.webp" },
+  { id: "egara", image: "/images/photos/egarajuga_sam.webp" },
 ] as const;
-
-const ITEM_COUNT = ACTIVITY_ITEMS.length;
-
-// --- Organic Parallax Gallery (Desktop) ---
-// Photos scattered like prints on a table, with scroll-driven parallax depth
-
-function OrganicParallaxGallery({
-  images,
-  scrollYProgress,
-}: {
-  images: readonly string[];
-  scrollYProgress: MotionValue<number>;
-}) {
-  // Parallax: each layer moves at a different rate for 3D depth
-  const bgY = useTransform(scrollYProgress, [0, 1], [40, -40]);
-  const fgY = useTransform(scrollYProgress, [0, 1], [-30, 30]);
-
-  return (
-    <div className="relative w-full h-full flex items-center justify-center">
-      {/* Background photo — top-left, behind everything */}
-      <motion.div
-        style={{ x: bgY }}
-        className="absolute w-[45%] aspect-[4/3] -top-[2%] -left-[3%] z-0 -rotate-6"
-      >
-        <div className="relative w-full h-full rounded-lg border-4 border-white shadow-2xl overflow-hidden">
-          <Image
-            src={images[1]}
-            alt=""
-            fill
-            className="object-cover"
-            sizes="(min-width: 768px) 25vw"
-          />
-        </div>
-      </motion.div>
-
-      {/* Central photo — largest, centered */}
-      <div className="relative w-[65%] aspect-[4/3] z-10 rotate-2">
-        <div className="relative w-full h-full rounded-lg border-4 border-white shadow-2xl overflow-hidden">
-          <Image
-            src={images[0]}
-            alt=""
-            fill
-            className="object-cover"
-            sizes="(min-width: 768px) 40vw"
-            priority
-          />
-        </div>
-      </div>
-
-      {/* Foreground photo — bottom-right, on top */}
-      <motion.div
-        style={{ x: fgY }}
-        className="absolute w-[42%] aspect-[4/3] -bottom-[2%] -right-[3%] z-20 rotate-4"
-      >
-        <div className="relative w-full h-full rounded-lg border-4 border-white shadow-2xl overflow-hidden">
-          <Image
-            src={images[2 % images.length]}
-            alt=""
-            fill
-            className="object-cover"
-            sizes="(min-width: 768px) 22vw"
-          />
-        </div>
-      </motion.div>
-
-      {/* Optional 4th photo — small accent, tucked behind top-right */}
-      {images.length > 3 && (
-        <motion.div
-          style={{ x: bgY }}
-          className="absolute w-[30%] aspect-[4/3] -top-[5%] right-[8%] -z-10 rotate-8"
-        >
-          <div className="relative w-full h-full rounded-lg border-4 border-white shadow-2xl overflow-hidden">
-            <Image
-              src={images[3]}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="(min-width: 768px) 15vw"
-            />
-          </div>
-        </motion.div>
-      )}
-    </div>
-  );
-}
-
-// --- Desktop Pinned Gallery ---
-
-// Slide offset in pixels — how far off-screen images start/end
-const SLIDE_OFFSET = 600;
-
-const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? SLIDE_OFFSET : -SLIDE_OFFSET,
-    opacity: 0,
-    scale: 0.92,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-    scale: 1,
-  },
-  exit: (direction: number) => ({
-    x: direction > 0 ? -SLIDE_OFFSET : SLIDE_OFFSET,
-    opacity: 0,
-    scale: 0.92,
-  }),
-};
-
-const slideTransition = {
-  x: { type: "spring" as const, stiffness: 200, damping: 30, mass: 1.2 },
-  opacity: { duration: 0.4, ease: "easeInOut" as const },
-  scale: { type: "spring" as const, stiffness: 300, damping: 30 },
-};
-
-function DesktopGallery({ t }: { t: ReturnType<typeof useTranslations> }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  // +1 = scrolling down (next item), -1 = scrolling up (prev item)
-  const [direction, setDirection] = useState(1);
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  useMotionValueEvent(scrollYProgress, "change", (progress) => {
-    const index = Math.min(
-      ITEM_COUNT - 1,
-      Math.floor(progress * ITEM_COUNT)
-    );
-    setActiveIndex((prev) => {
-      if (index !== prev) {
-        setDirection(index > prev ? 1 : -1);
-      }
-      return index;
-    });
-  });
-
-  const activeItem = ACTIVITY_ITEMS[activeIndex];
-
-  return (
-    <div
-      ref={containerRef}
-      style={{ height: `${(ITEM_COUNT + 1) * 100}vh` }}
-      className="relative hidden md:block"
-    >
-      <div className="sticky top-0 h-screen flex flex-col overflow-hidden py-10">
-        <div className="container mx-auto px-6 flex flex-col h-full">
-          {/* Section header */}
-          <div className="text-center mb-8 shrink-0">
-            <h2 className="text-4xl font-bold tracking-tight md:text-5xl">
-              {t("title")}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-xl leading-relaxed opacity-60">
-              {t("text")}
-            </p>
-          </div>
-
-          {/* 2-column layout — fills remaining height */}
-          <div className="grid grid-cols-12 gap-8 flex-1 min-h-0">
-            {/* Left Column: Navigation titles */}
-            <nav className="col-span-3 flex flex-col justify-center space-y-2">
-              {ACTIVITY_ITEMS.map((item, index) => {
-                const isActive = index === activeIndex;
-                return (
-                  <motion.div
-                    key={item.id}
-                    className="relative cursor-default px-5 py-4 transition-colors duration-300"
-                    animate={{
-                      opacity: isActive ? 1 : 0.4,
-                    }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                  >
-                    <span
-                      className="text-4xl font-semibold transition-all duration-300">
-                      {t(`items.${item.id}.title`)}
-                    </span>
-                  </motion.div>
-                );
-              })}
-            </nav>
-
-            {/* Right Column: Images on top, text below */}
-            <div className="col-span-9 flex flex-col h-full min-h-0">
-              {/* Images area — takes most of the space, unclipped */}
-              <div className="relative flex-3 min-h-0">
-                <AnimatePresence mode="popLayout" custom={direction}>
-                  <motion.div
-                    key={activeItem.id}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={slideTransition}
-                    className="absolute inset-0"
-                  >
-                    <OrganicParallaxGallery
-                      images={activeItem.images}
-                      scrollYProgress={scrollYProgress}
-                    />
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-
-              {/* Text area — masked/clipped */}
-              <div className="relative shrink-0 min-h-0">
-                <AnimatePresence mode="popLayout" custom={direction}>
-                  <motion.div
-                    key={activeItem.id}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={slideTransition}
-                    className="space-y-3 py-2"
-                  >
-                    <h3 className="text-2xl lg:text-3xl font-bold text-stone-900">
-                      {t(`items.${activeItem.id}.title`)}
-                    </h3>
-                    <p className="text-base lg:text-lg leading-relaxed text-stone-600 max-w-2xl">
-                      {t(`items.${activeItem.id}.description`)}
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// --- Mobile Fallback ---
-
-function MobileGallery({ t }: { t: ReturnType<typeof useTranslations> }) {
-  return (
-    <div className="block md:hidden py-24">
-      <div className="container mx-auto px-6">
-        {/* Section header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold tracking-tight">
-            {t("title")}
-          </h2>
-          <p className="mx-auto mt-4 max-w-md text-lg leading-relaxed opacity-60">
-            {t("text")}
-          </p>
-        </div>
-
-        {/* Stacked items */}
-        <div className="space-y-16">
-          {ACTIVITY_ITEMS.map((item) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 32 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="space-y-5"
-            >
-              {/* Photo grid: hero + 2 thumbnails */}
-              <div className="grid grid-cols-2 grid-rows-2 gap-2 aspect-[4/3]">
-                <div className="row-span-2 relative overflow-hidden shadow-lg">
-                  <Image
-                    src={item.images[0]}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="50vw"
-                  />
-                </div>
-                <div className="relative overflow-hidden shadow-lg">
-                  <Image
-                    src={item.images[1]}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="50vw"
-                  />
-                </div>
-                <div className="relative overflow-hidden shadow-lg">
-                  <Image
-                    src={item.images[2 % item.images.length]}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="50vw"
-                  />
-                </div>
-              </div>
-
-              {/* Title + Description */}
-              <div className="space-y-3 text-center">
-                <h3 className="text-2xl font-bold text-stone-900">
-                  {t(`items.${item.id}.title`)}
-                </h3>
-                <p className="text-base leading-relaxed text-stone-600 max-w-md mx-auto">
-                  {t(`items.${item.id}.description`)}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// --- Main Component ---
 
 export default function Activities() {
   const t = useTranslations("activities");
   const sectionRef = useThemeSection("#EEE8DC", "#1c1917");
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (dir: "left" | "right") => {
+    if (!carouselRef.current) return;
+    const cardWidth = carouselRef.current.firstElementChild?.clientWidth ?? 400;
+    carouselRef.current.scrollBy({
+      left: dir === "right" ? cardWidth + 16 : -(cardWidth + 16),
+      behavior: "smooth",
+    });
+  };
 
   return (
-    <section ref={sectionRef} id="activities" className="pt-[30vh]">
-      <DesktopGallery t={t} />
-      <MobileGallery t={t} />
+    <section
+      ref={sectionRef}
+      id="activities"
+      className="flex min-h-screen flex-col py-16 md:py-24"
+    >
+      {/* Header */}
+      <div className="container mx-auto flex items-end justify-between px-8 pb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="text-xs font-semibold uppercase tracking-[0.3em] opacity-40">
+            {t("section_label")}
+          </span>
+          <h2 className="mt-1 text-4xl font-black tracking-tight md:text-5xl">
+            {t("title")}
+          </h2>
+          <p className="mt-2 max-w-md text-sm opacity-50">
+            {t("text")}
+          </p>
+        </motion.div>
+
+        {/* Navigation arrows */}
+        <motion.div
+          className="hidden gap-2 md:flex"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <button
+            onClick={() => scroll("left")}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-current/20 transition-colors hover:bg-current/5"
+            aria-label="Previous"
+          >
+            &larr;
+          </button>
+          <button
+            onClick={() => scroll("right")}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-current/20 transition-colors hover:bg-current/5"
+            aria-label="Next"
+          >
+            &rarr;
+          </button>
+        </motion.div>
+      </div>
+
+      {/* Carousel */}
+      <div
+        ref={carouselRef}
+        className="no-scrollbar flex flex-1 snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-8"
+      >
+        {CARDS.map((card, i) => (
+          <motion.div
+            key={card.id}
+            className="relative shrink-0 snap-start overflow-hidden rounded-2xl w-[85vw] md:w-[55vw] lg:w-[45vw]"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
+          >
+            {/* Image */}
+            <div className="relative h-full min-h-[55vh] md:min-h-[60vh]">
+              <Image
+                src={card.image}
+                alt={t(`items.${card.id}.title`)}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 85vw, (max-width: 1024px) 55vw, 45vw"
+              />
+
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+              {/* Number */}
+              <span className="absolute right-4 top-4 font-mono text-xs text-white/40">
+                {String(i + 1).padStart(2, "0")} / {String(CARDS.length).padStart(2, "0")}
+              </span>
+
+              {/* Text */}
+              <div className="absolute bottom-0 left-0 p-6 md:p-8">
+                <h3 className="text-2xl font-black leading-tight text-white md:text-3xl">
+                  {t(`items.${card.id}.title`)}
+                </h3>
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-white/70">
+                  {t(`items.${card.id}.description`)}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
     </section>
   );
 }
