@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 
 interface SectionDividerProps {
@@ -32,15 +33,20 @@ export default function SectionDivider({
   overlap = false,
   animated = false,
 }: SectionDividerProps) {
-  const { scrollYProgress } = useScroll();
-  const x = useTransform(scrollYProgress, [0, 1], ["100%", "-200%"]);
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-50%"]);
 
   const isAnimatedWave = animated && variant === "wave";
 
   return (
     <div
+      ref={ref}
       className={`relative w-full overflow-hidden ${overlap ? "-mt-16 -mb-16 z-20 md:-mt-24 md:-mb-24 lg:-mt-32 lg:-mb-32" : "-mt-px"}`}
-      style={{ backgroundColor: overlap ? "transparent" : topColor, lineHeight: 0 }}
+      style={{ lineHeight: 0 }}
       aria-hidden="true"
     >
       {isAnimatedWave ? (
@@ -51,6 +57,7 @@ export default function SectionDivider({
           xmlns="http://www.w3.org/2000/svg"
           style={{ x }}
         >
+          <rect x="0" y="0" width="5760" height="160" fill={topColor} />
           <path d={WAVE_TILED} fill={bottomColor} />
         </motion.svg>
       ) : (
@@ -60,6 +67,7 @@ export default function SectionDivider({
           className={`block h-16 w-full md:h-24 lg:h-32 ${flip ? "-scale-x-100" : ""}`}
           xmlns="http://www.w3.org/2000/svg"
         >
+          <rect x="0" y="0" width="1440" height="160" fill={topColor} />
           <path d={PATHS[variant]} fill={bottomColor} />
         </svg>
       )}

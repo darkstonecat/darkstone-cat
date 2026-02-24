@@ -168,7 +168,7 @@ export default function Activities() {
   const t = useTranslations("activities");
 
   return (
-    <section id="activities" className="bg-stone-custom text-stone-white-hover">
+    <section id="activities" className="bg-brand-beige text-stone-custom">
       <DesktopActivities t={t} />
       <MobileActivities t={t} />
     </section>

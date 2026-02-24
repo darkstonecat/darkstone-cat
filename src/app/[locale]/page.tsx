@@ -18,9 +18,11 @@ export default function HomePage() {
         <ScrollProgress />
         <NavBar />
         <Hero />
-        <About />
         <SectionDivider topColor="#EEE8DC" bottomColor="#1C1917" variant="wave" overlap animated />
+        <About />
+        <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="wave" overlap animated />
         <Activities />
+        <SectionDivider topColor="#EEE8DC" bottomColor="#1C1917" variant="wave" overlap animated />
         <Schedule />
         <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="curve" flip />
         <JoinUs />

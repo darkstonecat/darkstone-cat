@@ -115,7 +115,7 @@ export default function About() {
     <section
       id="about"
       ref={containerRef}
-      className="relative bg-brand-beige text-stone-custom"
+      className="relative bg-stone-custom text-stone-white-hover"
       style={{ height: `${TOTAL_H}vh` }}
     >
       {/* Title */}
