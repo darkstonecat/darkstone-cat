@@ -131,6 +131,12 @@
     "open_tables_title": "Open tables space",
     "open_tables_text": "DarkStone Catalunya is an open social space where we want to encourage neighbourhood and collective participation. For this reason, we ask that proposed activities be, whenever possible, open to new participants. The DarkStone Catalunya coordination team will ensure that there is always at least one open table so that anyone interested who requests it with enough notice can play with us as far as possible. Furthermore, we encourage established gaming groups to periodically rotate or open spots."
   },
+  "cookies": {
+    "title": "Cookies",
+    "description": "We use Google Analytics to understand how the site is used. No data is sold to third parties.",
+    "accept": "Accept",
+    "reject": "Reject"
+  },
   "contact_page": {
     "title": "Contact",
     "subtitle": "Have a question? Write to us!",

@@ -131,6 +131,12 @@
     "open_tables_title": "Espai de taules obertes",
     "open_tables_text": "DarkStone Catalunya és un espai social obert on volem fomentar la participació veïnal i col·lectiva. Per aquest motiu, preguem que les activitats proposades estiguin, sempre que sigui possible, obertes a nous participants. L'equip de coordinació de DarkStone Catalunya vetllarà per mantenir sempre, com a mínim, una taula oberta a fi que tothom interessat i que ho sol·liciti amb prou antelació, pugui jugar amb nosaltres dins dels possibles. A més, animem als grups de joc establerts que periòdicament rotin o obrin places."
   },
+  "cookies": {
+    "title": "Cookies",
+    "description": "Usem Google Analytics per entendre com s'usa la web. Cap dada es ven a tercers.",
+    "accept": "Acceptar",
+    "reject": "Rebutjar"
+  },
   "contact_page": {
     "title": "Contacte",
     "subtitle": "Tens algun dubte? Escriu-nos!",

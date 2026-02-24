@@ -5,6 +5,9 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import '@/styles/globals.css';
 import SmoothScroll from "@/components/SmoothScroll";
+import CookieConsentProvider from "@/components/CookieConsentProvider";
+import CookieBanner from "@/components/CookieBanner";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 export const metadata: Metadata = {
   title: "Darkstone Catalunya — Associació de jocs de taula i rol",
@@ -53,7 +56,11 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <SmoothScroll>
-            {children}
+            <CookieConsentProvider>
+              {children}
+              <CookieBanner />
+              <GoogleAnalytics />
+            </CookieConsentProvider>
           </SmoothScroll>
         </NextIntlClientProvider>
       </body>
