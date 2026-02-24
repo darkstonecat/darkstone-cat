@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { motion } from "motion/react";
-import { FaInstagram, FaTelegram } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaTelegram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { useLenis } from "./SmoothScroll";
 
@@ -21,6 +21,11 @@ const SOCIALS = [
     href: "https://instagram.com/darkstone.cat",
     label: "Instagram",
     icon: FaInstagram,
+  },
+  {
+    href: "https://www.facebook.com/profile.php?id=61560270602862",
+    label: "Facebook",
+    icon: FaFacebook,
   },
   {
     href: "https://x.com/darkstonecat",
