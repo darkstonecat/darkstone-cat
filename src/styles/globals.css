@@ -33,6 +33,10 @@
 }
 
 @layer base {
+  html {
+    @apply relative;
+  }
+
   body {
     @apply antialiased;
   }

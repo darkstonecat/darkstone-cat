@@ -61,6 +61,7 @@ export default function Footer() {
                   alt="Darkstone Logo"
                   fill
                   className="object-cover"
+                  sizes="36px"
                 />
               </div>
               <span className="text-lg font-bold tracking-tight">

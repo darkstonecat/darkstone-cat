@@ -49,8 +49,9 @@ export default function PageIntro() {
               src="/images/darkstone_logo.png"
               alt="Darkstone Catalunya"
               fill
-              priority
+              loading="eager"
               className="object-contain"
+              sizes="256px"
             />
           </motion.div>
 

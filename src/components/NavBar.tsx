@@ -8,6 +8,13 @@ import { motion, AnimatePresence } from "motion/react";
 import { useLenis } from "./SmoothScroll";
 import LanguageSwitcher from "./LanguageSwitcher";
 
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 const NAV_LINKS = [
   { href: "/", key: "home" },
   { href: "/about", key: "about" },
@@ -101,8 +108,8 @@ export default function NavBar() {
         className="fixed top-0 left-0 right-0 z-50 transition-[backdrop-filter] duration-500"
         animate={{
           backgroundColor: scrolled
-            ? `color-mix(in srgb, ${theme.bg} 80%, transparent)`
-            : "transparent",
+            ? hexToRgba(theme.bg, 0.8)
+            : "rgba(0, 0, 0, 0)",
         }}
         transition={{ duration: 0.4 }}
         style={{
@@ -119,6 +126,7 @@ export default function NavBar() {
                 alt="Darkstone Logo"
                 fill
                 className="object-cover"
+                sizes="40px"
               />
             </div>
             <motion.span
@@ -153,6 +161,7 @@ export default function NavBar() {
                   <motion.div
                     layoutId="nav-indicator"
                     className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
+                    initial={{ backgroundColor: theme.text }}
                     animate={{ backgroundColor: theme.text }}
                     transition={{
                       type: "spring",
