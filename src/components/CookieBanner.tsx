@@ -17,7 +17,7 @@ export default function CookieBanner() {
           key="cookie-banner"
           role="dialog"
           aria-label={t('title')}
-          className="fixed bottom-6 right-6 z-50 w-[calc(100%-3rem)] max-w-[360px] overflow-hidden rounded-2xl border border-stone-custom/15 bg-brand-beige shadow-[0_8px_30px_rgba(0,0,0,0.6)] sm:w-auto"
+          className="fixed bottom-6 right-6 z-50 w-[calc(100%-3rem)] max-w-90 overflow-hidden rounded-2xl border border-stone-custom/15 bg-brand-beige shadow-[0_8px_30px_rgba(0,0,0,0.6)] sm:w-auto"
           initial={{ x: 40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 40, opacity: 0 }}
