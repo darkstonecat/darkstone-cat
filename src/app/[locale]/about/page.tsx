@@ -5,7 +5,8 @@ import ScrollToTop from "@/components/ScrollToTop";
 import AboutHero from "@/components/about/AboutHero";
 import AboutOrigin from "@/components/about/AboutOrigin";
 import AboutMissionValues from "@/components/about/AboutMissionValues";
-import BoardMembers from "@/components/about/BoardMembers";
+import AboutValues from "@/components/about/AboutValues";
+import SectionDivider from "@/components/home/SectionDivider";
 
 export const metadata: Metadata = {
   title: "Qui som — Darkstone Catalunya",
@@ -18,9 +19,10 @@ export default function AboutPage() {
     <main className="relative min-h-screen font-sans selection:bg-stone-300">
       <NavBar />
       <AboutHero />
+      <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="curve" flip />
       <AboutOrigin />
       <AboutMissionValues />
-      <BoardMembers />
+      <AboutValues />
       <Footer />
       <ScrollToTop />
     </main>
