@@ -37,7 +37,7 @@ const SECTION_THEMES: Record<string, { text: string; bg: string }> = {
 const SUBPAGE_THEMES: Record<string, { text: string; bg: string }> = {
   "/about": { text: "#FAFAF9", bg: "#1C1917" },
   "/pautes-de-conducta": { text: "#FAFAF9", bg: "#1C1917" },
-  "/contact": { text: "#1c1917", bg: "#EEE8DC" },
+  "/contact": { text: "#FAFAF9", bg: "#1C1917" },
 };
 
 export default function NavBar() {

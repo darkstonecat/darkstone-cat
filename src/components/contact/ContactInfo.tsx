@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { FaFacebook, FaInstagram, FaTelegram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { Mail, MapPin } from "lucide-react";
+import { Clock, Mail, MapPin } from "lucide-react";
 
 const SOCIALS = [
   { href: "https://instagram.com/darkstone.cat", label: "Instagram", icon: FaInstagram },
@@ -15,6 +15,7 @@ const SOCIALS = [
 
 export default function ContactInfo() {
   const t = useTranslations("contact_page");
+  const tSchedule = useTranslations("schedule");
 
   return (
     <motion.div
@@ -45,11 +46,28 @@ export default function ContactInfo() {
           <span className="text-sm font-medium">{t("location_title")}</span>
         </div>
         <p className="text-base font-medium text-stone-custom">
-          Centre Cívic Ca N&apos;Aurell
+          {t("location_name")}
         </p>
         <p className="text-sm text-stone-custom/60">
-          Plaça del Tint, 4 · 08224 Terrassa
+          {t("address_street")} · {t("address_city")}
         </p>
+        <div className="mt-4 flex items-start gap-2 text-sm">
+          <Clock className="mt-0.5 h-4 w-4 shrink-0 text-stone-custom/40" />
+          <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
+            <span className="font-medium text-stone-custom">{tSchedule("friday")}</span>
+            <span className="text-stone-custom/60">{tSchedule("friday_start")} – {tSchedule("friday_end")}</span>
+            <span className="font-medium text-stone-custom">{tSchedule("saturday")}</span>
+            <span className="text-stone-custom/60">{tSchedule("saturday_start")} – {tSchedule("saturday_end")}</span>
+          </div>
+        </div>
+        <a
+          href="https://maps.google.com/?q=Plaça+del+Tint,4,Terrassa"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-block text-sm font-medium text-brand-orange transition-opacity hover:opacity-80"
+        >
+          {t("maps_link")}
+        </a>
       </div>
 
       {/* Social links */}

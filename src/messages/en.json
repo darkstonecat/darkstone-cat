@@ -155,6 +155,10 @@
     "submit": "Send message",
     "email_us": "Or write to us directly at",
     "social_title": "Find us on social media",
-    "location_title": "Where we are"
+    "location_title": "Where we are",
+    "location_name": "Centre Cívic Ca N'Aurell",
+    "address_street": "Plaça del Tint, 4",
+    "address_city": "08224 Terrassa",
+    "maps_link": "View on Google Maps"
   }
 }

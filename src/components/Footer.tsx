@@ -14,6 +14,18 @@ const NAV_LINKS = [
   { href: "/contact", key: "contact" },
 ] as const;
 
+function LudoyaIcon({ size = 22 }: { size?: number }) {
+  return (
+    <Image
+      src="/images/icons/ludoya.svg"
+      alt=""
+      width={size}
+      height={size}
+      className="brightness-0 invert"
+    />
+  );
+}
+
 const SOCIALS = [
   {
     href: "https://instagram.com/darkstone.cat",
@@ -34,6 +46,11 @@ const SOCIALS = [
     href: "https://t.me/darkstonecat",
     label: "Telegram",
     icon: FaTelegram,
+  },
+  {
+    href: "https://app.ludoya.com/darkstonecat",
+    label: "Ludoya",
+    icon: LudoyaIcon,
   },
 ] as const;
 

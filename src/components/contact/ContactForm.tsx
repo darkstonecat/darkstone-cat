@@ -8,7 +8,7 @@ export default function ContactForm() {
 
   return (
     <motion.form
-      className="space-y-6"
+      className="space-y-6 md:col-span-2"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}

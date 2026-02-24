@@ -14,13 +14,13 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="relative min-h-screen font-sans selection:bg-stone-300">
+    <main className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
       <NavBar />
       <ContactHero />
 
       {/* Content */}
-      <section className="bg-brand-beige pb-20">
-        <div className="container mx-auto grid max-w-4xl gap-16 px-6 md:grid-cols-2">
+      <section className="flex-1 bg-brand-beige pb-20">
+        <div className="container mx-auto grid max-w-4xl gap-16 pt-16 px-6 md:grid-cols-3">
           <ContactForm />
           <ContactInfo />
         </div>
