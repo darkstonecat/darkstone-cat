@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import TextReveal from "@/components/TextReveal";
 
@@ -15,19 +15,32 @@ const CARDS = [
 
 function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activities">> }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scrollRange, setScrollRange] = useState(0);
+
+  useEffect(() => {
+    const measure = () => {
+      if (innerRef.current) {
+        setScrollRange(innerRef.current.scrollWidth - window.innerWidth);
+      }
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // 1 title slide (100vw) + 4 square cards (70vh) + 70% gaps (49vh each)
-  const x = useTransform(scrollYProgress, [0, 1], ["0vw", "-290vw"]);
+  const x = useTransform(scrollYProgress, [0, 1], [0, -scrollRange]);
 
   return (
     <div ref={containerRef} className="hidden md:block relative h-[400vh]">
       <div className="sticky top-0 flex h-screen items-center overflow-hidden">
         <motion.div
+          ref={innerRef}
           className="flex w-max items-center"
           style={{ x }}
         >
