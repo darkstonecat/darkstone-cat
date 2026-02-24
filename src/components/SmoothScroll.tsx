@@ -1,17 +1,40 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import Lenis from "lenis";
 
-const LenisContext = createContext<Lenis | null>(null);
+const LenisContext = createContext<{
+  subscribe: (cb: () => void) => () => void;
+  getSnapshot: () => Lenis | null;
+}>({
+  subscribe: () => () => {},
+  getSnapshot: () => null,
+});
 
-export function useLenis() {
-  return useContext(LenisContext);
+export function useLenis(): Lenis | null {
+  const store = useContext(LenisContext);
+  return useSyncExternalStore(store.subscribe, store.getSnapshot, () => null);
 }
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null);
-  const [lenis, setLenis] = useState<Lenis | null>(null);
+  const subscribersRef = useRef(new Set<() => void>());
+
+  const subscribe = useCallback((cb: () => void) => {
+    subscribersRef.current.add(cb);
+    return () => {
+      subscribersRef.current.delete(cb);
+    };
+  }, []);
+
+  const getSnapshot = useCallback(() => lenisRef.current, []);
 
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -27,7 +50,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     });
 
     lenisRef.current = instance;
-    setLenis(instance);
+    subscribersRef.current.forEach((cb) => cb());
 
     function raf(time: number) {
       instance.raf(time);
@@ -38,8 +61,13 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     return () => {
       instance.destroy();
+      lenisRef.current = null;
     };
   }, []);
 
-  return <LenisContext.Provider value={lenis}>{children}</LenisContext.Provider>;
+  return (
+    <LenisContext.Provider value={{ subscribe, getSnapshot }}>
+      {children}
+    </LenisContext.Provider>
+  );
 }

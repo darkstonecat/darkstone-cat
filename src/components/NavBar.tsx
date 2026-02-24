@@ -214,7 +214,7 @@ export default function NavBar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            className="fixed inset-0 z-[55] flex flex-col items-center justify-center bg-stone-custom"
+            className="fixed inset-0 z-55 flex flex-col items-center justify-center bg-stone-custom"
             initial={{ clipPath: "circle(0% at calc(100% - 40px) 28px)" }}
             animate={{ clipPath: "circle(150% at calc(100% - 40px) 28px)" }}
             exit={{ clipPath: "circle(0% at calc(100% - 40px) 28px)" }}
