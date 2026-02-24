@@ -1,22 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { Link } from "@/i18n/routing";
+import { Link, usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useLenis } from "./SmoothScroll";
 import LanguageSwitcher from "./LanguageSwitcher";
 
-const NAV_SECTIONS = [
-  { id: "about", key: "association" },
-  { id: "activities", key: "activities" },
-  { id: "schedule", key: "schedule" },
-  { id: "join-us", key: "join" },
-  { id: "location", key: "location" },
+const NAV_LINKS = [
+  { href: "/", key: "home" },
+  { href: "/about", key: "about" },
+  { href: "/pautes-de-conducta", key: "conduct" },
+  { href: "/contact", key: "contact" },
 ] as const;
 
-// Maps sections to their color scheme (must match section bg/text classes)
+// Theme for the home page scroll sections (backdrop adaptation)
+const HOME_SECTION_IDS = ["about", "activities", "schedule", "join-us", "location"] as const;
 const SECTION_THEMES: Record<string, { text: string; bg: string }> = {
   "": { text: "#1c1917", bg: "#EEE8DC" },
   about: { text: "#FAFAF9", bg: "#1C1917" },
@@ -26,49 +26,58 @@ const SECTION_THEMES: Record<string, { text: string; bg: string }> = {
   location: { text: "#FAFAF9", bg: "#1C1917" },
 };
 
+// Fixed themes for subpages
+const SUBPAGE_THEMES: Record<string, { text: string; bg: string }> = {
+  "/about": { text: "#FAFAF9", bg: "#1C1917" },
+  "/pautes-de-conducta": { text: "#FAFAF9", bg: "#1C1917" },
+  "/contact": { text: "#1c1917", bg: "#EEE8DC" },
+};
+
 export default function NavBar() {
   const t = useTranslations("nav");
+  const pathname = usePathname();
   const lenis = useLenis();
+  const isHomePage = pathname === "/";
 
   const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState("");
+  const [homeActiveSection, setHomeActiveSection] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const theme = useMemo(
-    () => SECTION_THEMES[activeSection] ?? SECTION_THEMES[""],
-    [activeSection]
-  );
+  // Determine theme based on page context
+  const theme = useMemo(() => {
+    if (isHomePage) {
+      return SECTION_THEMES[homeActiveSection] ?? SECTION_THEMES[""];
+    }
+    return SUBPAGE_THEMES[pathname] ?? SECTION_THEMES[""];
+  }, [isHomePage, homeActiveSection, pathname]);
 
-  // Track scroll position for backdrop and active section
+  // Track scroll for backdrop blur + home page section detection
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
 
-      // Determine active section
-      const sections = NAV_SECTIONS.map((s) => ({
-        ...s,
-        el: document.getElementById(s.id),
-      }));
+      if (!isHomePage) return;
 
       const viewportCenter = window.innerHeight / 2;
       let current = "";
 
-      for (const section of sections) {
-        if (!section.el) continue;
-        const rect = section.el.getBoundingClientRect();
+      for (const id of HOME_SECTION_IDS) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
         if (rect.top <= viewportCenter && rect.bottom >= viewportCenter) {
-          current = section.id;
+          current = id;
           break;
         }
       }
 
-      setActiveSection(current);
+      setHomeActiveSection(current);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isHomePage]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -84,25 +93,7 @@ export default function NavBar() {
     };
   }, [mobileOpen, lenis]);
 
-  const scrollToSection = useCallback(
-    (id: string) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-
-      // Close menu first and restart Lenis before scrolling
-      setMobileOpen(false);
-
-      requestAnimationFrame(() => {
-        if (lenis) {
-          lenis.start();
-          lenis.scrollTo(el, { offset: -80 });
-        } else {
-          el.scrollIntoView({ behavior: "smooth" });
-        }
-      });
-    },
-    [lenis]
-  );
+  const isActive = (href: string) => pathname === href;
 
   return (
     <>
@@ -142,20 +133,23 @@ export default function NavBar() {
 
           {/* Desktop nav links */}
           <div className="hidden items-center gap-1 md:flex">
-            {NAV_SECTIONS.map((section) => (
-              <motion.button
-                key={section.id}
-                onClick={() => scrollToSection(section.id)}
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
                 className="relative px-3 py-2 text-sm font-medium transition-opacity duration-200"
-                animate={{ color: theme.text }}
-                transition={{ duration: 0.4 }}
-                style={{
-                  opacity: activeSection === section.id ? 1 : 0.55,
-                }}
               >
-                {t(section.key)}
+                <motion.span
+                  animate={{ color: theme.text }}
+                  transition={{ duration: 0.4 }}
+                  style={{
+                    opacity: isActive(link.href) ? 1 : 0.55,
+                  }}
+                >
+                  {t(link.key)}
+                </motion.span>
                 {/* Active indicator line */}
-                {activeSection === section.id && (
+                {isActive(link.href) && (
                   <motion.div
                     layoutId="nav-indicator"
                     className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
@@ -167,7 +161,7 @@ export default function NavBar() {
                     }}
                   />
                 )}
-              </motion.button>
+              </Link>
             ))}
 
             <div className="ml-4 pl-4 border-l border-current/15">
@@ -239,17 +233,21 @@ export default function NavBar() {
             </button>
 
             <nav className="flex flex-col items-center gap-6">
-              {NAV_SECTIONS.map((section, i) => (
-                <motion.button
-                  key={section.id}
-                  onClick={() => scrollToSection(section.id)}
-                  className="text-3xl font-bold tracking-tight text-brand-white/90 transition-colors hover:text-brand-white"
+              {NAV_LINKS.map((link, i) => (
+                <motion.div
+                  key={link.href}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 + i * 0.05, duration: 0.4 }}
                 >
-                  {t(section.key)}
-                </motion.button>
+                  <Link
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="text-3xl font-bold tracking-tight text-brand-white/90 transition-colors hover:text-brand-white"
+                  >
+                    {t(link.key)}
+                  </Link>
+                </motion.div>
               ))}
 
               <motion.div

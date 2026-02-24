@@ -1,19 +1,17 @@
 "use client";
 
 import Image from "next/image";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { useCallback } from "react";
 import { motion } from "motion/react";
 import { FaFacebook, FaInstagram, FaTelegram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { useLenis } from "./SmoothScroll";
 
-const NAV_SECTIONS = [
-  { id: "about", key: "association" },
-  { id: "activities", key: "activities" },
-  { id: "schedule", key: "schedule" },
-  { id: "join-us", key: "join" },
-  { id: "location", key: "location" },
+const NAV_LINKS = [
+  { href: "/", key: "home" },
+  { href: "/about", key: "about" },
+  { href: "/pautes-de-conducta", key: "conduct" },
+  { href: "/contact", key: "contact" },
 ] as const;
 
 const SOCIALS = [
@@ -43,20 +41,6 @@ export default function Footer() {
   const t = useTranslations("footer");
   const tNav = useTranslations("nav");
   const currentYear = new Date().getFullYear();
-  const lenis = useLenis();
-
-  const scrollToSection = useCallback(
-    (id: string) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      if (lenis) {
-        lenis.scrollTo(el, { offset: -80 });
-      } else {
-        el.scrollIntoView({ behavior: "smooth" });
-      }
-    },
-    [lenis]
-  );
 
   return (
     <footer className="bg-stone-custom pt-16 pb-10 text-stone-white-hover">
@@ -96,14 +80,14 @@ export default function Footer() {
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            {NAV_SECTIONS.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => scrollToSection(section.id)}
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
                 className="text-sm opacity-50 transition-opacity duration-200 hover:opacity-100"
               >
-                {tNav(section.key)}
-              </button>
+                {tNav(link.key)}
+              </Link>
             ))}
           </motion.nav>
 

@@ -1,15 +1,15 @@
 import NavBar from "@/components/NavBar";
 import ScrollProgress from "@/components/ScrollProgress";
-import PageIntro from "@/components/PageIntro";
-import Hero from "@/components/Hero";
-import About from "@/components/About";
-import Activities from "@/components/Activities";
-import Schedule from "@/components/Schedule";
-import JoinUs from "@/components/JoinUs";
-import Location from "@/components/Location";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
-import SectionDivider from "@/components/SectionDivider";
+import PageIntro from "@/components/home/PageIntro";
+import Hero from "@/components/home/Hero";
+import About from "@/components/home/About";
+import Activities from "@/components/home/Activities";
+import Schedule from "@/components/home/Schedule";
+import JoinUs from "@/components/home/JoinUs";
+import Location from "@/components/home/Location";
+import SectionDivider from "@/components/home/SectionDivider";
 
 export default function HomePage() {
   return (
