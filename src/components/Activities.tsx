@@ -36,16 +36,21 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
     offset: ["start start", "end end"],
   });
 
+  const { scrollYProgress: meepleProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end end"],
+  });
+
   const x = useTransform(scrollYProgress, [0, 1], [0, -scrollRange]);
-  const meepleX = useTransform(scrollYProgress, [0, 1], [0, -viewportWidth * 1.2]);
-  const meepleRotate = useTransform(scrollYProgress, [0, 1], [0, 360]);
-  const meepleScale = useTransform(scrollYProgress, [0, 1], [1, 0.35]);
+  const meepleX = useTransform(meepleProgress, [0, 1], [0, viewportWidth * 1.2]);
+  const meepleRotate = useTransform(meepleProgress, [0, 1], [0, 360]);
+  const meepleScale = useTransform(meepleProgress, [0, 1], [1, 0.2]);
 
   return (
     <div ref={containerRef} className="hidden md:block relative h-[400vh]">
       <div className="sticky top-0 flex h-screen items-center overflow-hidden">
         <motion.div
-          className="pointer-events-none absolute right-6 bottom-[15%] z-0 h-[60vh]"
+          className="pointer-events-none absolute left-6 bottom-[15%] z-0 h-[85vh]"
           aria-hidden="true"
           style={{ x: meepleX }}
         >
@@ -143,14 +148,14 @@ function MobileActivities({ t }: { t: ReturnType<typeof useTranslations<"activit
     offset: ["start end", "end start"],
   });
 
-  const meepleX = useTransform(scrollYProgress, [0, 1], [0, -viewportWidth * 1.2]);
+  const meepleX = useTransform(scrollYProgress, [0, 1], [0, viewportWidth * 1.2]);
   const meepleRotate = useTransform(scrollYProgress, [0, 1], [0, 360]);
-  const meepleScale = useTransform(scrollYProgress, [0, 1], [1, 0.35]);
+  const meepleScale = useTransform(scrollYProgress, [0, 1], [1, 0.2]);
 
   return (
     <div ref={containerRef} className="relative flex flex-col gap-5 px-6 py-16 md:hidden">
       <motion.div
-        className="pointer-events-none absolute right-4 bottom-[20%] z-0 h-[60vh]"
+        className="pointer-events-none absolute left-4 bottom-[20%] z-0 h-[65vh]"
         aria-hidden="true"
         style={{ x: meepleX }}
       >
