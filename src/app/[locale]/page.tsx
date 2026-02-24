@@ -18,11 +18,15 @@ export default function HomePage() {
         <ScrollProgress />
         <NavBar />
         <Hero />
-        <SectionDivider topColor="#EEE8DC" bottomColor="#1C1917" variant="wave" overlap animated />
-        <About />
-        <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="wave" overlap animated />
-        <Activities />
-        <SectionDivider topColor="#EEE8DC" bottomColor="#1C1917" variant="wave" overlap animated />
+        <div className="relative z-10 -mt-[40vh]">
+          <SectionDivider topColor="transparent" bottomColor="#1C1917" variant="wave" animated />
+          <About />
+        </div>
+        <div className="relative z-20 -mt-[15vh]">
+          <SectionDivider topColor="transparent" bottomColor="#EEE8DC" variant="wave" animated />
+          <Activities />
+        </div>
+        <SectionDivider topColor="#EEE8DC" bottomColor="#1C1917" variant="wave" animated />
         <Schedule />
         <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="curve" flip />
         <JoinUs />

@@ -45,7 +45,7 @@ export default function SectionDivider({
   return (
     <div
       ref={ref}
-      className={`relative w-full overflow-hidden ${overlap ? "-mt-16 -mb-16 z-20 md:-mt-24 md:-mb-24 lg:-mt-32 lg:-mb-32" : "-mt-px"}`}
+      className={`relative w-full overflow-hidden z-20`}
       style={{ lineHeight: 0 }}
       aria-hidden="true"
     >
