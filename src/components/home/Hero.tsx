@@ -117,8 +117,8 @@ export default function Hero() {
           >
             <MagneticButton
               as="a"
-              href="#activities"
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-stone-900 px-8 py-3 font-medium text-stone-50 transition-all duration-300 hover:bg-stone-800 hover:shadow-lg hover:shadow-stone-500/30"
+              href="#join-us"
+              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105"
             >
               <span className="mr-2">{t("cta")}</span>
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
