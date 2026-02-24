@@ -81,7 +81,7 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
                   className="object-cover"
                   sizes="70vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
                 <span className="absolute top-5 right-5 font-mono text-xs tracking-widest text-white/40">
                   {String(i + 1).padStart(2, "0")} /{" "}
@@ -92,13 +92,16 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
                   <h3 className="mb-3 text-4xl font-black leading-tight text-white">
                     {t(`items.${card.id}.title`)}
                   </h3>
-                  <p className="max-w-[380px] text-base leading-relaxed text-white/75">
+                  <p className="max-w-95 text-base leading-relaxed text-white/75">
                     {t(`items.${card.id}.description`)}
                   </p>
                 </div>
               </div>
             </motion.article>
           ))}
+
+          {/* Trailing spacer so the last card ends up ~centered */}
+          <div className="shrink-0" style={{ width: 'calc(50vw - 35vh)' }} />
         </motion.div>
       </div>
     </div>
@@ -134,7 +137,7 @@ function MobileActivities({ t }: { t: ReturnType<typeof useTranslations<"activit
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.5, delay: i * 0.08 }}
         >
-          <div className="relative aspect-[4/5]">
+          <div className="relative aspect-4/5">
             <Image
               src={card.image}
               alt={t(`items.${card.id}.title`)}
@@ -142,7 +145,7 @@ function MobileActivities({ t }: { t: ReturnType<typeof useTranslations<"activit
               className="object-cover"
               sizes="100vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
             <span className="absolute top-4 right-4 font-mono text-xs tracking-widest text-white/40">
               {String(i + 1).padStart(2, "0")} /{" "}
