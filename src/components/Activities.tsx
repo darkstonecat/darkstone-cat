@@ -91,7 +91,7 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
           {CARDS.map((card, i) => (
             <motion.article
               key={card.id}
-              className="relative w-[70vh] shrink-0 overflow-hidden rounded-3xl ml-[49vh] first:ml-[8vw]"
+              className={`relative w-[70vh] shrink-0 overflow-hidden rounded-3xl ${i === 0 ? "-ml-[21vh]" : "ml-[8vh]"}`}
               initial={{ scale: 0 }}
               whileInView={{ scale: 1 }}
               viewport={{ once: true, amount: 0.5 }}
@@ -125,7 +125,7 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
           ))}
 
           {/* Trailing spacer so the last card ends up ~centered */}
-          <div className="shrink-0" style={{ width: 'calc(50vw - 35vh)' }} />
+          <div className="shrink-0" style={{ width: '20vw' }} />
         </motion.div>
       </div>
     </div>
