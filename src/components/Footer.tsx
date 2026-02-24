@@ -60,9 +60,6 @@ export default function Footer() {
 
   return (
     <footer className="bg-stone-custom pt-16 pb-10 text-stone-white-hover">
-      {/* Gradient divider */}
-      <div className="mx-auto mb-16 h-px w-full max-w-5xl bg-gradient-to-r from-transparent via-brand-red/30 to-transparent" />
-
       <div className="container mx-auto px-6">
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-12 md:grid-cols-3">
           {/* Logo + tagline */}

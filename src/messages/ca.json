@@ -44,12 +44,18 @@
     }
   },
   "location": {
-    "title": "On som",
-    "address_title": "ADREÇA",
-    "address": "Plaça del Tint, 4, 08224 Terrassa, Barcelona",
-    "hours_title": "HORARI",
-    "hours": "Divendres de 16:00 a 20:30 i Dissabtes de 10:00 a 13:30",
-    "map": "Mapa",
+    "title": "On som?",
+    "centre_name": "Casal Cívic Ca N'Aurell",
+    "centre_description": "Nau industrial rehabilitada · Plaça del Tint, 4",
+    "photo_alt": "Interior del Casal Cívic Ca N'Aurell — nau industrial rehabilitada",
+    "address": "Plaça del Tint, 4 · 08224 Terrassa",
+    "hours_title": "Horari",
+    "transport_title": "Com arribar-hi",
+    "walk_time": "{min} min a peu",
+    "rodalies_connection": "connexió Rodalies",
+    "bus_nearest_stop": "Parada propera",
+    "bus_multiple_lines": "Múltiples línies",
+    "map": "Mapa de Darkstone Catalunya",
     "cta": "Com arribar-hi"
   },
   "schedule": {

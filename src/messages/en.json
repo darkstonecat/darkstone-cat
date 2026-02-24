@@ -45,11 +45,17 @@
   },
   "location": {
     "title": "Where are we?",
-    "address_title": "ADDRESS",
-    "address": "Example Street, 123, Barcelona (Example)",
-    "hours_title": "OPEN HOURS",
-    "hours": "Fridays 16:00 to 20:30 and Saturdays 10:00 to 13:30",
-    "map": "Map",
+    "centre_name": "Casal Cívic Ca N'Aurell",
+    "centre_description": "Rehabilitated industrial warehouse · Plaça del Tint, 4",
+    "photo_alt": "Interior of Casal Cívic Ca N'Aurell — rehabilitated industrial warehouse",
+    "address": "Plaça del Tint, 4 · 08224 Terrassa",
+    "hours_title": "Hours",
+    "transport_title": "How to get here",
+    "walk_time": "{min} min walk",
+    "rodalies_connection": "Rodalies connection",
+    "bus_nearest_stop": "Nearest stop",
+    "bus_multiple_lines": "Multiple lines",
+    "map": "Darkstone Catalunya map",
     "cta": "Get directions"
   },
   "schedule": {

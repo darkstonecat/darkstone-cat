@@ -30,7 +30,6 @@ export default function HomePage() {
         <Schedule />
         <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="curve" flip />
         <JoinUs />
-        <SectionDivider topColor="#EEE8DC" bottomColor="#1C1917" variant="flat" />
         <Location />
         <Footer />
         <ScrollToTop />

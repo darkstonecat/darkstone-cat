@@ -44,12 +44,18 @@
     }
   },
   "location": {
-    "title": "Dónde estamos",
-    "address_title": "DIRECCIÓN",
-    "address": "Calle del Ejemplo, 123, Barcelona (Ejemplo)",
-    "hours_title": "HORARIO",
-    "hours": "Viernes de 16:00 a 20:30 y Sábados de 10:00 a 13:30",
-    "map": "Mapa",
+    "title": "¿Dónde estamos?",
+    "centre_name": "Casal Cívic Ca N'Aurell",
+    "centre_description": "Nave industrial rehabilitada · Plaça del Tint, 4",
+    "photo_alt": "Interior del Casal Cívic Ca N'Aurell — nave industrial rehabilitada",
+    "address": "Plaça del Tint, 4 · 08224 Terrassa",
+    "hours_title": "Horario",
+    "transport_title": "Cómo llegar",
+    "walk_time": "{min} min a pie",
+    "rodalies_connection": "conexión Rodalies",
+    "bus_nearest_stop": "Parada cercana",
+    "bus_multiple_lines": "Múltiples líneas",
+    "map": "Mapa de Darkstone Catalunya",
     "cta": "Cómo llegar"
   },
   "schedule": {
