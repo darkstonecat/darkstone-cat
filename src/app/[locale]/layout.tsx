@@ -36,6 +36,32 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Darkstone Catalunya",
+  alternateName: "Associació Darkstone Catalunya",
+  url: "https://darkstone.cat",
+  logo: "https://darkstone.cat/images/darkstone_logo.png",
+  description:
+    "Associació sense ànim de lucre dedicada als jocs de taula i jocs de rol a Terrassa.",
+  foundingDate: "2024-09-14",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Plaça del Tint, 4",
+    addressLocality: "Terrassa",
+    addressRegion: "Barcelona",
+    postalCode: "08224",
+    addressCountry: "ES",
+  },
+  sameAs: [
+    "https://instagram.com/darkstone.cat",
+    "https://x.com/darkstonecat",
+    "https://t.me/darkstonecat",
+    "https://app.ludoya.com/darkstonecat",
+  ],
+};
+
 export default async function LocaleLayout({
   children,
   params
@@ -54,6 +80,10 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <NextIntlClientProvider messages={messages}>
           <SmoothScroll>
             <CookieConsentProvider>

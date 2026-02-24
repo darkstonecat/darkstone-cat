@@ -2,17 +2,21 @@
 
 ## 🚀 Abans de publicar
 
-- [ ] Passar Lighthouse al 100% en totes les categories (Performance, Accessibility, Best Practices, SEO)
-- [ ] Verificar que el `sitemap.xml` és generat correctament (Next.js ho pot fer automàticament)
-- [ ] Verificar que el `robots.txt` és correcte
-- [ ] Afegir meta tags bàsiques a totes les pàgines (title, description, og:image...)
-- [ ] Comprovar que el web és correcte en mòbil (responsive)
+### Tècnic (codi)
+- [x] Afegir meta tags bàsiques a totes les pàgines (title, description, og:image, twitter card) — `src/app/[locale]/layout.tsx` + pàgines individuals
+- [x] Comprovar que el web és correcte en mòbil (responsive) — Activities té variants desktop/mobile
+- [x] Integrar Google Analytics 4 a `layout.tsx` usant `<Script>` de Next.js — `src/components/GoogleAnalytics.tsx`
+- [x] Gestionar el Measurement ID via variable d'entorn `NEXT_PUBLIC_GA_MEASUREMENT_ID` — `.env.local`
+- [x] Afegir un banner de cookies RGPD — `src/components/CookieBanner.tsx` + `CookieConsentProvider.tsx`
+- [x] Contrast de colors WCAG AA — brand-orange ajustat a `#C05600`
+- [x] Generar `sitemap.xml` — `src/app/sitemap.ts` (4 pàgines × 3 locales, amb alternates hreflang)
+- [x] Generar `robots.txt` — `src/app/robots.ts`
+- [x] Afegir `og:image` generada dinàmicament — `src/app/[locale]/opengraph-image.tsx` (logo + branding)
+- [x] Afegir dades estructurades JSON-LD (Schema.org `Organization`) a `layout.tsx`
 
-### Google Analytics 4 (preparació prèvia)
+### Verificació manual
+- [ ] Passar Lighthouse al 100% en totes les categories (Performance, Accessibility, Best Practices, SEO)
 - [ ] Crear compte a [analytics.google.com](https://analytics.google.com) i obtenir el Measurement ID (`G-XXXXXXXXXX`)
-- [ ] Integrar el codi a `app/layout.tsx` usant el component `<Script>` de Next.js
-- [ ] Gestionar el Measurement ID via variable d'entorn `NEXT_PUBLIC_GA_MEASUREMENT_ID` (buida en dev, activa en producció)
-- [ ] Afegir un banner de cookies RGPD (obligatori per a usuaris europeus) — llibreries recomanades: `cookie-consent`
 
 ## 📊 Just després de publicar
 
@@ -24,13 +28,13 @@
 - [ ] Monitoritzar les primeres setmanes: impressions, clics i posicions per paraules clau com "associació jocs de taula Terrassa"
 
 ### Google Analytics 4 (activació)
-- [ ] Afegir el Measurement ID real a les variables d'entorn de producció
-- [ ] Verificar que funciona a la vista "Temps real" de GA4 (obrir la web i comprovar que apareix una visita)
+- [ ] Afegir el Measurement ID real a les variables d'entorn de producció (Vercel)
+- [ ] Verificar que funciona a la vista "Temps real" de GA4
 - [ ] Configurar esdeveniments bàsics: clics a botó de contacte, visites a pàgines clau...
 
 ### Google Rich Results
-- [ ] Afegir dades estructurades (Schema.org) per a l'associació: `Organization`, `Event` si hi ha events...
-- [ ] Validar amb [Rich Results Test](https://search.google.com/test/rich-results)
+- [ ] Validar dades estructurades amb [Rich Results Test](https://search.google.com/test/rich-results)
+- [ ] Considerar afegir schema `Event` si es publiquen esdeveniments (Egara Juga, etc.)
 
 ## 🔍 SEO continu (un cop publicat)
 
@@ -41,8 +45,24 @@
 ## 💡 Notes
 
 - **Lighthouse** → SEO tècnic i rendiment. Executar amb `lighthouse https://url --output json`
-- **Google Search Console** → Dades reals de Google. Requereix tràfic per tenir dades útils, pot trigar setmanes.
+- **Google Search Console** → Dades reals de Google. Requereix tràfic, pot trigar setmanes.
 - **Rich Results Test** → Valida dades estructurades (Schema.org)
-- **Screaming Frog** → Auditoria de rastreig i indexació
-- **Google Analytics 4** → Analítica de comportament d'usuaris (què fan dins la web). Diferent de GSC (que és com et troben). Preparar el codi abans de publicar, activar quan el domini estigui actiu.
-- Per ara (web no publicat) no cal configurar GSC ni GA4. Tornar a aquest fitxer quan el domini estigui actiu.
+- **Google Analytics 4** → Analítica de comportament d'usuaris. Diferent de GSC (que és com et troben).
+- El codi de GA4 ja està integrat i condicionat al consentiment de cookies. Només cal afegir el Measurement ID real a Vercel.
+
+## 📋 Resum d'estat
+
+| Element | Estat | Detall |
+|---------|-------|--------|
+| Meta tags (title, description, og, twitter) | ✅ Fet | Layout + pàgines individuals |
+| Responsive / mòbil | ✅ Fet | Variants desktop/mobile |
+| Google Analytics 4 (codi) | ✅ Fet | Component + env var |
+| Cookie banner RGPD | ✅ Fet | Amb consentiment i traduccions |
+| Contrast WCAG AA | ✅ Fet | brand-orange ajustat |
+| `sitemap.xml` | ✅ Fet | `src/app/sitemap.ts` — 4 pàgines × 3 locales |
+| `robots.txt` | ✅ Fet | `src/app/robots.ts` |
+| `og:image` dinàmica | ✅ Fet | `src/app/[locale]/opengraph-image.tsx` |
+| JSON-LD (Schema.org) | ✅ Fet | `Organization` a layout.tsx |
+| Lighthouse 100% | ⚠️ No verificat | Cal executar auditoria |
+| GA4 Measurement ID | ⏳ Post-publicació | Afegir a Vercel env vars |
+| Google Search Console | ⏳ Post-publicació | Quan el domini estigui actiu |
