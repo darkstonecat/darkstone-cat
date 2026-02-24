@@ -82,9 +82,11 @@ export default function JoinUs() {
             href="https://t.me/darkstonecat"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-5 rounded-2xl bg-[#229ED9] p-8 text-center text-white transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] hover:shadow-xl hover:shadow-[#229ED9]/20"
+            className="group flex flex-col items-center gap-5 rounded-2xl bg-[#229ED9] p-8 text-center text-white transition-shadow duration-300 hover:shadow-xl hover:shadow-[#229ED9]/20"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.98 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.5, delay: 0.15 }}
           >
@@ -106,9 +108,11 @@ export default function JoinUs() {
             href="https://app.ludoya.com/darkstonecat?inviteCode=link&lang=ca"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-5 rounded-2xl bg-stone-800 p-8 text-center text-stone-100 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] hover:shadow-xl hover:shadow-stone-800/20"
+            className="group flex flex-col items-center gap-5 rounded-2xl bg-stone-800 p-8 text-center text-stone-100 transition-shadow duration-300 hover:shadow-xl hover:shadow-stone-800/20"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.98 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.5, delay: 0.25 }}
           >
