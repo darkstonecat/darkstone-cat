@@ -77,7 +77,7 @@ export default function Location() {
 
           {/* Map column — 60% */}
           <motion.div
-            className="relative h-[60vh] overflow-hidden rounded-2xl lg:h-auto lg:min-h-[500px] lg:w-3/5"
+            className="relative h-[60vh] overflow-hidden rounded-2xl lg:h-auto lg:min-h-125 lg:w-3/5"
             initial={{ opacity: 0, scale: 0.97 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}

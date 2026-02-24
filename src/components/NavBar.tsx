@@ -158,7 +158,7 @@ export default function NavBar() {
                 {activeSection === section.id && (
                   <motion.div
                     layoutId="nav-indicator"
-                    className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full"
+                    className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
                     animate={{ backgroundColor: theme.text }}
                     transition={{
                       type: "spring",
@@ -178,12 +178,12 @@ export default function NavBar() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="relative z-[60] flex h-10 w-10 items-center justify-center md:hidden"
+            className="relative z-60 flex h-10 w-10 items-center justify-center md:hidden"
             aria-label={t("menu_button")}
           >
-            <div className="flex w-6 flex-col items-end gap-[6px]">
+            <div className="flex w-6 flex-col items-end gap-1.5">
               <motion.span
-                className="block h-[2px] rounded-full"
+                className="block h-0.5 rounded-full"
                 style={{ backgroundColor: mobileOpen ? "#FAFAF9" : theme.text }}
                 animate={{
                   width: mobileOpen ? 24 : 24,
@@ -193,7 +193,7 @@ export default function NavBar() {
                 transition={{ duration: 0.3 }}
               />
               <motion.span
-                className="block h-[2px] rounded-full"
+                className="block h-0.5 rounded-full"
                 style={{ backgroundColor: mobileOpen ? "#FAFAF9" : theme.text }}
                 animate={{
                   width: mobileOpen ? 0 : 16,
@@ -202,7 +202,7 @@ export default function NavBar() {
                 transition={{ duration: 0.2 }}
               />
               <motion.span
-                className="block h-[2px] rounded-full"
+                className="block h-0.5 rounded-full"
                 style={{ backgroundColor: mobileOpen ? "#FAFAF9" : theme.text }}
                 animate={{
                   width: mobileOpen ? 24 : 20,

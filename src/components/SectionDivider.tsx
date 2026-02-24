@@ -30,7 +30,6 @@ export default function SectionDivider({
   bottomColor,
   variant = "wave",
   flip = false,
-  overlap = false,
   animated = false,
 }: SectionDividerProps) {
   const ref = useRef<HTMLDivElement>(null);
