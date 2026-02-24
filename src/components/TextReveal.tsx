@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
+import { useRef } from "react";
+import { motion, useInView } from "motion/react";
 
 interface TextRevealProps {
   text: string;
@@ -15,17 +16,18 @@ export default function TextReveal({
   as: Tag = "h2",
   delay = 0,
 }: TextRevealProps) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
   const words = text.split(" ");
 
   return (
-    <Tag className={className}>
+    <Tag ref={ref} className={className}>
       {words.map((word, i) => (
         <span key={i} className="inline-block overflow-hidden">
           <motion.span
             className="inline-block"
             initial={{ y: "100%" }}
-            whileInView={{ y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
+            animate={isInView ? { y: 0 } : { y: "100%" }}
             transition={{
               duration: 0.5,
               delay: delay + i * 0.04,
