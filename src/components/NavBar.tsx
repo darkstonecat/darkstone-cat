@@ -19,8 +19,8 @@ const NAV_SECTIONS = [
 // Maps sections to their color scheme (must match section bg/text classes)
 const SECTION_THEMES: Record<string, { text: string; bg: string }> = {
   "": { text: "#1c1917", bg: "#EEE8DC" },
-  about: { text: "#1c1917", bg: "#EEE8DC" },
-  activities: { text: "#FAFAF9", bg: "#1C1917" },
+  about: { text: "#FAFAF9", bg: "#1C1917" },
+  activities: { text: "#1c1917", bg: "#EEE8DC" },
   schedule: { text: "#FAFAF9", bg: "#1C1917" },
   "join-us": { text: "#1c1917", bg: "#EEE8DC" },
   location: { text: "#FAFAF9", bg: "#1C1917" },
