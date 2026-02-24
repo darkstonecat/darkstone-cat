@@ -135,7 +135,7 @@ export default function NavBar() {
               transition={{ duration: 0.4 }}
             >
               Darkstone
-              <span className="font-light opacity-50">.cat</span>
+              <span className="font-light opacity-65">.cat</span>
             </motion.span>
           </Link>
 

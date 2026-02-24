@@ -118,7 +118,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <p className="mt-14 text-center text-xs opacity-30">
+        <p className="mt-14 text-center text-xs opacity-50">
           &copy; {currentYear} Darkstone Catalunya. {t("rights")}
         </p>
       </div>
