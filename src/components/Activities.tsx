@@ -43,14 +43,14 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
 
   const x = useTransform(scrollYProgress, [0, 1], [0, -scrollRange]);
   const meepleX = useTransform(meepleProgress, [0, 1], [0, viewportWidth * 1.2]);
-  const meepleRotate = useTransform(meepleProgress, [0, 1], [0, 360]);
+  const meepleRotate = useTransform(meepleProgress, [0, 1], [-45, 360]);
   const meepleScale = useTransform(meepleProgress, [0, 1], [1, 0.2]);
 
   return (
     <div ref={containerRef} className="hidden md:block relative h-[400vh]">
       <div className="sticky top-0 flex h-screen items-center overflow-hidden">
         <motion.div
-          className="pointer-events-none absolute left-6 bottom-[15%] z-0 h-[85vh]"
+          className="pointer-events-none absolute left-[-25vw] bottom-[15%] z-0 h-[65vh]"
           aria-hidden="true"
           style={{ x: meepleX }}
         >
@@ -133,41 +133,8 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
 }
 
 function MobileActivities({ t }: { t: ReturnType<typeof useTranslations<"activities">> }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [viewportWidth, setViewportWidth] = useState(0);
-
-  useEffect(() => {
-    const measure = () => setViewportWidth(window.innerWidth);
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  });
-
-  const meepleX = useTransform(scrollYProgress, [0, 1], [0, viewportWidth * 1.2]);
-  const meepleRotate = useTransform(scrollYProgress, [0, 1], [0, 360]);
-  const meepleScale = useTransform(scrollYProgress, [0, 1], [1, 0.2]);
-
   return (
-    <div ref={containerRef} className="relative flex flex-col gap-5 px-6 py-16 md:hidden">
-      <motion.div
-        className="pointer-events-none absolute left-4 bottom-[20%] z-0 h-[65vh]"
-        aria-hidden="true"
-        style={{ x: meepleX }}
-      >
-        <motion.div className="h-full origin-bottom" style={{ scale: meepleScale }}>
-          <motion.img
-            src="/images/icons/meeple.svg"
-            alt=""
-            className="h-full w-auto opacity-[0.07]"
-            style={{ rotate: meepleRotate }}
-          />
-        </motion.div>
-      </motion.div>
+    <div className="flex flex-col gap-5 px-6 py-16 md:hidden">
       {/* Header */}
       <motion.div
         className="flex flex-col items-center gap-1 pb-4 text-center"
