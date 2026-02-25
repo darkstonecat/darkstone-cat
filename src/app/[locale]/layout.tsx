@@ -7,6 +7,8 @@ import '@/styles/globals.css';
 import SmoothScroll from "@/components/SmoothScroll";
 import CookieConsentProvider from "@/components/CookieConsentProvider";
 import CookieBanner from "@/components/CookieBanner";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 export const metadata: Metadata = {
@@ -90,6 +92,8 @@ export default async function LocaleLayout({
               {children}
               <CookieBanner />
               <GoogleAnalytics />
+              <Analytics />
+              <SpeedInsights />
             </CookieConsentProvider>
           </SmoothScroll>
         </NextIntlClientProvider>
