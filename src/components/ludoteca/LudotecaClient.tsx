@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { SlidersHorizontal, ArrowDownUp, LayoutGrid, List } from "lucide-react";
 import type { BggGame } from "@/lib/bgg";
-import FilterBar from "./FilterBar";
+import FilterSidebar from "./FilterSidebar";
 import GameGrid from "./GameGrid";
 import GameDetailModal from "./GameDetailModal";
 import Pagination from "./Pagination";
@@ -17,32 +18,43 @@ interface LudotecaClientProps {
 export interface Filters {
   search: string;
   gameType: "" | "boardgame" | "boardgameexpansion";
-  players: number;
-  maxDuration: number;
-  maxWeight: number;
-  minAge: number;
-  sortBy: "name" | "rating" | "weight" | "year";
+  players: number[];
+  duration: string[];
+  weight: number[];
+  age: number[];
 }
 
-const DEFAULT_FILTERS: Filters = {
+export const DEFAULT_FILTERS: Filters = {
   search: "",
   gameType: "",
-  players: 0,
-  maxDuration: 0,
-  maxWeight: 0,
-  minAge: 0,
-  sortBy: "name",
+  players: [],
+  duration: [],
+  weight: [],
+  age: [],
 };
 
-const ITEMS_PER_PAGE_OPTIONS = [12, 24, 48, 96];
+const DURATION_RANGES: Record<string, [number, number]> = {
+  lt30: [0, 29],
+  "30-60": [30, 60],
+  "60-120": [61, 120],
+  "120-180": [121, 180],
+  "180-240": [181, 240],
+  "240+": [241, Infinity],
+};
+
+const ITEMS_PER_PAGE = 48;
 
 export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   const t = useTranslations("ludoteca");
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sortBy, setSortBy] = useState("name-asc");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(24);
   const [selectedGame, setSelectedGame] = useState<BggGame | null>(null);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [mobileSortOpen, setMobileSortOpen] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   // Debounce search
   useEffect(() => {
@@ -54,7 +66,6 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     let result = [...games];
     const search = debouncedSearch.toLowerCase();
 
-    // Text search
     if (search) {
       result = result.filter(
         (g) =>
@@ -63,64 +74,75 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       );
     }
 
-    // Game type
     if (filters.gameType) {
       result = result.filter((g) => g.subtype === filters.gameType);
     }
 
-    // Players
-    if (filters.players > 0) {
-      result = result.filter(
-        (g) =>
-          g.minPlayers <= filters.players && g.maxPlayers >= filters.players
+    if (filters.players.length > 0) {
+      result = result.filter((g) =>
+        filters.players.some(
+          (p) => g.minPlayers <= p && g.maxPlayers >= p
+        )
       );
     }
 
-    // Duration
-    if (filters.maxDuration > 0) {
-      result = result.filter((g) => g.playingTime > 0 && g.playingTime <= filters.maxDuration);
+    if (filters.duration.length > 0) {
+      result = result.filter(
+        (g) =>
+          g.playingTime > 0 &&
+          filters.duration.some((d) => {
+            const range = DURATION_RANGES[d];
+            if (!range) return false;
+            return g.playingTime >= range[0] && g.playingTime <= range[1];
+          })
+      );
     }
 
-    // Weight/complexity
-    if (filters.maxWeight > 0) {
-      result = result.filter((g) => g.weight > 0 && g.weight <= filters.maxWeight);
+    if (filters.weight.length > 0) {
+      result = result.filter(
+        (g) =>
+          g.weight > 0 &&
+          filters.weight.some((w) => Math.round(g.weight) === w)
+      );
     }
 
-    // Min age
-    if (filters.minAge > 0) {
-      result = result.filter((g) => g.minAge > 0 && g.minAge <= filters.minAge);
+    if (filters.age.length > 0) {
+      result = result.filter(
+        (g) =>
+          g.minAge > 0 && filters.age.some((a) => g.minAge <= a)
+      );
     }
 
     // Sort
+    const [sortField, sortDir] = sortBy.split("-") as [string, string];
     result.sort((a, b) => {
-      switch (filters.sortBy) {
+      let cmp = 0;
+      switch (sortField) {
         case "rating":
-          return b.rating - a.rating;
+          cmp = a.rating - b.rating;
+          break;
         case "weight":
-          return b.weight - a.weight;
-        case "year":
-          return b.year - a.year;
+          cmp = a.weight - b.weight;
+          break;
         default:
-          return a.name.localeCompare(b.name);
+          cmp = a.name.localeCompare(b.name);
       }
+      return sortDir === "desc" ? -cmp : cmp;
     });
 
     return result;
-  }, [games, debouncedSearch, filters]);
+  }, [games, debouncedSearch, filters, sortBy]);
 
   // Pagination
-  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const safePage = Math.min(currentPage, totalPages);
-  const startIndex = (safePage - 1) * itemsPerPage;
-  const paginatedGames = filtered.slice(startIndex, startIndex + itemsPerPage);
+  const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
+  const paginatedGames = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  const updateFilter = useCallback(
-    <K extends keyof Filters>(key: K, value: Filters[K]) => {
-      setFilters((prev) => ({ ...prev, [key]: value }));
-      setCurrentPage(1);
-    },
-    []
-  );
+  const setFiltersAndReset = useCallback((newFilters: Filters) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  }, []);
 
   const resetFilters = useCallback(() => {
     setFilters(DEFAULT_FILTERS);
@@ -128,23 +150,22 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     setCurrentPage(1);
   }, []);
 
-  const handleItemsPerPageChange = useCallback((n: number) => {
-    setItemsPerPage(n);
-    setCurrentPage(1);
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   const hasActiveFilters = useMemo(
     () =>
       filters.search !== "" ||
       filters.gameType !== "" ||
-      filters.players !== 0 ||
-      filters.maxDuration !== 0 ||
-      filters.maxWeight !== 0 ||
-      filters.minAge !== 0,
+      filters.players.length > 0 ||
+      filters.duration.length > 0 ||
+      filters.weight.length > 0 ||
+      filters.age.length > 0,
     [filters]
   );
 
-  // Error state
   if (error) {
     return (
       <div className="container mx-auto max-w-6xl px-6 pt-16 text-center">
@@ -153,7 +174,6 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     );
   }
 
-  // Empty collection
   if (games.length === 0) {
     return (
       <div className="container mx-auto max-w-6xl px-6 pt-16 text-center">
@@ -162,51 +182,210 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     );
   }
 
+  const sortOptions = [
+    { value: "name-asc", label: t("sort_name_asc") },
+    { value: "name-desc", label: t("sort_name_desc") },
+    { value: "rating-desc", label: t("sort_rating_desc") },
+    { value: "rating-asc", label: t("sort_rating_asc") },
+    { value: "weight-desc", label: t("sort_weight_desc") },
+    { value: "weight-asc", label: t("sort_weight_asc") },
+  ];
+
   return (
-    <div className="container mx-auto max-w-7xl px-6 pt-10">
-      <FilterBar
-        filters={filters}
-        onFilterChange={updateFilter}
-        onReset={resetFilters}
-        hasActiveFilters={hasActiveFilters}
-      />
-
-      {/* Results count */}
-      <p className="mt-6 text-sm text-stone-500">
-        {t("results_count", { count: filtered.length, total: games.length })}
-      </p>
-
-      {filtered.length === 0 ? (
-        <div className="mt-16 text-center">
-          <p className="text-lg text-stone-600">{t("no_results")}</p>
+    <div className="container mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+      {/* Mobile sticky bar */}
+      <div className="sticky top-16 z-30 -mx-4 mb-4 flex gap-3 bg-brand-beige px-4 py-3 sm:-mx-6 sm:px-6 md:hidden">
+        <button
+          onClick={() => setMobileFilterOpen(true)}
+          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand-orange py-2.5 text-sm font-semibold text-white"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          {t("btn_filter")}
+          {hasActiveFilters && (
+            <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white/25 px-1 text-xs">
+              {filters.players.length + filters.duration.length + filters.weight.length + filters.age.length + (filters.gameType ? 1 : 0)}
+            </span>
+          )}
+        </button>
+        <div className="relative flex-1">
           <button
-            onClick={resetFilters}
-            className="mt-4 rounded-lg bg-stone-custom px-6 py-2 text-sm font-medium text-brand-white transition-opacity hover:opacity-80"
+            onClick={() => setMobileSortOpen(!mobileSortOpen)}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-brand-orange py-2.5 text-sm font-semibold text-brand-orange"
           >
-            {t("reset_filters")}
+            <ArrowDownUp className="h-4 w-4" />
+            {t("btn_sort")}
           </button>
+          {mobileSortOpen && (
+            <div className="absolute top-full left-0 right-0 z-10 mt-1 rounded-lg border border-stone-200 bg-white shadow-lg">
+              {sortOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    setSortBy(opt.value);
+                    setMobileSortOpen(false);
+                    setCurrentPage(1);
+                  }}
+                  className={`w-full px-4 py-2.5 text-left text-sm transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                    sortBy === opt.value
+                      ? "bg-brand-orange/10 font-semibold text-brand-orange"
+                      : "text-stone-700 hover:bg-stone-50"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      ) : (
-        <>
-          <GameGrid
-            games={paginatedGames}
-            onSelectGame={setSelectedGame}
-          />
+      </div>
 
+      {/* Two-column layout */}
+      <div className="flex gap-8" ref={resultsRef}>
+        {/* Desktop sidebar */}
+        <aside className="hidden w-[300px] shrink-0 md:block">
+          <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 no-scrollbar">
+            <FilterSidebar
+              filters={filters}
+              onFiltersChange={setFiltersAndReset}
+              onReset={resetFilters}
+              hasActiveFilters={hasActiveFilters}
+              totalResults={filtered.length}
+            />
+          </div>
+        </aside>
+
+        {/* Results column */}
+        <div className="min-w-0 flex-1">
+          {/* Desktop toolbar */}
+          <div className="mb-4 hidden items-center justify-between md:flex">
+            <p className="text-sm text-stone-500">
+              {t("results_count", { count: filtered.length, total: games.length })}
+            </p>
+            <div className="flex items-center gap-3">
+              <select
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="h-9 rounded-lg border border-stone-300 bg-white px-3 pr-8 text-sm text-stone-700 outline-none"
+                aria-label={t("btn_sort")}
+              >
+                {sortOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <div className="flex rounded-lg border border-stone-300 bg-white">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`flex h-9 w-9 items-center justify-center rounded-l-lg transition-colors ${
+                    viewMode === "grid"
+                      ? "bg-stone-custom text-white"
+                      : "text-stone-400 hover:text-stone-600"
+                  }`}
+                  aria-label={t("view_grid")}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`flex h-9 w-9 items-center justify-center rounded-r-lg border-l border-stone-300 transition-colors ${
+                    viewMode === "list"
+                      ? "bg-stone-custom text-white"
+                      : "text-stone-400 hover:text-stone-600"
+                  }`}
+                  aria-label={t("view_list")}
+                >
+                  <List className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile results count */}
+          <p className="mb-3 text-sm text-stone-500 md:hidden">
+            {t("results_count", { count: filtered.length, total: games.length })}
+          </p>
+
+          {/* Top pagination */}
           {totalPages > 1 && (
             <Pagination
               currentPage={safePage}
               totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
               totalItems={filtered.length}
-              onPageChange={setCurrentPage}
-              onItemsPerPageChange={handleItemsPerPageChange}
+              itemsPerPage={ITEMS_PER_PAGE}
+              onPageChange={handlePageChange}
             />
           )}
-        </>
-      )}
 
+          {filtered.length === 0 ? (
+            <div className="mt-16 text-center">
+              <p className="text-lg text-stone-600">{t("no_results")}</p>
+              <button
+                onClick={resetFilters}
+                className="mt-4 rounded-lg bg-stone-custom px-6 py-2 text-sm font-medium text-brand-white transition-opacity hover:opacity-80"
+              >
+                {t("filter_clear")}
+              </button>
+            </div>
+          ) : (
+            <>
+              <GameGrid
+                games={paginatedGames}
+                viewMode={viewMode}
+                onSelectGame={setSelectedGame}
+              />
+
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={safePage}
+                  totalPages={totalPages}
+                  totalItems={filtered.length}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  onPageChange={handlePageChange}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile filter fullscreen panel */}
+      <AnimatePresence>
+        {mobileFilterOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex flex-col bg-white md:hidden"
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <div className="flex-1 overflow-y-auto px-5 pt-5 pb-24">
+              <FilterSidebar
+                filters={filters}
+                onFiltersChange={setFiltersAndReset}
+                onReset={resetFilters}
+                hasActiveFilters={hasActiveFilters}
+                totalResults={filtered.length}
+                onClose={() => setMobileFilterOpen(false)}
+                isMobile
+              />
+            </div>
+            <div className="sticky bottom-0 border-t border-stone-200 bg-white p-4">
+              <button
+                onClick={() => setMobileFilterOpen(false)}
+                className="w-full rounded-lg bg-brand-orange py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                {t("filter_apply")} ({filtered.length})
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Game detail modal */}
       <AnimatePresence>
         {selectedGame && (
           <GameDetailModal

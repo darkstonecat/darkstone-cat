@@ -6,27 +6,22 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  itemsPerPage: number;
-  itemsPerPageOptions: number[];
   totalItems: number;
+  itemsPerPage: number;
   onPageChange: (page: number) => void;
-  onItemsPerPageChange: (n: number) => void;
 }
 
 function getPageNumbers(current: number, total: number): (number | "...")[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
 
   const pages: (number | "...")[] = [1];
-
   if (current > 3) pages.push("...");
 
   const start = Math.max(2, current - 1);
   const end = Math.min(total - 1, current + 1);
-
   for (let i = start; i <= end; i++) pages.push(i);
 
   if (current < total - 2) pages.push("...");
-
   pages.push(total);
   return pages;
 }
@@ -34,25 +29,22 @@ function getPageNumbers(current: number, total: number): (number | "...")[] {
 export default function Pagination({
   currentPage,
   totalPages,
-  itemsPerPage,
-  itemsPerPageOptions,
   totalItems,
+  itemsPerPage,
   onPageChange,
-  onItemsPerPageChange,
 }: PaginationProps) {
   const t = useTranslations("ludoteca");
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
-
   const pages = getPageNumbers(currentPage, totalPages);
 
   const btnBase =
     "flex h-9 min-w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors";
 
   return (
-    <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-      {/* Showing X-Y of Z */}
-      <p className="text-sm text-stone-500">
+    <div className="my-4 flex items-center justify-between gap-2">
+      {/* Showing info — desktop only */}
+      <p className="hidden text-xs text-stone-400 sm:block">
         {t("pagination_showing", {
           start: startItem,
           end: endItem,
@@ -60,8 +52,33 @@ export default function Pagination({
         })}
       </p>
 
-      {/* Page navigation */}
-      <div className="flex items-center gap-1">
+      {/* Mobile: simple prev/next */}
+      <div className="flex flex-1 items-center justify-between gap-2 sm:hidden">
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="flex h-10 flex-1 items-center justify-center gap-1 rounded-lg bg-stone-200 text-sm font-medium text-stone-700 transition-colors disabled:opacity-30"
+          aria-label={t("pagination_prev")}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          {t("pagination_prev")}
+        </button>
+        <span className="text-xs text-stone-400">
+          {currentPage}/{totalPages}
+        </span>
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="flex h-10 flex-1 items-center justify-center gap-1 rounded-lg bg-stone-200 text-sm font-medium text-stone-700 transition-colors disabled:opacity-30"
+          aria-label={t("pagination_next")}
+        >
+          {t("pagination_next")}
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Desktop: numbered pagination */}
+      <div className="hidden items-center gap-1 sm:flex">
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
@@ -85,7 +102,7 @@ export default function Pagination({
               onClick={() => onPageChange(page)}
               className={`${btnBase} ${
                 page === currentPage
-                  ? "bg-stone-custom text-brand-white"
+                  ? "bg-brand-orange text-white"
                   : "border border-stone-300 bg-white text-stone-700 hover:bg-stone-100"
               }`}
             >
@@ -103,20 +120,6 @@ export default function Pagination({
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
-
-      {/* Items per page */}
-      <select
-        value={itemsPerPage}
-        onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-        className="h-9 rounded-lg border border-stone-300 bg-white px-2 text-sm text-stone-700 outline-none"
-        aria-label={t("pagination_per_page")}
-      >
-        {itemsPerPageOptions.map((n) => (
-          <option key={n} value={n}>
-            {n} / {t("pagination_page_label")}
-          </option>
-        ))}
-      </select>
     </div>
   );
 }
