@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 
 const STORAGE_KEY = 'darkstone_cookie_consent'
 
@@ -19,21 +19,19 @@ export interface UseCookieConsent {
 }
 
 export function useCookieConsent(): UseCookieConsent {
-  const [status, setStatus] = useState<ConsentStatus>(null)
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  useEffect(() => {
+  const [state, setState] = useState<{status: ConsentStatus, isLoaded: boolean}>(() => {
+    if (typeof window === 'undefined') return { status: null, isLoaded: false }
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         const data: ConsentData = JSON.parse(stored)
-        setStatus(data.status)
+        return { status: data.status, isLoaded: true }
       }
     } catch {
       // localStorage not available or corrupted data
     }
-    setIsLoaded(true)
-  }, [])
+    return { status: null, isLoaded: true }
+  })
 
   const save = useCallback((newStatus: 'accepted' | 'rejected') => {
     const data: ConsentData = {
@@ -45,11 +43,11 @@ export function useCookieConsent(): UseCookieConsent {
     } catch {
       // localStorage not available
     }
-    setStatus(newStatus)
+    setState(prev => ({ ...prev, status: newStatus }))
   }, [])
 
   const accept = useCallback(() => save('accepted'), [save])
   const reject = useCallback(() => save('rejected'), [save])
 
-  return { status, accept, reject, isLoaded }
+  return { status: state.status, accept, reject, isLoaded: state.isLoaded }
 }

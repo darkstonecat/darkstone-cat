@@ -1,8 +1,6 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const CONTACT_EMAIL = "darkstone.cat@gmail.com";
 
 export async function POST(request: Request) {
@@ -24,6 +22,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "message_required" }, { status: 400 });
     }
 
+    // Check if API key is configured
+    if (!process.env.RESEND_API_KEY) {
+      console.error("RESEND_API_KEY is not configured");
+      return NextResponse.json(
+        { error: "service_unavailable" },
+        { status: 503 }
+      );
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const { error: resendError } = await resend.emails.send({
       from: "Web [darkstone.cat] <onboarding@resend.dev>",
       to: CONTACT_EMAIL,
