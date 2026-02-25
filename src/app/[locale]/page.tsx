@@ -2,7 +2,6 @@ import NavBar from "@/components/NavBar";
 import ScrollProgress from "@/components/ScrollProgress";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
-import PageIntro from "@/components/home/PageIntro";
 import Hero from "@/components/home/Hero";
 import About from "@/components/home/About";
 import Activities from "@/components/home/Activities";
@@ -14,7 +13,6 @@ import SectionDivider from "@/components/home/SectionDivider";
 export default function HomePage() {
   return (
     <main className="relative min-h-screen font-sans selection:bg-stone-300">
-        <PageIntro />
         <ScrollProgress />
         <NavBar />
         <Hero />
