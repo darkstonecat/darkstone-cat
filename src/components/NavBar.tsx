@@ -18,6 +18,7 @@ function hexToRgba(hex: string, alpha: number): string {
 const NAV_LINKS = [
   { href: "/", key: "home" },
   { href: "/about", key: "about" },
+  { href: "/ludoteca", key: "ludoteca" },
   { href: "/pautes-de-conducta", key: "conduct" },
   { href: "/contact", key: "contact" },
 ] as const;
@@ -36,6 +37,7 @@ const SECTION_THEMES: Record<string, { text: string; bg: string }> = {
 // Fixed themes for subpages
 const SUBPAGE_THEMES: Record<string, { text: string; bg: string }> = {
   "/about": { text: "#FAFAF9", bg: "#1C1917" },
+  "/ludoteca": { text: "#FAFAF9", bg: "#1C1917" },
   "/pautes-de-conducta": { text: "#FAFAF9", bg: "#1C1917" },
   "/contact": { text: "#FAFAF9", bg: "#1C1917" },
 };
