@@ -9,6 +9,7 @@ import FilterSidebar from "./FilterSidebar";
 import GameGrid from "./GameGrid";
 import GameDetailModal from "./GameDetailModal";
 import Pagination from "./Pagination";
+import SortDropdown from "./SortDropdown";
 
 interface LudotecaClientProps {
   games: BggGame[];
@@ -338,7 +339,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   ];
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+    <div ref={resultsRef} className="container mx-auto max-w-7xl scroll-mt-16 px-4 pt-6 sm:px-6">
       {/* Mobile sticky bar */}
       <div className="sticky top-16 z-30 -mx-4 mb-4 flex gap-3 bg-brand-beige px-4 py-3 sm:-mx-6 sm:px-6 md:hidden">
         <button
@@ -387,10 +388,10 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       </div>
 
       {/* Two-column layout */}
-      <div className="flex gap-8" ref={resultsRef}>
+      <div className="flex gap-8">
         {/* Desktop sidebar */}
         <aside className="hidden w-[300px] shrink-0 md:block">
-          <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl border border-stone-200 bg-white p-6 no-scrollbar">
+          <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl border border-stone-200 bg-white p-6 scrollbar-thin">
             <FilterSidebar
               filters={filters}
               onFiltersChange={setFiltersAndReset}
@@ -407,25 +408,23 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
         <div className="min-w-0 flex-1">
           {/* Desktop toolbar */}
           <div className="mb-4 hidden items-center justify-between md:flex">
-            <p className="text-sm font-semibold text-stone-custom">
-              {t("results_count", { count: filtered.length, total: games.length })}
-            </p>
             <div className="flex items-center gap-3">
-              <select
+              <SortDropdown
                 value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value);
+                options={sortOptions}
+                onChange={(v) => {
+                  setSortBy(v);
                   setCurrentPage(1);
                 }}
-                className="h-9 rounded-lg border border-stone-300 bg-white px-3 pr-8 text-sm text-stone-700 outline-none"
-                aria-label={t("btn_sort")}
-              >
-                {sortOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+                ariaLabel={t("btn_sort")}
+              />
+              {hasActiveFilters && (
+                <p className="text-sm font-semibold text-stone-custom">
+                  {t("results_filtered", { count: filtered.length })}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
               <div className="flex rounded-lg border border-stone-300 bg-white">
                 <button
                   onClick={() => setViewMode("grid")}
@@ -454,20 +453,12 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
           </div>
 
           {/* Mobile results count */}
-          <p className="mb-3 text-sm text-stone-500 md:hidden">
-            {t("results_count", { count: filtered.length, total: games.length })}
-          </p>
-
-          {/* Top pagination */}
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={safePage}
-              totalPages={totalPages}
-              totalItems={filtered.length}
-              itemsPerPage={ITEMS_PER_PAGE}
-              onPageChange={handlePageChange}
-            />
+          {hasActiveFilters && (
+            <p className="mb-3 text-sm font-semibold text-stone-custom md:hidden">
+              {t("results_filtered", { count: filtered.length })}
+            </p>
           )}
+
 
           {filtered.length === 0 ? (
             <div className="mt-16 text-center">

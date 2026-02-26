@@ -138,7 +138,7 @@ export default function FilterSidebar({
             <button
               key={n}
               onClick={() => update("players", toggleInArray(filters.players, n))}
-              className={`${chipBase} ${
+              className={`${chipBase} ${n <= 10 ? "w-9 px-0" : ""} ${
                 filters.players.includes(n) ? chipActive : chipInactive
               }`}
               role="switch"
@@ -212,7 +212,7 @@ export default function FilterSidebar({
             <button
               key={n}
               onClick={() => update("age", toggleInArray(filters.age, n))}
-              className={`${chipBase} ${
+              className={`${chipBase} w-11 px-0 ${
                 filters.age.includes(n) ? chipActive : chipInactive
               }`}
               role="switch"
@@ -267,24 +267,24 @@ export default function FilterSidebar({
       )}
 
       {/* Clear filters */}
-      {hasActiveFilters && !isMobile && (
+      {!isMobile && (
         <>
           <hr className="border-stone-200" />
           <button
             onClick={onReset}
-            className="w-full rounded-lg border border-stone-300 bg-white py-2.5 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50"
+            disabled={!hasActiveFilters}
+            className="w-full rounded-full border border-stone-300 bg-white py-2.5 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {t("filter_clear")}
           </button>
         </>
       )}
 
-      {isMobile && hasActiveFilters && (
+      {isMobile && (
         <button
-          onClick={() => {
-            onReset();
-          }}
-          className="text-sm font-medium text-brand-orange underline underline-offset-2"
+          onClick={onReset}
+          disabled={!hasActiveFilters}
+          className="text-sm font-medium text-brand-orange underline underline-offset-2 disabled:cursor-not-allowed disabled:opacity-40 disabled:no-underline"
         >
           {t("filter_clear")}
         </button>
