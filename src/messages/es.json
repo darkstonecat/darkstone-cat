@@ -224,12 +224,16 @@
     "pagination_prev": "Anterior",
     "pagination_next": "Siguiente",
     "modal_close": "Cerrar",
+    "modal_back": "Volver al juego principal",
     "detail_players": "Jugadores",
     "detail_duration": "Duración",
     "detail_rating": "Valoración BGG",
     "detail_weight": "Complejidad",
     "detail_age": "Edad mínima",
+    "detail_categories": "Temáticas",
+    "detail_mechanics": "Mecánicas",
     "detail_bgg_link": "Ver en BoardGameGeek",
+    "base_game_title": "Juego base",
     "expansions_title": "Expansiones en la colección"
   }
 }

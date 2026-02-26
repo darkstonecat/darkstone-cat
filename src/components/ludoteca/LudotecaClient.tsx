@@ -124,6 +124,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGame, setSelectedGame] = useState<BggGame | null>(null);
+  const allGamesMap = useMemo(() => new Map(games.map((g) => [g.id, g])), [games]);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [mobileSortOpen, setMobileSortOpen] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -559,6 +560,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
         {selectedGame && (
           <GameDetailModal
             game={selectedGame}
+            allGames={allGamesMap}
             onClose={() => setSelectedGame(null)}
           />
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
@@ -10,16 +10,34 @@ import type { BggGame } from "@/lib/bgg";
 
 interface GameDetailModalProps {
   game: BggGame;
+  allGames: Map<string, BggGame>;
   onClose: () => void;
 }
 
 export default function GameDetailModal({
-  game,
+  game: initialGame,
+  allGames,
   onClose,
 }: GameDetailModalProps) {
   const t = useTranslations("ludoteca");
   const lenis = useLenis();
   const dialogRef = useRef<HTMLDivElement>(null);
+  const [game, setGame] = useState(initialGame);
+
+  const baseGame = useMemo(() => {
+    if (game.subtype !== "boardgameexpansion") return null;
+    for (const g of allGames.values()) {
+      if (g.expansions.some((exp) => exp.id === game.id)) return g;
+    }
+    return null;
+  }, [game, allGames]);
+
+  const navigateTo = useCallback((gameId: string) => {
+    const target = allGames.get(gameId);
+    if (!target) return;
+    setGame(target);
+    dialogRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [allGames]);
 
   // Lock scroll
   useEffect(() => {
@@ -161,6 +179,34 @@ export default function GameDetailModal({
             )}
           </div>
 
+          {/* Categories & Mechanics */}
+          {game.categories.length > 0 && (
+            <div className="mt-5">
+              <h3 className="text-xs font-semibold text-stone-400">{t("detail_categories")}</h3>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {game.categories.slice(0, 10).map((cat) => (
+                  <span key={cat} className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">{cat}</span>
+                ))}
+                {game.categories.length > 10 && (
+                  <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-400">...</span>
+                )}
+              </div>
+            </div>
+          )}
+          {game.mechanics.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-xs font-semibold text-stone-400">{t("detail_mechanics")}</h3>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {game.mechanics.slice(0, 10).map((mec) => (
+                  <span key={mec} className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">{mec}</span>
+                ))}
+                {game.mechanics.length > 10 && (
+                  <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-400">...</span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* BGG link */}
           <a
             href={bggUrl}
@@ -172,6 +218,40 @@ export default function GameDetailModal({
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
 
+          {/* Base game */}
+          {baseGame && (
+            <div className="mt-6 border-t border-stone-200 pt-5">
+              <h3 className="text-sm font-semibold text-stone-700">
+                {t("base_game_title")}
+              </h3>
+              <div className="mt-3">
+                <button
+                  onClick={() => navigateTo(baseGame.id)}
+                  className="group flex w-full items-center gap-3 overflow-hidden rounded-xl bg-stone-100 text-left transition-transform duration-300 hover:scale-[1.02]"
+                >
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-stone-100">
+                    {baseGame.thumbnail ? (
+                      <Image
+                        src={baseGame.thumbnail}
+                        alt={baseGame.name}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-110"
+                        sizes="56px"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-stone-300">
+                        <Star className="h-5 w-5" />
+                      </div>
+                    )}
+                  </div>
+                  <span className="line-clamp-1 text-sm text-stone-700">
+                    {baseGame.name}
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Expansions */}
           {game.expansions.length > 0 && (
             <div className="mt-6 border-t border-stone-200 pt-5">
@@ -181,11 +261,9 @@ export default function GameDetailModal({
               <ul className="mt-3 space-y-2">
                 {game.expansions.map((exp) => (
                   <li key={exp.id}>
-                    <a
-                      href={`https://boardgamegeek.com/boardgameexpansion/${exp.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-center gap-3 overflow-hidden rounded-xl bg-stone-100 transition-transform duration-300 hover:scale-[1.02]"
+                    <button
+                      onClick={() => navigateTo(exp.id)}
+                      className="group flex w-full items-center gap-3 overflow-hidden rounded-xl bg-stone-100 text-left transition-transform duration-300 hover:scale-[1.02]"
                     >
                       <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-stone-100">
                         {exp.thumbnail ? (
@@ -205,7 +283,7 @@ export default function GameDetailModal({
                       <span className="line-clamp-1 text-sm text-stone-700">
                         {exp.name}
                       </span>
-                    </a>
+                    </button>
                   </li>
                 ))}
               </ul>

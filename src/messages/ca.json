@@ -224,12 +224,16 @@
     "pagination_prev": "Anterior",
     "pagination_next": "Següent",
     "modal_close": "Tancar",
+    "modal_back": "Tornar al joc principal",
     "detail_players": "Jugadors",
     "detail_duration": "Durada",
     "detail_rating": "Valoració BGG",
     "detail_weight": "Complexitat",
     "detail_age": "Edat mínima",
+    "detail_categories": "Temàtiques",
+    "detail_mechanics": "Mecàniques",
     "detail_bgg_link": "Veure a BoardGameGeek",
+    "base_game_title": "Joc base",
     "expansions_title": "Expansions a la col·lecció"
   }
 }
