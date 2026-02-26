@@ -37,11 +37,11 @@ export default function GameListRow({ game, onClick }: GameListRowProps) {
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-4 rounded-2xl border border-stone-200/50 bg-white p-3 text-left transition-all duration-200 hover:shadow-md"
+      className="flex w-full items-stretch gap-4 overflow-hidden rounded-2xl border border-stone-200/50 bg-white pr-3 text-left transition-all duration-200 hover:shadow-md"
       aria-label={`${game.name} — ${t("card_aria")}`}
     >
       {/* Thumbnail */}
-      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100">
+      <div className="relative aspect-square w-20 shrink-0 bg-stone-100">
         {game.thumbnail ? (
           <Image
             src={game.thumbnail}
@@ -58,7 +58,7 @@ export default function GameListRow({ game, onClick }: GameListRowProps) {
       </div>
 
       {/* Info */}
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 py-3">
         <div className="flex items-start justify-between gap-2">
           <h3 className="line-clamp-1 text-sm font-semibold text-stone-800">
             {game.name}

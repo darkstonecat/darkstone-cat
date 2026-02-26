@@ -418,11 +418,6 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                 }}
                 ariaLabel={t("btn_sort")}
               />
-              {hasActiveFilters && (
-                <p className="text-sm font-semibold text-stone-custom">
-                  {t("results_filtered", { count: filtered.length })}
-                </p>
-              )}
             </div>
             <div className="flex items-center gap-3">
               <div className="flex rounded-lg border border-stone-300 bg-white">
@@ -452,13 +447,33 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
             </div>
           </div>
 
-          {/* Mobile results count */}
-          {hasActiveFilters && (
-            <p className="mb-3 text-sm font-semibold text-stone-custom md:hidden">
-              {t("results_filtered", { count: filtered.length })}
-            </p>
-          )}
-
+          {/* Mobile view toggle */}
+          <div className="mb-3 flex justify-end md:hidden">
+            <div className="flex rounded-lg border border-stone-300 bg-white">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`flex h-9 w-9 items-center justify-center rounded-l-lg transition-colors ${
+                  viewMode === "grid"
+                    ? "bg-stone-custom text-white"
+                    : "text-stone-400 hover:text-stone-600"
+                }`}
+                aria-label={t("view_grid")}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`flex h-9 w-9 items-center justify-center rounded-r-lg border-l border-stone-300 transition-colors ${
+                  viewMode === "list"
+                    ? "bg-stone-custom text-white"
+                    : "text-stone-400 hover:text-stone-600"
+                }`}
+                aria-label={t("view_list")}
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
 
           {filtered.length === 0 ? (
             <div className="mt-16 text-center">
