@@ -1,0 +1,2701 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+	<item type="boardgame" id="367280">
+		<thumbnail>https://cf.geekdo-images.com/mHypc6oFI6COk5zfRRrZjA__small/img/ejz7qBjlugTVV985_sQTJvRGdPM=/fit-in/200x150/filters:strip_icc()/pic6968446.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/mHypc6oFI6COk5zfRRrZjA__original/img/MlKE3p3AT8Y_BvFSBjX7QcSJ3u8=/0x0/filters:format(jpeg)/pic6968446.jpg</image>
+		<name type="primary" sortindex="1" value="1998 ISS" />
+		<description>In 1998 ISS, players work as space agencies cooperating and competing to build the International Space Station. Manage your hand of project cards, allocate resources, and contribute modules to the station while advancing your own national interests in the race for space.</description>
+		<yearpublished value="2022" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="90" />
+		<minplaytime value="60" />
+		<maxplaytime value="90" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1016" value="Science Fiction" />
+		<link type="boardgamecategory" id="1113" value="Space Exploration" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2897" value="Engine Building" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2814" value="Solo / Solitaire Game" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="601" />
+				<average value="7.30093" />
+				<bayesaverage value="5.85222" />
+				<stddev value="1.24018" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="4225" bayesaverage="5.85222" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="1748" bayesaverage="5.94934" />
+				</ranks>
+				<averageweight value="2.8200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="371947">
+		<thumbnail>https://cf.geekdo-images.com/rlVMW44IxSdXg0mfbdOdOg__small/img/-AEXgv7NazOF2KXxPb-KPuR1yvg=/fit-in/200x150/filters:strip_icc()/pic7819093.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/rlVMW44IxSdXg0mfbdOdOg__original/img/0dv_H-9NXnu7aKwbZD0T9cHTHyw=/0x0/filters:format(jpeg)/pic7819093.jpg</image>
+		<name type="primary" sortindex="1" value="3 Ring Circus" />
+		<description>Step into the world of traveling circuses in 3 Ring Circus! As a circus director, recruit performers, manage logistics, and put on spectacular shows across the country. Balance your roster of acrobats, animal acts, and clowns to attract the biggest audiences.</description>
+		<yearpublished value="2023" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="75" />
+		<minplaytime value="45" />
+		<maxplaytime value="75" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamemechanic" id="2082" value="Worker Placement" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<link type="boardgamemechanic" id="2984" value="Open Drafting" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="2808" />
+				<average value="7.17871" />
+				<bayesaverage value="6.39037" />
+				<stddev value="1.17905" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="1602" bayesaverage="6.39037" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="864" bayesaverage="6.51186" />
+				</ranks>
+				<averageweight value="2.5300" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="173346">
+		<thumbnail>https://cf.geekdo-images.com/zdagMskTF7wJBPjX74XsRw__small/img/gV1-ckZSIC-dCxxpq1Y7GmPITzQ=/fit-in/200x150/filters:strip_icc()/pic2576399.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/zdagMskTF7wJBPjX74XsRw__original/img/Ju836WNSaW7Mab9Vjq2TJ_FqhWQ=/0x0/filters:format(jpeg)/pic2576399.jpg</image>
+		<name type="primary" sortindex="1" value="7 Wonders Duel" />
+		<description>In many regards, 7 Wonders Duel resembles its parent game 7 Wonders, as players acquire cards over three ages that provide resources or advance their military or scientific development. However, this two-player game features a unique card drafting mechanism from a shared display, and three distinct victory conditions: military supremacy, scientific supremacy, or civilian victory by points.</description>
+		<yearpublished value="2015" />
+		<minplayers value="2" />
+		<maxplayers value="2" />
+		<playingtime value="30" />
+		<minplaytime value="30" />
+		<maxplaytime value="30" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1050" value="Ancient" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamecategory" id="1015" value="Civilization" />
+		<link type="boardgamemechanic" id="2043" value="Card Drafting" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="107642" />
+				<average value="8.07921" />
+				<bayesaverage value="7.95364" />
+				<stddev value="1.1999" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="24" bayesaverage="7.95364" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="28" bayesaverage="7.9184" />
+				</ranks>
+				<averageweight value="2.2200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="202976">
+		<thumbnail>https://cf.geekdo-images.com/iQRqtxgRuh-4J5vYLdhsMg__small/img/7KX-iJ5e3ZW0LnbEd9OQHRSpHG8=/fit-in/200x150/filters:strip_icc()/pic3143885.png</thumbnail>
+		<image>https://cf.geekdo-images.com/iQRqtxgRuh-4J5vYLdhsMg__original/img/rwOQ9RK6_C9gIy-g_dgkdF6Mb7Y=/0x0/filters:format(png)/pic3143885.png</image>
+		<name type="primary" sortindex="1" value="7 Wonders Duel: Pantheon" />
+		<description>Pantheon is an expansion for 7 Wonders Duel that adds a mythological dimension to the game. Players can now invoke the powers of ancient gods and goddesses from five different pantheons. During Age I, you discover the gods available; in Age II and III, you can call upon their powers to gain powerful abilities.</description>
+		<yearpublished value="2016" />
+		<minplayers value="2" />
+		<maxplayers value="2" />
+		<playingtime value="30" />
+		<minplaytime value="30" />
+		<maxplaytime value="30" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1050" value="Ancient" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1015" value="Civilization" />
+		<link type="boardgamecategory" id="1042" value="Expansion for Base-game" />
+		<link type="boardgamemechanic" id="2043" value="Card Drafting" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="16159" />
+				<average value="7.99589" />
+				<bayesaverage value="7.62507" />
+				<stddev value="1.20134" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="Not Ranked" bayesaverage="7.62507" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="Not Ranked" bayesaverage="7.66226" />
+				</ranks>
+				<averageweight value="2.4200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="176013">
+		<thumbnail>https://cf.geekdo-images.com/yY2_o-Gay-uBopKkmwa2ow__small/img/wLclKYbyMaXNoxI4w87zCcqeTXI=/fit-in/200x150/filters:strip_icc()/pic2556079.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/yY2_o-Gay-uBopKkmwa2ow__original/img/tm7u5Z4nSzkjXYjkMMf1A1HDf04=/0x0/filters:format(jpeg)/pic2556079.jpg</image>
+		<name type="primary" sortindex="1" value="¡Abordaje!" />
+		<description>¡Abordaje! es un juego de cartas para dos jugadores ambientado en la piratería. Los jugadores se enfrentan en un duelo naval intentando hundir el barco enemigo mediante cartas de ataque, defensa y maniobras especiales. Combina gestión de mano con timing para superar a tu rival.</description>
+		<yearpublished value="2015" />
+		<minplayers value="2" />
+		<maxplayers value="2" />
+		<playingtime value="25" />
+		<minplaytime value="10" />
+		<maxplaytime value="25" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1008" value="Nautical" />
+		<link type="boardgamecategory" id="1046" value="Fighting" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2686" value="Take That" />
+		<link type="boardgamemechanic" id="2041" value="Card Play Conflict Resolution" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="169" />
+				<average value="6.09541" />
+				<bayesaverage value="5.53324" />
+				<stddev value="1.54473" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="15715" bayesaverage="5.53324" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="2915" bayesaverage="5.53689" />
+				</ranks>
+				<averageweight value="1.4700" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="205418">
+		<thumbnail>https://cf.geekdo-images.com/X1xSEWTxwMuCVYBC6SpgWg__small/img/xRshQ8XgLaLL_n6_xLDCGeNTSgg=/fit-in/200x150/filters:strip_icc()/pic3136438.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/X1xSEWTxwMuCVYBC6SpgWg__original/img/IwU1BQrnYwYVe33vdhxdtHprVrg=/0x0/filters:format(jpeg)/pic3136438.jpg</image>
+		<name type="primary" sortindex="1" value="Agricola: Family Edition" />
+		<description>Agricola: Family Edition is an introductory version of the classic Agricola, designed to make the farming experience more accessible. Players place family members to plow fields, sow grain, raise livestock, and expand their farmstead. Without the minor improvements and occupations cards, the game focuses on the core worker placement mechanics.</description>
+		<yearpublished value="2016" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="45" />
+		<minplaytime value="45" />
+		<maxplaytime value="45" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1013" value="Farming" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamemechanic" id="2082" value="Worker Placement" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2850" value="Income" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="3277" />
+				<average value="7.0353" />
+				<bayesaverage value="6.36309" />
+				<stddev value="1.24241" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="1661" bayesaverage="6.36309" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="933" bayesaverage="6.45834" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="478" bayesaverage="6.49107" />
+				</ranks>
+				<averageweight value="2.2300" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="357563">
+		<thumbnail>https://cf.geekdo-images.com/OTb0hIJHE-U3eD0FmpBrzA__small/img/ELFjkv8JJACHRQHQf6b9hzJziaw=/fit-in/200x150/filters:strip_icc()/pic6705097.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/OTb0hIJHE-U3eD0FmpBrzA__original/img/GpSyHl2wwgLJ6JHJAjPbEQk4MNU=/0x0/filters:format(jpeg)/pic6705097.jpg</image>
+		<name type="primary" sortindex="1" value="Akropolis" />
+		<description>In Akropolis, each player builds their own ancient Greek city by drafting and placing polyomino-style hex tiles. Stack tiles to gain height bonuses, but manage your resources carefully — only districts visible from above will score. Plazas of each type multiply the score of adjacent matching districts, creating a layered puzzle.</description>
+		<yearpublished value="2022" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="30" />
+		<minplaytime value="20" />
+		<maxplaytime value="30" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1050" value="Ancient" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamecategory" id="1086" value="Territory Building" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2984" value="Open Drafting" />
+		<link type="boardgamemechanic" id="2048" value="Pattern Building" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="10041" />
+				<average value="7.4461" />
+				<bayesaverage value="7.04076" />
+				<stddev value="1.11497" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="449" bayesaverage="7.04076" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="93" bayesaverage="7.13701" />
+				</ranks>
+				<averageweight value="1.8400" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="236457">
+		<thumbnail>https://cf.geekdo-images.com/OAX7HfOz-9N60StgADzd0g__small/img/sBMaoJ-Kz74lJ6djcl-NNMTr0Wo=/fit-in/200x150/filters:strip_icc()/pic3781944.png</thumbnail>
+		<image>https://cf.geekdo-images.com/OAX7HfOz-9N60StgADzd0g__original/img/x2Y_DYWrzzleMETfnu7Jm3R8jPo=/0x0/filters:format(png)/pic3781944.png</image>
+		<name type="primary" sortindex="1" value="Architects of the West Kingdom" />
+		<description>In Architects of the West Kingdom, players are royal architects competing to impress the King by constructing various landmarks. Gather resources, hire apprentices, and work on the cathedral. But be careful — your workers can be captured by other players, and you may be tempted to dabble in the black market at the cost of your virtue.</description>
+		<yearpublished value="2018" />
+		<minplayers value="1" />
+		<maxplayers value="5" />
+		<playingtime value="80" />
+		<minplaytime value="60" />
+		<maxplaytime value="80" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1035" value="Medieval" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamemechanic" id="2082" value="Worker Placement" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2839" value="Action Retrieval" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="32299" />
+				<average value="7.70942" />
+				<bayesaverage value="7.51421" />
+				<stddev value="1.18443" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="128" bayesaverage="7.51421" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="110" bayesaverage="7.52854" />
+				</ranks>
+				<averageweight value="2.7600" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="352179">
+		<thumbnail>https://cf.geekdo-images.com/jVHj2mDZsjXfEZtT50kSQg__small/img/7uHpDHvrWmvo-BzB5EnjGV6sMg0=/fit-in/200x150/filters:strip_icc()/pic6555779.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/jVHj2mDZsjXfEZtT50kSQg__original/img/BZNN6uXkiQiFl0AYUARb2JN7umA=/0x0/filters:format(jpeg)/pic6555779.jpg</image>
+		<name type="primary" sortindex="1" value="Astro Knights" />
+		<description>Astro Knights is a cooperative deck-building game set in a science-fantasy universe. Players take on the roles of knights piloting mech suits to defend their home planet from waves of enemies. Coordinate your deck builds, chain powerful combos, and defeat the boss before your defenses crumble.</description>
+		<yearpublished value="2023" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="45" />
+		<minplaytime value="45" />
+		<maxplaytime value="45" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1016" value="Science Fiction" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1010" value="Fantasy" />
+		<link type="boardgamemechanic" id="2664" value="Deck, Bag, and Pool Building" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="1417" />
+				<average value="7.79871" />
+				<bayesaverage value="6.34146" />
+				<stddev value="1.19582" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="1725" bayesaverage="6.34146" />
+					<rank type="family" id="5496" name="thematic" friendlyname="Thematic Rank" value="273" bayesaverage="6.73395" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="869" bayesaverage="6.50947" />
+				</ranks>
+				<averageweight value="2.5800" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="344177">
+		<thumbnail>https://cf.geekdo-images.com/18XXBjMM0ZnXzhpRxpQPIQ__small/img/BHX0jIdjfmQwvSjRAhdx_kLcZTc=/fit-in/200x150/filters:strip_icc()/pic6321655.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/18XXBjMM0ZnXzhpRxpQPIQ__original/img/FKA3-XO9ZqoIUfC1lZfiMYnRn24=/0x0/filters:format(jpeg)/pic6321655.jpg</image>
+		<name type="primary" sortindex="1" value="Bananya: The Card Game" />
+		<description>Based on the popular anime series, Bananya: The Card Game lets players collect sets of adorable cats hiding inside bananas. Draw cards, play sets, and use special action cards to interfere with opponents. A quick and light card game perfect for families.</description>
+		<yearpublished value="2023" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="30" />
+		<minplaytime value="20" />
+		<maxplaytime value="30" />
+		<minage value="6" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamecategory" id="1079" value="Humor" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2686" value="Take That" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="155" />
+				<average value="5.61419" />
+				<bayesaverage value="5.50072" />
+				<stddev value="1.80692" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="25192" bayesaverage="5.50072" />
+				</ranks>
+				<averageweight value="1.1700" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="379959">
+		<thumbnail>https://cf.geekdo-images.com/TCuxzLnOl7bhekjcPM2IDw__small/img/cm3QU3t8AVBCC5RRpYi9p6WfwQo=/fit-in/200x150/filters:strip_icc()/pic8630039.png</thumbnail>
+		<image>https://cf.geekdo-images.com/TCuxzLnOl7bhekjcPM2IDw__original/img/0CJAepYztNiKC2PRmiYltv1FTho=/0x0/filters:format(png)/pic8630039.png</image>
+		<name type="primary" sortindex="1" value="The Battle of Versailles" />
+		<description>The Battle of Versailles recreates the legendary 1973 fashion showdown between French and American designers at the Palace of Versailles. Players represent fashion houses competing for influence on the runway, managing resources and playing strategic cards to win over the audience.</description>
+		<yearpublished value="2024" />
+		<minplayers value="2" />
+		<maxplayers value="2" />
+		<playingtime value="45" />
+		<minplaytime value="30" />
+		<maxplaytime value="45" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1046" value="Fighting" />
+		<link type="boardgamecategory" id="1001" value="Political" />
+		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2041" value="Card Play Conflict Resolution" />
+		<link type="boardgamemechanic" id="2831" value="Events" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="547" />
+				<average value="7.40589" />
+				<bayesaverage value="5.85963" />
+				<stddev value="1.21357" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="4159" bayesaverage="5.85963" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="1703" bayesaverage="5.97108" />
+				</ranks>
+				<averageweight value="2.4700" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="240980">
+		<thumbnail>https://cf.geekdo-images.com/HINb2nkFn5IiZxAlzQIs4g__small/img/cRCX-PIROiSFG5aLvwkn2O7tHsg=/fit-in/200x150/filters:strip_icc()/pic7009391.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/HINb2nkFn5IiZxAlzQIs4g__original/img/e7izEwSmnBPiErsIF6hlWbgybBE=/0x0/filters:format(jpeg)/pic7009391.jpg</image>
+		<name type="primary" sortindex="1" value="Blood on the Clocktower" />
+		<description>Blood on the Clocktower is a social deduction game for 5-20 players. A demon is killing off townsfolk one by one, and the town must figure out who it is before it&apos;s too late. With dozens of unique character roles, a storyteller running the game, and dead players who can still participate, every game tells a different story.</description>
+		<yearpublished value="2022" />
+		<minplayers value="6" />
+		<maxplayers value="21" />
+		<playingtime value="120" />
+		<minplaytime value="30" />
+		<maxplaytime value="120" />
+		<minage value="15" />
+		<link type="boardgamecategory" id="1023" value="Bluffing" />
+		<link type="boardgamecategory" id="1039" value="Deduction" />
+		<link type="boardgamecategory" id="1024" value="Horror" />
+		<link type="boardgamecategory" id="1030" value="Party Game" />
+		<link type="boardgamecategory" id="1040" value="Murder / Mystery" />
+		<link type="boardgamemechanic" id="2028" value="Hidden Roles" />
+		<link type="boardgamemechanic" id="2017" value="Voting" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2685" value="Player Elimination" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="10725" />
+				<average value="8.3618" />
+				<bayesaverage value="7.69868" />
+				<stddev value="1.9024" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="69" bayesaverage="7.69868" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="53" bayesaverage="7.74803" />
+					<rank type="family" id="5498" name="partygames" friendlyname="Party Game Rank" value="1" bayesaverage="7.86691" />
+				</ranks>
+				<averageweight value="2.5400" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="364405">
+		<thumbnail>https://cf.geekdo-images.com/X_b-m2T7YsfG3hY1E0bqvg__small/img/Nq9reJUR2O6Yz4q0H9ud2_xbiRk=/fit-in/200x150/filters:strip_icc()/pic6539643.png</thumbnail>
+		<image>https://cf.geekdo-images.com/X_b-m2T7YsfG3hY1E0bqvg__original/img/yzNKj21nD7oIj6RvI95TUlzsm9k=/0x0/filters:format(png)/pic6539643.png</image>
+		<name type="primary" sortindex="1" value="Carcassonne Big Box 7" />
+		<description>Carcassonne is a tile-placement game where players draw and place tiles to build the medieval French countryside. Place your followers (meeples) on roads, cities, monasteries, and fields to score points. The Big Box includes the base game plus several expansions for greater variety.</description>
+		<yearpublished value="2021" />
+		<minplayers value="2" />
+		<maxplayers value="6" />
+		<playingtime value="35" />
+		<minplaytime value="35" />
+		<maxplaytime value="35" />
+		<minage value="7" />
+		<link type="boardgamecategory" id="1035" value="Medieval" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamecategory" id="1086" value="Territory Building" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
+		<link type="boardgamemechanic" id="2902" value="Map Addition" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="1204" />
+				<average value="8.22825" />
+				<bayesaverage value="6.31375" />
+				<stddev value="1.19806" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="Not Ranked" bayesaverage="6.31375" />
+				</ranks>
+				<averageweight value="1.9700" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="4390">
+		<thumbnail>https://cf.geekdo-images.com/NSD4L9c-rY5OOlJYFlQ2Wg__small/img/4jFZqbcMUlrd-Nhy7IJHjTshbrc=/fit-in/200x150/filters:strip_icc()/pic5647234.png</thumbnail>
+		<image>https://cf.geekdo-images.com/NSD4L9c-rY5OOlJYFlQ2Wg__original/img/pBCT2KKOuuSrj4OI5gybXzySnRo=/0x0/filters:format(png)/pic5647234.png</image>
+		<name type="primary" sortindex="1" value="Carcassonne: Hunters and Gatherers" />
+		<description>Carcassonne: Hunters and Gatherers is a standalone game in the Carcassonne family set in a prehistoric landscape. Players place tiles depicting forests, rivers, lakes, and meadows, then claim features with their tribe members. Hunt for animals, fish in rivers, and gather mushrooms in this reimagining of the classic.</description>
+		<yearpublished value="2002" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="40" />
+		<minplaytime value="35" />
+		<maxplaytime value="40" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1050" value="Ancient" />
+		<link type="boardgamecategory" id="1086" value="Territory Building" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
+		<link type="boardgamemechanic" id="2902" value="Map Addition" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="13699" />
+				<average value="7.13338" />
+				<bayesaverage value="6.85264" />
+				<stddev value="1.2496" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="679" bayesaverage="6.85264" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="185" bayesaverage="6.90564" />
+				</ranks>
+				<averageweight value="1.8800" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="245934">
+		<thumbnail>https://cf.geekdo-images.com/fsjopscDFCVArzU7fzhVxA__small/img/6Yu-lVdkDTrICD1y5ZqNmzHZEsc=/fit-in/200x150/filters:strip_icc()/pic6183704.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/fsjopscDFCVArzU7fzhVxA__original/img/JJXwLsCeWj_8FOurLToKpdQuvpc=/0x0/filters:format(jpeg)/pic6183704.jpg</image>
+		<name type="primary" sortindex="1" value="Carpe Diem" />
+		<description>In Stefan Feld&apos;s Carpe Diem, players are patricians in ancient Rome developing their city districts. Navigate a selection rondel to draft building tiles, then place them in your district to create bakeries, villas, markets, and gardens. Fulfill scoring objectives at the end of each of the four rounds to maximize your prestige.</description>
+		<yearpublished value="2018" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="75" />
+		<minplaytime value="45" />
+		<maxplaytime value="75" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1050" value="Ancient" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<link type="boardgamemechanic" id="2078" value="Point to Point Movement" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="8701" />
+				<average value="7.49722" />
+				<bayesaverage value="7.05321" />
+				<stddev value="1.16614" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="438" bayesaverage="7.05321" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="278" bayesaverage="7.15091" />
+				</ranks>
+				<averageweight value="2.6200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="84876">
+		<thumbnail>https://cf.geekdo-images.com/sH2YTQ10dHj1ibfS-KKtGA__small/img/f5zFXdTcH9RNY0iMNBppd8D-_r0=/fit-in/200x150/filters:strip_icc()/pic8745814.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/sH2YTQ10dHj1ibfS-KKtGA__original/img/L_gsMsuhbAe0kyq1QLAmyeKOeSs=/0x0/filters:format(jpeg)/pic8745814.jpg</image>
+		<name type="primary" sortindex="1" value="The Castles of Burgundy" />
+		<description>The Castles of Burgundy is set in the Loire Valley of medieval France. Players take the roles of aristocrats controlling small estates, striving to build settlements, trade goods, exploit silver mines, and use knowledge to grow their estates. The game uses dice to determine available actions, but strategic planning mitigates luck.</description>
+		<yearpublished value="2011" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="90" />
+		<minplaytime value="30" />
+		<maxplaytime value="90" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1035" value="Medieval" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamecategory" id="1086" value="Territory Building" />
+		<link type="boardgamecategory" id="1017" value="Dice" />
+		<link type="boardgamemechanic" id="2072" value="Dice Rolling" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2008" value="Trading" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="68752" />
+				<average value="8.15835" />
+				<bayesaverage value="8.02864" />
+				<stddev value="1.25311" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="15" bayesaverage="8.02864" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="17" bayesaverage="8.02836" />
+				</ranks>
+				<averageweight value="3.0000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="124361">
+		<thumbnail>https://cf.geekdo-images.com/CzwSm8i7tkLz6cBnrILZBg__small/img/ESPSltYYSFK-aJw6jOTdQrJGpOc=/fit-in/200x150/filters:strip_icc()/pic3453267.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/CzwSm8i7tkLz6cBnrILZBg__original/img/BhJ3sB3uk-eSdR1iW4EP3cu0Wi0=/0x0/filters:format(jpeg)/pic3453267.jpg</image>
+		<name type="primary" sortindex="1" value="Concordia" />
+		<description>Concordia is a strategic game of colonization and trade in the Roman Empire. Players use identical decks of personality cards to take actions: producing goods, trading, moving colonists, and building houses across the Mediterranean. The cards you acquire determine not only your abilities but also your scoring at game end — a clever dual-purpose system.</description>
+		<yearpublished value="2013" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="100" />
+		<minplaytime value="100" />
+		<maxplaytime value="100" />
+		<minage value="13" />
+		<link type="boardgamecategory" id="1050" value="Ancient" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1008" value="Nautical" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2664" value="Deck, Bag, and Pool Building" />
+		<link type="boardgamemechanic" id="2078" value="Point to Point Movement" />
+		<link type="boardgamemechanic" id="2008" value="Trading" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="44904" />
+				<average value="8.07785" />
+				<bayesaverage value="7.92626" />
+				<stddev value="1.21218" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="29" bayesaverage="7.92626" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="24" bayesaverage="7.94623" />
+				</ranks>
+				<averageweight value="3.0900" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="343899">
+		<thumbnail>https://cf.geekdo-images.com/VkHdaM9ki7mU4m6_SYbyAQ__small/img/jiBiXlcpDma0se8mcB51JRhdKr4=/fit-in/200x150/filters:strip_icc()/pic6590748.png</thumbnail>
+		<image>https://cf.geekdo-images.com/VkHdaM9ki7mU4m6_SYbyAQ__original/img/Q-vT7jPjfZB9nzGS020FKBglTGA=/0x0/filters:format(png)/pic6590748.png</image>
+		<name type="primary" sortindex="1" value="Coral" />
+		<description>Coral is a beautiful tile-stacking game where players build a colorful coral reef. Place coral tiles on different levels, aiming to have your color visible from above while strategically building the 3D reef structure. Simple rules create a surprisingly deep spatial puzzle.</description>
+		<yearpublished value="2022" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="20" />
+		<minplaytime value="10" />
+		<maxplaytime value="20" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1009" value="Abstract Strategy" />
+		<link type="boardgamecategory" id="1084" value="Environmental" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2048" value="Pattern Building" />
+		<link type="boardgamemechanic" id="2984" value="Open Drafting" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="712" />
+				<average value="6.57063" />
+				<bayesaverage value="5.72284" />
+				<stddev value="1.38952" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="5812" bayesaverage="5.72284" />
+					<rank type="family" id="4666" name="abstracts" friendlyname="Abstract Game Rank" value="276" bayesaverage="6.00533" />
+				</ranks>
+				<averageweight value="1.5900" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="284083">
+		<thumbnail>https://cf.geekdo-images.com/98LnQShydr11OBKS46xY-Q__small/img/et-fnuozyOdBOVL-5kSS3_7I8fw=/fit-in/200x150/filters:strip_icc()/pic5687013.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/98LnQShydr11OBKS46xY-Q__original/img/Q-ZkgnuBu9OTBr7J3qnqPjqamAE=/0x0/filters:format(jpeg)/pic5687013.jpg</image>
+		<name type="primary" sortindex="1" value="The Crew: The Quest for Planet Nine" />
+		<description>The Crew is a cooperative trick-taking card game set in outer space. Players embark on 50 missions of increasing difficulty, each requiring the team to win specific tricks according to assigned task cards. Communication is severely limited — you can only share one clue per round — making coordination a fascinating puzzle.</description>
+		<yearpublished value="2019" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="20" />
+		<minplaytime value="20" />
+		<maxplaytime value="20" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1016" value="Science Fiction" />
+		<link type="boardgamecategory" id="1113" value="Space Exploration" />
+		<link type="boardgamemechanic" id="2009" value="Trick-taking" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<link type="boardgamemechanic" id="2893" value="Communication Limits" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="48010" />
+				<average value="7.76016" />
+				<bayesaverage value="7.62117" />
+				<stddev value="1.3171" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="91" bayesaverage="7.62117" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="14" bayesaverage="7.64538" />
+				</ranks>
+				<averageweight value="2.0300" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="437581">
+		<thumbnail>https://cf.geekdo-images.com/LJ-bH8ZCrVUZpwEhzjdE-Q__small/img/vcG7EyO10LjjtxlZuLL0SgkEijU=/fit-in/200x150/filters:strip_icc()/pic8660315.png</thumbnail>
+		<image>https://cf.geekdo-images.com/LJ-bH8ZCrVUZpwEhzjdE-Q__original/img/vplwH-lS7OGvzalcvQH8EqFbVZk=/0x0/filters:format(png)/pic8660315.png</image>
+		<name type="primary" sortindex="1" value="La Cuenta" />
+		<description>La Cuenta es un juego de cartas rápido y sencillo donde los jugadores deben completar operaciones matemáticas sumando, restando, multiplicando o dividiendo. Ideal para toda la familia, combina agilidad mental con diversión para practicar cálculo de forma lúdica.</description>
+		<yearpublished value="2025" />
+		<minplayers value="3" />
+		<maxplayers value="8" />
+		<playingtime value="15" />
+		<minplaytime value="5" />
+		<maxplaytime value="15" />
+		<minage value="6" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1104" value="Math" />
+		<link type="boardgamecategory" id="1098" value="Number" />
+		<link type="boardgamecategory" id="1030" value="Party Game" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="619" />
+				<average value="7.53323" />
+				<bayesaverage value="5.84291" />
+				<stddev value="1.46602" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="4323" bayesaverage="5.84291" />
+					<rank type="family" id="5498" name="partygames" friendlyname="Party Game Rank" value="248" bayesaverage="6.14453" />
+				</ranks>
+				<averageweight value="1.0000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="402677">
+		<thumbnail>https://cf.geekdo-images.com/RCQf2kr9tPW3RrrZj-9lvA__small/img/--Lgerr-HDIhLb7kxrNWV2HLnGY=/fit-in/200x150/filters:strip_icc()/pic7774194.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/RCQf2kr9tPW3RrrZj-9lvA__original/img/tCt01H_w1VQr-lU99inHPt1QJj8=/0x0/filters:format(jpeg)/pic7774194.jpg</image>
+		<name type="primary" sortindex="1" value="Daitoshi" />
+		<description>In Daitoshi, players are architects tasked with building a magnificent Japanese city. Place building tiles strategically across the shared city grid, claiming districts and constructing landmarks. Manage your resources and timing to dominate key areas and fulfill the emperor&apos;s decrees.</description>
+		<yearpublished value="2024" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="120" />
+		<minplaytime value="120" />
+		<maxplaytime value="120" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamecategory" id="1050" value="Ancient" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="1444" />
+				<average value="7.48501" />
+				<bayesaverage value="6.23106" />
+				<stddev value="1.46024" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="2094" bayesaverage="6.23106" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="1030" bayesaverage="6.38906" />
+				</ranks>
+				<averageweight value="2.3500" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="370591">
+		<thumbnail>https://cf.geekdo-images.com/Nqw3SzV4JDd64lcDgytPEg__small/img/SYowoPc4NsBcU6duKGUM93itzZY=/fit-in/200x150/filters:strip_icc()/pic7227691.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/Nqw3SzV4JDd64lcDgytPEg__original/img/CK6xh0d01jIC7WOIGALHZCDli34=/0x0/filters:format(jpeg)/pic7227691.jpg</image>
+		<name type="primary" sortindex="1" value="Dorfromantik: The Board Game" />
+		<description>Based on the beloved video game, Dorfromantik: The Board Game is a cooperative tile-placement game where players build a beautiful countryside together. Place hex tiles to extend forests, fields, rivers, and villages while trying to complete shared objectives. A peaceful, puzzle-like experience with a campaign mode that unlocks new content.</description>
+		<yearpublished value="2022" />
+		<minplayers value="1" />
+		<maxplayers value="6" />
+		<playingtime value="60" />
+		<minplaytime value="30" />
+		<maxplaytime value="60" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1028" value="Puzzle" />
+		<link type="boardgamecategory" id="1086" value="Territory Building" />
+		<link type="boardgamecategory" id="1084" value="Environmental" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<link type="boardgamemechanic" id="2048" value="Pattern Building" />
+		<link type="boardgamemechanic" id="2902" value="Map Addition" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="10704" />
+				<average value="7.60018" />
+				<bayesaverage value="7.17013" />
+				<stddev value="1.32448" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="328" bayesaverage="7.17013" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="65" bayesaverage="7.25291" />
+				</ranks>
+				<averageweight value="1.6200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="264055">
+		<thumbnail>https://cf.geekdo-images.com/JahbLRZ_jEe8P8gisXUtJw__small/img/XGKi6qBOizS_IdLqOHny-rf0JZw=/fit-in/200x150/filters:strip_icc()/pic4447676.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/JahbLRZ_jEe8P8gisXUtJw__original/img/Ug7yXzMmgpaqcv7B_lNTXsAk7_g=/0x0/filters:format(jpeg)/pic4447676.jpg</image>
+		<name type="primary" sortindex="1" value="Draftosaurus" />
+		<description>In Draftosaurus, players draft adorable dinosaur meeples and place them in their own zoo park. A die roll determines placement constraints each turn, and different enclosures score in unique ways — pairs, trios, diverse species, or specific types. A quick, family-friendly drafting game.</description>
+		<yearpublished value="2019" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="15" />
+		<minplaytime value="15" />
+		<maxplaytime value="15" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamemechanic" id="2891" value="Closed Drafting" />
+		<link type="boardgamemechanic" id="2072" value="Dice Rolling" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2020" value="Simultaneous Action Selection" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="16625" />
+				<average value="7.08295" />
+				<bayesaverage value="6.85733" />
+				<stddev value="1.13684" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="671" bayesaverage="6.85733" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="184" bayesaverage="6.90662" />
+				</ranks>
+				<averageweight value="1.2200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="447243">
+		<thumbnail>https://cf.geekdo-images.com/e-Xx7mz_tgisEx2Aq4Wa6w__small/img/ie98O_KC7v3m_jSXZpYd1vqmd_I=/fit-in/200x150/filters:strip_icc()/pic8910865.png</thumbnail>
+		<image>https://cf.geekdo-images.com/e-Xx7mz_tgisEx2Aq4Wa6w__original/img/pe7roKL2-gtXSvGIzHBiXzb0yzk=/0x0/filters:format(png)/pic8910865.png</image>
+		<name type="primary" sortindex="1" value="Duel for Cardia" />
+		<description>Duel for Cardia is a head-to-head card game where two players clash in a tactical duel. Build your deck during the game, play cards for attacks and defense, and manage your resources to outlast your opponent in this fast-paced fantasy card battle.</description>
+		<yearpublished value="2025" />
+		<minplayers value="2" />
+		<maxplayers value="2" />
+		<playingtime value="15" />
+		<minplaytime value="15" />
+		<maxplaytime value="15" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1010" value="Fantasy" />
+		<link type="boardgamecategory" id="1046" value="Fighting" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2041" value="Card Play Conflict Resolution" />
+		<link type="boardgamemechanic" id="2664" value="Deck, Bag, and Pool Building" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="3062" />
+				<average value="7.54122" />
+				<bayesaverage value="6.61938" />
+				<stddev value="1.15094" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="1050" bayesaverage="6.61938" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="609" bayesaverage="6.74416" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="246" bayesaverage="6.78273" />
+				</ranks>
+				<averageweight value="2.0000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="257164">
+		<thumbnail>https://cf.geekdo-images.com/XPVILrCVxga8X-Cw7r6EAw__small/img/YMYE0uQaPTf7-r0WsqryjzEkD8s=/fit-in/200x150/filters:strip_icc()/pic4034698.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/XPVILrCVxga8X-Cw7r6EAw__original/img/FpOQEgt_TIjXo9yJ1a7jpfU_XrM=/0x0/filters:format(jpeg)/pic4034698.jpg</image>
+		<name type="primary" sortindex="1" value="Dungeon Raiders" />
+		<description>Dungeon Raiders is a dungeon-crawling card game where players explore a five-level dungeon, facing monsters, traps, and treasures. Each round, players simultaneously play numbered cards to resolve encounters — but resources are limited, forcing tough choices about when to commit your strongest cards.</description>
+		<yearpublished value="2018" />
+		<minplayers value="3" />
+		<maxplayers value="5" />
+		<playingtime value="30" />
+		<minplaytime value="20" />
+		<maxplaytime value="30" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1022" value="Adventure" />
+		<link type="boardgamecategory" id="1020" value="Exploration" />
+		<link type="boardgamecategory" id="1010" value="Fantasy" />
+		<link type="boardgamemechanic" id="2020" value="Simultaneous Action Selection" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2661" value="Push Your Luck" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="1096" />
+				<average value="7.09193" />
+				<bayesaverage value="5.96736" />
+				<stddev value="1.1852" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="3361" bayesaverage="5.96736" />
+					<rank type="family" id="5498" name="partygames" friendlyname="Party Game Rank" value="213" bayesaverage="6.2334" />
+				</ranks>
+				<averageweight value="1.5100" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="447110">
+		<thumbnail>https://cf.geekdo-images.com/SSqy0Hw599gyU8OGB6UKFA__small/img/--of05yMxzFKdoG9oc4-GwDO2rY=/fit-in/200x150/filters:strip_icc()/pic8899413.png</thumbnail>
+		<image>https://cf.geekdo-images.com/SSqy0Hw599gyU8OGB6UKFA__original/img/M-YmpM97179Ug-1kaM9eqsL4cpw=/0x0/filters:format(png)/pic8899413.png</image>
+		<name type="primary" sortindex="1" value="Everest Go!" />
+		<description>Everest Go! is a card game about climbing the world&apos;s highest peak. Players manage their hand of equipment and weather cards, pushing their luck to advance base camps while avoiding deadly storms. Collect sets of gear to prepare for the final summit push.</description>
+		<yearpublished value="2025" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="25" />
+		<minplaytime value="15" />
+		<maxplaytime value="25" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1022" value="Adventure" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2661" value="Push Your Luck" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="35" />
+				<average value="6.72286" />
+				<bayesaverage value="5.51038" />
+				<stddev value="1.78054" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="22249" bayesaverage="5.51038" />
+				</ranks>
+				<averageweight value="1.5000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="216600">
+		<thumbnail>https://cf.geekdo-images.com/AzNYQ2o-SXBAHFpPPtRBIw__small/img/CkfTNq419k6DTJthFwPA5oKYoHE=/fit-in/200x150/filters:strip_icc()/pic4095959.png</thumbnail>
+		<image>https://cf.geekdo-images.com/AzNYQ2o-SXBAHFpPPtRBIw__original/img/QSapQT41vJZkBMzXx5ZkTbuTVf8=/0x0/filters:format(png)/pic4095959.png</image>
+		<name type="primary" sortindex="1" value="Fantastic Factories" />
+		<description>Fantastic Factories is an engine-building game where players construct manufacturing empires. In the market phase, draft blueprint cards and hire contractors. In the work phase, roll dice and allocate them as workers across your factories to produce goods, generate resources, and manufacture prestige. The first to build enough triggers the endgame.</description>
+		<yearpublished value="2019" />
+		<minplayers value="1" />
+		<maxplayers value="5" />
+		<playingtime value="60" />
+		<minplaytime value="45" />
+		<maxplaytime value="60" />
+		<minage value="14" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1088" value="Industry / Manufacturing" />
+		<link type="boardgamecategory" id="1017" value="Dice" />
+		<link type="boardgamemechanic" id="2072" value="Dice Rolling" />
+		<link type="boardgamemechanic" id="2897" value="Engine Building" />
+		<link type="boardgamemechanic" id="2020" value="Simultaneous Action Selection" />
+		<link type="boardgamemechanic" id="2043" value="Card Drafting" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="7877" />
+				<average value="7.41129" />
+				<bayesaverage value="6.94777" />
+				<stddev value="1.15867" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="559" bayesaverage="6.94777" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="364" bayesaverage="7.0326" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="121" bayesaverage="7.05304" />
+				</ranks>
+				<averageweight value="2.1000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="40628">
+		<thumbnail>https://cf.geekdo-images.com/U7n2gtbgu2IpEGs8YePYlQ__small/img/5jsaAnh3fc8yy8QwnzBhRXr3kIs=/fit-in/200x150/filters:strip_icc()/pic8520431.png</thumbnail>
+		<image>https://cf.geekdo-images.com/U7n2gtbgu2IpEGs8YePYlQ__original/img/JDYLSVGE5CTt__nA1lLb7hBnmAw=/0x0/filters:format(png)/pic8520431.png</image>
+		<name type="primary" sortindex="1" value="Finca" />
+		<description>Finca is set on the island of Mallorca, where players are fruit farmers harvesting and delivering tropical produce. Move your farmers around a shared windmill rondel to collect fruits — oranges, lemons, almonds, figs, and olives — then deliver sets to fulfill demand tiles across the island.</description>
+		<yearpublished value="2009" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="45" />
+		<minplaytime value="45" />
+		<maxplaytime value="45" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1013" value="Farming" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamemechanic" id="2831" value="Rondel" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2007" value="Pick-up and Deliver" />
+		<link type="boardgamemechanic" id="2011" value="Modular Board" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="8353" />
+				<average value="7.06811" />
+				<bayesaverage value="6.7071" />
+				<stddev value="1.17605" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="890" bayesaverage="6.7071" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="234" bayesaverage="6.79748" />
+				</ranks>
+				<averageweight value="2.1900" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="100901">
+		<thumbnail>https://cf.geekdo-images.com/v6bTbxeprDFj1nN4AenvjA__small/img/7AyBFA8JfZHKxC5ntwOjJTbIgWE=/fit-in/200x150/filters:strip_icc()/pic1129370.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/v6bTbxeprDFj1nN4AenvjA__original/img/ri91i22ujLCZqxXKhFIdVDPGe8Y=/0x0/filters:format(jpeg)/pic1129370.jpg</image>
+		<name type="primary" sortindex="1" value="Flash Point: Fire Rescue" />
+		<description>Flash Point: Fire Rescue is a cooperative game where players take on the roles of firefighters rescuing victims from a burning building. Spend action points to move, fight fires, chop through walls, and carry victims to safety. But the fire spreads unpredictably — explosions can cause structural damage, and if the building collapses, everyone loses.</description>
+		<yearpublished value="2011" />
+		<minplayers value="2" />
+		<maxplayers value="6" />
+		<playingtime value="45" />
+		<minplaytime value="45" />
+		<maxplaytime value="45" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1022" value="Adventure" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<link type="boardgamemechanic" id="2001" value="Action Points" />
+		<link type="boardgamemechanic" id="2072" value="Dice Rolling" />
+		<link type="boardgamemechanic" id="2011" value="Modular Board" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="25300" />
+				<average value="7.14536" />
+				<bayesaverage value="6.96873" />
+				<stddev value="1.25547" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="535" bayesaverage="6.96873" />
+					<rank type="family" id="5496" name="thematic" friendlyname="Thematic Rank" value="171" bayesaverage="6.98438" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="145" bayesaverage="6.98732" />
+				</ranks>
+				<averageweight value="2.3000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="65244">
+		<thumbnail>https://cf.geekdo-images.com/JgAkEBUaiHOsOS94iRMs2w__small/img/5aPR8-KMbgucI_XkPE2PJaMQQsg=/fit-in/200x150/filters:strip_icc()/pic646458.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/JgAkEBUaiHOsOS94iRMs2w__original/img/H5d4I5z_HSpPEu7EAl0DqLt9_pM=/0x0/filters:format(jpeg)/pic646458.jpg</image>
+		<name type="primary" sortindex="1" value="Forbidden Island" />
+		<description>Forbidden Island is a cooperative game where players are adventurers on a sinking island, racing to collect four sacred treasures and escape before the island disappears beneath the waves. Trade cards, shore up sinking tiles, and coordinate your special abilities to survive.</description>
+		<yearpublished value="2010" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="30" />
+		<minplaytime value="30" />
+		<maxplaytime value="30" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1022" value="Adventure" />
+		<link type="boardgamecategory" id="1020" value="Exploration" />
+		<link type="boardgamecategory" id="1010" value="Fantasy" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2001" value="Action Points" />
+		<link type="boardgamemechanic" id="2011" value="Modular Board" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="54120" />
+				<average value="6.75037" />
+				<bayesaverage value="6.64027" />
+				<stddev value="1.22187" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="1022" bayesaverage="6.64027" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="355" bayesaverage="6.6348" />
+				</ranks>
+				<averageweight value="1.7400" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="280032">
+		<thumbnail>https://cf.geekdo-images.com/rczms2pvajxj5l9Vpo66Hw__small/img/-3U6s7tj2ltu-5J6F9lZo2wfH5I=/fit-in/200x150/filters:strip_icc()/pic4754389.png</thumbnail>
+		<image>https://cf.geekdo-images.com/rczms2pvajxj5l9Vpo66Hw__original/img/TTJPVAZ-cYy9zXZ6Tt6p7Tuuzxg=/0x0/filters:format(png)/pic4754389.png</image>
+		<name type="primary" sortindex="1" value="Fossilis" />
+		<description>In Fossilis, players are paleontologists excavating dinosaur bones from a layered dig site. Remove plaster tokens to reveal bones, then collect sets of fossils to assemble complete dinosaur skeletons. Supply cards provide tools and equipment that give special abilities during your digs.</description>
+		<yearpublished value="2020" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="60" />
+		<minplaytime value="45" />
+		<maxplaytime value="60" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamecategory" id="1020" value="Exploration" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2984" value="Open Drafting" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="1584" />
+				<average value="6.96446" />
+				<bayesaverage value="6.05018" />
+				<stddev value="1.32341" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="2890" bayesaverage="6.05018" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="895" bayesaverage="6.17246" />
+				</ranks>
+				<averageweight value="1.7800" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="343526">
+		<thumbnail>https://cf.geekdo-images.com/0lWQRlVnTZwzNrHhnQoRQg__small/img/IkrYWIopiuMeifwu8c5k62QGvnM=/fit-in/200x150/filters:strip_icc()/pic6305717.png</thumbnail>
+		<image>https://cf.geekdo-images.com/0lWQRlVnTZwzNrHhnQoRQg__original/img/yw-1kbv3p2ms_ug6eVUuf-E3-Zw=/0x0/filters:format(png)/pic6305717.png</image>
+		<name type="primary" sortindex="1" value="G.I. JOE Deck-Building Game" />
+		<description>G.I. JOE Deck-Building Game is a cooperative deck-building game where players take on the roles of G.I. JOE heroes fighting against Cobra. Build your deck with weapons, vehicles, and allies to complete missions and defeat Cobra&apos;s schemes. Each hero has unique abilities that synergize with different strategies.</description>
+		<yearpublished value="2021" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="70" />
+		<minplaytime value="30" />
+		<maxplaytime value="70" />
+		<minage value="14" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1046" value="Fighting" />
+		<link type="boardgamecategory" id="1064" value="Movies / TV / Radio Theme" />
+		<link type="boardgamemechanic" id="2664" value="Deck, Bag, and Pool Building" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="1449" />
+				<average value="7.66557" />
+				<bayesaverage value="6.26746" />
+				<stddev value="1.30952" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="1958" bayesaverage="6.26746" />
+					<rank type="family" id="5496" name="thematic" friendlyname="Thematic Rank" value="325" bayesaverage="6.65197" />
+				</ranks>
+				<averageweight value="2.4200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="378916">
+		<thumbnail>https://cf.geekdo-images.com/wmq5zVtI20W4OTC-vtz93A__small/img/NVtc3BqlJVa-EXYvFnimTeqrhy8=/fit-in/200x150/filters:strip_icc()/pic8502569.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/wmq5zVtI20W4OTC-vtz93A__original/img/82gJe8mm7BAwFOllTiXpDTzxGP8=/0x0/filters:format(jpeg)/pic8502569.jpg</image>
+		<name type="primary" sortindex="1" value="Gold Nugget" />
+		<description>Gold Nugget is a light card game where players are prospectors bidding on gold nuggets. Use your numbered cards cleverly in simple auctions — the highest card wins, but you&apos;ll need to manage your hand carefully as played cards don&apos;t return. A quick filler game with satisfying decisions.</description>
+		<yearpublished value="2024" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="20" />
+		<minplaytime value="20" />
+		<maxplaytime value="20" />
+		<minage value="6" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamemechanic" id="2012" value="Auction / Bidding" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2661" value="Push Your Luck" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="156" />
+				<average value="6.81378" />
+				<bayesaverage value="5.53125" />
+				<stddev value="2.42568" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="16168" bayesaverage="5.53125" />
+				</ranks>
+				<averageweight value="1.2000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="93">
+		<thumbnail>https://cf.geekdo-images.com/RRKDHaYtFPHhczkUDcHOmg__small/img/XPcVtsZPITv5qe3IXpzMKa5RSYA=/fit-in/200x150/filters:strip_icc()/pic7906240.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/RRKDHaYtFPHhczkUDcHOmg__original/img/E_QazS4f8ffj6oBcUl3C_VROCEw=/0x0/filters:format(jpeg)/pic7906240.jpg</image>
+		<name type="primary" sortindex="1" value="El Grande" />
+		<description>El Grande is the quintessential area majority game. Set in medieval Spain, players are Grandes deploying caballeros across the nine regions of Spain and the mysterious Castillo. Play power cards to determine turn order and action selection, using action cards to move caballeros, score regions, and manipulate the board in this deeply strategic classic.</description>
+		<yearpublished value="1995" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="120" />
+		<minplaytime value="60" />
+		<maxplaytime value="120" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1035" value="Medieval" />
+		<link type="boardgamecategory" id="1001" value="Political" />
+		<link type="boardgamecategory" id="1086" value="Territory Building" />
+		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
+		<link type="boardgamemechanic" id="2012" value="Auction / Bidding" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2020" value="Simultaneous Action Selection" />
+		<link type="boardgamemechanic" id="2831" value="Events" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="32689" />
+				<average value="7.77063" />
+				<bayesaverage value="7.59276" />
+				<stddev value="1.32042" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="100" bayesaverage="7.59276" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="78" bayesaverage="7.62216" />
+				</ranks>
+				<averageweight value="3.0700" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="320718">
+		<thumbnail>https://cf.geekdo-images.com/vDu0Zb4ooGEOF29ZaRQ3EQ__small/img/3AcQZQ_MB1dJiQlQzcJMjDK637M=/fit-in/200x150/filters:strip_icc()/pic5845169.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/vDu0Zb4ooGEOF29ZaRQ3EQ__original/img/SP1CFuPlOKKOVtz66o1nKQwBS3o=/0x0/filters:format(jpeg)/pic5845169.jpg</image>
+		<name type="primary" sortindex="1" value="Hidden Leaders" />
+		<description>Hidden Leaders is a card-driven game where each player secretly supports two of four factions competing for control of a fantasy realm. Play hero cards to advance faction tracks and influence the conflict, while trying to deduce your opponents&apos; hidden allegiances. The balance of bluffing and deduction creates tense moments.</description>
+		<yearpublished value="2022" />
+		<minplayers value="2" />
+		<maxplayers value="6" />
+		<playingtime value="40" />
+		<minplaytime value="20" />
+		<maxplaytime value="40" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1010" value="Fantasy" />
+		<link type="boardgamecategory" id="1001" value="Political" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
+		<link type="boardgamemechanic" id="2028" value="Hidden Roles" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="3930" />
+				<average value="6.71127" />
+				<bayesaverage value="6.1979" />
+				<stddev value="1.37634" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="2229" bayesaverage="6.1979" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="748" bayesaverage="6.26524" />
+				</ranks>
+				<averageweight value="1.8300" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="282524">
+		<thumbnail>https://cf.geekdo-images.com/SoClIcwjDo_iZs0idVikDw__small/img/YSf5Z99aBqAlNKaGBj_oGb1oKH4=/fit-in/200x150/filters:strip_icc()/pic4848330.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/SoClIcwjDo_iZs0idVikDw__original/img/TEprFkOM3G_u2HnUvh05WITeXbg=/0x0/filters:format(jpeg)/pic4848330.jpg</image>
+		<name type="primary" sortindex="1" value="Horrified" />
+		<description>In Horrified, players work together to defeat classic Universal Monsters — Dracula, Frankenstein&apos;s Monster, the Mummy, the Wolfman, and more. Each monster has a unique defeat condition that requires collecting specific items and completing tasks. Protect the villagers, manage your actions, and save the town before the monsters overwhelm you.</description>
+		<yearpublished value="2019" />
+		<minplayers value="1" />
+		<maxplayers value="5" />
+		<playingtime value="60" />
+		<minplaytime value="60" />
+		<maxplaytime value="60" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1024" value="Horror" />
+		<link type="boardgamecategory" id="1022" value="Adventure" />
+		<link type="boardgamecategory" id="1064" value="Movies / TV / Radio Theme" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<link type="boardgamemechanic" id="2001" value="Action Points" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2007" value="Pick-up and Deliver" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="19664" />
+				<average value="7.59481" />
+				<bayesaverage value="7.29817" />
+				<stddev value="1.15172" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="240" bayesaverage="7.29817" />
+					<rank type="family" id="5496" name="thematic" friendlyname="Thematic Rank" value="65" bayesaverage="7.33549" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="46" bayesaverage="7.33683" />
+				</ranks>
+				<averageweight value="2.0400" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="393165">
+		<thumbnail>https://cf.geekdo-images.com/spughd3LLwO-qNzK0jP0vg__small/img/G4K-9MXWVGrxpszl-p8MbE6KhUU=/fit-in/200x150/filters:strip_icc()/pic7588439.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/spughd3LLwO-qNzK0jP0vg__original/img/gi3gyreRGaMg8wkuAEyK-q78W30=/0x0/filters:format(jpeg)/pic7588439.jpg</image>
+		<name type="primary" sortindex="1" value="Inferno" />
+		<description>Inferno is a trick-taking card game inspired by the circles of Dante&apos;s Inferno. Players try to avoid taking certain cards that carry penalty points. Numbered and colored cards create a simple but engaging system where you must balance following suit with avoiding the infernal penalties. Collecting all penalty cards in a suit can turn a disaster into a triumph.</description>
+		<yearpublished value="2024" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="120" />
+		<minplaytime value="45" />
+		<maxplaytime value="120" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamemechanic" id="2009" value="Trick-taking" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2661" value="Push Your Luck" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="2232" />
+				<average value="7.88058" />
+				<bayesaverage value="6.56007" />
+				<stddev value="1.46841" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="1173" bayesaverage="6.56007" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="638" bayesaverage="6.71841" />
+				</ranks>
+				<averageweight value="1.4600" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="353945">
+		<thumbnail>https://cf.geekdo-images.com/poTZOHBjq83dzXYqICfJkw__small/img/UrDY_co4wmq0hxhO6J2g9sSfbLg=/fit-in/200x150/filters:strip_icc()/pic7558309.png</thumbnail>
+		<image>https://cf.geekdo-images.com/poTZOHBjq83dzXYqICfJkw__original/img/c2PMyIoGCHBUZEALmzQP54ojHLk=/0x0/filters:format(png)/pic7558309.png</image>
+		<name type="primary" sortindex="1" value="Infiltraitors" />
+		<description>Infiltraitors is a social deduction game where players are agents trying to complete missions while rooting out hidden infiltrators among them. Discuss, vote, and take actions, but beware — the infiltrators are sabotaging your efforts from within. Trust is your most valuable and most dangerous resource.</description>
+		<yearpublished value="2023" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="30" />
+		<minplaytime value="20" />
+		<maxplaytime value="30" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1023" value="Bluffing" />
+		<link type="boardgamecategory" id="1039" value="Deduction" />
+		<link type="boardgamecategory" id="1081" value="Spies / Secret Agents" />
+		<link type="boardgamemechanic" id="2028" value="Hidden Roles" />
+		<link type="boardgamemechanic" id="2017" value="Voting" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="657" />
+				<average value="7.20224" />
+				<bayesaverage value="5.86061" />
+				<stddev value="1.2678" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="4151" bayesaverage="5.86061" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="1268" bayesaverage="5.97068" />
+				</ranks>
+				<averageweight value="1.8000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="392473">
+		<thumbnail>https://cf.geekdo-images.com/zS0JcWZcx-c0IAA4_gTCpg__small/img/FIxNLcxKir7MEZPNg4-O8BW4BNA=/fit-in/200x150/filters:strip_icc()/pic7581384.png</thumbnail>
+		<image>https://cf.geekdo-images.com/zS0JcWZcx-c0IAA4_gTCpg__original/img/FRwyI4qLY4PahEsbcC_hwt9TvBU=/0x0/filters:format(png)/pic7581384.png</image>
+		<name type="primary" sortindex="1" value="Islet" />
+		<description>Islet is a serene tile-placement game where players grow a coral island ecosystem. Place polyomino tiles representing different marine habitats — seagrass, coral, sand, and rock — to create a balanced ecosystem. Score by forming connected groups and fulfilling pattern objectives in this peaceful, strategic puzzle.</description>
+		<yearpublished value="2023" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="40" />
+		<minplaytime value="20" />
+		<maxplaytime value="40" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1009" value="Abstract Strategy" />
+		<link type="boardgamecategory" id="1084" value="Environmental" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2048" value="Pattern Building" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="245" />
+				<average value="6.83873" />
+				<bayesaverage value="5.61713" />
+				<stddev value="1.34888" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="8499" bayesaverage="5.61713" />
+				</ranks>
+				<averageweight value="1.6800" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="70323">
+		<thumbnail>https://cf.geekdo-images.com/m_RzXpHURC0_xLkvRSR_sw__small/img/OfgWmkGJj5BgOO0zFHEtP5CHfbU=/fit-in/200x150/filters:strip_icc()/pic3043734.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/m_RzXpHURC0_xLkvRSR_sw__original/img/hSvWgiRYJCTTuoLOWTW3c8sYtl8=/0x0/filters:format(jpeg)/pic3043734.jpg</image>
+		<name type="primary" sortindex="1" value="King of Tokyo" />
+		<description>King of Tokyo is a dice-rolling game where giant monsters, robots, and aliens compete to be the King of Tokyo. Roll dice Yahtzee-style to attack, heal, gain energy, or score victory points. Occupying Tokyo makes you the target but gives bonus points. Be the last monster standing or the first to 20 points!</description>
+		<yearpublished value="2011" />
+		<minplayers value="2" />
+		<maxplayers value="6" />
+		<playingtime value="30" />
+		<minplaytime value="30" />
+		<maxplaytime value="30" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1046" value="Fighting" />
+		<link type="boardgamecategory" id="1016" value="Science Fiction" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamemechanic" id="2072" value="Dice Rolling" />
+		<link type="boardgamemechanic" id="2661" value="Push Your Luck" />
+		<link type="boardgamemechanic" id="2685" value="Player Elimination" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="75413" />
+				<average value="7.11554" />
+				<bayesaverage value="7.00978" />
+				<stddev value="1.33017" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="482" bayesaverage="7.00978" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="142" bayesaverage="6.9999" />
+				</ranks>
+				<averageweight value="1.4900" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="193512">
+		<thumbnail>https://cf.geekdo-images.com/TSv83Z5IUCCe6YEZvNxasQ__small/img/43P7o9vXvp0nrZCFbZIIIO65nlc=/fit-in/200x150/filters:strip_icc()/pic6970161.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/TSv83Z5IUCCe6YEZvNxasQ__original/img/pLqrnqTlqjJeUHvOZ3nxex1hyYY=/0x0/filters:format(jpeg)/pic6970161.jpg</image>
+		<name type="primary" sortindex="1" value="Kingdom Defenders" />
+		<description>Kingdom Defenders is a cooperative card game where players protect a fantasy kingdom from waves of invaders. Each player controls a hero with unique abilities, playing cards to defend castle walls and launch counter-attacks. Coordinate your limited resources and special powers to survive the onslaught.</description>
+		<yearpublished value="2018" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="90" />
+		<minplaytime value="60" />
+		<maxplaytime value="90" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1010" value="Fantasy" />
+		<link type="boardgamecategory" id="1035" value="Medieval" />
+		<link type="boardgamecategory" id="1046" value="Fighting" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2041" value="Card Play Conflict Resolution" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="515" />
+				<average value="7.55648" />
+				<bayesaverage value="5.85665" />
+				<stddev value="1.36118" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="4190" bayesaverage="5.85665" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="1715" bayesaverage="5.9664" />
+				</ranks>
+				<averageweight value="2.0000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="204583">
+		<thumbnail>https://cf.geekdo-images.com/c0m3gwZTcfKoLI63ASio8g__small/img/4p4Xydg0tze9UFcd6oUbCnVyxCw=/fit-in/200x150/filters:strip_icc()/pic8443569.png</thumbnail>
+		<image>https://cf.geekdo-images.com/c0m3gwZTcfKoLI63ASio8g__original/img/HT6NQPT0cSFcZXjSewtjTO_NBAE=/0x0/filters:format(png)/pic8443569.png</image>
+		<name type="primary" sortindex="1" value="Kingdomino" />
+		<description>In Kingdomino, players are lords seeking new lands to expand their kingdoms. Draft domino-shaped tiles and add them to your 5x5 grid, matching terrain types. Crowns on tiles multiply the size of connected matching terrains for points. A simple, elegant game that plays in 15 minutes with surprising strategic depth.</description>
+		<yearpublished value="2016" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="25" />
+		<minplaytime value="15" />
+		<maxplaytime value="25" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1035" value="Medieval" />
+		<link type="boardgamecategory" id="1086" value="Territory Building" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2676" value="Drafting" />
+		<link type="boardgamemechanic" id="2048" value="Pattern Building" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="52541" />
+				<average value="7.28973" />
+				<bayesaverage value="7.17093" />
+				<stddev value="1.12445" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="326" bayesaverage="7.17093" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="77" bayesaverage="7.18489" />
+				</ranks>
+				<averageweight value="1.2000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="379629">
+		<thumbnail>https://cf.geekdo-images.com/PaYRAlezMGDlLt8LXmR_sQ__small/img/9BXSosnE91-b8tHUEz3Qgfr0aAo=/fit-in/200x150/filters:strip_icc()/pic7857343.png</thumbnail>
+		<image>https://cf.geekdo-images.com/PaYRAlezMGDlLt8LXmR_sQ__original/img/9nndYkVCIDsSHM3CmuiLk-0WCHk=/0x0/filters:format(png)/pic7857343.png</image>
+		<name type="primary" sortindex="1" value="Knarr" />
+		<description>Knarr is a Viking-themed card game where players recruit crew members and send them on expeditions to distant lands. Play cards to your crew to gain resources and abilities, then use those resources to claim destination cards worth victory points. Build an efficient engine of Norse exploration.</description>
+		<yearpublished value="2023" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="30" />
+		<minplaytime value="30" />
+		<maxplaytime value="30" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1008" value="Nautical" />
+		<link type="boardgamecategory" id="1020" value="Exploration" />
+		<link type="boardgamecategory" id="1035" value="Medieval" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2984" value="Open Drafting" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="7621" />
+				<average value="7.46914" />
+				<bayesaverage value="6.98297" />
+				<stddev value="1.07554" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="517" bayesaverage="6.98297" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="107" bayesaverage="7.09387" />
+				</ranks>
+				<averageweight value="1.8100" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="425237">
+		<thumbnail>https://cf.geekdo-images.com/WOm1yhX1fiEiQBibCtl6NQ__small/img/x5WF3GmEcbah_pDzJpzudQMoYu0=/fit-in/200x150/filters:strip_icc()/pic8337016.png</thumbnail>
+		<image>https://cf.geekdo-images.com/WOm1yhX1fiEiQBibCtl6NQ__original/img/jteAOuGz5zLUtuOEa4K8fX5um8s=/0x0/filters:format(png)/pic8337016.png</image>
+		<name type="primary" sortindex="1" value="MADZEMATICZ!" />
+		<description>MADZEMATICZ! is a fast-paced math game where players race to solve arithmetic challenges. Flip cards, spot the correct equations, and slap the answer before your opponents. A fun educational game that sharpens mental math skills for kids and adults alike.</description>
+		<yearpublished value="2024" />
+		<minplayers value="2" />
+		<maxplayers value="2" />
+		<playingtime value="15" />
+		<minplaytime value="15" />
+		<maxplaytime value="15" />
+		<minage value="6" />
+		<link type="boardgamecategory" id="1104" value="Math" />
+		<link type="boardgamecategory" id="1098" value="Number" />
+		<link type="boardgamecategory" id="1030" value="Party Game" />
+		<link type="boardgamecategory" id="1041" value="Children&apos;s Game" />
+		<link type="boardgamemechanic" id="2020" value="Simultaneous Action Selection" />
+		<link type="boardgamemechanic" id="2047" value="Memory" />
+		<link type="boardgamemechanic" id="2661" value="Push Your Luck" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="6" />
+				<average value="6.91667" />
+				<bayesaverage value="0" />
+				<stddev value="2.45657" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="Not Ranked" bayesaverage="Not Ranked" />
+				</ranks>
+				<averageweight value="1.0000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="319348">
+		<thumbnail>https://cf.geekdo-images.com/d3vAnJjry1N9iAZ0BUKpsQ__small/img/I9YdWxRXmdvN3r5RTGMUsT0B638=/fit-in/200x150/filters:strip_icc()/pic8963351.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/d3vAnJjry1N9iAZ0BUKpsQ__original/img/u25j1ir6pl8D1N1iCAoubbgWiYU=/0x0/filters:format(jpeg)/pic8963351.jpg</image>
+		<name type="primary" sortindex="1" value="Magna Roma" />
+		<description>Magna Roma is a tile-placement game where players build the great city of Rome. Place building tiles on a shared grid, construct roads and aqueducts, and develop your personal player board. Chain buildings together for powerful combos and fulfill objective cards to earn the most victory points.</description>
+		<yearpublished value="2022" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="90" />
+		<minplaytime value="30" />
+		<maxplaytime value="90" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1050" value="Ancient" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2081" value="Network and Route Building" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<link type="boardgamemechanic" id="2850" value="Income" />
+		<link type="boardgamemechanic" id="2897" value="Engine Building" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="441" />
+				<average value="7.17272" />
+				<bayesaverage value="5.74483" />
+				<stddev value="1.40191" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="5462" bayesaverage="5.74483" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="2027" bayesaverage="5.82496" />
+				</ranks>
+				<averageweight value="2.5100" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="318977">
+		<thumbnail>https://cf.geekdo-images.com/bLL3P-G25nIUkFjHxfJfnw__small/img/XY_Z5rRJe3IPLRfOvWp70OM2B68=/fit-in/200x150/filters:strip_icc()/pic7632081.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/bLL3P-G25nIUkFjHxfJfnw__original/img/HBEhgjfb0QcF9pFrdJ8VYhBapoU=/0x0/filters:format(jpeg)/pic7632081.jpg</image>
+		<name type="primary" sortindex="1" value="MicroMacro: Crime City" />
+		<description>MicroMacro: Crime City is a cooperative detective game played on a giant city map filled with hundreds of tiny illustrated characters. Solve 16 criminal cases by tracing character movements across the map — following suspects, identifying weapons, and reconstructing crime scenes using only your eyes and deductive reasoning.</description>
+		<yearpublished value="2020" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="45" />
+		<minplaytime value="15" />
+		<maxplaytime value="45" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1039" value="Deduction" />
+		<link type="boardgamecategory" id="1040" value="Murder / Mystery" />
+		<link type="boardgamecategory" id="1028" value="Puzzle" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="19401" />
+				<average value="7.45357" />
+				<bayesaverage value="7.2196" />
+				<stddev value="1.24303" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="284" bayesaverage="7.2196" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="58" bayesaverage="7.27307" />
+				</ranks>
+				<averageweight value="1.1200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="303057">
+		<thumbnail>https://cf.geekdo-images.com/Dkd1DKelqroYz21llrqJ_A__small/img/Z2ABrbZpzhogn2V3uyZMAuUf5OA=/fit-in/200x150/filters:strip_icc()/pic5252922.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/Dkd1DKelqroYz21llrqJ_A__original/img/ODz-pc-p39DCJ2wl5rzSBC0gON8=/0x0/filters:format(jpeg)/pic5252922.jpg</image>
+		<name type="primary" sortindex="1" value="Pan Am" />
+		<description>Pan Am is a strategy game that tells the story of the rise of aviation&apos;s most iconic airline. Players run competing airlines, bidding for routes, acquiring planes, and building networks — but Pan Am is always expanding and will buy your routes at a premium. Invest in Pan Am stock at the right time to win.</description>
+		<yearpublished value="2020" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="60" />
+		<minplaytime value="60" />
+		<maxplaytime value="60" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1052" value="Aviation / Flight" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1011" value="Transportation" />
+		<link type="boardgamemechanic" id="2082" value="Worker Placement" />
+		<link type="boardgamemechanic" id="2012" value="Auction / Bidding" />
+		<link type="boardgamemechanic" id="2081" value="Network and Route Building" />
+		<link type="boardgamemechanic" id="2831" value="Events" />
+		<link type="boardgamemechanic" id="2897" value="Engine Building" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="8089" />
+				<average value="7.52609" />
+				<bayesaverage value="7.03558" />
+				<stddev value="1.07608" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="453" bayesaverage="7.03558" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="308" bayesaverage="7.11478" />
+				</ranks>
+				<averageweight value="2.4000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="398996">
+		<thumbnail>https://cf.geekdo-images.com/4qSXZhz2Y57goC704eI0RQ__small/img/6JqLZVjkwyFzmm-A4k6obDHforc=/fit-in/200x150/filters:strip_icc()/pic7684828.png</thumbnail>
+		<image>https://cf.geekdo-images.com/4qSXZhz2Y57goC704eI0RQ__original/img/KDRsfzJBwpAzzdV0KsnTvzywW-Y=/0x0/filters:format(png)/pic7684828.png</image>
+		<name type="primary" sortindex="1" value="Panda Royale" />
+		<description>Panda Royale is a dice game where adorable but fierce pandas compete in a royal battle. Roll dice to collect bamboo, attack opponents, or defend yourself. Push your luck for bigger rewards, but watch out — other pandas are hungry too! A light, fun game with charming panda artwork.</description>
+		<yearpublished value="2024" />
+		<minplayers value="2" />
+		<maxplayers value="10" />
+		<playingtime value="30" />
+		<minplaytime value="20" />
+		<maxplaytime value="30" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamecategory" id="1046" value="Fighting" />
+		<link type="boardgamecategory" id="1079" value="Humor" />
+		<link type="boardgamecategory" id="1017" value="Dice" />
+		<link type="boardgamemechanic" id="2072" value="Dice Rolling" />
+		<link type="boardgamemechanic" id="2661" value="Push Your Luck" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2686" value="Take That" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="929" />
+				<average value="7.32863" />
+				<bayesaverage value="5.999" />
+				<stddev value="1.41749" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="3166" bayesaverage="5.999" />
+				</ranks>
+				<averageweight value="1.4700" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="417323">
+		<thumbnail>https://cf.geekdo-images.com/-s_z7CrUOywLKfc-2OznRg__small/img/k98i12tmvXLaWKdirIMtXr6RtaM=/fit-in/200x150/filters:strip_icc()/pic8170512.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/-s_z7CrUOywLKfc-2OznRg__original/img/jg0U8cCRyH-VzRggrm_AU-32e0g=/0x0/filters:format(jpeg)/pic8170512.jpg</image>
+		<name type="primary" sortindex="1" value="Panda Spin" />
+		<description>Panda Spin is a fast and fun dexterity game where players spin panda figures and race to complete challenges. Quick reflexes and a steady hand are key as you compete in various mini-games featuring adorable panda characters.</description>
+		<yearpublished value="2024" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="40" />
+		<minplaytime value="25" />
+		<maxplaytime value="40" />
+		<minage value="6" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamecategory" id="1041" value="Children&apos;s Game" />
+		<link type="boardgamecategory" id="1030" value="Party Game" />
+		<link type="boardgamemechanic" id="2060" value="Physical Dexterity" />
+		<link type="boardgamemechanic" id="2020" value="Simultaneous Action Selection" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="1501" />
+				<average value="7.11614" />
+				<bayesaverage value="6.12307" />
+				<stddev value="1.5125" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="2531" bayesaverage="6.12307" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="1215" bayesaverage="6.25292" />
+				</ranks>
+				<averageweight value="1.0000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="369388">
+		<thumbnail>https://cf.geekdo-images.com/KuqHs5EA7yAnUMmHpaP8-Q__small/img/qT7Zljils2mjridRCmB93wa8meI=/fit-in/200x150/filters:strip_icc()/pic7030213.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/KuqHs5EA7yAnUMmHpaP8-Q__original/img/7TO9gLlFplbZjPpt-kZrxrg2cmc=/0x0/filters:format(jpeg)/pic7030213.jpg</image>
+		<name type="primary" sortindex="1" value="Penguin Airlines" />
+		<description>Penguin Airlines is a light card game where players manage penguin-run airline routes. Collect sets of destination cards, manage your hand of flight crew penguins, and complete routes for points. A charming family game with simple rules and just enough decisions to keep everyone engaged.</description>
+		<yearpublished value="2023" />
+		<minplayers value="2" />
+		<maxplayers value="8" />
+		<playingtime value="30" />
+		<minplaytime value="15" />
+		<maxplaytime value="30" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamecategory" id="1052" value="Aviation / Flight" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2661" value="Push Your Luck" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="568" />
+				<average value="6.89747" />
+				<bayesaverage value="5.73689" />
+				<stddev value="1.45987" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="5586" bayesaverage="5.73689" />
+					<rank type="family" id="5498" name="partygames" friendlyname="Party Game Rank" value="330" bayesaverage="5.99186" />
+				</ranks>
+				<averageweight value="1.2100" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="180899">
+		<thumbnail>https://cf.geekdo-images.com/c7eDqWqXn1Gxb3R8nmQkgA__small/img/C5Ll5quZC5FAOWQVV4Qym0aHQRs=/fit-in/200x150/filters:strip_icc()/pic7647050.png</thumbnail>
+		<image>https://cf.geekdo-images.com/c7eDqWqXn1Gxb3R8nmQkgA__original/img/uM8t9FDCb0YlByDKx4DbTvjmLdI=/0x0/filters:format(png)/pic7647050.png</image>
+		<name type="primary" sortindex="1" value="Ponzi Scheme" />
+		<description>Ponzi Scheme is an economic game where players are fraudulent financiers trying to keep their Ponzi schemes running as long as possible. Borrow from new investors to pay old debts, trade industries, and manage your cash flow. The question isn&apos;t if you&apos;ll go bankrupt — it&apos;s when. The last player standing wins.</description>
+		<yearpublished value="2015" />
+		<minplayers value="3" />
+		<maxplayers value="5" />
+		<playingtime value="90" />
+		<minplaytime value="60" />
+		<maxplaytime value="90" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1026" value="Negotiation" />
+		<link type="boardgamemechanic" id="2019" value="Negotiation" />
+		<link type="boardgamemechanic" id="2008" value="Trading" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2850" value="Income" />
+		<link type="boardgamemechanic" id="2903" value="Commodity Speculation" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="3368" />
+				<average value="7.135" />
+				<bayesaverage value="6.46363" />
+				<stddev value="1.37043" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="1397" bayesaverage="6.46363" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="779" bayesaverage="6.59315" />
+				</ranks>
+				<averageweight value="2.6200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="3076">
+		<thumbnail>https://cf.geekdo-images.com/QFiIRd2kimaMqTyWsX0aUg__small/img/5fLo89ChZH6Wzukk36bhZ-EpBS0=/fit-in/200x150/filters:strip_icc()/pic158548.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/QFiIRd2kimaMqTyWsX0aUg__original/img/DOgIp57F7tKZvxeITGAd3e_Q9as=/0x0/filters:format(jpeg)/pic158548.jpg</image>
+		<name type="primary" sortindex="1" value="Puerto Rico" />
+		<description>Puerto Rico is a classic euro game of production and shipping. Players select roles that grant all players an action, with the active player receiving a bonus. Build plantations, man production buildings with colonists, produce goods, trade at the trading house, or ship goods for victory points. Strategic role selection is the key to victory.</description>
+		<yearpublished value="2002" />
+		<minplayers value="3" />
+		<maxplayers value="5" />
+		<playingtime value="150" />
+		<minplaytime value="90" />
+		<maxplaytime value="150" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1013" value="Farming" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamemechanic" id="2079" value="Variable Phase Order" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2008" value="Trading" />
+		<link type="boardgamemechanic" id="2850" value="Income" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="73903" />
+				<average value="7.89893" />
+				<bayesaverage value="7.75358" />
+				<stddev value="1.38982" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="55" bayesaverage="7.75358" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="54" bayesaverage="7.7425" />
+				</ranks>
+				<averageweight value="3.2900" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="108687">
+		<thumbnail>https://cf.geekdo-images.com/cZ8h5HpbD6asCJuGuuuT-w__small/img/1GUPtGNfDR_CmbM7SYv2ABV1AeQ=/fit-in/200x150/filters:strip_icc()/pic4887895.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/cZ8h5HpbD6asCJuGuuuT-w__original/img/eBJRy_g1zc1ZKBeqSqrqZpnfs6A=/0x0/filters:format(jpeg)/pic4887895.jpg</image>
+		<name type="primary" sortindex="1" value="Puerto Rico" />
+		<description>Puerto Rico is a classic euro game of production and shipping set on the island of Puerto Rico. Players select roles that grant all players an action, with the active player receiving a bonus. Build plantations, man production buildings with colonists, produce goods, trade at the trading house, or ship goods for victory points.</description>
+		<yearpublished value="2011" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="150" />
+		<minplaytime value="90" />
+		<maxplaytime value="150" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1013" value="Farming" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamemechanic" id="2079" value="Variable Phase Order" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2008" value="Trading" />
+		<link type="boardgamemechanic" id="2850" value="Income" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="6039" />
+				<average value="8.30903" />
+				<bayesaverage value="7.48448" />
+				<stddev value="1.47396" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="Not Ranked" bayesaverage="7.48448" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="Not Ranked" bayesaverage="7.642" />
+				</ranks>
+				<averageweight value="3.2900" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="217372">
+		<thumbnail>https://cf.geekdo-images.com/b5VyYjNfAxJ4Z-Dx2UWlqg__small/img/TB_X7b0PIfykfnI12rm3bt6rnGY=/fit-in/200x150/filters:strip_icc()/pic7945692.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/b5VyYjNfAxJ4Z-Dx2UWlqg__original/img/-GqQ0EOfg9e3yFVpKgJbPdlunso=/0x0/filters:format(jpeg)/pic7945692.jpg</image>
+		<name type="primary" sortindex="1" value="The Quest for El Dorado" />
+		<description>The Quest for El Dorado is a deck-building race game where players lead expeditions through the jungles of South America toward the legendary city of gold. Buy cards to improve your deck, then play them to move through different terrains. The modular board ensures a different race every game.</description>
+		<yearpublished value="2017" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="60" />
+		<minplaytime value="30" />
+		<maxplaytime value="60" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1022" value="Adventure" />
+		<link type="boardgamecategory" id="1020" value="Exploration" />
+		<link type="boardgamecategory" id="1031" value="Racing" />
+		<link type="boardgamemechanic" id="2664" value="Deck, Bag, and Pool Building" />
+		<link type="boardgamemechanic" id="2876" value="Race" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2011" value="Modular Board" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="32017" />
+				<average value="7.71521" />
+				<bayesaverage value="7.53403" />
+				<stddev value="1.09788" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="121" bayesaverage="7.53403" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="19" bayesaverage="7.57363" />
+				</ranks>
+				<averageweight value="1.9300" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="429851">
+		<thumbnail>https://cf.geekdo-images.com/4o4CKLKGph6AB9FiAdQHGA__small/img/MrERFLSLT9SwQKMBokxY7nEqfsI=/fit-in/200x150/filters:strip_icc()/pic8794114.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/4o4CKLKGph6AB9FiAdQHGA__original/img/EbaFdkjCpjwXEgv0qd7W_oKxAcU=/0x0/filters:format(jpeg)/pic8794114.jpg</image>
+		<name type="primary" sortindex="1" value="Quorum" />
+		<description>Quorum is a political negotiation game where players represent factions in a parliament, forming coalitions and pushing agendas. Negotiate deals, trade votes, and pass legislation that benefits your faction. But alliances are fragile, and the political landscape shifts every round.</description>
+		<yearpublished value="2025" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="45" />
+		<minplaytime value="45" />
+		<maxplaytime value="45" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1001" value="Political" />
+		<link type="boardgamecategory" id="1026" value="Negotiation" />
+		<link type="boardgamemechanic" id="2019" value="Negotiation" />
+		<link type="boardgamemechanic" id="2017" value="Voting" />
+		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="446" />
+				<average value="7.04711" />
+				<bayesaverage value="5.70415" />
+				<stddev value="1.36143" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="6150" bayesaverage="5.70415" />
+				</ranks>
+				<averageweight value="2.0300" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="28143">
+		<thumbnail>https://cf.geekdo-images.com/-DOqixs8uwKUvvWPKI4f9w__small/img/xLs-ldTPwaADbvzkOpF0sgWzwck=/fit-in/200x150/filters:strip_icc()/pic5261714.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/-DOqixs8uwKUvvWPKI4f9w__original/img/Vh-DCkTPa8OU45LaJdUywwhiYqE=/0x0/filters:format(jpeg)/pic5261714.jpg</image>
+		<name type="primary" sortindex="1" value="Race for the Galaxy" />
+		<description>Race for the Galaxy is a card game where players build galactic civilizations by playing cards representing worlds and developments. Cards serve as both the things you build and the currency to pay for them. Each round, players simultaneously choose phases, and only the chosen phases occur. A deep, fast-playing engine builder.</description>
+		<yearpublished value="2007" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="60" />
+		<minplaytime value="30" />
+		<maxplaytime value="60" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1016" value="Science Fiction" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1015" value="Civilization" />
+		<link type="boardgamecategory" id="1113" value="Space Exploration" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2020" value="Simultaneous Action Selection" />
+		<link type="boardgamemechanic" id="2079" value="Variable Phase Order" />
+		<link type="boardgamemechanic" id="2897" value="Engine Building" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="58599" />
+				<average value="7.73774" />
+				<bayesaverage value="7.61844" />
+				<stddev value="1.4647" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="94" bayesaverage="7.61844" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="79" bayesaverage="7.6207" />
+				</ranks>
+				<averageweight value="2.9800" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="314971">
+		<thumbnail>https://cf.geekdo-images.com/GI_7QfgwhhnmCaGfhOK4gQ__small/img/esrj-BF3TwzdNu139hhp7Xr6UZE=/fit-in/200x150/filters:strip_icc()/pic5545298.png</thumbnail>
+		<image>https://cf.geekdo-images.com/GI_7QfgwhhnmCaGfhOK4gQ__original/img/YbIGacHKMBWP_6KwZFugjJ_L0WE=/0x0/filters:format(png)/pic5545298.png</image>
+		<name type="primary" sortindex="1" value="Ramen! Ramen!" />
+		<description>Ramen! Ramen! is a card game about crafting the perfect bowl of ramen. Collect ingredient cards — noodles, broth, toppings, and spices — to fulfill recipe objectives. Draft from the market, manage your hand, and create the most delicious combinations to score the most points.</description>
+		<yearpublished value="2021" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="30" />
+		<minplaytime value="30" />
+		<maxplaytime value="30" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2984" value="Open Drafting" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="318" />
+				<average value="6.87547" />
+				<bayesaverage value="5.64957" />
+				<stddev value="1.47102" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="7425" bayesaverage="5.64957" />
+				</ranks>
+				<averageweight value="1.5200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="1513">
+		<thumbnail>https://cf.geekdo-images.com/1hw9kRfQg849_J5mjPHuBQ__small/img/A8YR8VBRNcV8QfA46JgyHAw1T6g=/fit-in/200x150/filters:strip_icc()/pic487045.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/1hw9kRfQg849_J5mjPHuBQ__original/img/2neiZgMUdbeliPtHUp-lSCfAOt0=/0x0/filters:format(jpeg)/pic487045.jpg</image>
+		<name type="primary" sortindex="1" value="The Republic of Rome" />
+		<description>The Republic of Rome is a grand political game spanning the history of the Roman Republic. Players control factions of senators, jockeying for consulships, governorships, and military commands. Negotiate alliances, prosecute rivals, and lead Rome&apos;s legions — but if Rome falls to external threats or civil war, everyone loses.</description>
+		<yearpublished value="1990" />
+		<minplayers value="1" />
+		<maxplayers value="6" />
+		<playingtime value="300" />
+		<minplaytime value="300" />
+		<maxplaytime value="300" />
+		<minage value="14" />
+		<link type="boardgamecategory" id="1050" value="Ancient" />
+		<link type="boardgamecategory" id="1001" value="Political" />
+		<link type="boardgamecategory" id="1026" value="Negotiation" />
+		<link type="boardgamecategory" id="1019" value="Wargame" />
+		<link type="boardgamemechanic" id="2019" value="Negotiation" />
+		<link type="boardgamemechanic" id="2017" value="Voting" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2831" value="Events" />
+		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="4317" />
+				<average value="7.53808" />
+				<bayesaverage value="6.75473" />
+				<stddev value="1.78664" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="817" bayesaverage="6.75473" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="493" bayesaverage="6.86088" />
+				</ranks>
+				<averageweight value="4.0700" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="427278">
+		<thumbnail>https://cf.geekdo-images.com/zCvWgidv-VPhYiJY1qcQ_g__small/img/dNZoMz03TCdWWjyGN7XlgEPROOw=/fit-in/200x150/filters:strip_icc()/pic8394529.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/zCvWgidv-VPhYiJY1qcQ_g__original/img/XU1EdapQzmB1Z-507szM5rMKWoo=/0x0/filters:format(jpeg)/pic8394529.jpg</image>
+		<name type="primary" sortindex="1" value="Roaring 20s" />
+		<description>Roaring 20s is a card game set during the jazz age of the 1920s. Players compete to build the most glamorous collection of speakeasy attractions, hiring performers and acquiring contraband through auctions. A light, thematic game with art deco artwork.</description>
+		<yearpublished value="2024" />
+		<minplayers value="3" />
+		<maxplayers value="5" />
+		<playingtime value="30" />
+		<minplaytime value="20" />
+		<maxplaytime value="30" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2012" value="Auction / Bidding" />
+		<link type="boardgamemechanic" id="2661" value="Push Your Luck" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="381" />
+				<average value="6.49016" />
+				<bayesaverage value="5.63721" />
+				<stddev value="1.20912" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="7801" bayesaverage="5.63721" />
+				</ranks>
+				<averageweight value="1.5000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="358284">
+		<thumbnail>https://cf.geekdo-images.com/Xy53W381g209GD8S2CQnkQ__small/img/32MC-kfQ-78ooBPfk-bRW4j0DQc=/fit-in/200x150/filters:strip_icc()/pic7412285.png</thumbnail>
+		<image>https://cf.geekdo-images.com/Xy53W381g209GD8S2CQnkQ__original/img/-IXdtXHc4URL4DHbVhQ6XLPBbn8=/0x0/filters:format(png)/pic7412285.png</image>
+		<name type="primary" sortindex="1" value="Rome in a Day" />
+		<description>Rome in a Day is a tile-placement game where players contribute to building ancient Rome. Draft and place building tiles on a shared map, creating neighborhoods and connecting landmarks. Score points for completed areas, collected resources, and matching objectives in this accessible city-building game.</description>
+		<yearpublished value="2023" />
+		<minplayers value="2" />
+		<maxplayers value="5" />
+		<playingtime value="20" />
+		<minplaytime value="15" />
+		<maxplaytime value="20" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1050" value="Ancient" />
+		<link type="boardgamecategory" id="1029" value="City Building" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2984" value="Open Drafting" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="930" />
+				<average value="7.0058" />
+				<bayesaverage value="5.92634" />
+				<stddev value="1.14198" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="3628" bayesaverage="5.92634" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="1100" bayesaverage="6.05286" />
+				</ranks>
+				<averageweight value="1.8200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="237182">
+		<thumbnail>https://cf.geekdo-images.com/JUAUWaVUzeBgzirhZNmHHw__small/img/ACovMZzGGIsBRyEQXFnsT8282NM=/fit-in/200x150/filters:strip_icc()/pic4254509.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/JUAUWaVUzeBgzirhZNmHHw__original/img/E0s2LvtFA1L5YKk-_44D4u2VD2s=/0x0/filters:format(jpeg)/pic4254509.jpg</image>
+		<name type="primary" sortindex="1" value="Root" />
+		<description>Root is a game of woodland might and right. Each player controls a unique faction with completely different rules, goals, and playstyles — from the expansionist Marquise de Cat to the guerrilla Woodland Alliance. Navigate the forest clearings through area control, card play, and asymmetric warfare in this acclaimed strategy game.</description>
+		<yearpublished value="2018" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="90" />
+		<minplaytime value="60" />
+		<maxplaytime value="90" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamecategory" id="1010" value="Fantasy" />
+		<link type="boardgamecategory" id="1019" value="Wargame" />
+		<link type="boardgamecategory" id="1001" value="Political" />
+		<link type="boardgamemechanic" id="2885" value="Asymmetric" />
+		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2046" value="Area Movement" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="62902" />
+				<average value="8.06941" />
+				<bayesaverage value="7.88002" />
+				<stddev value="1.48431" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="34" bayesaverage="7.88002" />
+					<rank type="family" id="4664" name="wargames" friendlyname="War Game Rank" value="13" bayesaverage="7.7436" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="36" bayesaverage="7.84406" />
+				</ranks>
+				<averageweight value="3.7200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="144733">
+		<thumbnail>https://cf.geekdo-images.com/B0oEVgeqs4_rT8oyb1_Juw__small/img/oZkHYUMtcGVwg_gz6OjtuiD3vmU=/fit-in/200x150/filters:strip_icc()/pic1772936.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/B0oEVgeqs4_rT8oyb1_Juw__original/img/EnBmUkDKSbcBusI6nVRczadYs0M=/0x0/filters:format(jpeg)/pic1772936.jpg</image>
+		<name type="primary" sortindex="1" value="Russian Railroads" />
+		<description>Russian Railroads is a heavy worker placement game where players develop railway lines across Russia. Extend your tracks on three different routes, advance your industry marker, hire engineers for special abilities, and build engines to boost your scoring. A deeply strategic game with multiple paths to victory and satisfying engine-building mechanics.</description>
+		<yearpublished value="2013" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="120" />
+		<minplaytime value="120" />
+		<maxplaytime value="120" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1034" value="Trains" />
+		<link type="boardgamecategory" id="1088" value="Industry / Manufacturing" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamemechanic" id="2082" value="Worker Placement" />
+		<link type="boardgamemechanic" id="2897" value="Engine Building" />
+		<link type="boardgamemechanic" id="2850" value="Income" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="18816" />
+				<average value="7.72525" />
+				<bayesaverage value="7.46254" />
+				<stddev value="1.29832" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="150" bayesaverage="7.46254" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="116" bayesaverage="7.52271" />
+				</ranks>
+				<averageweight value="3.4700" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="330769">
+		<thumbnail>https://cf.geekdo-images.com/a1yDs19lCPJgUSNQjbfsmA__small/img/0rAl0eyTxyixg74KhGHh47eNaQQ=/fit-in/200x150/filters:strip_icc()/pic5971149.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/a1yDs19lCPJgUSNQjbfsmA__original/img/Aq6oi8Th3E30yKM18hq0HOR1ChY=/0x0/filters:format(jpeg)/pic5971149.jpg</image>
+		<name type="primary" sortindex="1" value="Saladin" />
+		<description>Saladin is a historical strategy game set during the era of the Crusades. Players take on the roles of leaders vying for control of the Holy Land, managing troops, playing event cards, and claiming territories. Balance military might with diplomatic cunning in this area control game.</description>
+		<yearpublished value="2022" />
+		<minplayers value="2" />
+		<maxplayers value="2" />
+		<playingtime value="60" />
+		<minplaytime value="45" />
+		<maxplaytime value="60" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1035" value="Medieval" />
+		<link type="boardgamecategory" id="1019" value="Wargame" />
+		<link type="boardgamecategory" id="1001" value="Political" />
+		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2046" value="Area Movement" />
+		<link type="boardgamemechanic" id="2831" value="Events" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="390" />
+				<average value="7.15661" />
+				<bayesaverage value="5.72364" />
+				<stddev value="1.36727" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="5799" bayesaverage="5.72364" />
+					<rank type="family" id="4664" name="wargames" friendlyname="War Game Rank" value="617" bayesaverage="6.39081" />
+				</ranks>
+				<averageweight value="2.5300" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="396542">
+		<thumbnail>https://cf.geekdo-images.com/R7GZPK79bMdsCZFamu7Z7A__small/img/YedpMxJGgeYiywHl4wW9_JlPtfM=/fit-in/200x150/filters:strip_icc()/pic7653476.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/R7GZPK79bMdsCZFamu7Z7A__original/img/4nFW02x2VogCfuoGk6Zv9H7X9hI=/0x0/filters:format(jpeg)/pic7653476.jpg</image>
+		<name type="primary" sortindex="1" value="The Same Game" />
+		<description>The Same Game is a pattern-matching party game where players simultaneously try to identify matching elements across revealed cards. Quick observation and a sharp memory are key as you race to spot the same items faster than your opponents.</description>
+		<yearpublished value="2023" />
+		<minplayers value="3" />
+		<maxplayers value="6" />
+		<playingtime value="45" />
+		<minplaytime value="30" />
+		<maxplaytime value="45" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1009" value="Abstract Strategy" />
+		<link type="boardgamecategory" id="1030" value="Party Game" />
+		<link type="boardgamecategory" id="1028" value="Puzzle" />
+		<link type="boardgamemechanic" id="2048" value="Pattern Building" />
+		<link type="boardgamemechanic" id="2020" value="Simultaneous Action Selection" />
+		<link type="boardgamemechanic" id="2047" value="Memory" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="828" />
+				<average value="7.13925" />
+				<bayesaverage value="5.93046" />
+				<stddev value="1.28038" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="3609" bayesaverage="5.93046" />
+				</ranks>
+				<averageweight value="1.1800" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="394340">
+		<thumbnail>https://cf.geekdo-images.com/RHDzphQrPdEYs87OZj6-Xw__small/img/aQyPs9Uk2krzDu6H4cmCy-84jPY=/fit-in/200x150/filters:strip_icc()/pic7615658.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/RHDzphQrPdEYs87OZj6-Xw__original/img/14ORG7cAf3olXCOMNNhmpAef0u0=/0x0/filters:format(jpeg)/pic7615658.jpg</image>
+		<name type="primary" sortindex="1" value="SCOPE Panzer" />
+		<description>SCOPE Panzer is a two-player card game simulating World War II tank combat through a sniper scope. Players simultaneously select and reveal action cards to maneuver their tanks, aim shots, and fire. A tense, quick-playing tactical game that captures the cat-and-mouse nature of armored warfare.</description>
+		<yearpublished value="2023" />
+		<minplayers value="2" />
+		<maxplayers value="2" />
+		<playingtime value="15" />
+		<minplaytime value="10" />
+		<maxplaytime value="15" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1019" value="Wargame" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2041" value="Card Play Conflict Resolution" />
+		<link type="boardgamemechanic" id="2020" value="Simultaneous Action Selection" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="92" />
+				<average value="7.20978" />
+				<bayesaverage value="5.54655" />
+				<stddev value="1.50485" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="13548" bayesaverage="5.54655" />
+				</ranks>
+				<averageweight value="1.8200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="319807">
+		<thumbnail>https://cf.geekdo-images.com/XdXFnbesrDbKVlhLS64LHw__small/img/__dDwotcUJz2Oj5lgXAaRxwmnys=/fit-in/200x150/filters:strip_icc()/pic5667351.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/XdXFnbesrDbKVlhLS64LHw__original/img/1d3wL7riZP_6Qum67BjQKNxrscM=/0x0/filters:format(jpeg)/pic5667351.jpg</image>
+		<name type="primary" sortindex="1" value="Shogun no Katana" />
+		<description>In Shogun no Katana, players are master swordsmiths in feudal Japan, crafting legendary katanas for the Shogun. Assign workers to gather materials, forge blades, and decorate hilts and scabbards. Fulfill commissions by completing katanas that match specific requirements, building your reputation as the finest swordsmith in Japan.</description>
+		<yearpublished value="2023" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="180" />
+		<minplaytime value="60" />
+		<maxplaytime value="180" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1035" value="Medieval" />
+		<link type="boardgamecategory" id="1088" value="Industry / Manufacturing" />
+		<link type="boardgamemechanic" id="2082" value="Worker Placement" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2932" value="Contracts" />
+		<link type="boardgamemechanic" id="2897" value="Engine Building" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="1365" />
+				<average value="7.75958" />
+				<bayesaverage value="6.29637" />
+				<stddev value="1.25099" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="1857" bayesaverage="6.29637" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="916" bayesaverage="6.47331" />
+				</ranks>
+				<averageweight value="3.0300" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="169768">
+		<thumbnail>https://cf.geekdo-images.com/q3Y07_uos22Ia8gpCE0Uww__small/img/-OCaOSF4eRjZx8S-giLBS8mY_sA=/fit-in/200x150/filters:strip_icc()/pic3710620.png</thumbnail>
+		<image>https://cf.geekdo-images.com/q3Y07_uos22Ia8gpCE0Uww__original/img/mindvBezW3cGbhT-qxNAAxkULio=/0x0/filters:format(png)/pic3710620.png</image>
+		<name type="primary" sortindex="1" value="Space Opera" />
+		<description>Space Opera is a sci-fi adventure game where players captain ships exploring the galaxy. Travel between star systems, complete missions, trade resources, and engage in space combat. Each captain has unique abilities that shape your approach to galactic exploration.</description>
+		<yearpublished value="2017" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="90" />
+		<minplaytime value="30" />
+		<maxplaytime value="90" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1016" value="Science Fiction" />
+		<link type="boardgamecategory" id="1113" value="Space Exploration" />
+		<link type="boardgamecategory" id="1022" value="Adventure" />
+		<link type="boardgamecategory" id="1020" value="Exploration" />
+		<link type="boardgamemechanic" id="2046" value="Area Movement" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2072" value="Dice Rolling" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="79" />
+				<average value="6.18869" />
+				<bayesaverage value="5.50681" />
+				<stddev value="2.21642" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="23407" bayesaverage="5.50681" />
+				</ranks>
+				<averageweight value="2.4800" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="232493">
+		<thumbnail>https://cf.geekdo-images.com/oW4cRupkS6aXN9NOpHwRHg__small/img/wqL5IpV5ALQtdsaYS2GWPfYgPnI=/fit-in/200x150/filters:strip_icc()/pic3683723.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/oW4cRupkS6aXN9NOpHwRHg__original/img/-ZPglO-EMMPThVfhvzzipUGAbv8=/0x0/filters:format(jpeg)/pic3683723.jpg</image>
+		<name type="primary" sortindex="1" value="Super Voxel Raiders" />
+		<description>Super Voxel Raiders is a cooperative dungeon-crawling game with retro pixel-art aesthetics. Players control unique heroes raiding procedurally-generated dungeons, rolling dice for combat and exploration. Work together to defeat the dungeon boss before time runs out in this love letter to classic video games.</description>
+		<yearpublished value="2017" />
+		<minplayers value="2" />
+		<maxplayers value="2" />
+		<playingtime value="90" />
+		<minplaytime value="60" />
+		<maxplaytime value="90" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1022" value="Adventure" />
+		<link type="boardgamecategory" id="1020" value="Exploration" />
+		<link type="boardgamecategory" id="1016" value="Science Fiction" />
+		<link type="boardgamemechanic" id="2023" value="Cooperative Game" />
+		<link type="boardgamemechanic" id="2072" value="Dice Rolling" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2011" value="Modular Board" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="4" />
+				<average value="9" />
+				<bayesaverage value="0" />
+				<stddev value="1" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="Not Ranked" bayesaverage="Not Ranked" />
+				</ranks>
+				<averageweight value="2.0000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="427084">
+		<thumbnail>https://cf.geekdo-images.com/XKNqw6mBwcVIrD9z8OLerw__small/img/EnTQSYbfi9rpgTk9tHTD8IN6ofA=/fit-in/200x150/filters:strip_icc()/pic8371127.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/XKNqw6mBwcVIrD9z8OLerw__original/img/eaLve--ksL3MJkvsPTS02OAEvbQ=/0x0/filters:format(jpeg)/pic8371127.jpg</image>
+		<name type="primary" sortindex="1" value="Superstore 3000" />
+		<description>Superstore 3000 is a card game set in a futuristic intergalactic supermarket. Players are store managers stocking shelves with exotic alien products, managing supply chains, and fulfilling customer orders. Collect sets of products and arrange your store layout for maximum efficiency and profit.</description>
+		<yearpublished value="2024" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="45" />
+		<minplaytime value="30" />
+		<maxplaytime value="45" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1079" value="Humor" />
+		<link type="boardgamecategory" id="1016" value="Science Fiction" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2984" value="Open Drafting" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="519" />
+				<average value="6.34873" />
+				<bayesaverage value="5.64069" />
+				<stddev value="1.4035" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="7697" bayesaverage="5.64069" />
+				</ranks>
+				<averageweight value="1.5000" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="167791">
+		<thumbnail>https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__small/img/BTxqxgYay5tHJfVoJ2NF5g43_gA=/fit-in/200x150/filters:strip_icc()/pic3536616.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__original/img/thIqWDnH9utKuoKVEUqveDixprI=/0x0/filters:format(jpeg)/pic3536616.jpg</image>
+		<name type="primary" sortindex="1" value="Terraforming Mars" />
+		<description>In Terraforming Mars, players control corporations working to make Mars habitable. Raise the temperature, create oceans, and develop greenery by playing project cards and managing income streams. Over generations, build an economic engine while contributing to three global parameters. With over 200 unique project cards, every game unfolds differently.</description>
+		<yearpublished value="2016" />
+		<minplayers value="1" />
+		<maxplayers value="5" />
+		<playingtime value="120" />
+		<minplaytime value="120" />
+		<maxplaytime value="120" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1016" value="Science Fiction" />
+		<link type="boardgamecategory" id="1113" value="Space Exploration" />
+		<link type="boardgamecategory" id="1086" value="Territory Building" />
+		<link type="boardgamecategory" id="1084" value="Environmental" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2897" value="Engine Building" />
+		<link type="boardgamemechanic" id="2002" value="Tile Placement" />
+		<link type="boardgamemechanic" id="2850" value="Income" />
+		<link type="boardgamemechanic" id="2676" value="Drafting" />
+		<link type="boardgamemechanic" id="2831" value="Events" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="111767" />
+				<average value="8.34007" />
+				<bayesaverage value="8.18903" />
+				<stddev value="1.4298" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="9" bayesaverage="8.18903" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="8" bayesaverage="8.16671" />
+				</ranks>
+				<averageweight value="3.2600" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="247030">
+		<thumbnail>https://cf.geekdo-images.com/2qrpbgsKEcvu5RLXpb6fgw__small/img/D5ierThzC9UcVe3mYB9n0-j5q5w=/fit-in/200x150/filters:strip_icc()/pic4137234.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/2qrpbgsKEcvu5RLXpb6fgw__original/img/aJDspE-4X4Qyn9ViaBrXd-P7IJw=/0x0/filters:format(jpeg)/pic4137234.jpg</image>
+		<name type="primary" sortindex="1" value="Terraforming Mars: Prelude" />
+		<description>Prelude is an expansion for Terraforming Mars that accelerates the early game. Each player receives Prelude cards that provide starting bonuses — extra production, resources, or special abilities — giving corporations a head start on their terraforming projects. Shorter game time with faster, more decisive early rounds.</description>
+		<yearpublished value="2018" />
+		<minplayers value="1" />
+		<maxplayers value="5" />
+		<playingtime value="120" />
+		<minplaytime value="90" />
+		<maxplaytime value="120" />
+		<minage value="12" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1016" value="Science Fiction" />
+		<link type="boardgamecategory" id="1113" value="Space Exploration" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2897" value="Engine Building" />
+		<link type="boardgamemechanic" id="2850" value="Income" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="17383" />
+				<average value="8.84581" />
+				<bayesaverage value="8.41224" />
+				<stddev value="1.09009" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="Not Ranked" bayesaverage="8.41224" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="Not Ranked" bayesaverage="8.49261" />
+				</ranks>
+				<averageweight value="2.8700" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="375651">
+		<thumbnail>https://cf.geekdo-images.com/y_8E6IhpFg5z-_9KHdQYYQ__small/img/8FaQmPggNpG2i2zIXe5-X8bGt30=/fit-in/200x150/filters:strip_icc()/pic7386321.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/y_8E6IhpFg5z-_9KHdQYYQ__original/img/nDlt2BB6wA2avRDDO8MKgP0bjW4=/0x0/filters:format(jpeg)/pic7386321.jpg</image>
+		<name type="primary" sortindex="1" value="That&amp;#039;s Not a Hat" />
+		<description>That&apos;s Not a Hat is a hilarious memory game where players pass gift cards around the table — face down. When you receive a card, you must remember what it is and pass it along. If you forget (or bluff), someone can call you out. A simple concept that creates wonderfully chaotic moments of confusion and laughter.</description>
+		<yearpublished value="2023" />
+		<minplayers value="3" />
+		<maxplayers value="8" />
+		<playingtime value="15" />
+		<minplaytime value="15" />
+		<maxplaytime value="15" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1030" value="Party Game" />
+		<link type="boardgamecategory" id="1045" value="Memory" />
+		<link type="boardgamecategory" id="1079" value="Humor" />
+		<link type="boardgamemechanic" id="2047" value="Memory" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2661" value="Push Your Luck" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="6328" />
+				<average value="7.00382" />
+				<bayesaverage value="6.57672" />
+				<stddev value="1.37238" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="1141" bayesaverage="6.57672" />
+					<rank type="family" id="5498" name="partygames" friendlyname="Party Game Rank" value="64" bayesaverage="6.78939" />
+				</ranks>
+				<averageweight value="1.0400" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="215">
+		<thumbnail>https://cf.geekdo-images.com/gz8_8iYP2SSGVAxpp7CwLg__small/img/5jkPnPGk5LWNzuW5GANPDLa4ZRA=/fit-in/200x150/filters:strip_icc()/pic5854968.png</thumbnail>
+		<image>https://cf.geekdo-images.com/gz8_8iYP2SSGVAxpp7CwLg__original/img/9ULfNvkyu0k1m0d63-Mk0k5e0MA=/0x0/filters:format(png)/pic5854968.png</image>
+		<name type="primary" sortindex="1" value="Tichu" />
+		<description>Tichu is a partnership climbing card game with roots in traditional Asian card games. Teams of two compete to shed their cards by playing increasingly powerful combinations — singles, pairs, sequences, and special hands. Call &quot;Tichu&quot; before playing your first card to bet you&apos;ll go out first for bonus points. A deeply strategic classic.</description>
+		<yearpublished value="1991" />
+		<minplayers value="4" />
+		<maxplayers value="4" />
+		<playingtime value="60" />
+		<minplaytime value="60" />
+		<maxplaytime value="60" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamemechanic" id="2009" value="Trick-taking" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2014" value="Betting and Bluffing" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="16736" />
+				<average value="7.5748" />
+				<bayesaverage value="7.27668" />
+				<stddev value="1.67337" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="249" bayesaverage="7.27668" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="182" bayesaverage="7.32375" />
+				</ranks>
+				<averageweight value="2.2900" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="119464">
+		<thumbnail>https://cf.geekdo-images.com/Ie931worTk1KDPuVLfgkwQ__small/img/ZMFxRNgboFB53o3aY4V0VrKp_gA=/fit-in/200x150/filters:strip_icc()/pic1223879.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/Ie931worTk1KDPuVLfgkwQ__original/img/hgN4d1B6tbOYHHKbSyFNB8qjwyA=/0x0/filters:format(jpeg)/pic1223879.jpg</image>
+		<name type="primary" sortindex="1" value="Tier auf Tier: Jetzt geht&amp;#039;s rund!" />
+		<description>Tier auf Tier: Jetzt geht&apos;s rund! (Animal Upon Animal: Here We Turn!) is a dexterity stacking game for young children. Players take turns stacking wooden animal figures on a wobbly crocodile base. Roll the die to determine how many animals to stack and on which side. A delightful balancing challenge for little hands.</description>
+		<yearpublished value="2012" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="15" />
+		<minplaytime value="15" />
+		<maxplaytime value="15" />
+		<minage value="4" />
+		<link type="boardgamecategory" id="1089" value="Animals" />
+		<link type="boardgamecategory" id="1041" value="Children&apos;s Game" />
+		<link type="boardgamemechanic" id="2060" value="Physical Dexterity" />
+		<link type="boardgamemechanic" id="2917" value="Stacking and Balancing" />
+		<link type="boardgamemechanic" id="2072" value="Dice Rolling" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="273" />
+				<average value="6.50293" />
+				<bayesaverage value="5.60398" />
+				<stddev value="1.35102" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="9092" bayesaverage="5.60398" />
+					<rank type="family" id="4665" name="childrensgames" friendlyname="Children&#039;s Game Rank" value="136" bayesaverage="6.08082" />
+				</ranks>
+				<averageweight value="1.0200" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="163967">
+		<thumbnail>https://cf.geekdo-images.com/c_87h8o0AOrfCO3hxMjjrA__small/img/OPNd-zRznLHOLfNDIN8rdhSMHPM=/fit-in/200x150/filters:strip_icc()/pic2349732.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/c_87h8o0AOrfCO3hxMjjrA__original/img/a1VPd_zbaoq3vthJxghgsnt2AyM=/0x0/filters:format(jpeg)/pic2349732.jpg</image>
+		<name type="primary" sortindex="1" value="Tiny Epic Galaxies" />
+		<description>Tiny Epic Galaxies is a dice-rolling space game in a small box. Players control galactic empires, rolling dice to colonize planets, harvest resources, advance their empire level, and utilize planet abilities. Other players can follow your actions by spending culture, creating an interactive and dynamic turn structure.</description>
+		<yearpublished value="2015" />
+		<minplayers value="1" />
+		<maxplayers value="5" />
+		<playingtime value="45" />
+		<minplaytime value="30" />
+		<maxplaytime value="45" />
+		<minage value="14" />
+		<link type="boardgamecategory" id="1016" value="Science Fiction" />
+		<link type="boardgamecategory" id="1113" value="Space Exploration" />
+		<link type="boardgamecategory" id="1017" value="Dice" />
+		<link type="boardgamecategory" id="1020" value="Exploration" />
+		<link type="boardgamemechanic" id="2072" value="Dice Rolling" />
+		<link type="boardgamemechanic" id="2897" value="Engine Building" />
+		<link type="boardgamemechanic" id="2924" value="Follow" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2814" value="Solo / Solitaire Game" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="22123" />
+				<average value="7.32128" />
+				<bayesaverage value="7.09935" />
+				<stddev value="1.21359" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="388" bayesaverage="7.09935" />
+					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="323" bayesaverage="7.09866" />
+				</ranks>
+				<averageweight value="2.1800" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="123540">
+		<thumbnail>https://cf.geekdo-images.com/7kLkx3k3ovL8fP-2krPqwA__small/img/yQg2AyLDdtfArqfb866NW2Wv1Es=/fit-in/200x150/filters:strip_icc()/pic8758132.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/7kLkx3k3ovL8fP-2krPqwA__original/img/NWuaZkfygEeQ7nvi0Ih7_FW9jO0=/0x0/filters:format(jpeg)/pic8758132.jpg</image>
+		<name type="primary" sortindex="1" value="Tokaido" />
+		<description>Tokaido simulates a journey along Japan&apos;s famous East Sea Road. Players are travelers, and the player furthest behind always moves next — choosing how far ahead to jump. Stop at hot springs, visit temples, meet interesting people, buy souvenirs, and paint panoramas. The most fulfilling journey wins.</description>
+		<yearpublished value="2012" />
+		<minplayers value="1" />
+		<maxplayers value="5" />
+		<playingtime value="45" />
+		<minplaytime value="45" />
+		<maxplaytime value="45" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1097" value="Travel" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2078" value="Point to Point Movement" />
+		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="28481" />
+				<average value="6.91197" />
+				<bayesaverage value="6.74261" />
+				<stddev value="1.37442" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="835" bayesaverage="6.74261" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="275" bayesaverage="6.75485" />
+				</ranks>
+				<averageweight value="1.7400" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="303672">
+		<thumbnail>https://cf.geekdo-images.com/Dk-J77g7K25I1uepIUbLCg__small/img/SLsXvENZs0NL79-vcXHOKtqBJBY=/fit-in/200x150/filters:strip_icc()/pic6671262.png</thumbnail>
+		<image>https://cf.geekdo-images.com/Dk-J77g7K25I1uepIUbLCg__original/img/fAp_kut60aWFl1QIkehGBJiLLmk=/0x0/filters:format(png)/pic6671262.png</image>
+		<name type="primary" sortindex="1" value="Trek 12: Himalaya" />
+		<description>Trek 12 is a roll-and-write game set in the Himalayas. Two dice are rolled each turn, and players choose how to combine them — add, subtract, multiply, or take the highest/lowest — then write the result on their expedition map. Chain numbers to create climbing routes and map areas to score. Includes a campaign mode.</description>
+		<yearpublished value="2020" />
+		<minplayers value="1" />
+		<maxplayers value="50" />
+		<playingtime value="30" />
+		<minplaytime value="15" />
+		<maxplaytime value="30" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1022" value="Adventure" />
+		<link type="boardgamecategory" id="1020" value="Exploration" />
+		<link type="boardgamemechanic" id="2877" value="Roll-and-Write" />
+		<link type="boardgamemechanic" id="2661" value="Push Your Luck" />
+		<link type="boardgamemechanic" id="2814" value="Solo / Solitaire Game" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="2920" />
+				<average value="6.78612" />
+				<bayesaverage value="6.20639" />
+				<stddev value="1.26372" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="2187" bayesaverage="6.20639" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="694" bayesaverage="6.31772" />
+				</ranks>
+				<averageweight value="1.6400" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="392064">
+		<thumbnail>https://cf.geekdo-images.com/t2yzecqH5tj-Wpl0eR7G2Q__small/img/nImmpUGTYvEI9JL9j4UpV6aw5BE=/fit-in/200x150/filters:strip_icc()/pic7603409.png</thumbnail>
+		<image>https://cf.geekdo-images.com/t2yzecqH5tj-Wpl0eR7G2Q__original/img/3uHnA718zqbNhysD-8nOdOapURc=/0x0/filters:format(png)/pic7603409.png</image>
+		<name type="primary" sortindex="1" value="Trekking" />
+		<description>Trekking is a set collection game where players hike through beautiful natural landscapes. Move along trails using movement cards, collect souvenir tokens, and complete trek cards for points. Visit national parks and scenic landmarks in this family-friendly adventure game.</description>
+		<yearpublished value="2024" />
+		<minplayers value="1" />
+		<maxplayers value="4" />
+		<playingtime value="45" />
+		<minplaytime value="45" />
+		<maxplaytime value="45" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1022" value="Adventure" />
+		<link type="boardgamecategory" id="1097" value="Travel" />
+		<link type="boardgamecategory" id="1020" value="Exploration" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2078" value="Point to Point Movement" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="66" />
+				<average value="6.76061" />
+				<bayesaverage value="5.53168" />
+				<stddev value="1.82349" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="16064" bayesaverage="5.53168" />
+				</ranks>
+				<averageweight value="1.7300" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="298060">
+		<thumbnail>https://cf.geekdo-images.com/nTEKC1bZ2GGANIoV204T3Q__small/img/8kZMzfKlRf3HYF3QqFRClSV9qWg=/fit-in/200x150/filters:strip_icc()/pic5159393.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/nTEKC1bZ2GGANIoV204T3Q__original/img/Ajd-NvwUtnHPR8XCb9NAbm3TxtQ=/0x0/filters:format(jpeg)/pic5159393.jpg</image>
+		<name type="primary" sortindex="1" value="Truffle Shuffle" />
+		<description>Truffle Shuffle is a card-drafting game where players are chocolatiers selecting truffles from an overlapping grid display. Carefully choose which chocolates to add to your box, creating sets and fulfilling customer preferences. The layered card display means your choices reveal new options for other players.</description>
+		<yearpublished value="2020" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="30" />
+		<minplaytime value="15" />
+		<maxplaytime value="30" />
+		<minage value="8" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2984" value="Open Drafting" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="1623" />
+				<average value="6.84228" />
+				<bayesaverage value="6.04171" />
+				<stddev value="1.12576" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="2927" bayesaverage="6.04171" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="910" bayesaverage="6.16425" />
+				</ranks>
+				<averageweight value="1.3800" />
+			</ratings>
+		</statistics>
+	</item>
+	<item type="boardgame" id="216694">
+		<thumbnail>https://cf.geekdo-images.com/RaABx0TA0buCUVeNxD3vBw__small/img/8Fgn4onCKuI8G9fgkPhJzHPJgZM=/fit-in/200x150/filters:strip_icc()/pic3328209.jpg</thumbnail>
+		<image>https://cf.geekdo-images.com/RaABx0TA0buCUVeNxD3vBw__original/img/hhUGWvwX7BWg2ahHdasXsB94FDc=/0x0/filters:format(jpeg)/pic3328209.jpg</image>
+		<name type="primary" sortindex="1" value="Das Vermächtnis des Maharaja" />
+		<description>Das Vermächtnis des Maharaja (The Maharaja&apos;s Legacy) is a card game where players are heirs competing for the treasures of a Maharaja&apos;s estate. Bid on artifact collections, manage your resources, and assemble the most valuable inheritance. Strategic bidding and set collection determine who claims the Maharaja&apos;s legacy.</description>
+		<yearpublished value="2017" />
+		<minplayers value="2" />
+		<maxplayers value="4" />
+		<playingtime value="30" />
+		<minplaytime value="30" />
+		<maxplaytime value="30" />
+		<minage value="10" />
+		<link type="boardgamecategory" id="1002" value="Card Game" />
+		<link type="boardgamecategory" id="1021" value="Economic" />
+		<link type="boardgamecategory" id="1050" value="Ancient" />
+		<link type="boardgamemechanic" id="2004" value="Set Collection" />
+		<link type="boardgamemechanic" id="2040" value="Hand Management" />
+		<link type="boardgamemechanic" id="2012" value="Auction / Bidding" />
+		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
+		<statistics page="1">
+			<ratings>
+				<usersrated value="197" />
+				<average value="6.67802" />
+				<bayesaverage value="5.59338" />
+				<stddev value="0.969823" />
+				<median value="0" />
+				<ranks>
+					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="9637" bayesaverage="5.59338" />
+					<rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="2306" bayesaverage="5.63359" />
+				</ranks>
+				<averageweight value="2.3800" />
+			</ratings>
+		</statistics>
+	</item>
+</items>

@@ -142,7 +142,7 @@ function rawToGame(item: RawCollectionItem): BggGame {
 }
 
 // ---------------------------------------------------------------------------
-// Expansion linking: name-based heuristic (mock mode)
+// Expansion linking: name-based heuristic
 // ---------------------------------------------------------------------------
 
 function normalizeForMatch(name: string): string {
@@ -183,6 +183,52 @@ function linkExpansionsByName(
       }
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Mock things.xml parser
+// ---------------------------------------------------------------------------
+
+function parseMockThings(xml: string): Map<string, ThingData> {
+  const result = new Map<string, ThingData>();
+  const parsed = parser.parse(xml);
+  const items = parsed?.items?.item;
+  if (!items) return result;
+
+  const list = Array.isArray(items) ? items : [items];
+
+  for (const item of list) {
+    const id = item["@_id"] as string;
+    const weight =
+      parseFloat(
+        item?.statistics?.ratings?.averageweight?.["@_value"] ?? "0"
+      ) || 0;
+    const minAge = parseInt(item?.minage?.["@_value"] ?? "0", 10) || 0;
+
+    const categories: string[] = [];
+    const mechanics: string[] = [];
+    const links = item?.link;
+    if (Array.isArray(links)) {
+      for (const link of links) {
+        const type = link["@_type"];
+        if (type === "boardgamecategory" && link["@_value"]) {
+          categories.push(link["@_value"]);
+        } else if (type === "boardgamemechanic" && link["@_value"]) {
+          mechanics.push(link["@_value"]);
+        }
+      }
+    }
+
+    result.set(id, {
+      weight: Math.round(weight * 10) / 10,
+      minAge,
+      categories,
+      mechanics,
+      baseGameIds: [],
+    });
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -329,14 +375,28 @@ export async function fetchBggCollection(): Promise<BggCollectionResult> {
       enrichWithThingData(expansionItems, thingMap);
       linkExpansionsByThing(baseGames, expansionItems, thingMap);
     } else {
-      // Mock mode: read two separate files
-      const [collectionXml, expansionsXml] = await Promise.all([
-        readMockXml("bgg-collection.xml"),
-        readMockXml("bgg-expansions.xml"),
+      // Mock mode: collection.xml + things.xml (enrichment data)
+      const [collectionXml, thingsXml] = await Promise.all([
+        readMockXml("collection.xml"),
+        readMockXml("things.xml"),
       ]);
 
-      baseGames = parseCollectionItems(collectionXml).map(rawToGame);
-      expansionItems = parseCollectionItems(expansionsXml).map(rawToGame);
+      const allGames = parseCollectionItems(collectionXml).map(rawToGame);
+      const thingMap = parseMockThings(thingsXml);
+      enrichWithThingData(allGames, thingMap);
+
+      // Separate expansions identified by "Expansion for Base-game" category
+      const EXPANSION_CAT = "Expansion for Base-game";
+      baseGames = allGames.filter((g) => !g.categories.includes(EXPANSION_CAT));
+      expansionItems = allGames.filter((g) =>
+        g.categories.includes(EXPANSION_CAT)
+      );
+
+      // Strip the metadata category from display
+      for (const game of [...baseGames, ...expansionItems]) {
+        game.categories = game.categories.filter((c) => c !== EXPANSION_CAT);
+      }
+
       linkExpansionsByName(baseGames, expansionItems);
     }
 
