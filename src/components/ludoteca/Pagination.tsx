@@ -2,6 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Dropdown from "./Dropdown";
+
+const PAGE_SIZE_OPTIONS = [24, 48, 96, 192] as const;
 
 interface PaginationProps {
   currentPage: number;
@@ -9,6 +12,7 @@ interface PaginationProps {
   totalItems: number;
   itemsPerPage: number;
   onPageChange: (page: number) => void;
+  onItemsPerPageChange: (size: number) => void;
 }
 
 function getPageNumbers(current: number, total: number): (number | "...")[] {
@@ -32,6 +36,7 @@ export default function Pagination({
   totalItems,
   itemsPerPage,
   onPageChange,
+  onItemsPerPageChange,
 }: PaginationProps) {
   const t = useTranslations("ludoteca");
   const startItem = (currentPage - 1) * itemsPerPage + 1;
@@ -42,83 +47,120 @@ export default function Pagination({
     "flex h-9 min-w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors";
 
   return (
-    <div className="my-4 flex items-center justify-between gap-2">
-      {/* Showing info — desktop only */}
-      <p className="hidden text-xs text-stone-400 sm:block">
-        {t("pagination_showing", {
-          start: startItem,
-          end: endItem,
-          total: totalItems,
-        })}
-      </p>
-
-      {/* Mobile: simple prev/next */}
-      <div className="flex flex-1 items-center justify-between gap-2 sm:hidden">
-        <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="flex h-10 flex-1 items-center justify-center gap-1 rounded-lg bg-stone-200 text-sm font-medium text-stone-700 transition-colors disabled:opacity-30"
-          aria-label={t("pagination_prev")}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          {t("pagination_prev")}
-        </button>
-        <span className="text-xs text-stone-400">
-          {currentPage}/{totalPages}
-        </span>
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="flex h-10 flex-1 items-center justify-center gap-1 rounded-lg bg-stone-200 text-sm font-medium text-stone-700 transition-colors disabled:opacity-30"
-          aria-label={t("pagination_next")}
-        >
-          {t("pagination_next")}
-          <ChevronRight className="h-4 w-4" />
-        </button>
+    <div className="my-4">
+      {/* Mobile: prev/next + per page */}
+      <div className="flex flex-col gap-3 sm:hidden">
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="flex h-10 flex-1 items-center justify-center gap-1 rounded-lg bg-stone-200 text-sm font-medium text-stone-700 transition-colors disabled:opacity-30"
+              aria-label={t("pagination_prev")}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              {t("pagination_prev")}
+            </button>
+            <span className="text-xs text-stone-400">
+              {currentPage}/{totalPages}
+            </span>
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="flex h-10 flex-1 items-center justify-center gap-1 rounded-lg bg-stone-200 text-sm font-medium text-stone-700 transition-colors disabled:opacity-30"
+              aria-label={t("pagination_next")}
+            >
+              {t("pagination_next")}
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+        <div className="flex items-center justify-end gap-2 text-sm text-stone-500">
+          <span>{t("per_page")}</span>
+          <Dropdown
+            value={String(itemsPerPage)}
+            options={PAGE_SIZE_OPTIONS.map((size) => ({
+              value: String(size),
+              label: String(size),
+            }))}
+            onChange={(v) => onItemsPerPageChange(Number(v))}
+            ariaLabel={t("per_page")}
+            className="min-w-20"
+          />
+        </div>
       </div>
 
-      {/* Desktop: numbered pagination */}
-      <div className="hidden items-center gap-1 sm:flex">
-        <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className={`${btnBase} border border-stone-300 bg-white px-2 disabled:opacity-30`}
-          aria-label={t("pagination_prev")}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
+      {/* Desktop: single row — showing info | pages | per page */}
+      <div className="hidden items-center sm:flex">
+        {/* Left: showing info */}
+        <p className="flex-1 text-xs text-stone-400">
+          {t("pagination_showing", {
+            start: startItem,
+            end: endItem,
+            total: totalItems,
+          })}
+        </p>
 
-        {pages.map((page, i) =>
-          page === "..." ? (
-            <span
-              key={`ellipsis-${i}`}
-              className="flex h-9 min-w-9 items-center justify-center text-sm text-stone-400"
-            >
-              ...
-            </span>
-          ) : (
+        {/* Center: numbered pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1">
             <button
-              key={page}
-              onClick={() => onPageChange(page)}
-              className={`${btnBase} ${
-                page === currentPage
-                  ? "bg-brand-orange text-white"
-                  : "border border-stone-300 bg-white text-stone-700 hover:bg-stone-100"
-              }`}
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`${btnBase} border border-stone-300 bg-white px-2 disabled:opacity-30`}
+              aria-label={t("pagination_prev")}
             >
-              {page}
+              <ChevronLeft className="h-4 w-4" />
             </button>
-          )
+
+            {pages.map((page, i) =>
+              page === "..." ? (
+                <span
+                  key={`ellipsis-${i}`}
+                  className="flex h-9 min-w-9 items-center justify-center text-sm text-stone-400"
+                >
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={page}
+                  onClick={() => onPageChange(page)}
+                  className={`${btnBase} ${
+                    page === currentPage
+                      ? "bg-brand-orange text-white"
+                      : "border border-stone-300 bg-white text-stone-700 hover:bg-stone-100"
+                  }`}
+                >
+                  {page}
+                </button>
+              )
+            )}
+
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`${btnBase} border border-stone-300 bg-white px-2 disabled:opacity-30`}
+              aria-label={t("pagination_next")}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         )}
 
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className={`${btnBase} border border-stone-300 bg-white px-2 disabled:opacity-30`}
-          aria-label={t("pagination_next")}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
+        {/* Right: per page */}
+        <div className="flex flex-1 items-center justify-end gap-2 text-sm text-stone-500">
+          <span>{t("per_page")}</span>
+          <Dropdown
+            value={String(itemsPerPage)}
+            options={PAGE_SIZE_OPTIONS.map((size) => ({
+              value: String(size),
+              label: String(size),
+            }))}
+            onChange={(v) => onItemsPerPageChange(Number(v))}
+            ariaLabel={t("per_page")}
+            className="min-w-20"
+          />
+        </div>
       </div>
     </div>
   );

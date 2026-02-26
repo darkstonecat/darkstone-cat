@@ -219,6 +219,7 @@
     "view_grid": "Grid",
     "view_list": "List",
     "card_aria": "view game details",
+    "per_page": "Per page",
     "pagination_showing": "Showing {start}–{end} of {total}",
     "pagination_prev": "Previous",
     "pagination_next": "Next",

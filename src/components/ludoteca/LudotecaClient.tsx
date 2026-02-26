@@ -47,7 +47,9 @@ const DURATION_RANGES: Record<string, [number, number]> = {
   "240+": [241, Infinity],
 };
 
-const ITEMS_PER_PAGE = 48;
+const PAGE_SIZE_OPTIONS = [24, 48, 96, 192] as const;
+const DEFAULT_PAGE_SIZE = 24;
+const VALID_PAGE_SIZES = new Set(PAGE_SIZE_OPTIONS);
 
 const VALID_GAME_TYPES = new Set(["boardgame", "boardgameexpansion"]);
 const VALID_DURATIONS = new Set(["lt30", "30-60", "60-120", "120-180", "180-240", "240+"]);
@@ -58,6 +60,7 @@ function parseFiltersFromParams(params: URLSearchParams): {
   sortBy: string;
   viewMode: "grid" | "list";
   page: number;
+  perPage: number;
 } {
   const nums = (key: string) =>
     params.get(key)?.split(",").map(Number).filter((n) => !isNaN(n) && n > 0) ?? [];
@@ -66,6 +69,7 @@ function parseFiltersFromParams(params: URLSearchParams): {
   const type = params.get("type") ?? "";
   const sort = params.get("sort") ?? "name-asc";
   const view = params.get("view");
+  const pp = parseInt(params.get("pp") ?? "", 10);
 
   return {
     filters: {
@@ -81,6 +85,7 @@ function parseFiltersFromParams(params: URLSearchParams): {
     sortBy: VALID_SORTS.has(sort) ? sort : "name-asc",
     viewMode: view === "list" ? "list" : "grid",
     page: Math.max(1, parseInt(params.get("page") ?? "1", 10) || 1),
+    perPage: VALID_PAGE_SIZES.has(pp as typeof PAGE_SIZE_OPTIONS[number]) ? pp : DEFAULT_PAGE_SIZE,
   };
 }
 
@@ -89,7 +94,8 @@ function serializeStateToUrl(
   filters: Filters,
   sortBy: string,
   viewMode: string,
-  page: number
+  page: number,
+  perPage: number
 ): void {
   const params = new URLSearchParams();
   if (debouncedSearch) params.set("q", debouncedSearch);
@@ -103,6 +109,7 @@ function serializeStateToUrl(
   if (sortBy !== "name-asc") params.set("sort", sortBy);
   if (viewMode !== "grid") params.set("view", viewMode);
   if (page > 1) params.set("page", String(page));
+  if (perPage !== DEFAULT_PAGE_SIZE) params.set("pp", String(perPage));
   const qs = params.toString();
   const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
   window.history.replaceState(null, "", url);
@@ -114,6 +121,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortBy, setSortBy] = useState("name-asc");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGame, setSelectedGame] = useState<BggGame | null>(null);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -132,6 +140,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       setDebouncedSearch(parsed.filters.search);
       setSortBy(parsed.sortBy);
       setViewMode(parsed.viewMode);
+      setItemsPerPage(parsed.perPage);
       setCurrentPage(parsed.page);
     }
     urlInitialized.current = true;
@@ -227,10 +236,10 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   }, [games, debouncedSearch, filters, sortBy]);
 
   // Pagination
-  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
   const safePage = Math.min(currentPage, totalPages);
-  const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
-  const paginatedGames = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const startIndex = (safePage - 1) * itemsPerPage;
+  const paginatedGames = filtered.slice(startIndex, startIndex + itemsPerPage);
 
   const setFiltersAndReset = useCallback((newFilters: Filters) => {
     setFilters(newFilters);
@@ -251,8 +260,8 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   // Sync state → URL
   useEffect(() => {
     if (!urlInitialized.current) return;
-    serializeStateToUrl(debouncedSearch, filters, sortBy, viewMode, safePage);
-  }, [debouncedSearch, filters, sortBy, viewMode, safePage]);
+    serializeStateToUrl(debouncedSearch, filters, sortBy, viewMode, safePage, itemsPerPage);
+  }, [debouncedSearch, filters, sortBy, viewMode, safePage, itemsPerPage]);
 
   // Focus trap for mobile filter panel
   useEffect(() => {
@@ -493,15 +502,17 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                 onSelectGame={setSelectedGame}
               />
 
-              {totalPages > 1 && (
-                <Pagination
-                  currentPage={safePage}
-                  totalPages={totalPages}
-                  totalItems={filtered.length}
-                  itemsPerPage={ITEMS_PER_PAGE}
-                  onPageChange={handlePageChange}
-                />
-              )}
+              <Pagination
+                currentPage={safePage}
+                totalPages={totalPages}
+                totalItems={filtered.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+                onItemsPerPageChange={(size) => {
+                  setItemsPerPage(size);
+                  setCurrentPage(1);
+                }}
+              />
             </>
           )}
         </div>

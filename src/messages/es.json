@@ -219,6 +219,7 @@
     "view_grid": "Cuadrícula",
     "view_list": "Lista",
     "card_aria": "ver detalles del juego",
+    "per_page": "Por página",
     "pagination_showing": "Mostrando {start}–{end} de {total}",
     "pagination_prev": "Anterior",
     "pagination_next": "Siguiente",

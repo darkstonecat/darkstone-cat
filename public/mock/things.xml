@@ -1755,41 +1755,6 @@
 			</ratings>
 		</statistics>
 	</item>
-	<item type="boardgame" id="108687">
-		<thumbnail>https://cf.geekdo-images.com/cZ8h5HpbD6asCJuGuuuT-w__small/img/1GUPtGNfDR_CmbM7SYv2ABV1AeQ=/fit-in/200x150/filters:strip_icc()/pic4887895.jpg</thumbnail>
-		<image>https://cf.geekdo-images.com/cZ8h5HpbD6asCJuGuuuT-w__original/img/eBJRy_g1zc1ZKBeqSqrqZpnfs6A=/0x0/filters:format(jpeg)/pic4887895.jpg</image>
-		<name type="primary" sortindex="1" value="Puerto Rico" />
-		<description>Puerto Rico is a classic euro game of production and shipping set on the island of Puerto Rico. Players select roles that grant all players an action, with the active player receiving a bonus. Build plantations, man production buildings with colonists, produce goods, trade at the trading house, or ship goods for victory points.</description>
-		<yearpublished value="2011" />
-		<minplayers value="2" />
-		<maxplayers value="5" />
-		<playingtime value="150" />
-		<minplaytime value="90" />
-		<maxplaytime value="150" />
-		<minage value="12" />
-		<link type="boardgamecategory" id="1021" value="Economic" />
-		<link type="boardgamecategory" id="1013" value="Farming" />
-		<link type="boardgamecategory" id="1029" value="City Building" />
-		<link type="boardgamemechanic" id="2079" value="Variable Phase Order" />
-		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
-		<link type="boardgamemechanic" id="2008" value="Trading" />
-		<link type="boardgamemechanic" id="2850" value="Income" />
-		<link type="boardgamemechanic" id="2856" value="End Game Bonuses" />
-		<statistics page="1">
-			<ratings>
-				<usersrated value="6039" />
-				<average value="8.30903" />
-				<bayesaverage value="7.48448" />
-				<stddev value="1.47396" />
-				<median value="0" />
-				<ranks>
-					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="Not Ranked" bayesaverage="7.48448" />
-					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="Not Ranked" bayesaverage="7.642" />
-				</ranks>
-				<averageweight value="3.2900" />
-			</ratings>
-		</statistics>
-	</item>
 	<item type="boardgame" id="217372">
 		<thumbnail>https://cf.geekdo-images.com/b5VyYjNfAxJ4Z-Dx2UWlqg__small/img/TB_X7b0PIfykfnI12rm3bt6rnGY=/fit-in/200x150/filters:strip_icc()/pic7945692.jpg</thumbnail>
 		<image>https://cf.geekdo-images.com/b5VyYjNfAxJ4Z-Dx2UWlqg__original/img/-GqQ0EOfg9e3yFVpKgJbPdlunso=/0x0/filters:format(jpeg)/pic7945692.jpg</image>
@@ -1921,43 +1886,6 @@
 					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="7425" bayesaverage="5.64957" />
 				</ranks>
 				<averageweight value="1.5200" />
-			</ratings>
-		</statistics>
-	</item>
-	<item type="boardgame" id="1513">
-		<thumbnail>https://cf.geekdo-images.com/1hw9kRfQg849_J5mjPHuBQ__small/img/A8YR8VBRNcV8QfA46JgyHAw1T6g=/fit-in/200x150/filters:strip_icc()/pic487045.jpg</thumbnail>
-		<image>https://cf.geekdo-images.com/1hw9kRfQg849_J5mjPHuBQ__original/img/2neiZgMUdbeliPtHUp-lSCfAOt0=/0x0/filters:format(jpeg)/pic487045.jpg</image>
-		<name type="primary" sortindex="1" value="The Republic of Rome" />
-		<description>The Republic of Rome is a grand political game spanning the history of the Roman Republic. Players control factions of senators, jockeying for consulships, governorships, and military commands. Negotiate alliances, prosecute rivals, and lead Rome&apos;s legions — but if Rome falls to external threats or civil war, everyone loses.</description>
-		<yearpublished value="1990" />
-		<minplayers value="1" />
-		<maxplayers value="6" />
-		<playingtime value="300" />
-		<minplaytime value="300" />
-		<maxplaytime value="300" />
-		<minage value="14" />
-		<link type="boardgamecategory" id="1050" value="Ancient" />
-		<link type="boardgamecategory" id="1001" value="Political" />
-		<link type="boardgamecategory" id="1026" value="Negotiation" />
-		<link type="boardgamecategory" id="1019" value="Wargame" />
-		<link type="boardgamemechanic" id="2019" value="Negotiation" />
-		<link type="boardgamemechanic" id="2017" value="Voting" />
-		<link type="boardgamemechanic" id="2040" value="Hand Management" />
-		<link type="boardgamemechanic" id="2015" value="Variable Player Powers" />
-		<link type="boardgamemechanic" id="2831" value="Events" />
-		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
-		<statistics page="1">
-			<ratings>
-				<usersrated value="4317" />
-				<average value="7.53808" />
-				<bayesaverage value="6.75473" />
-				<stddev value="1.78664" />
-				<median value="0" />
-				<ranks>
-					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="817" bayesaverage="6.75473" />
-					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="493" bayesaverage="6.86088" />
-				</ranks>
-				<averageweight value="4.0700" />
 			</ratings>
 		</statistics>
 	</item>
@@ -2094,40 +2022,6 @@
 					<rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="116" bayesaverage="7.52271" />
 				</ranks>
 				<averageweight value="3.4700" />
-			</ratings>
-		</statistics>
-	</item>
-	<item type="boardgame" id="330769">
-		<thumbnail>https://cf.geekdo-images.com/a1yDs19lCPJgUSNQjbfsmA__small/img/0rAl0eyTxyixg74KhGHh47eNaQQ=/fit-in/200x150/filters:strip_icc()/pic5971149.jpg</thumbnail>
-		<image>https://cf.geekdo-images.com/a1yDs19lCPJgUSNQjbfsmA__original/img/Aq6oi8Th3E30yKM18hq0HOR1ChY=/0x0/filters:format(jpeg)/pic5971149.jpg</image>
-		<name type="primary" sortindex="1" value="Saladin" />
-		<description>Saladin is a historical strategy game set during the era of the Crusades. Players take on the roles of leaders vying for control of the Holy Land, managing troops, playing event cards, and claiming territories. Balance military might with diplomatic cunning in this area control game.</description>
-		<yearpublished value="2022" />
-		<minplayers value="2" />
-		<maxplayers value="2" />
-		<playingtime value="60" />
-		<minplaytime value="45" />
-		<maxplaytime value="60" />
-		<minage value="12" />
-		<link type="boardgamecategory" id="1035" value="Medieval" />
-		<link type="boardgamecategory" id="1019" value="Wargame" />
-		<link type="boardgamecategory" id="1001" value="Political" />
-		<link type="boardgamemechanic" id="2080" value="Area Majority / Influence" />
-		<link type="boardgamemechanic" id="2040" value="Hand Management" />
-		<link type="boardgamemechanic" id="2046" value="Area Movement" />
-		<link type="boardgamemechanic" id="2831" value="Events" />
-		<statistics page="1">
-			<ratings>
-				<usersrated value="390" />
-				<average value="7.15661" />
-				<bayesaverage value="5.72364" />
-				<stddev value="1.36727" />
-				<median value="0" />
-				<ranks>
-					<rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="5799" bayesaverage="5.72364" />
-					<rank type="family" id="4664" name="wargames" friendlyname="War Game Rank" value="617" bayesaverage="6.39081" />
-				</ranks>
-				<averageweight value="2.5300" />
 			</ratings>
 		</statistics>
 	</item>

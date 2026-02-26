@@ -219,6 +219,7 @@
     "view_grid": "Quadrícula",
     "view_list": "Llista",
     "card_aria": "veure detalls del joc",
+    "per_page": "Per pàgina",
     "pagination_showing": "Mostrant {start}–{end} de {total}",
     "pagination_prev": "Anterior",
     "pagination_next": "Següent",
