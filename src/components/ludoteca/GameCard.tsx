@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
@@ -27,6 +28,42 @@ function WeightBar({ weight }: { weight: number }) {
   );
 }
 
+const IMAGE_SIZES = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw";
+
+function ProgressiveGameImage({ game }: { game: BggGame }) {
+  const [hiLoaded, setHiLoaded] = useState(false);
+  const alt = `${game.originalName ?? game.name} — board game cover`;
+  const hasHiRes = !!game.image;
+
+  return (
+    <>
+      {/* Low-res thumbnail — loads fast, visible until high-res is ready */}
+      <Image
+        src={game.thumbnail}
+        alt={alt}
+        fill
+        className={`object-cover transition-all duration-300 group-hover:scale-105 ${
+          hiLoaded ? "opacity-0" : "opacity-100"
+        }`}
+        sizes={IMAGE_SIZES}
+      />
+      {/* High-res image — fades in over the thumbnail once loaded */}
+      {hasHiRes && (
+        <Image
+          src={game.image}
+          alt={alt}
+          fill
+          className={`object-cover transition-all duration-500 group-hover:scale-105 ${
+            hiLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          sizes={IMAGE_SIZES}
+          onLoad={() => setHiLoaded(true)}
+        />
+      )}
+    </>
+  );
+}
+
 export default function GameCard({ game, onClick }: GameCardProps) {
   const t = useTranslations("ludoteca");
 
@@ -43,16 +80,10 @@ export default function GameCard({ game, onClick }: GameCardProps) {
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       aria-label={`${game.name} — ${t("card_aria")}`}
     >
-      {/* Image — ~60% of card height */}
+      {/* Image — ~60% of card height, progressive: thumbnail → full image */}
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-stone-100">
         {game.thumbnail ? (
-          <Image
-            src={game.thumbnail}
-            alt={`${game.originalName ?? game.name} — board game cover`}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
+          <ProgressiveGameImage game={game} />
         ) : (
           <div className="flex h-full items-center justify-center text-stone-300">
             <Star className="h-12 w-12" />
