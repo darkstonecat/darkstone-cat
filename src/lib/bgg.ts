@@ -26,6 +26,8 @@ export interface BggGame {
   rating: number;
   weight: number;
   minAge: number;
+  categories: string[];
+  mechanics: string[];
   expansions: BggExpansion[];
 }
 
@@ -133,6 +135,8 @@ function rawToGame(item: RawCollectionItem): BggGame {
     rating: isNaN(rating) ? 0 : Math.round(rating * 10) / 10,
     weight: isNaN(weight) ? 0 : Math.round(weight * 10) / 10,
     minAge: 0,
+    categories: [],
+    mechanics: [],
     expansions: [],
   };
 }
@@ -188,6 +192,8 @@ function linkExpansionsByName(
 interface ThingData {
   weight: number;
   minAge: number;
+  categories: string[];
+  mechanics: string[];
   baseGameIds: string[];
 }
 
@@ -217,14 +223,21 @@ async function fetchThingData(
         const minAge = parseInt(item?.["@_minage"] ?? "0", 10) || 0;
 
         const baseGameIds: string[] = [];
+        const categories: string[] = [];
+        const mechanics: string[] = [];
         const links = item?.link;
         if (Array.isArray(links)) {
           for (const link of links) {
+            const type = link["@_type"];
             if (
-              link["@_type"] === "boardgameexpansion" &&
+              type === "boardgameexpansion" &&
               link["@_inbound"] === "true"
             ) {
               baseGameIds.push(link["@_id"]);
+            } else if (type === "boardgamecategory" && link["@_value"]) {
+              categories.push(link["@_value"]);
+            } else if (type === "boardgamemechanic" && link["@_value"]) {
+              mechanics.push(link["@_value"]);
             }
           }
         }
@@ -232,6 +245,8 @@ async function fetchThingData(
         result.set(id, {
           weight: Math.round(weight * 10) / 10,
           minAge,
+          categories,
+          mechanics,
           baseGameIds,
         });
       }
@@ -278,6 +293,8 @@ function enrichWithThingData(
     if (thing) {
       if (thing.weight > 0) game.weight = thing.weight;
       if (thing.minAge > 0) game.minAge = thing.minAge;
+      if (thing.categories.length > 0) game.categories = thing.categories;
+      if (thing.mechanics.length > 0) game.mechanics = thing.mechanics;
     }
   }
 }

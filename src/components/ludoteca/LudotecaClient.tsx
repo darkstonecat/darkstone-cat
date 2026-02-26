@@ -22,6 +22,8 @@ export interface Filters {
   duration: string[];
   weight: number[];
   age: number[];
+  categories: string[];
+  mechanics: string[];
 }
 
 export const DEFAULT_FILTERS: Filters = {
@@ -31,6 +33,8 @@ export const DEFAULT_FILTERS: Filters = {
   duration: [],
   weight: [],
   age: [],
+  categories: [],
+  mechanics: [],
 };
 
 const DURATION_RANGES: Record<string, [number, number]> = {
@@ -44,6 +48,65 @@ const DURATION_RANGES: Record<string, [number, number]> = {
 
 const ITEMS_PER_PAGE = 48;
 
+const VALID_GAME_TYPES = new Set(["boardgame", "boardgameexpansion"]);
+const VALID_DURATIONS = new Set(["lt30", "30-60", "60-120", "120-180", "180-240", "240+"]);
+const VALID_SORTS = new Set(["name-asc", "name-desc", "rating-desc", "rating-asc", "weight-desc", "weight-asc"]);
+
+function parseFiltersFromParams(params: URLSearchParams): {
+  filters: Filters;
+  sortBy: string;
+  viewMode: "grid" | "list";
+  page: number;
+} {
+  const nums = (key: string) =>
+    params.get(key)?.split(",").map(Number).filter((n) => !isNaN(n) && n > 0) ?? [];
+  const strs = (key: string) =>
+    params.get(key)?.split(",").filter(Boolean) ?? [];
+  const type = params.get("type") ?? "";
+  const sort = params.get("sort") ?? "name-asc";
+  const view = params.get("view");
+
+  return {
+    filters: {
+      search: params.get("q") ?? "",
+      gameType: VALID_GAME_TYPES.has(type) ? (type as Filters["gameType"]) : "",
+      players: nums("players"),
+      duration: strs("duration").filter((d) => VALID_DURATIONS.has(d)),
+      weight: nums("weight").filter((w) => w >= 1 && w <= 5),
+      age: nums("age"),
+      categories: strs("cat"),
+      mechanics: strs("mech"),
+    },
+    sortBy: VALID_SORTS.has(sort) ? sort : "name-asc",
+    viewMode: view === "list" ? "list" : "grid",
+    page: Math.max(1, parseInt(params.get("page") ?? "1", 10) || 1),
+  };
+}
+
+function serializeStateToUrl(
+  debouncedSearch: string,
+  filters: Filters,
+  sortBy: string,
+  viewMode: string,
+  page: number
+): void {
+  const params = new URLSearchParams();
+  if (debouncedSearch) params.set("q", debouncedSearch);
+  if (filters.gameType) params.set("type", filters.gameType);
+  if (filters.players.length) params.set("players", filters.players.join(","));
+  if (filters.duration.length) params.set("duration", filters.duration.join(","));
+  if (filters.weight.length) params.set("weight", filters.weight.join(","));
+  if (filters.age.length) params.set("age", filters.age.join(","));
+  if (filters.categories.length) params.set("cat", filters.categories.join(","));
+  if (filters.mechanics.length) params.set("mech", filters.mechanics.join(","));
+  if (sortBy !== "name-asc") params.set("sort", sortBy);
+  if (viewMode !== "grid") params.set("view", viewMode);
+  if (page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+  window.history.replaceState(null, "", url);
+}
+
 export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   const t = useTranslations("ludoteca");
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
@@ -55,6 +118,23 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [mobileSortOpen, setMobileSortOpen] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const urlInitialized = useRef(false);
+  const mobileFilterPanelRef = useRef<HTMLDivElement>(null);
+  const mobileFilterBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Read URL params on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.toString()) {
+      const parsed = parseFiltersFromParams(params);
+      setFilters(parsed.filters);
+      setDebouncedSearch(parsed.filters.search);
+      setSortBy(parsed.sortBy);
+      setViewMode(parsed.viewMode);
+      setCurrentPage(parsed.page);
+    }
+    urlInitialized.current = true;
+  }, []);
 
   // Debounce search
   useEffect(() => {
@@ -113,6 +193,18 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       );
     }
 
+    if (filters.categories.length > 0) {
+      result = result.filter((g) =>
+        filters.categories.some((c) => g.categories.includes(c))
+      );
+    }
+
+    if (filters.mechanics.length > 0) {
+      result = result.filter((g) =>
+        filters.mechanics.some((m) => g.mechanics.includes(m))
+      );
+    }
+
     // Sort
     const [sortField, sortDir] = sortBy.split("-") as [string, string];
     result.sort((a, b) => {
@@ -155,6 +247,58 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
+  // Sync state → URL
+  useEffect(() => {
+    if (!urlInitialized.current) return;
+    serializeStateToUrl(debouncedSearch, filters, sortBy, viewMode, safePage);
+  }, [debouncedSearch, filters, sortBy, viewMode, safePage]);
+
+  // Focus trap for mobile filter panel
+  useEffect(() => {
+    if (!mobileFilterOpen) {
+      mobileFilterBtnRef.current?.focus();
+      return;
+    }
+    const panel = mobileFilterPanelRef.current;
+    if (!panel) return;
+
+    const FOCUSABLE =
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const focusable = panel.querySelectorAll<HTMLElement>(FOCUSABLE);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    // Focus first element on open
+    const focusable = panel.querySelectorAll<HTMLElement>(FOCUSABLE);
+    if (focusable.length > 0) focusable[0].focus();
+
+    panel.addEventListener("keydown", handleKeyDown);
+    return () => panel.removeEventListener("keydown", handleKeyDown);
+  }, [mobileFilterOpen]);
+
+  const allCategories = useMemo(
+    () => [...new Set(games.flatMap((g) => g.categories))].sort(),
+    [games]
+  );
+
+  const allMechanics = useMemo(
+    () => [...new Set(games.flatMap((g) => g.mechanics))].sort(),
+    [games]
+  );
+
   const hasActiveFilters = useMemo(
     () =>
       filters.search !== "" ||
@@ -162,7 +306,9 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       filters.players.length > 0 ||
       filters.duration.length > 0 ||
       filters.weight.length > 0 ||
-      filters.age.length > 0,
+      filters.age.length > 0 ||
+      filters.categories.length > 0 ||
+      filters.mechanics.length > 0,
     [filters]
   );
 
@@ -196,6 +342,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       {/* Mobile sticky bar */}
       <div className="sticky top-16 z-30 -mx-4 mb-4 flex gap-3 bg-brand-beige px-4 py-3 sm:-mx-6 sm:px-6 md:hidden">
         <button
+          ref={mobileFilterBtnRef}
           onClick={() => setMobileFilterOpen(true)}
           className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand-orange py-2.5 text-sm font-semibold text-white"
         >
@@ -203,7 +350,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
           {t("btn_filter")}
           {hasActiveFilters && (
             <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white/25 px-1 text-xs">
-              {filters.players.length + filters.duration.length + filters.weight.length + filters.age.length + (filters.gameType ? 1 : 0)}
+              {filters.players.length + filters.duration.length + filters.weight.length + filters.age.length + filters.categories.length + filters.mechanics.length + (filters.gameType ? 1 : 0)}
             </span>
           )}
         </button>
@@ -250,6 +397,8 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
               onReset={resetFilters}
               hasActiveFilters={hasActiveFilters}
               totalResults={filtered.length}
+              availableCategories={allCategories}
+              availableMechanics={allMechanics}
             />
           </div>
         </aside>
@@ -356,6 +505,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       <AnimatePresence>
         {mobileFilterOpen && (
           <motion.div
+            ref={mobileFilterPanelRef}
             className="fixed inset-0 z-50 flex flex-col bg-white md:hidden"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
@@ -369,6 +519,8 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                 onReset={resetFilters}
                 hasActiveFilters={hasActiveFilters}
                 totalResults={filtered.length}
+                availableCategories={allCategories}
+                availableMechanics={allMechanics}
                 onClose={() => setMobileFilterOpen(false)}
                 isMobile
               />

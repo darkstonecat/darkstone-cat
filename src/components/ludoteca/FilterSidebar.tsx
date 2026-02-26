@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
 import type { Filters } from "./LudotecaClient";
+import SearchableMultiSelect from "./SearchableMultiSelect";
 
 interface FilterSidebarProps {
   filters: Filters;
@@ -10,6 +11,8 @@ interface FilterSidebarProps {
   onReset: () => void;
   hasActiveFilters: boolean;
   totalResults: number;
+  availableCategories: string[];
+  availableMechanics: string[];
   onClose?: () => void;
   isMobile?: boolean;
 }
@@ -39,6 +42,8 @@ export default function FilterSidebar({
   onReset,
   hasActiveFilters,
   totalResults,
+  availableCategories,
+  availableMechanics,
   onClose,
   isMobile,
 }: FilterSidebarProps) {
@@ -209,6 +214,46 @@ export default function FilterSidebar({
           ))}
         </div>
       </div>
+
+      {/* Categories */}
+      {availableCategories.length > 0 && (
+        <>
+          <hr className="border-stone-200" />
+          <div>
+            <h3 className="mb-2.5 text-sm font-semibold text-stone-800">
+              {t("filter_categories_title")}
+            </h3>
+            <SearchableMultiSelect
+              options={availableCategories}
+              selected={filters.categories}
+              onChange={(v) => update("categories", v)}
+              placeholder={t("filter_select_placeholder")}
+              searchPlaceholder={t("filter_categories_placeholder")}
+              label={t("filter_categories_title")}
+            />
+          </div>
+        </>
+      )}
+
+      {/* Mechanics */}
+      {availableMechanics.length > 0 && (
+        <>
+          <hr className="border-stone-200" />
+          <div>
+            <h3 className="mb-2.5 text-sm font-semibold text-stone-800">
+              {t("filter_mechanics_title")}
+            </h3>
+            <SearchableMultiSelect
+              options={availableMechanics}
+              selected={filters.mechanics}
+              onChange={(v) => update("mechanics", v)}
+              placeholder={t("filter_select_placeholder")}
+              searchPlaceholder={t("filter_mechanics_placeholder")}
+              label={t("filter_mechanics_title")}
+            />
+          </div>
+        </>
+      )}
 
       {/* Clear filters */}
       {hasActiveFilters && !isMobile && (
