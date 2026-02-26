@@ -24,10 +24,8 @@ export default function GameDetailModal({
   // Lock scroll
   useEffect(() => {
     lenis?.stop();
-    document.body.style.overflow = "hidden";
     return () => {
       lenis?.start();
-      document.body.style.overflow = "";
     };
   }, [lenis]);
 
