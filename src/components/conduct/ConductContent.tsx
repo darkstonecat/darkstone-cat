@@ -3,6 +3,9 @@
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 
+const PROTOCOL_URL =
+  "https://drive.google.com/file/d/1U2EmCWP29o__MMTpdcJb7e2OaEqzVCc2/view?usp=sharing";
+
 const SECTIONS = [
   {
     titleKey: "safe_space_title",
@@ -87,7 +90,20 @@ export default function ConductContent() {
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.4, delay: j * 0.05 }}
                   >
-                    {t(pKey)}
+                    {pKey === "safe_space_protocol"
+                      ? t.rich(pKey, {
+                          link: (chunks) => (
+                            <a
+                              href={PROTOCOL_URL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline font-semibold hover:opacity-80 transition-opacity"
+                            >
+                              {chunks}
+                            </a>
+                          ),
+                        })
+                      : t(pKey)}
                   </motion.p>
                 ))}
               </div>
