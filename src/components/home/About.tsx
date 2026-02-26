@@ -12,9 +12,9 @@ import {
 import TextReveal from "@/components/TextReveal";
 
 const ABOUT_CARDS = [
-  { key: "card1", image: "/images/photos/egarajuga_sam.webp" },
-  { key: "card2", image: "/images/photos/egarajuga_alcalde.webp" },
-  { key: "card3", image: "/images/photos/events_speedpainting.webp" },
+  { key: "card1", image: "/images/photos/about_01.webp" },
+  { key: "card2", image: "/images/photos/about_02.webp" },
+  { key: "card3", image: "/images/photos/about_03.webp" },
 ];
 
 // Layout constants (in vh)

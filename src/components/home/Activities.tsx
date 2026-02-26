@@ -7,10 +7,10 @@ import { motion, useScroll, useTransform } from "motion/react";
 import TextReveal from "@/components/TextReveal";
 
 const CARDS = [
-  { id: "board_games", image: "/images/photos/boardgames_finspan.webp" },
-  { id: "rpg", image: "/images/photos/rol_miseries2.webp" },
-  { id: "events", image: "/images/photos/events_speedpainting.webp" },
-  { id: "egara", image: "/images/photos/egarajuga_sam.webp" },
+  { id: "board_games", image: "/images/photos/activities_boardgames.webp" },
+  { id: "rpg", image: "/images/photos/activities_rpg.webp" },
+  { id: "events", image: "/images/photos/activities_events.webp" },
+  { id: "egara", image: "/images/photos/activities_egara.webp" },
 ] as const;
 
 function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activities">> }) {
