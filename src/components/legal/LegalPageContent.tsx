@@ -45,13 +45,9 @@ export default function LegalPageContent({ namespace, titleKey, introKey, sectio
       </section>
 
       {/* Sections */}
-      {sections.map((section, i) => {
-        const isDark = i % 2 === 0;
-        return (
-          <section
-            key={section.titleKey}
-            className={`py-20 ${isDark ? "bg-brand-beige text-stone-custom" : "bg-stone-custom text-brand-white"}`}
-          >
+      <div className="bg-brand-beige text-stone-custom">
+        {sections.map((section) => (
+          <section key={section.titleKey} className="py-6 first:pt-16 last:pb-20">
             <div className="container mx-auto max-w-3xl px-6">
               <motion.h2
                 className="mb-8 text-2xl font-bold tracking-tight sm:text-3xl"
@@ -66,7 +62,7 @@ export default function LegalPageContent({ namespace, titleKey, introKey, sectio
                 {section.paragraphs.map((pKey, j) => (
                   <motion.p
                     key={pKey}
-                    className={`text-base leading-relaxed ${isDark ? "text-stone-custom/80" : "text-brand-white/70"}`}
+                    className="text-base leading-relaxed text-stone-custom/80"
                     initial={{ opacity: 0, y: 15 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-60px" }}
@@ -78,8 +74,8 @@ export default function LegalPageContent({ namespace, titleKey, introKey, sectio
               </div>
             </div>
           </section>
-        );
-      })}
+        ))}
+      </div>
     </>
   );
 }
