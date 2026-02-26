@@ -1,7 +1,21 @@
 import NavBar from "@/components/NavBar";
-import GameCardSkeleton from "@/components/ludoteca/GameCardSkeleton";
 
 const SKELETON_COUNT = 12;
+
+function CardSkeleton() {
+  return (
+    <div className="flex w-full flex-col overflow-hidden rounded-xl bg-white shadow-sm">
+      <div className="aspect-[4/5] w-full animate-pulse bg-stone-200" />
+      <div className="flex flex-1 flex-col gap-2.5 p-3">
+        <div className="h-4 w-3/4 animate-pulse rounded bg-stone-200" />
+        <div className="mt-auto flex flex-col gap-2">
+          <div className="h-3 w-full animate-pulse rounded bg-stone-100" />
+          <div className="h-1.5 w-16 animate-pulse rounded bg-stone-100" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function LudotecaLoading() {
   return (
@@ -49,7 +63,7 @@ export default function LudotecaLoading() {
               </div>
               <div className="mt-4 grid grid-cols-2 gap-4 min-[1200px]:grid-cols-3">
                 {Array.from({ length: SKELETON_COUNT }, (_, i) => (
-                  <GameCardSkeleton key={i} />
+                  <CardSkeleton key={i} />
                 ))}
               </div>
             </div>
