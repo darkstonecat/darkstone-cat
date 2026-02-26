@@ -4,38 +4,14 @@ import { motion } from "motion/react";
 import type { BggGame } from "@/lib/bgg";
 import GameCard from "./GameCard";
 import GameListRow from "./GameListRow";
-import GameCardSkeleton from "./GameCardSkeleton";
-import GameListRowSkeleton from "./GameListRowSkeleton";
-
-const SKELETON_COUNT = 12;
 
 interface GameGridProps {
   games: BggGame[];
   viewMode: "grid" | "list";
   onSelectGame: (game: BggGame) => void;
-  loading?: boolean;
 }
 
-export default function GameGrid({ games, viewMode, onSelectGame, loading }: GameGridProps) {
-  if (loading) {
-    if (viewMode === "list") {
-      return (
-        <div className="mt-4 flex flex-col gap-3">
-          {Array.from({ length: SKELETON_COUNT }, (_, i) => (
-            <GameListRowSkeleton key={i} />
-          ))}
-        </div>
-      );
-    }
-    return (
-      <div className="mt-4 grid grid-cols-2 gap-4 min-[1200px]:grid-cols-3">
-        {Array.from({ length: SKELETON_COUNT }, (_, i) => (
-          <GameCardSkeleton key={i} />
-        ))}
-      </div>
-    );
-  }
-
+export default function GameGrid({ games, viewMode, onSelectGame }: GameGridProps) {
   if (viewMode === "list") {
     return (
       <div className="mt-4 flex flex-col gap-3">
