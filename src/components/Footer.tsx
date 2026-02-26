@@ -148,6 +148,17 @@ export default function Footer() {
         <p className="mt-3 text-center text-xs opacity-50">
           &copy; {currentYear} Darkstone Catalunya. {t("rights")}
         </p>
+        <p className="mt-2 text-center text-xs opacity-50">
+          {t("developedBy")}{" "}
+          <a
+            href="https://www.linkedin.com/in/rubencodina/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline transition-opacity hover:opacity-100"
+          >
+            Rubén Codina
+          </a>
+        </p>
       </div>
     </footer>
   );
