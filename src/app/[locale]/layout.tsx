@@ -42,7 +42,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Darkstone Catalunya",
-  alternateName: "Associació Darkstone Catalunya",
+  alternateName: "Associació de jugadors i jugadores de jocs de taula i rol Darkstone Catalunya",
   url: "https://darkstone.cat",
   logo: "https://darkstone.cat/images/darkstone_logo.png",
   description:
@@ -50,7 +50,7 @@ const jsonLd = {
   foundingDate: "2024-09-14",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Plaça del Tint, 4",
+    streetAddress: "Carrer Galileu, 277, Planta 1, Porta 2",
     addressLocality: "Terrassa",
     addressRegion: "Barcelona",
     postalCode: "08224",
