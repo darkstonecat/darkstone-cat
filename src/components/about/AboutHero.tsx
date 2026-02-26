@@ -7,7 +7,7 @@ export default function AboutHero() {
   const t = useTranslations("about_page");
 
   return (
-    <section className="relative flex min-h-[60vh] items-center justify-center bg-stone-custom pt-24">
+    <section className="relative flex items-center justify-center bg-stone-custom pt-32 pb-16">
       <div className="container mx-auto px-6 text-center">
         <motion.p
           className="text-sm font-medium uppercase tracking-widest text-brand-white/40"

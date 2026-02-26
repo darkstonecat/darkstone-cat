@@ -38,7 +38,7 @@ export default function ConductContent() {
   return (
     <>
       {/* Hero */}
-      <section className="relative flex min-h-[50vh] items-center justify-center bg-stone-custom pt-24 pb-16">
+      <section className="relative flex items-center justify-center bg-stone-custom pt-32 pb-16">
         <div className="container mx-auto px-6 text-center">
           <motion.h1
             className="text-4xl font-bold tracking-tight text-brand-white sm:text-5xl md:text-6xl"

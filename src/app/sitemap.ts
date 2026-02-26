@@ -8,7 +8,7 @@ const pages = [
   { path: "/about", changeFrequency: "monthly" as const, priority: 0.8 },
   { path: "/contact", changeFrequency: "monthly" as const, priority: 0.7 },
   {
-    path: "/pautes-de-conducta",
+    path: "/conduct",
     changeFrequency: "yearly" as const,
     priority: 0.5,
   },
