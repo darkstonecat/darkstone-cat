@@ -70,31 +70,23 @@ export default function GameListRow({ game, onClick }: GameListRowProps) {
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone-500">
-          {game.minPlayers > 0 && (
-            <span className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              {playersText}
-            </span>
-          )}
-          {game.playingTime > 0 && (
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {game.playingTime}&prime;
-            </span>
-          )}
-          {game.minAge > 0 && (
-            <span className="flex items-center gap-1">
-              <Baby className="h-3 w-3" />
-              +{game.minAge}
-            </span>
-          )}
-          {game.rating > 0 && (
-            <span className="flex items-center gap-1">
-              <Star className="h-3 w-3" />
-              {game.rating.toFixed(1)}
-            </span>
-          )}
+        <div className="flex items-center text-xs text-stone-500">
+          <span className="flex w-14 items-center gap-1">
+            <Users className="h-3 w-3 shrink-0" />
+            {game.minPlayers > 0 ? playersText : "–"}
+          </span>
+          <span className="flex w-14 items-center gap-1">
+            <Clock className="h-3 w-3 shrink-0" />
+            {game.playingTime > 0 ? <>{game.playingTime}&prime;</> : "–"}
+          </span>
+          <span className="flex w-12 items-center gap-1">
+            <Baby className="h-3 w-3 shrink-0" />
+            {game.minAge > 0 ? `+${game.minAge}` : "–"}
+          </span>
+          <span className="flex w-12 items-center gap-1">
+            <Star className="h-3 w-3 shrink-0" />
+            {game.rating > 0 ? game.rating.toFixed(1) : "–"}
+          </span>
           {game.weight > 0 && <WeightBar weight={game.weight} />}
         </div>
       </div>
