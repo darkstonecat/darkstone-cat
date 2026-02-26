@@ -5,7 +5,7 @@ import LegalPageContent from "./LegalPageContent";
 const SECTIONS = [
   {
     titleKey: "owner_title",
-    paragraphs: ["owner_name", "owner_address", "owner_email", "owner_website"],
+    paragraphs: ["owner_name", "owner_email", "owner_website"],
   },
   {
     titleKey: "purpose_title",

@@ -50,7 +50,6 @@ const jsonLd = {
   foundingDate: "2024-09-14",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Carrer Galileu, 277, Planta 1, Porta 2",
     addressLocality: "Terrassa",
     addressRegion: "Barcelona",
     postalCode: "08224",
