@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { motion } from "motion/react";
 import { Users, Clock, Star, Baby } from "lucide-react";
 import type { BggGame } from "@/lib/bgg";
 
@@ -44,7 +43,7 @@ function ProgressiveGameImage({ game }: { game: BggGame }) {
           src={game.thumbnail}
           alt={alt}
           fill
-          className="object-cover group-hover:scale-105"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes={IMAGE_SIZES}
         />
       )}
@@ -54,7 +53,7 @@ function ProgressiveGameImage({ game }: { game: BggGame }) {
           src={game.image}
           alt={alt}
           fill
-          className={`object-cover transition-opacity duration-100 group-hover:scale-105 ${
+          className={`object-cover transition-opacity duration-100 transition-transform duration-300 group-hover:scale-105 ${
             hiLoaded ? "opacity-100" : "opacity-0"
           }`}
           sizes={IMAGE_SIZES}
@@ -75,11 +74,9 @@ export default function GameCard({ game, onClick }: GameCardProps) {
       : `${game.minPlayers}–${game.maxPlayers}`;
 
   return (
-    <motion.button
+    <button
       onClick={onClick}
-      className="group flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200/50 bg-white text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-      whileHover={{ scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className="group flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200/50 bg-white text-left transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md"
       aria-label={`${game.name} — ${t("card_aria")}`}
     >
       {/* Image — ~60% of card height, progressive: thumbnail → full image */}
@@ -136,6 +133,6 @@ export default function GameCard({ game, onClick }: GameCardProps) {
           {game.weight > 0 && <WeightBar weight={game.weight} />}
         </div>
       </div>
-    </motion.button>
+    </button>
   );
 }
