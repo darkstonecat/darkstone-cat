@@ -40,3 +40,8 @@ next-env.d.ts
 
 # Analytics
 lighthouse-report.*
+
+# IDE
+.vscode
+.idea
+.antigravity
