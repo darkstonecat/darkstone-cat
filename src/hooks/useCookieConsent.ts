@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useSyncExternalStore, useCallback } from 'react'
 
 const STORAGE_KEY = 'darkstone_cookie_consent'
 
@@ -18,22 +18,44 @@ export interface UseCookieConsent {
   isLoaded: boolean
 }
 
-export function useCookieConsent(): UseCookieConsent {
-  const [status, setStatus] = useState<ConsentStatus>(null)
-  const [isLoaded, setIsLoaded] = useState(false)
+// --- localStorage as an external store ---
 
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const data: ConsentData = JSON.parse(stored)
-        setStatus(data.status)
-      }
-    } catch {
-      // localStorage not available or corrupted data
+let listeners: Array<() => void> = []
+
+function emitChange() {
+  for (const listener of listeners) listener()
+}
+
+function subscribe(callback: () => void) {
+  listeners.push(callback)
+  return () => {
+    listeners = listeners.filter((l) => l !== callback)
+  }
+}
+
+function getSnapshot(): ConsentStatus {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      const data: ConsentData = JSON.parse(stored)
+      return data.status
     }
-    setIsLoaded(true)
-  }, [])
+  } catch {
+    // localStorage not available or corrupted data
+  }
+  return null
+}
+
+function getServerSnapshot(): ConsentStatus {
+  return null
+}
+
+// isLoaded: false on server, true on client (prevents banner flash during SSR)
+const noopSubscribe = () => () => {}
+
+export function useCookieConsent(): UseCookieConsent {
+  const status = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  const isLoaded = useSyncExternalStore(noopSubscribe, () => true, () => false)
 
   const save = useCallback((newStatus: 'accepted' | 'rejected') => {
     const data: ConsentData = {
@@ -45,7 +67,7 @@ export function useCookieConsent(): UseCookieConsent {
     } catch {
       // localStorage not available
     }
-    setStatus(newStatus)
+    emitChange()
   }, [])
 
   const accept = useCallback(() => save('accepted'), [save])
