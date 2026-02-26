@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "motion/react";
 import { SlidersHorizontal, ArrowDownUp, LayoutGrid, List } from "lucide-react";
@@ -55,7 +56,7 @@ const VALID_GAME_TYPES = new Set(["boardgame", "boardgameexpansion"]);
 const VALID_DURATIONS = new Set(["lt30", "30-60", "60-120", "120-180", "180-240", "240+"]);
 const VALID_SORTS = new Set(["name-asc", "name-desc", "rating-desc", "rating-asc", "weight-desc", "weight-asc"]);
 
-function parseFiltersFromParams(params: URLSearchParams): {
+function parseFiltersFromParams(params: Pick<URLSearchParams, "get" | "toString">): {
   filters: Filters;
   sortBy: string;
   viewMode: "grid" | "list";
@@ -117,35 +118,25 @@ function serializeStateToUrl(
 
 export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   const t = useTranslations("ludoteca");
-  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [sortBy, setSortBy] = useState("name-asc");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGE_SIZE);
-  const [currentPage, setCurrentPage] = useState(1);
+  const searchParams = useSearchParams();
+
+  // Parse URL params once to initialise state (lazy initialisers run only on first render)
+  const initFromUrl = () =>
+    searchParams.toString() ? parseFiltersFromParams(searchParams) : null;
+
+  const [filters, setFilters] = useState<Filters>(() => initFromUrl()?.filters ?? DEFAULT_FILTERS);
+  const [debouncedSearch, setDebouncedSearch] = useState(() => initFromUrl()?.filters.search ?? "");
+  const [sortBy, setSortBy] = useState(() => initFromUrl()?.sortBy ?? "name-asc");
+  const [viewMode, setViewMode] = useState<"grid" | "list">(() => initFromUrl()?.viewMode ?? "grid");
+  const [itemsPerPage, setItemsPerPage] = useState(() => initFromUrl()?.perPage ?? DEFAULT_PAGE_SIZE);
+  const [currentPage, setCurrentPage] = useState(() => initFromUrl()?.page ?? 1);
   const [selectedGame, setSelectedGame] = useState<BggGame | null>(null);
   const allGamesMap = useMemo(() => new Map(games.map((g) => [g.id, g])), [games]);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [mobileSortOpen, setMobileSortOpen] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
-  const urlInitialized = useRef(false);
   const mobileFilterPanelRef = useRef<HTMLDivElement>(null);
   const mobileFilterBtnRef = useRef<HTMLButtonElement>(null);
-
-  // Read URL params on mount
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.toString()) {
-      const parsed = parseFiltersFromParams(params);
-      setFilters(parsed.filters);
-      setDebouncedSearch(parsed.filters.search);
-      setSortBy(parsed.sortBy);
-      setViewMode(parsed.viewMode);
-      setItemsPerPage(parsed.perPage);
-      setCurrentPage(parsed.page);
-    }
-    urlInitialized.current = true;
-  }, []);
 
   // Debounce search
   useEffect(() => {
@@ -260,7 +251,6 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
 
   // Sync state → URL
   useEffect(() => {
-    if (!urlInitialized.current) return;
     serializeStateToUrl(debouncedSearch, filters, sortBy, viewMode, safePage, itemsPerPage);
   }, [debouncedSearch, filters, sortBy, viewMode, safePage, itemsPerPage]);
 
@@ -400,7 +390,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       {/* Two-column layout */}
       <div className="flex gap-8">
         {/* Desktop sidebar */}
-        <aside className="hidden w-[300px] shrink-0 md:block">
+        <aside className="hidden w-75 shrink-0 md:block">
           <div className="rounded-2xl border border-stone-200 bg-white p-6">
             <FilterSidebar
               filters={filters}

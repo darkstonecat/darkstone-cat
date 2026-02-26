@@ -33,6 +33,16 @@ export default function SearchableMultiSelect({
     ? options.filter((o) => o.toLowerCase().includes(query.toLowerCase()))
     : options;
 
+  const handleOpen = useCallback(() => {
+    setOpen(true);
+    setFocusIndex(-1);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setOpen(false);
+    setQuery("");
+  }, []);
+
   // Close on click outside
   useEffect(() => {
     if (!open) return;
@@ -41,12 +51,12 @@ export default function SearchableMultiSelect({
         containerRef.current &&
         !containerRef.current.contains(e.target as Node)
       ) {
-        setOpen(false);
+        handleClose();
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+  }, [open, handleClose]);
 
   // Close on scroll outside the dropdown
   useEffect(() => {
@@ -56,20 +66,17 @@ export default function SearchableMultiSelect({
         containerRef.current &&
         !containerRef.current.contains(e.target as Node)
       ) {
-        setOpen(false);
+        handleClose();
       }
     };
     document.addEventListener("wheel", handler, { passive: true });
     return () => document.removeEventListener("wheel", handler);
-  }, [open]);
+  }, [open, handleClose]);
 
   // Focus search input when opening
   useEffect(() => {
     if (open) {
       searchRef.current?.focus();
-      setFocusIndex(-1);
-    } else {
-      setQuery("");
     }
   }, [open]);
 
@@ -88,7 +95,7 @@ export default function SearchableMultiSelect({
     switch (e.key) {
       case "Escape":
         e.preventDefault();
-        setOpen(false);
+        handleClose();
         break;
       case "ArrowDown":
         e.preventDefault();
@@ -116,11 +123,6 @@ export default function SearchableMultiSelect({
     }
   }, [focusIndex]);
 
-  // Reset focus index when filtered list changes
-  useEffect(() => {
-    setFocusIndex(-1);
-  }, [query]);
-
   if (options.length === 0) return null;
 
   return (
@@ -128,7 +130,7 @@ export default function SearchableMultiSelect({
       {/* Trigger */}
       <button
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={() => (open ? handleClose() : handleOpen())}
         className={`flex h-10 w-full items-center justify-between rounded-lg border px-3 text-sm transition-colors ${
           selected.length > 0
             ? "border-brand-orange bg-brand-orange/5 text-stone-800"
@@ -165,7 +167,7 @@ export default function SearchableMultiSelect({
                 ref={searchRef}
                 type="text"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => { setQuery(e.target.value); setFocusIndex(-1); }}
                 placeholder={searchPlaceholder}
                 className="h-8 w-full rounded-md border border-stone-200 bg-stone-50 pl-8 pr-3 text-sm text-stone-700 outline-none placeholder:text-stone-400 focus:border-brand-orange"
                 aria-label={searchPlaceholder}

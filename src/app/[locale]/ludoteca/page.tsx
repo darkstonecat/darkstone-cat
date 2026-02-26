@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import { Suspense } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -26,10 +27,12 @@ export default async function LudotecaPage() {
       />
 
       <section className="flex-1 bg-brand-beige pb-20">
-        <LudotecaClient
-          games={collection.games}
-          error={collection.error}
-        />
+        <Suspense>
+          <LudotecaClient
+            games={collection.games}
+            error={collection.error}
+          />
+        </Suspense>
       </section>
 
       <Footer />

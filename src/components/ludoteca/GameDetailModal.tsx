@@ -113,7 +113,7 @@ export default function GameDetailModal({
 
         {/* Image */}
         {game.image && (
-          <div className="relative aspect-[16/10] w-full overflow-hidden bg-stone-100">
+          <div className="relative aspect-16/10 w-full overflow-hidden bg-stone-100">
             <Image
               src={game.image}
               alt={`${game.originalName ?? game.name} — board game cover`}

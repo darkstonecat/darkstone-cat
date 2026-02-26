@@ -53,7 +53,7 @@ function ProgressiveGameImage({ game }: { game: BggGame }) {
           src={game.image}
           alt={alt}
           fill
-          className={`object-cover transition-opacity duration-100 transition-transform duration-300 group-hover:scale-110 ${
+          className={`object-cover transition duration-300 group-hover:scale-110 ${
             hiLoaded ? "opacity-100" : "opacity-0"
           }`}
           sizes={IMAGE_SIZES}
@@ -80,7 +80,7 @@ export default function GameCard({ game, onClick }: GameCardProps) {
       aria-label={`${game.name} — ${t("card_aria")}`}
     >
       {/* Image — ~60% of card height, progressive: thumbnail → full image */}
-      <div className="relative aspect-[4/5] w-full overflow-hidden bg-stone-100">
+      <div className="relative aspect-4/5 w-full overflow-hidden bg-stone-100">
         {game.thumbnail ? (
           <ProgressiveGameImage game={game} />
         ) : (

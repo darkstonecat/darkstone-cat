@@ -5,7 +5,7 @@ const SKELETON_COUNT = 12;
 function CardSkeleton() {
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200/50 bg-white">
-      <div className="aspect-[4/5] w-full animate-pulse bg-stone-200" />
+      <div className="aspect-4/5 w-full animate-pulse bg-stone-200" />
       <div className="flex flex-1 flex-col gap-2.5 p-3">
         <div className="h-4 w-3/4 animate-pulse rounded bg-stone-200" />
         <div className="mt-auto flex flex-col gap-2">
@@ -36,7 +36,7 @@ export default function LudotecaLoading() {
         <div className="container mx-auto max-w-7xl px-4 pt-6 sm:px-6">
           <div className="flex gap-8">
             {/* Sidebar skeleton — desktop only */}
-            <aside className="hidden w-[300px] shrink-0 md:block">
+            <aside className="hidden w-75 shrink-0 md:block">
               <div className="flex flex-col gap-6 rounded-2xl border border-stone-200 bg-white p-6">
                 <div className="h-10 w-full animate-pulse rounded-full bg-stone-100" />
                 <hr className="border-stone-200" />
