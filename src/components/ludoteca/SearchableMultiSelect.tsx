@@ -48,6 +48,21 @@ export default function SearchableMultiSelect({
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  // Close on scroll outside the dropdown
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: WheelEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("wheel", handler, { passive: true });
+    return () => document.removeEventListener("wheel", handler);
+  }, [open]);
+
   // Focus search input when opening
   useEffect(() => {
     if (open) {
@@ -139,6 +154,7 @@ export default function SearchableMultiSelect({
       {open && (
         <div
           className="absolute left-0 right-0 z-20 mt-1 overflow-hidden rounded-lg border border-stone-200 bg-white shadow-lg"
+          data-lenis-prevent
           onKeyDown={handleKeyDown}
         >
           {/* Search input */}

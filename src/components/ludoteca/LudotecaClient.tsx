@@ -391,7 +391,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       <div className="flex gap-8">
         {/* Desktop sidebar */}
         <aside className="hidden w-[300px] shrink-0 md:block">
-          <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl border border-stone-200 bg-white p-6 scrollbar-thin">
+          <div className="rounded-2xl border border-stone-200 bg-white p-6">
             <FilterSidebar
               filters={filters}
               onFiltersChange={setFiltersAndReset}
