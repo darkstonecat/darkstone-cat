@@ -32,32 +32,34 @@ const IMAGE_SIZES = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw";
 
 function ProgressiveGameImage({ game }: { game: BggGame }) {
   const [hiLoaded, setHiLoaded] = useState(false);
+  const [hiVisible, setHiVisible] = useState(false);
   const alt = `${game.originalName ?? game.name} — board game cover`;
   const hasHiRes = !!game.image;
 
   return (
     <>
-      {/* Low-res thumbnail — loads fast, visible until high-res is ready */}
-      <Image
-        src={game.thumbnail}
-        alt={alt}
-        fill
-        className={`object-cover transition-all duration-300 group-hover:scale-105 ${
-          hiLoaded ? "opacity-0" : "opacity-100"
-        }`}
-        sizes={IMAGE_SIZES}
-      />
-      {/* High-res image — fades in over the thumbnail once loaded */}
+      {/* Low-res thumbnail — visible until high-res fade-in completes */}
+      {!hiVisible && (
+        <Image
+          src={game.thumbnail}
+          alt={alt}
+          fill
+          className="object-cover group-hover:scale-105"
+          sizes={IMAGE_SIZES}
+        />
+      )}
+      {/* High-res image — fades in over the thumbnail, then hides it */}
       {hasHiRes && (
         <Image
           src={game.image}
           alt={alt}
           fill
-          className={`object-cover transition-all duration-500 group-hover:scale-105 ${
+          className={`object-cover transition-opacity duration-100 group-hover:scale-105 ${
             hiLoaded ? "opacity-100" : "opacity-0"
           }`}
           sizes={IMAGE_SIZES}
           onLoad={() => setHiLoaded(true)}
+          onTransitionEnd={() => { if (hiLoaded) setHiVisible(true); }}
         />
       )}
     </>
