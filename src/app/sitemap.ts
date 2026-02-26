@@ -12,6 +12,9 @@ const pages = [
     changeFrequency: "yearly" as const,
     priority: 0.5,
   },
+  { path: "/legal", changeFrequency: "yearly" as const, priority: 0.3 },
+  { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3 },
+  { path: "/cookies", changeFrequency: "yearly" as const, priority: 0.3 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

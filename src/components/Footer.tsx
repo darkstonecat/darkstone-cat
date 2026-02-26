@@ -135,8 +135,17 @@ export default function Footer() {
           </motion.div>
         </div>
 
+        {/* Legal links */}
+        <div className="mt-14 flex items-center justify-center gap-4 text-xs opacity-40">
+          <Link href="/legal" className="transition-opacity hover:opacity-100">{t("legal")}</Link>
+          <span>·</span>
+          <Link href="/privacy" className="transition-opacity hover:opacity-100">{t("privacy")}</Link>
+          <span>·</span>
+          <Link href="/cookies" className="transition-opacity hover:opacity-100">{t("cookies")}</Link>
+        </div>
+
         {/* Copyright */}
-        <p className="mt-14 text-center text-xs opacity-50">
+        <p className="mt-3 text-center text-xs opacity-50">
           &copy; {currentYear} Darkstone Catalunya. {t("rights")}
         </p>
       </div>

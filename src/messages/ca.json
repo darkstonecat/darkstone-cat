@@ -69,7 +69,10 @@
   },
   "footer": {
     "tagline": "Associació de Jocs de Taula i Rol de Terrassa",
-    "rights": "Tots els drets reservats."
+    "rights": "Tots els drets reservats.",
+    "legal": "Avís legal",
+    "privacy": "Privadesa",
+    "cookies": "Cookies"
   },
   "join_us": {
     "cta_title": "Fes-te soci",
@@ -235,5 +238,70 @@
     "detail_bgg_link": "Veure a BoardGameGeek",
     "base_game_title": "Joc base",
     "expansions_title": "Expansions a la col·lecció"
+  },
+  "not_found": {
+    "title": "Pàgina no trobada",
+    "description": "La pàgina que busques no existeix o s'ha mogut a una altra adreça.",
+    "back_home": "Tornar a l'inici"
+  },
+  "error_page": {
+    "title": "Alguna cosa ha anat malament",
+    "description": "S'ha produït un error inesperat. Si us plau, torna-ho a provar.",
+    "retry": "Tornar a intentar"
+  },
+  "legal_notice": {
+    "title": "Avís legal",
+    "intro": "En compliment de la Llei 34/2002, d'11 de juliol, de serveis de la societat de la informació i de comerç electrònic (LSSI-CE), s'informen les dades d'identificació del titular d'aquest lloc web.",
+    "owner_title": "Identificació del titular",
+    "owner_name": "Denominació: Associació Darkstone Catalunya.",
+    "owner_address": "Domicili social: Plaça del Tint, 4, 08224 Terrassa, Barcelona.",
+    "owner_email": "Correu electrònic: hola@darkstone.cat",
+    "owner_website": "Lloc web: darkstone.cat",
+    "purpose_title": "Objecte del lloc web",
+    "purpose_text": "Aquest lloc web té com a finalitat informar sobre les activitats, esdeveniments i funcionament de l'Associació Darkstone Catalunya, així com facilitar el contacte amb les persones interessades.",
+    "ip_title": "Propietat intel·lectual",
+    "ip_text": "Tots els continguts d'aquest lloc web, incloent-hi textos, imatges, logotips, disseny gràfic i codi font, són propietat de l'Associació Darkstone Catalunya o dels seus respectius autors, i estan protegits per les lleis de propietat intel·lectual vigents. Queda prohibida la seva reproducció, distribució o transformació sense autorització prèvia.",
+    "liability_title": "Limitació de responsabilitat",
+    "liability_text": "L'Associació Darkstone Catalunya no es fa responsable dels danys o perjudicis que es puguin derivar de la utilització d'aquest lloc web, ni garanteix l'absència d'errors o interrupcions en el servei.",
+    "links_title": "Enllaços externs",
+    "links_text": "Aquest lloc web pot contenir enllaços a pàgines de tercers. L'Associació Darkstone Catalunya no controla ni es fa responsable del contingut d'aquestes pàgines.",
+    "law_title": "Legislació aplicable",
+    "law_text": "Les condicions d'ús d'aquest lloc web es regeixen per la legislació espanyola. Per a la resolució de qualsevol controvèrsia seran competents els jutjats i tribunals de Terrassa."
+  },
+  "privacy_policy": {
+    "title": "Política de privadesa",
+    "intro": "Aquesta política explica com l'Associació Darkstone Catalunya recull, utilitza i protegeix les dades personals dels usuaris d'aquest lloc web, en compliment del Reglament General de Protecció de Dades (RGPD) i la Llei Orgànica 3/2018 de Protecció de Dades Personals.",
+    "controller_title": "Responsable del tractament",
+    "controller_text": "El responsable del tractament de les dades és l'Associació Darkstone Catalunya, amb domicili a Plaça del Tint, 4, 08224 Terrassa, Barcelona. Podeu contactar-nos a hola@darkstone.cat.",
+    "data_title": "Dades recollides i finalitats",
+    "data_form": "Formulari de contacte: Recollim el vostre nom, correu electrònic, assumpte i missatge amb l'única finalitat de respondre les vostres consultes.",
+    "data_analytics": "Analítica web: Utilitzem Google Analytics i Vercel Analytics per obtenir estadístiques anònimes d'ús del lloc web (pàgines visitades, durada de les visites, dispositiu, etc.). Aquestes dades s'utilitzen exclusivament per millorar el contingut i l'experiència d'usuari.",
+    "legal_basis_title": "Base legal del tractament",
+    "legal_basis_consent": "Consentiment: Per a l'enviament del formulari de contacte i l'ús de cookies analítiques, la base legal és el vostre consentiment explícit.",
+    "legal_basis_interest": "Interès legítim: Per al funcionament tècnic del lloc web i la millora del servei.",
+    "retention_title": "Conservació de les dades",
+    "retention_text": "Les dades del formulari de contacte es conserven durant el temps necessari per gestionar la consulta i, com a màxim, durant un any. Les dades analítiques es conserven segons les polítiques de retenció de Google Analytics i Vercel.",
+    "rights_title": "Drets dels usuaris",
+    "rights_text": "Podeu exercir els vostres drets d'accés, rectificació, supressió, portabilitat, limitació i oposició enviant un correu a hola@darkstone.cat. També teniu dret a presentar una reclamació davant l'Agència Espanyola de Protecció de Dades (aepd.es).",
+    "third_parties_title": "Tercers",
+    "third_parties_text": "Les dades del formulari de contacte es processen a través del proveïdor d'allotjament (Vercel). Les dades analítiques es processen per Google (Google Analytics) i Vercel (Vercel Analytics). Aquests serveis poden implicar transferències internacionals de dades emparades per les clàusules contractuals tipus de la Comissió Europea.",
+    "updates_title": "Actualitzacions",
+    "updates_text": "Aquesta política de privadesa pot ser actualitzada periòdicament. Última actualització: febrer de 2026."
+  },
+  "cookie_policy": {
+    "title": "Política de cookies",
+    "intro": "Aquesta pàgina explica què són les cookies, quines utilitzem en aquest lloc web i com podeu gestionar-les.",
+    "what_title": "Què són les cookies?",
+    "what_text": "Les cookies són petits fitxers de text que s'emmagatzemen al vostre navegador quan visiteu un lloc web. S'utilitzen per recordar preferències, analitzar el tràfic i millorar l'experiència de navegació.",
+    "cookies_used_title": "Cookies que utilitzem",
+    "cookies_necessary": "Cookies tècniques: Essencials per al funcionament del lloc web. Inclouen la cookie de preferència de consentiment que recorda la vostra elecció sobre les cookies analítiques.",
+    "cookies_analytics": "Cookies analítiques: S'activen únicament si accepteu el seu ús. Utilitzem Google Analytics (cookies _ga, _ga_*) per obtenir estadístiques anònimes de visites, i Vercel Analytics per a mètriques de rendiment.",
+    "third_party_title": "Cookies de tercers",
+    "third_party_google": "Google Analytics: Google pot processar les dades recollides segons la seva política de privadesa (policies.google.com/privacy).",
+    "third_party_vercel": "Vercel Analytics: Vercel processa mètriques de rendiment web (vercel.com/docs/analytics).",
+    "manage_title": "Com gestionar les cookies",
+    "manage_text": "Podeu acceptar o rebutjar les cookies analítiques mitjançant el bàner que apareix la primera vegada que visiteu el lloc web. També podeu configurar el vostre navegador per bloquejar o eliminar cookies. Tingueu en compte que bloquejar totes les cookies pot afectar el funcionament d'algunes funcionalitats.",
+    "updates_title": "Actualitzacions",
+    "updates_text": "Aquesta política de cookies pot ser actualitzada periòdicament per reflectir canvis en les cookies utilitzades o la normativa aplicable."
   }
 }

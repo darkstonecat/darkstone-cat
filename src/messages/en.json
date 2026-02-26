@@ -69,7 +69,10 @@
   },
   "footer": {
     "tagline": "Board Game & RPG Association in Terrassa",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "legal": "Legal notice",
+    "privacy": "Privacy",
+    "cookies": "Cookies"
   },
   "join_us": {
     "cta_title": "Become a member",
@@ -235,5 +238,70 @@
     "detail_bgg_link": "View on BoardGameGeek",
     "base_game_title": "Base game",
     "expansions_title": "Expansions in the collection"
+  },
+  "not_found": {
+    "title": "Page not found",
+    "description": "The page you're looking for doesn't exist or has been moved.",
+    "back_home": "Back to home"
+  },
+  "error_page": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "retry": "Try again"
+  },
+  "legal_notice": {
+    "title": "Legal notice",
+    "intro": "In compliance with Spanish Law 34/2002 on Information Society Services and Electronic Commerce (LSSI-CE), the following information identifies the owner of this website.",
+    "owner_title": "Website owner",
+    "owner_name": "Name: Associació Darkstone Catalunya.",
+    "owner_address": "Registered address: Plaça del Tint, 4, 08224 Terrassa, Barcelona, Spain.",
+    "owner_email": "Email: hola@darkstone.cat",
+    "owner_website": "Website: darkstone.cat",
+    "purpose_title": "Purpose of the website",
+    "purpose_text": "This website aims to inform about the activities, events and operation of Associació Darkstone Catalunya, as well as to facilitate contact with interested individuals.",
+    "ip_title": "Intellectual property",
+    "ip_text": "All content on this website, including text, images, logos, graphic design and source code, is the property of Associació Darkstone Catalunya or its respective authors, and is protected by applicable intellectual property laws. Reproduction, distribution or transformation without prior authorisation is prohibited.",
+    "liability_title": "Limitation of liability",
+    "liability_text": "Associació Darkstone Catalunya is not responsible for any damages that may arise from the use of this website, nor does it guarantee the absence of errors or interruptions in service.",
+    "links_title": "External links",
+    "links_text": "This website may contain links to third-party pages. Associació Darkstone Catalunya does not control and is not responsible for the content of those pages.",
+    "law_title": "Applicable law",
+    "law_text": "The terms of use of this website are governed by Spanish law. The courts of Terrassa shall have jurisdiction over any disputes."
+  },
+  "privacy_policy": {
+    "title": "Privacy policy",
+    "intro": "This policy explains how Associació Darkstone Catalunya collects, uses and protects the personal data of users of this website, in compliance with the General Data Protection Regulation (GDPR) and Spanish Organic Law 3/2018 on Personal Data Protection.",
+    "controller_title": "Data controller",
+    "controller_text": "The data controller is Associació Darkstone Catalunya, with registered address at Plaça del Tint, 4, 08224 Terrassa, Barcelona. You can contact us at hola@darkstone.cat.",
+    "data_title": "Data collected and purposes",
+    "data_form": "Contact form: We collect your name, email address, subject and message for the sole purpose of responding to your enquiries.",
+    "data_analytics": "Web analytics: We use Google Analytics and Vercel Analytics to obtain anonymous usage statistics (pages visited, visit duration, device, etc.). This data is used exclusively to improve content and user experience.",
+    "legal_basis_title": "Legal basis for processing",
+    "legal_basis_consent": "Consent: For the submission of the contact form and the use of analytical cookies, the legal basis is your explicit consent.",
+    "legal_basis_interest": "Legitimate interest: For the technical operation of the website and service improvement.",
+    "retention_title": "Data retention",
+    "retention_text": "Contact form data is retained for the time necessary to handle the enquiry and for a maximum of one year. Analytics data is retained according to Google Analytics and Vercel retention policies.",
+    "rights_title": "User rights",
+    "rights_text": "You may exercise your rights of access, rectification, erasure, portability, restriction and objection by sending an email to hola@darkstone.cat. You also have the right to lodge a complaint with the Spanish Data Protection Agency (aepd.es).",
+    "third_parties_title": "Third parties",
+    "third_parties_text": "Contact form data is processed through the hosting provider (Vercel). Analytics data is processed by Google (Google Analytics) and Vercel (Vercel Analytics). These services may involve international data transfers covered by the European Commission's standard contractual clauses.",
+    "updates_title": "Updates",
+    "updates_text": "This privacy policy may be updated periodically. Last updated: February 2026."
+  },
+  "cookie_policy": {
+    "title": "Cookie policy",
+    "intro": "This page explains what cookies are, which ones we use on this website and how you can manage them.",
+    "what_title": "What are cookies?",
+    "what_text": "Cookies are small text files stored in your browser when you visit a website. They are used to remember preferences, analyse traffic and improve the browsing experience.",
+    "cookies_used_title": "Cookies we use",
+    "cookies_necessary": "Technical cookies: Essential for the website to function. These include the consent preference cookie that remembers your choice regarding analytical cookies.",
+    "cookies_analytics": "Analytical cookies: Only activated if you accept their use. We use Google Analytics (_ga, _ga_* cookies) for anonymous visit statistics, and Vercel Analytics for performance metrics.",
+    "third_party_title": "Third-party cookies",
+    "third_party_google": "Google Analytics: Google may process collected data according to its privacy policy (policies.google.com/privacy).",
+    "third_party_vercel": "Vercel Analytics: Vercel processes web performance metrics (vercel.com/docs/analytics).",
+    "manage_title": "How to manage cookies",
+    "manage_text": "You can accept or reject analytical cookies via the banner that appears the first time you visit the website. You can also configure your browser to block or delete cookies. Please note that blocking all cookies may affect the functionality of some features.",
+    "updates_title": "Updates",
+    "updates_text": "This cookie policy may be updated periodically to reflect changes in the cookies used or applicable regulations."
   }
 }

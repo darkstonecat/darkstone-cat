@@ -40,6 +40,9 @@ const SUBPAGE_THEMES: Record<string, { text: string; bg: string }> = {
   "/ludoteca": { text: "#FAFAF9", bg: "#1C1917" },
   "/conduct": { text: "#FAFAF9", bg: "#1C1917" },
   "/contact": { text: "#FAFAF9", bg: "#1C1917" },
+  "/legal": { text: "#FAFAF9", bg: "#1C1917" },
+  "/privacy": { text: "#FAFAF9", bg: "#1C1917" },
+  "/cookies": { text: "#FAFAF9", bg: "#1C1917" },
 };
 
 export default function NavBar() {
