@@ -37,7 +37,7 @@ export default function GameListRow({ game, onClick }: GameListRowProps) {
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-4 rounded-xl bg-white p-3 text-left shadow-sm transition-shadow hover:shadow-md"
+      className="flex w-full items-center gap-4 rounded-2xl border border-stone-200/50 bg-white p-3 text-left transition-all duration-200 hover:shadow-md"
       aria-label={`${game.name} — ${t("card_aria")}`}
     >
       {/* Thumbnail */}

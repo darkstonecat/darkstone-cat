@@ -344,7 +344,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
         <button
           ref={mobileFilterBtnRef}
           onClick={() => setMobileFilterOpen(true)}
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand-orange py-2.5 text-sm font-semibold text-white"
+          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-orange py-2.5 text-sm font-semibold text-white"
         >
           <SlidersHorizontal className="h-4 w-4" />
           {t("btn_filter")}
@@ -357,13 +357,13 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
         <div className="relative flex-1">
           <button
             onClick={() => setMobileSortOpen(!mobileSortOpen)}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-brand-orange py-2.5 text-sm font-semibold text-brand-orange"
+            className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-brand-orange py-2.5 text-sm font-semibold text-brand-orange"
           >
             <ArrowDownUp className="h-4 w-4" />
             {t("btn_sort")}
           </button>
           {mobileSortOpen && (
-            <div className="absolute top-full left-0 right-0 z-10 mt-1 rounded-lg border border-stone-200 bg-white shadow-lg">
+            <div className="absolute top-full left-0 right-0 z-10 mt-1 rounded-2xl border border-stone-200 bg-white shadow-lg">
               {sortOptions.map((opt) => (
                 <button
                   key={opt.value}
@@ -372,7 +372,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                     setMobileSortOpen(false);
                     setCurrentPage(1);
                   }}
-                  className={`w-full px-4 py-2.5 text-left text-sm transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                  className={`w-full px-4 py-2.5 text-left text-sm transition-colors first:rounded-t-2xl last:rounded-b-2xl ${
                     sortBy === opt.value
                       ? "bg-brand-orange/10 font-semibold text-brand-orange"
                       : "text-stone-700 hover:bg-stone-50"
@@ -390,7 +390,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       <div className="flex gap-8" ref={resultsRef}>
         {/* Desktop sidebar */}
         <aside className="hidden w-[300px] shrink-0 md:block">
-          <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 no-scrollbar">
+          <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl border border-stone-200 bg-white p-6 no-scrollbar">
             <FilterSidebar
               filters={filters}
               onFiltersChange={setFiltersAndReset}
@@ -407,7 +407,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
         <div className="min-w-0 flex-1">
           {/* Desktop toolbar */}
           <div className="mb-4 hidden items-center justify-between md:flex">
-            <p className="text-sm text-stone-500">
+            <p className="text-sm font-semibold text-stone-custom">
               {t("results_count", { count: filtered.length, total: games.length })}
             </p>
             <div className="flex items-center gap-3">
@@ -528,7 +528,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
             <div className="sticky bottom-0 border-t border-stone-200 bg-white p-4">
               <button
                 onClick={() => setMobileFilterOpen(false)}
-                className="w-full rounded-lg bg-brand-orange py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                className="w-full rounded-full bg-brand-orange py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
               >
                 {t("filter_apply")} ({filtered.length})
               </button>

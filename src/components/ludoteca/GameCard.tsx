@@ -38,7 +38,7 @@ export default function GameCard({ game, onClick }: GameCardProps) {
   return (
     <motion.button
       onClick={onClick}
-      className="group flex w-full flex-col overflow-hidden rounded-xl bg-white text-left shadow-sm transition-shadow hover:shadow-md"
+      className="group flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200/50 bg-white text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
       whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       aria-label={`${game.name} — ${t("card_aria")}`}

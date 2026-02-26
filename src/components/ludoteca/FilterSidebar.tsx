@@ -54,11 +54,11 @@ export default function FilterSidebar({
   };
 
   const chipBase =
-    "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-colors cursor-pointer select-none";
+    "inline-flex h-9 min-w-9 items-center justify-center rounded-full border px-3 text-sm font-medium transition-colors cursor-pointer select-none";
   const chipActive =
-    "border-brand-orange bg-brand-orange text-white";
+    "border-transparent bg-brand-orange text-white";
   const chipInactive =
-    "border-stone-300 bg-white text-stone-600 hover:border-stone-400";
+    "border-stone-300 bg-white text-stone-600 hover:bg-stone-100";
 
   return (
     <div className="flex flex-col gap-6">
@@ -92,36 +92,45 @@ export default function FilterSidebar({
             value={filters.search}
             onChange={(e) => update("search", e.target.value)}
             placeholder={t("filter_search")}
-            className="h-10 w-full rounded-lg border border-stone-300 bg-white pl-10 pr-4 text-sm text-stone-700 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange"
+            className="h-10 w-full rounded-full border border-stone-300 bg-white pl-10 pr-4 text-sm text-stone-700 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange"
             aria-label={t("filter_search")}
           />
         </div>
       </div>
 
+      <hr className="border-stone-200" />
+
       {/* Game type */}
       <div>
-        <h3 className="mb-2.5 text-sm font-semibold text-stone-800">
+        <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
           {t("filter_type")}
         </h3>
-        <select
-          value={filters.gameType}
-          onChange={(e) =>
-            update("gameType", e.target.value as Filters["gameType"])
-          }
-          className="h-10 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm text-stone-700 outline-none transition-colors focus:border-brand-orange focus:ring-1 focus:ring-brand-orange"
-          aria-label={t("filter_type")}
-        >
-          <option value="">{t("filter_type_all")}</option>
-          <option value="boardgame">{t("filter_type_base")}</option>
-          <option value="boardgameexpansion">{t("filter_type_expansion")}</option>
-        </select>
+        <div className="flex flex-wrap gap-2">
+          {([
+            { value: "", label: t("filter_type_all") },
+            { value: "boardgame", label: t("filter_type_base") },
+            { value: "boardgameexpansion", label: t("filter_type_expansion") },
+          ] as const).map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => update("gameType", opt.value as Filters["gameType"])}
+              className={`${chipBase} ${
+                filters.gameType === opt.value ? chipActive : chipInactive
+              }`}
+              role="switch"
+              aria-checked={filters.gameType === opt.value}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <hr className="border-stone-200" />
 
       {/* Players */}
       <div>
-        <h3 className="mb-2.5 text-sm font-semibold text-stone-800">
+        <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
           {t("filter_players_title")}
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -145,7 +154,7 @@ export default function FilterSidebar({
 
       {/* Duration */}
       <div>
-        <h3 className="mb-2.5 text-sm font-semibold text-stone-800">
+        <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
           {t("filter_duration_title")}
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -171,7 +180,7 @@ export default function FilterSidebar({
 
       {/* Complexity */}
       <div>
-        <h3 className="mb-2.5 text-sm font-semibold text-stone-800">
+        <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
           {t("filter_weight_title")}
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -195,7 +204,7 @@ export default function FilterSidebar({
 
       {/* Age */}
       <div>
-        <h3 className="mb-2.5 text-sm font-semibold text-stone-800">
+        <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
           {t("filter_age_title")}
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -220,7 +229,7 @@ export default function FilterSidebar({
         <>
           <hr className="border-stone-200" />
           <div>
-            <h3 className="mb-2.5 text-sm font-semibold text-stone-800">
+            <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
               {t("filter_categories_title")}
             </h3>
             <SearchableMultiSelect
@@ -241,7 +250,7 @@ export default function FilterSidebar({
         <>
           <hr className="border-stone-200" />
           <div>
-            <h3 className="mb-2.5 text-sm font-semibold text-stone-800">
+            <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
               {t("filter_mechanics_title")}
             </h3>
             <SearchableMultiSelect

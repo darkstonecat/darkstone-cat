@@ -4,7 +4,7 @@ const SKELETON_COUNT = 12;
 
 function CardSkeleton() {
   return (
-    <div className="flex w-full flex-col overflow-hidden rounded-xl bg-white shadow-sm">
+    <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200/50 bg-white">
       <div className="aspect-[4/5] w-full animate-pulse bg-stone-200" />
       <div className="flex flex-1 flex-col gap-2.5 p-3">
         <div className="h-4 w-3/4 animate-pulse rounded bg-stone-200" />
@@ -23,7 +23,7 @@ export default function LudotecaLoading() {
       <NavBar />
 
       {/* Hero skeleton */}
-      <section className="bg-stone-custom pt-28 pb-8">
+      <section className="bg-stone-custom pt-24 pb-6">
         <div className="container mx-auto px-6 text-center">
           <div className="mx-auto h-12 w-64 animate-pulse rounded-lg bg-brand-white/10 sm:h-14 md:h-16" />
           <div className="mx-auto mt-4 h-5 w-80 max-w-full animate-pulse rounded bg-brand-white/5" />
@@ -37,19 +37,27 @@ export default function LudotecaLoading() {
           <div className="flex gap-8">
             {/* Sidebar skeleton — desktop only */}
             <aside className="hidden w-[300px] shrink-0 md:block">
-              <div className="flex flex-col gap-6">
-                <div className="h-10 w-full animate-pulse rounded-lg bg-white" />
-                <div className="h-8 w-24 animate-pulse rounded bg-stone-200" />
+              <div className="flex flex-col gap-6 rounded-2xl border border-stone-200 bg-white p-6">
+                <div className="h-10 w-full animate-pulse rounded-full bg-stone-100" />
+                <hr className="border-stone-200" />
+                <div className="h-4 w-24 animate-pulse rounded bg-stone-200" />
                 <div className="flex flex-wrap gap-2">
-                  {Array.from({ length: 8 }, (_, i) => (
-                    <div key={i} className="h-9 w-9 animate-pulse rounded-lg bg-white" />
+                  {Array.from({ length: 3 }, (_, i) => (
+                    <div key={i} className="h-9 w-20 animate-pulse rounded-full bg-stone-100" />
                   ))}
                 </div>
                 <hr className="border-stone-200" />
-                <div className="h-8 w-32 animate-pulse rounded bg-stone-200" />
+                <div className="h-4 w-28 animate-pulse rounded bg-stone-200" />
+                <div className="flex flex-wrap gap-2">
+                  {Array.from({ length: 8 }, (_, i) => (
+                    <div key={i} className="h-9 w-9 animate-pulse rounded-full bg-stone-100" />
+                  ))}
+                </div>
+                <hr className="border-stone-200" />
+                <div className="h-4 w-32 animate-pulse rounded bg-stone-200" />
                 <div className="flex flex-wrap gap-2">
                   {Array.from({ length: 5 }, (_, i) => (
-                    <div key={i} className="h-9 w-20 animate-pulse rounded-lg bg-white" />
+                    <div key={i} className="h-9 w-20 animate-pulse rounded-full bg-stone-100" />
                   ))}
                 </div>
               </div>

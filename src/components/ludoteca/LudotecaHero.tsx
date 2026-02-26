@@ -15,10 +15,10 @@ export default function LudotecaHero({
   const t = useTranslations("ludoteca");
 
   return (
-    <section className="bg-stone-custom pt-28 pb-8">
+    <section className="bg-stone-custom pt-24 pb-6">
       <div className="container mx-auto px-6 text-center">
         <motion.h1
-          className="text-4xl font-bold tracking-tight text-brand-white sm:text-5xl md:text-6xl"
+          className="text-3xl font-bold tracking-tight text-brand-white sm:text-4xl md:text-5xl"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
