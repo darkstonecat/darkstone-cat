@@ -10,6 +10,7 @@ export interface BggExpansion {
   id: string;
   name: string;
   year: number;
+  thumbnail: string;
 }
 
 export interface BggGame {
@@ -179,6 +180,7 @@ function linkExpansionsByName(
           id: exp.id,
           name: exp.originalName ?? exp.name,
           year: exp.year,
+          thumbnail: exp.thumbnail,
         });
         break;
       }
@@ -324,6 +326,7 @@ function linkExpansionsByThing(
           id: exp.id,
           name: exp.originalName ?? exp.name,
           year: exp.year,
+          thumbnail: exp.thumbnail,
         });
         break;
       }

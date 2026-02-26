@@ -37,17 +37,17 @@ export default function GameListRow({ game, onClick }: GameListRowProps) {
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-stretch gap-4 overflow-hidden rounded-2xl border border-stone-200/50 bg-white pr-3 text-left transition-all duration-200 hover:shadow-md"
+      className="group flex w-full items-stretch gap-4 overflow-hidden rounded-2xl border border-stone-200/50 bg-white pr-3 text-left transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
       aria-label={`${game.name} — ${t("card_aria")}`}
     >
       {/* Thumbnail */}
-      <div className="relative aspect-square w-20 shrink-0 bg-stone-100">
+      <div className="relative aspect-square w-20 shrink-0 overflow-hidden bg-stone-100">
         {game.thumbnail ? (
           <Image
             src={game.thumbnail}
             alt={`${game.originalName ?? game.name} — board game cover`}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-300 group-hover:scale-115"
             sizes="80px"
           />
         ) : (

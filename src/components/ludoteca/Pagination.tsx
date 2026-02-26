@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Dropdown from "./Dropdown";
@@ -45,6 +46,17 @@ export default function Pagination({
 
   const btnBase =
     "flex h-9 min-w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors";
+  const showPerPage = totalItems > PAGE_SIZE_OPTIONS[0];
+  const visibleSizeOptions = PAGE_SIZE_OPTIONS.filter((size, i) =>
+    i === 0 || PAGE_SIZE_OPTIONS[i - 1] < totalItems
+  );
+  const maxVisibleSize = visibleSizeOptions[visibleSizeOptions.length - 1];
+
+  useEffect(() => {
+    if (itemsPerPage > maxVisibleSize) {
+      onItemsPerPageChange(maxVisibleSize);
+    }
+  }, [itemsPerPage, maxVisibleSize, onItemsPerPageChange]);
 
   return (
     <div className="my-4">
@@ -75,19 +87,21 @@ export default function Pagination({
             </button>
           </div>
         )}
-        <div className="flex items-center justify-end gap-2 text-sm text-stone-500">
-          <span>{t("per_page")}</span>
-          <Dropdown
-            value={String(itemsPerPage)}
-            options={PAGE_SIZE_OPTIONS.map((size) => ({
-              value: String(size),
-              label: String(size),
-            }))}
-            onChange={(v) => onItemsPerPageChange(Number(v))}
-            ariaLabel={t("per_page")}
-            className="min-w-20"
-          />
-        </div>
+        {showPerPage && (
+          <div className="flex items-center justify-end gap-2 text-sm text-stone-500">
+            <span>{t("per_page")}</span>
+            <Dropdown
+              value={String(itemsPerPage)}
+              options={visibleSizeOptions.map((size) => ({
+                value: String(size),
+                label: String(size),
+              }))}
+              onChange={(v) => onItemsPerPageChange(Number(v))}
+              ariaLabel={t("per_page")}
+              className="min-w-20"
+            />
+          </div>
+        )}
       </div>
 
       {/* Desktop: single row — showing info | pages | per page */}
@@ -148,19 +162,21 @@ export default function Pagination({
         )}
 
         {/* Right: per page */}
-        <div className="flex flex-1 items-center justify-end gap-2 text-sm text-stone-500">
-          <span>{t("per_page")}</span>
-          <Dropdown
-            value={String(itemsPerPage)}
-            options={PAGE_SIZE_OPTIONS.map((size) => ({
-              value: String(size),
-              label: String(size),
-            }))}
-            onChange={(v) => onItemsPerPageChange(Number(v))}
-            ariaLabel={t("per_page")}
-            className="min-w-20"
-          />
-        </div>
+        {showPerPage && (
+          <div className="flex flex-1 items-center justify-end gap-2 text-sm text-stone-500">
+            <span>{t("per_page")}</span>
+            <Dropdown
+              value={String(itemsPerPage)}
+              options={visibleSizeOptions.map((size) => ({
+                value: String(size),
+                label: String(size),
+              }))}
+              onChange={(v) => onItemsPerPageChange(Number(v))}
+              ariaLabel={t("per_page")}
+              className="min-w-20"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

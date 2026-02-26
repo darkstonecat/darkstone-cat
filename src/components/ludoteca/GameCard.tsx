@@ -43,7 +43,7 @@ function ProgressiveGameImage({ game }: { game: BggGame }) {
           src={game.thumbnail}
           alt={alt}
           fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          className="object-cover transition-transform duration-300 group-hover:scale-110"
           sizes={IMAGE_SIZES}
         />
       )}
@@ -53,7 +53,7 @@ function ProgressiveGameImage({ game }: { game: BggGame }) {
           src={game.image}
           alt={alt}
           fill
-          className={`object-cover transition-opacity duration-100 transition-transform duration-300 group-hover:scale-105 ${
+          className={`object-cover transition-opacity duration-100 transition-transform duration-300 group-hover:scale-110 ${
             hiLoaded ? "opacity-100" : "opacity-0"
           }`}
           sizes={IMAGE_SIZES}

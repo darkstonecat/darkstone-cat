@@ -78,6 +78,7 @@ export default function GameDetailModal({
       <motion.div
         ref={dialogRef}
         className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl"
+        data-lenis-prevent
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -184,14 +185,26 @@ export default function GameDetailModal({
                       href={`https://boardgamegeek.com/boardgameexpansion/${exp.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors hover:bg-stone-50"
+                      className="group flex items-center gap-3 overflow-hidden rounded-xl bg-stone-100 transition-transform duration-300 hover:scale-[1.02]"
                     >
-                      <span className="text-stone-700">{exp.name}</span>
-                      {exp.year > 0 && (
-                        <span className="ml-2 text-xs text-stone-400">
-                          {exp.year}
-                        </span>
-                      )}
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-stone-100">
+                        {exp.thumbnail ? (
+                          <Image
+                            src={exp.thumbnail}
+                            alt={exp.name}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-110"
+                            sizes="56px"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-stone-300">
+                            <Star className="h-5 w-5" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="line-clamp-1 text-sm text-stone-700">
+                        {exp.name}
+                      </span>
                     </a>
                   </li>
                 ))}
