@@ -69,6 +69,12 @@
   },
   "footer": {
     "tagline": "Asociación de Juegos de Mesa y Rol de Terrassa",
+    "description": "Un espacio para compartir afición, jugar y promover el catalán a través del juego.",
+    "navigation": "Navegación",
+    "locationLabel": "Dónde estamos",
+    "scheduleLabel": "Horario",
+    "address_street": "Plaça del Tint, 4",
+    "address_city": "08224 Terrassa",
     "rights": "Todos los derechos reservados.",
     "developedBy": "Desarrollado por",
     "legal": "Aviso legal",

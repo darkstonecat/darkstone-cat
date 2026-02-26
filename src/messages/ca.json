@@ -69,6 +69,12 @@
   },
   "footer": {
     "tagline": "Associació de Jocs de Taula i Rol de Terrassa",
+    "description": "Un espai per compartir afició, jugar i promoure el català a través del joc.",
+    "navigation": "Navegació",
+    "locationLabel": "On som",
+    "scheduleLabel": "Horari",
+    "address_street": "Plaça del Tint, 4",
+    "address_city": "08224 Terrassa",
     "rights": "Tots els drets reservats.",
     "developedBy": "Desenvolupat per",
     "legal": "Avís legal",

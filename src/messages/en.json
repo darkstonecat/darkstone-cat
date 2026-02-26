@@ -69,6 +69,12 @@
   },
   "footer": {
     "tagline": "Board Game & RPG Association in Terrassa",
+    "description": "A space to share the hobby, play games, and promote the Catalan language through gaming.",
+    "navigation": "Navigation",
+    "locationLabel": "Where we are",
+    "scheduleLabel": "Schedule",
+    "address_street": "Plaça del Tint, 4",
+    "address_city": "08224 Terrassa",
     "rights": "All rights reserved.",
     "developedBy": "Developed by",
     "legal": "Legal notice",

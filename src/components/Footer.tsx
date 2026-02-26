@@ -15,18 +15,6 @@ const NAV_LINKS = [
   { href: "/contact", key: "contact" },
 ] as const;
 
-function LudoyaIcon({ size = 22 }: { size?: number }) {
-  return (
-    <Image
-      src="/images/icons/ludoya.svg"
-      alt=""
-      width={size}
-      height={size}
-      className="brightness-0 invert"
-    />
-  );
-}
-
 const SOCIALS = [
   {
     href: "https://instagram.com/darkstone.cat",
@@ -48,30 +36,37 @@ const SOCIALS = [
     label: "Telegram",
     icon: FaTelegram,
   },
-  {
-    href: "https://app.ludoya.com/darkstonecat",
-    label: "Ludoya",
-    icon: LudoyaIcon,
-  },
 ] as const;
+
+const LEGAL_LINKS = [
+  { href: "/legal", key: "legal" },
+  { href: "/privacy", key: "privacy" },
+  { href: "/cookies", key: "cookies" },
+] as const;
+
+const MAPS_URL = "https://maps.google.com/?q=Plaça+del+Tint,4,08224+Terrassa";
+
+const columnAnimation = (delay: number) => ({
+  initial: { opacity: 0, y: 20 } as const,
+  whileInView: { opacity: 1, y: 0 } as const,
+  viewport: { once: true, margin: "-50px" } as const,
+  transition: { duration: 0.5, delay },
+});
 
 export default function Footer() {
   const t = useTranslations("footer");
   const tNav = useTranslations("nav");
+  const tLoc = useTranslations("location");
+  const tSch = useTranslations("schedule");
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-stone-custom pt-16 pb-10 text-stone-white-hover">
-      <div className="container mx-auto px-6">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-12 md:grid-cols-3">
-          {/* Logo + tagline */}
-          <motion.div
-            className="flex flex-col items-center md:items-start"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-          >
+    <footer>
+      {/* ── Upper zone ── */}
+      <div className="bg-stone-950 px-6 pt-16 pb-12 lg:px-16">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 md:grid-cols-3">
+          {/* Col 1 — Identity (left) */}
+          <motion.div {...columnAnimation(0)} className="text-left">
             <div className="flex items-center gap-3">
               <div className="relative h-9 w-9 overflow-hidden rounded-full">
                 <Image
@@ -82,83 +77,139 @@ export default function Footer() {
                   sizes="36px"
                 />
               </div>
-              <span className="text-lg font-bold tracking-tight">
+              <span className="text-lg font-bold tracking-tight text-stone-white-hover">
                 Darkstone<span className="font-light opacity-50">.cat</span>
               </span>
             </div>
-            <p className="mt-3 text-sm opacity-40">
-              {t("tagline")}
-            </p>
+
+            <div className="mt-5 space-y-1">
+              <p className="max-w-xs text-sm leading-relaxed text-stone-400">
+                {t("tagline")}
+              </p>
+              <p className="max-w-xs pt-1 text-xs leading-relaxed text-stone-500">
+                {t("description")}
+              </p>
+            </div>
+
+            <div className="mt-6 border-t border-stone-800 pt-4">
+              <a
+                href="mailto:darkstone.cat@gmail.com"
+                className="text-sm text-stone-300 transition-colors hover:text-brand-orange"
+              >
+                darkstone.cat@gmail.com
+              </a>
+            </div>
           </motion.div>
 
-          {/* Navigation links */}
-          <motion.nav
-            className="flex flex-col items-center gap-3"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm opacity-50 transition-opacity duration-200 hover:opacity-100"
-              >
-                {tNav(link.key)}
-              </Link>
+          {/* Col 2 — Navigation (center) */}
+          <motion.div {...columnAnimation(0.1)} className="md:text-center md:flex md:flex-col md:items-center">
+            <span className="mb-5 block text-xs uppercase tracking-[0.15em] text-stone-500">
+              {t("navigation")}
+            </span>
+            <nav className="flex flex-col gap-2">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="py-0.5 text-sm text-stone-400 transition-colors hover:text-stone-white-hover"
+                >
+                  {tNav(link.key)}
+                </Link>
+              ))}
+            </nav>
+          </motion.div>
+
+          {/* Col 3 — Location + Schedule (right) */}
+          <motion.div {...columnAnimation(0.2)} className="md:text-right md:flex md:flex-col md:items-end">
+            <span className="mb-5 block text-xs uppercase tracking-[0.15em] text-stone-500">
+              {t("locationLabel")}
+            </span>
+            <a
+              href={MAPS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block transition-colors"
+            >
+              <p className="text-sm text-stone-400 group-hover:text-stone-300">
+                {tLoc("centre_name")}
+              </p>
+              <p className="mt-1 text-sm text-stone-400 group-hover:text-stone-300">
+                {t("address_street")}
+              </p>
+              <p className="text-sm text-stone-400 group-hover:text-stone-300">
+                {t("address_city")}
+              </p>
+            </a>
+
+            <span className="mt-6 mb-4 block text-xs uppercase tracking-[0.15em] text-stone-500">
+              {t("scheduleLabel")}
+            </span>
+            <div className="space-y-1">
+              <p className="text-sm text-stone-400">
+                {tSch("friday")}: {tSch("friday_start")} — {tSch("friday_end")}
+              </p>
+              <p className="text-sm text-stone-400">
+                {tSch("saturday")}: {tSch("saturday_start")} — {tSch("saturday_end")}
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* ── Lower zone ── */}
+      <div className="bg-stone-custom px-6 py-5 lg:px-16">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 md:grid-cols-3">
+          {/* Legal links */}
+          <div className="flex items-center justify-center gap-4 md:justify-start">
+            {LEGAL_LINKS.map((item, i) => (
+              <span key={item.key} className="flex items-center gap-4">
+                <Link
+                  href={item.href}
+                  className="text-xs text-stone-500 transition-colors hover:text-stone-300"
+                >
+                  {t(item.key)}
+                </Link>
+                {i < LEGAL_LINKS.length - 1 && (
+                  <span className="text-stone-700">&middot;</span>
+                )}
+              </span>
             ))}
-          </motion.nav>
+          </div>
 
           {/* Social icons */}
-          <motion.div
-            className="flex items-center justify-center gap-5 md:justify-end"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
+          <div className="flex items-center justify-center gap-4">
             {SOCIALS.map((social) => (
-              <motion.a
+              <a
                 key={social.label}
                 href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={social.label}
-                className="opacity-50 transition-opacity duration-200 hover:opacity-100"
-                whileHover={{ scale: 1.15 }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="text-stone-500 transition-colors hover:text-stone-300"
               >
-                <social.icon size={22} />
-              </motion.a>
+                <social.icon size={20} />
+              </a>
             ))}
-          </motion.div>
-        </div>
+          </div>
 
-        {/* Legal links */}
-        <div className="mt-14 flex items-center justify-center gap-4 text-xs opacity-40">
-          <Link href="/legal" className="transition-opacity hover:opacity-100">{t("legal")}</Link>
-          <span>·</span>
-          <Link href="/privacy" className="transition-opacity hover:opacity-100">{t("privacy")}</Link>
-          <span>·</span>
-          <Link href="/cookies" className="transition-opacity hover:opacity-100">{t("cookies")}</Link>
+          {/* Copyright & dev */}
+          <div className="text-center md:text-right md:flex md:flex-col md:items-end">
+            <p className="text-xs text-stone-600">
+              &copy; {currentYear} Darkstone Catalunya. {t("rights")}
+            </p>
+            <p className="mt-0.5 text-xs text-stone-600">
+              {t("developedBy")}{" "}
+              <a
+                href="https://www.linkedin.com/in/rubencodina/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-stone-400 transition-colors hover:text-stone-white-hover"
+              >
+                Rubén Codina
+              </a>
+            </p>
+          </div>
         </div>
-
-        {/* Copyright */}
-        <p className="mt-3 text-center text-xs opacity-50">
-          &copy; {currentYear} Darkstone Catalunya. {t("rights")}
-        </p>
-        <p className="mt-2 text-center text-xs opacity-50">
-          {t("developedBy")}{" "}
-          <a
-            href="https://www.linkedin.com/in/rubencodina/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline transition-opacity hover:opacity-100"
-          >
-            Rubén Codina
-          </a>
-        </p>
       </div>
     </footer>
   );
