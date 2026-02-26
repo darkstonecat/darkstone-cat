@@ -9,6 +9,7 @@ interface SearchableMultiSelectProps {
   onChange: (selected: string[]) => void;
   placeholder: string;
   searchPlaceholder: string;
+  selectedLabel: (count: number) => string;
   label: string;
 }
 
@@ -18,6 +19,7 @@ export default function SearchableMultiSelect({
   onChange,
   placeholder,
   searchPlaceholder,
+  selectedLabel,
   label,
 }: SearchableMultiSelectProps) {
   const [open, setOpen] = useState(false);
@@ -123,7 +125,7 @@ export default function SearchableMultiSelect({
       >
         <span className="truncate">
           {selected.length > 0
-            ? `${selected.length} selected`
+            ? selectedLabel(selected.length)
             : placeholder}
         </span>
         <ChevronDown

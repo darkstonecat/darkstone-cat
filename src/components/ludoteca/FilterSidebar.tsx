@@ -229,6 +229,7 @@ export default function FilterSidebar({
               onChange={(v) => update("categories", v)}
               placeholder={t("filter_select_placeholder")}
               searchPlaceholder={t("filter_categories_placeholder")}
+              selectedLabel={(n) => t("filter_selected_count", { count: n })}
               label={t("filter_categories_title")}
             />
           </div>
@@ -249,6 +250,7 @@ export default function FilterSidebar({
               onChange={(v) => update("mechanics", v)}
               placeholder={t("filter_select_placeholder")}
               searchPlaceholder={t("filter_mechanics_placeholder")}
+              selectedLabel={(n) => t("filter_selected_count", { count: n })}
               label={t("filter_mechanics_title")}
             />
           </div>
