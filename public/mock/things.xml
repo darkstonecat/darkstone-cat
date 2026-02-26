@@ -2277,6 +2277,7 @@
 		<link type="boardgamecategory" id="1021" value="Economic" />
 		<link type="boardgamecategory" id="1016" value="Science Fiction" />
 		<link type="boardgamecategory" id="1113" value="Space Exploration" />
+		<link type="boardgamecategory" id="1042" value="Expansion for Base-game" />
 		<link type="boardgamemechanic" id="2040" value="Hand Management" />
 		<link type="boardgamemechanic" id="2897" value="Engine Building" />
 		<link type="boardgamemechanic" id="2850" value="Income" />

@@ -33,6 +33,7 @@ export interface BggGame {
 
 export interface BggCollectionResult {
   games: BggGame[];
+  baseCount: number;
   totalWithExpansions: number;
   fetchedAt: string;
   error?: "timeout" | "api_error" | "parse_error";
@@ -392,6 +393,11 @@ export async function fetchBggCollection(): Promise<BggCollectionResult> {
         g.categories.includes(EXPANSION_CAT)
       );
 
+      // Mark expansion subtypes (collection.xml has all as "boardgame")
+      for (const exp of expansionItems) {
+        exp.subtype = "boardgameexpansion";
+      }
+
       // Strip the metadata category from display
       for (const game of [...baseGames, ...expansionItems]) {
         game.categories = game.categories.filter((c) => c !== EXPANSION_CAT);
@@ -400,9 +406,10 @@ export async function fetchBggCollection(): Promise<BggCollectionResult> {
       linkExpansionsByName(baseGames, expansionItems);
     }
 
-    // Deduplicate
+    // Combine base games + expansions, deduplicate
+    const allItems = [...baseGames, ...expansionItems];
     const seen = new Set<string>();
-    const deduped = baseGames.filter((g) => {
+    const deduped = allItems.filter((g) => {
       if (seen.has(g.id)) return false;
       seen.add(g.id);
       return true;
@@ -411,9 +418,12 @@ export async function fetchBggCollection(): Promise<BggCollectionResult> {
     // Sort alphabetically by name
     deduped.sort((a, b) => a.name.localeCompare(b.name));
 
+    const baseCount = deduped.filter((g) => g.subtype === "boardgame").length;
+
     return {
       games: deduped,
-      totalWithExpansions: deduped.length + expansionItems.length,
+      baseCount,
+      totalWithExpansions: deduped.length,
       fetchedAt: new Date().toISOString(),
     };
   } catch (err) {
@@ -426,6 +436,7 @@ export async function fetchBggCollection(): Promise<BggCollectionResult> {
 
     return {
       games: [],
+      baseCount: 0,
       totalWithExpansions: 0,
       fetchedAt: new Date().toISOString(),
       error: errorType,

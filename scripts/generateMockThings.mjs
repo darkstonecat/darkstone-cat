@@ -548,7 +548,7 @@ const GAME_DATA = {
   247030: { // Terraforming Mars: Prelude
     weight: 2.87, minage: 12,
     mechanics: ['handManagement', 'engineBuilding', 'income', 'endGameBonuses'],
-    categories: ['economic', 'sciFi', 'space'],
+    categories: ['economic', 'sciFi', 'space', 'expansion'],
     description: 'Prelude is an expansion for Terraforming Mars that accelerates the early game. Each player receives Prelude cards that provide starting bonuses — extra production, resources, or special abilities — giving corporations a head start on their terraforming projects. Shorter game time with faster, more decisive early rounds.',
   },
   375651: { // That's Not a Hat

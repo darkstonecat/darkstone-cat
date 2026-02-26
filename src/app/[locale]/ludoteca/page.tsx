@@ -21,7 +21,7 @@ export default async function LudotecaPage() {
     <main className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
       <NavBar />
       <LudotecaHero
-        totalGames={collection.games.length}
+        totalGames={collection.baseCount}
         totalWithExpansions={collection.totalWithExpansions}
       />
 
