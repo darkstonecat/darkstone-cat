@@ -19,7 +19,7 @@ interface LudotecaClientProps {
 
 export interface Filters {
   search: string;
-  gameType: "" | "boardgame" | "boardgameexpansion";
+  gameType: string[];
   rankTypes: string[];
   players: number[];
   duration: string[];
@@ -31,7 +31,7 @@ export interface Filters {
 
 export const DEFAULT_FILTERS: Filters = {
   search: "",
-  gameType: "",
+  gameType: ["boardgame"],
   rankTypes: [],
   players: [],
   duration: [],
@@ -77,7 +77,7 @@ function parseFiltersFromParams(params: Pick<URLSearchParams, "get" | "toString"
   return {
     filters: {
       search: params.get("q") ?? "",
-      gameType: VALID_GAME_TYPES.has(type) ? (type as Filters["gameType"]) : "",
+      gameType: type ? type.split(",").filter((t) => VALID_GAME_TYPES.has(t)) : ["boardgame"],
       rankTypes: strs("rank"),
       players: nums("players"),
       duration: strs("duration").filter((d) => VALID_DURATIONS.has(d)),
@@ -103,7 +103,7 @@ function serializeStateToUrl(
 ): void {
   const params = new URLSearchParams();
   if (debouncedSearch) params.set("q", debouncedSearch);
-  if (filters.gameType) params.set("type", filters.gameType);
+  if (filters.gameType.length > 0 && !(filters.gameType.length === 1 && filters.gameType[0] === "boardgame")) params.set("type", filters.gameType.join(","));
   if (filters.rankTypes.length) params.set("rank", filters.rankTypes.join(","));
   if (filters.players.length) params.set("players", filters.players.join(","));
   if (filters.duration.length) params.set("duration", filters.duration.join(","));
@@ -160,8 +160,8 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       );
     }
 
-    if (filters.gameType) {
-      result = result.filter((g) => g.subtype === filters.gameType);
+    if (filters.gameType.length > 0) {
+      result = result.filter((g) => filters.gameType.includes(g.subtype));
     }
 
     if (filters.rankTypes.length > 0) {
@@ -327,7 +327,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   const hasActiveFilters = useMemo(
     () =>
       filters.search !== "" ||
-      filters.gameType !== "" ||
+      (filters.gameType.length !== 1 || filters.gameType[0] !== "boardgame") ||
       filters.rankTypes.length > 0 ||
       filters.players.length > 0 ||
       filters.duration.length > 0 ||
@@ -376,7 +376,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
           {t("btn_filter")}
           {hasActiveFilters && (
             <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white/25 px-1 text-xs">
-              {filters.rankTypes.length + filters.players.length + filters.duration.length + filters.weight.length + filters.age.length + filters.categories.length + filters.mechanics.length + (filters.gameType ? 1 : 0)}
+              {filters.rankTypes.length + filters.players.length + filters.duration.length + filters.weight.length + filters.age.length + filters.categories.length + filters.mechanics.length + (filters.gameType.includes("boardgameexpansion") ? 1 : 0)}
             </span>
           )}
         </button>

@@ -109,18 +109,17 @@ export default function FilterSidebar({
         </h3>
         <div className="flex flex-wrap gap-2">
           {([
-            { value: "", label: t("filter_type_all") },
             { value: "boardgame", label: t("filter_type_base") },
             { value: "boardgameexpansion", label: t("filter_type_expansion") },
           ] as const).map((opt) => (
             <button
               key={opt.value}
-              onClick={() => update("gameType", opt.value as Filters["gameType"])}
+              onClick={() => update("gameType", toggleInArray(filters.gameType, opt.value))}
               className={`${chipBase} ${
-                filters.gameType === opt.value ? chipActive : chipInactive
+                filters.gameType.includes(opt.value) ? chipActive : chipInactive
               }`}
               role="switch"
-              aria-checked={filters.gameType === opt.value}
+              aria-checked={filters.gameType.includes(opt.value)}
             >
               {opt.label}
             </button>
