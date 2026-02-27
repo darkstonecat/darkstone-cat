@@ -1,14 +1,22 @@
 import { type Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import CookiesContent from "@/components/legal/CookiesContent";
 
-export const metadata: Metadata = {
-  title: "Política de cookies — Darkstone Catalunya",
-  description:
-    "Política de cookies de l'Associació Darkstone Catalunya. Informació sobre les cookies utilitzades en aquest lloc web.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  return {
+    title: t("cookies_title"),
+    description: t("cookies_description"),
+  };
+}
 
 export default function CookiesPage() {
   return (

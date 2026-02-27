@@ -1,14 +1,22 @@
 import { type Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import PrivacyContent from "@/components/legal/PrivacyContent";
 
-export const metadata: Metadata = {
-  title: "Política de privadesa — Darkstone Catalunya",
-  description:
-    "Política de privadesa de l'Associació Darkstone Catalunya. Informació sobre el tractament de dades personals.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  return {
+    title: t("privacy_title"),
+    description: t("privacy_description"),
+  };
+}
 
 export default function PrivacyPage() {
   return (

@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -8,11 +9,18 @@ import AboutMissionValues from "@/components/about/AboutMissionValues";
 import AboutValues from "@/components/about/AboutValues";
 import SectionDivider from "@/components/home/SectionDivider";
 
-export const metadata: Metadata = {
-  title: "Qui som — Darkstone Catalunya",
-  description:
-    "Coneix l'Associació Darkstone Catalunya: el nostre origen, missió, valors i la junta directiva.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  return {
+    title: t("about_title"),
+    description: t("about_description"),
+  };
+}
 
 export default function AboutPage() {
   return (

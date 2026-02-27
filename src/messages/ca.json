@@ -257,6 +257,26 @@
     "base_game_title": "Joc base",
     "expansions_title": "Expansions a la col·lecció"
   },
+  "metadata": {
+    "home_title": "Darkstone Catalunya — Associació de jocs de taula i rol",
+    "home_description": "Associació sense ànim de lucre dedicada als jocs de taula i jocs de rol a Terrassa. Veniu a jugar cada divendres i dissabte!",
+    "home_og_title": "Darkstone Catalunya",
+    "home_og_description": "Associació de jocs de taula i rol a Terrassa. Espai per compartir l'afició, jugar i fomentar la llengua catalana.",
+    "about_title": "Qui som — Darkstone Catalunya",
+    "about_description": "Coneix l'Associació Darkstone Catalunya: el nostre origen, missió, valors i la junta directiva.",
+    "contact_title": "Contacte — Darkstone Catalunya",
+    "contact_description": "Contacta amb l'Associació Darkstone Catalunya. Escriu-nos per qualsevol dubte o suggeriment.",
+    "conduct_title": "Pautes de conducta — Darkstone Catalunya",
+    "conduct_description": "Pautes de conducta de l'Associació Darkstone Catalunya. Espai segur, comunicació respectuosa i col·laboració.",
+    "legal_title": "Avís legal — Darkstone Catalunya",
+    "legal_description": "Avís legal de l'Associació Darkstone Catalunya. Identificació del titular, propietat intel·lectual i legislació aplicable.",
+    "privacy_title": "Política de privadesa — Darkstone Catalunya",
+    "privacy_description": "Política de privadesa de l'Associació Darkstone Catalunya. Informació sobre el tractament de dades personals.",
+    "cookies_title": "Política de cookies — Darkstone Catalunya",
+    "cookies_description": "Política de cookies de l'Associació Darkstone Catalunya. Informació sobre les cookies utilitzades en aquest lloc web.",
+    "ludoteca_title": "Ludoteca — Darkstone Catalunya",
+    "ludoteca_description": "Descobreix la col·lecció de jocs de taula de Darkstone Catalunya. Més de 250 jocs disponibles per jugar."
+  },
   "not_found": {
     "title": "Pàgina no trobada",
     "description": "La pàgina que busques no existeix o s'ha mogut a una altra adreça.",

@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -6,11 +7,18 @@ import ContactHero from "@/components/contact/ContactHero";
 import ContactForm from "@/components/contact/ContactForm";
 import ContactInfo from "@/components/contact/ContactInfo";
 
-export const metadata: Metadata = {
-  title: "Contacte — Darkstone Catalunya",
-  description:
-    "Contacta amb l'Associació Darkstone Catalunya. Escriu-nos per qualsevol dubte o suggeriment.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  return {
+    title: t("contact_title"),
+    description: t("contact_description"),
+  };
+}
 
 export default function ContactPage() {
   return (

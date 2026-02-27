@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -9,11 +10,18 @@ import { fetchBggCollection } from "@/lib/bgg";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "Ludoteca — Darkstone Catalunya",
-  description:
-    "Descobreix la col·lecció de jocs de taula de Darkstone Catalunya. Més de 250 jocs disponibles per jugar.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  return {
+    title: t("ludoteca_title"),
+    description: t("ludoteca_description"),
+  };
+}
 
 export default async function LudotecaPage() {
   const collection = await fetchBggCollection();

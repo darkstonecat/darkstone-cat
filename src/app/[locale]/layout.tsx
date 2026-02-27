@@ -1,7 +1,7 @@
 
 import { type Metadata } from "next";
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import '@/styles/globals.css';
 import SmoothScroll from "@/components/SmoothScroll";
@@ -11,32 +11,44 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 
-export const metadata: Metadata = {
-  title: "Darkstone Catalunya — Associació de jocs de taula i rol",
-  description:
-    "Associació sense ànim de lucre dedicada als jocs de taula i jocs de rol a Terrassa. Veniu a jugar cada divendres i dissabte!",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
-  metadataBase: new URL("https://darkstone.cat"),
-  openGraph: {
-    title: "Darkstone Catalunya",
-    description:
-      "Associació de jocs de taula i rol a Terrassa. Espai per compartir l'afició, jugar i fomentar la llengua catalana.",
-    url: "https://darkstone.cat",
-    siteName: "Darkstone Catalunya",
-    locale: "ca_ES",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Darkstone Catalunya",
-    description:
-      "Associació de jocs de taula i rol a Terrassa.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+const localeToOg: Record<string, string> = {
+  ca: "ca_ES",
+  es: "es_ES",
+  en: "en_US",
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("home_title"),
+    description: t("home_description"),
+    icons: [{ rel: "icon", url: "/favicon.ico" }],
+    metadataBase: new URL("https://darkstone.cat"),
+    openGraph: {
+      title: t("home_og_title"),
+      description: t("home_og_description"),
+      url: "https://darkstone.cat",
+      siteName: "Darkstone Catalunya",
+      locale: localeToOg[locale] ?? "ca_ES",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("home_og_title"),
+      description: t("home_og_description"),
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 const jsonLd = {
   "@context": "https://schema.org",

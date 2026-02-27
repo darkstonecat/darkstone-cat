@@ -257,6 +257,26 @@
     "base_game_title": "Base game",
     "expansions_title": "Expansions in the collection"
   },
+  "metadata": {
+    "home_title": "Darkstone Catalunya — Board game and RPG association",
+    "home_description": "Non-profit association dedicated to board games and role-playing games in Terrassa. Come play every Friday and Saturday!",
+    "home_og_title": "Darkstone Catalunya",
+    "home_og_description": "Board game and RPG association in Terrassa. A space to share the hobby, play, and promote the Catalan language.",
+    "about_title": "About us — Darkstone Catalunya",
+    "about_description": "Learn about Darkstone Catalunya: our origin, mission, values, and the board of directors.",
+    "contact_title": "Contact — Darkstone Catalunya",
+    "contact_description": "Get in touch with Darkstone Catalunya. Write to us with any questions or suggestions.",
+    "conduct_title": "Code of conduct — Darkstone Catalunya",
+    "conduct_description": "Code of conduct of Darkstone Catalunya. Safe space, respectful communication, and collaboration.",
+    "legal_title": "Legal notice — Darkstone Catalunya",
+    "legal_description": "Legal notice of Darkstone Catalunya. Website owner identification, intellectual property, and applicable law.",
+    "privacy_title": "Privacy policy — Darkstone Catalunya",
+    "privacy_description": "Privacy policy of Darkstone Catalunya. Information about personal data processing.",
+    "cookies_title": "Cookie policy — Darkstone Catalunya",
+    "cookies_description": "Cookie policy of Darkstone Catalunya. Information about cookies used on this website.",
+    "ludoteca_title": "Game Library — Darkstone Catalunya",
+    "ludoteca_description": "Discover the Darkstone Catalunya board game collection. Over 250 games available to play."
+  },
   "not_found": {
     "title": "Page not found",
     "description": "The page you're looking for doesn't exist or has been moved.",
