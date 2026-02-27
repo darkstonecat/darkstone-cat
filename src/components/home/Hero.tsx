@@ -60,6 +60,7 @@ export default function Hero() {
               fill
               priority
               fetchPriority="high"
+              quality={60}
               className="object-contain drop-shadow-2xl"
               sizes="(max-width: 768px) 35vh, 45vh"
             />
