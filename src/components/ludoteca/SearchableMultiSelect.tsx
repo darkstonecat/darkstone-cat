@@ -11,6 +11,7 @@ interface SearchableMultiSelectProps {
   searchPlaceholder: string;
   selectedLabel: (count: number) => string;
   label: string;
+  optionLabel?: (option: string) => string;
 }
 
 export default function SearchableMultiSelect({
@@ -21,6 +22,7 @@ export default function SearchableMultiSelect({
   searchPlaceholder,
   selectedLabel,
   label,
+  optionLabel,
 }: SearchableMultiSelectProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -29,8 +31,10 @@ export default function SearchableMultiSelect({
   const listRef = useRef<HTMLUListElement>(null);
   const [focusIndex, setFocusIndex] = useState(-1);
 
+  const getLabel = optionLabel ?? ((o: string) => o);
+
   const filtered = query
-    ? options.filter((o) => o.toLowerCase().includes(query.toLowerCase()))
+    ? options.filter((o) => getLabel(o).toLowerCase().includes(query.toLowerCase()))
     : options;
 
   const handleOpen = useCallback(() => {
@@ -212,7 +216,7 @@ export default function SearchableMultiSelect({
                     >
                       {isSelected && <Check className="h-3 w-3" />}
                     </span>
-                    <span className="truncate">{option}</span>
+                    <span className="truncate">{getLabel(option)}</span>
                   </li>
                 );
               })

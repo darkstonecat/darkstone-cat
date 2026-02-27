@@ -198,17 +198,24 @@ export default function GameDetailModal({
             )}
           </div>
 
-          {/* Categories & Mechanics */}
+          {/* Rank types, Categories & Mechanics */}
+          {(game.rankTypes.length > 0 || baseGame?.rankTypes.length) && (
+            <div className="mt-5">
+              <h3 className="text-xs font-semibold text-stone-400">{t("detail_rank_types")}</h3>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {(game.rankTypes.length > 0 ? game.rankTypes : baseGame?.rankTypes ?? []).map((rank) => (
+                  <span key={rank} className="rounded-full bg-brand-orange/10 px-3 py-1 text-xs font-medium text-brand-orange">{t(`filter_rank_${rank}`)}</span>
+                ))}
+              </div>
+            </div>
+          )}
           {game.categories.length > 0 && (
             <div className="mt-5">
               <h3 className="text-xs font-semibold text-stone-400">{t("detail_categories")}</h3>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {game.categories.slice(0, 10).map((cat) => (
+                {game.categories.map((cat) => (
                   <span key={cat} className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">{cat}</span>
                 ))}
-                {game.categories.length > 10 && (
-                  <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-400">...</span>
-                )}
               </div>
             </div>
           )}
@@ -216,12 +223,9 @@ export default function GameDetailModal({
             <div className="mt-4">
               <h3 className="text-xs font-semibold text-stone-400">{t("detail_mechanics")}</h3>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {game.mechanics.slice(0, 10).map((mec) => (
+                {game.mechanics.map((mec) => (
                   <span key={mec} className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">{mec}</span>
                 ))}
-                {game.mechanics.length > 10 && (
-                  <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-400">...</span>
-                )}
               </div>
             </div>
           )}

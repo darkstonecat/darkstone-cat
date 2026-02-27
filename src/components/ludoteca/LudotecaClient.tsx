@@ -20,6 +20,7 @@ interface LudotecaClientProps {
 export interface Filters {
   search: string;
   gameType: "" | "boardgame" | "boardgameexpansion";
+  rankTypes: string[];
   players: number[];
   duration: string[];
   weight: number[];
@@ -31,6 +32,7 @@ export interface Filters {
 export const DEFAULT_FILTERS: Filters = {
   search: "",
   gameType: "",
+  rankTypes: [],
   players: [],
   duration: [],
   weight: [],
@@ -76,6 +78,7 @@ function parseFiltersFromParams(params: Pick<URLSearchParams, "get" | "toString"
     filters: {
       search: params.get("q") ?? "",
       gameType: VALID_GAME_TYPES.has(type) ? (type as Filters["gameType"]) : "",
+      rankTypes: strs("rank"),
       players: nums("players"),
       duration: strs("duration").filter((d) => VALID_DURATIONS.has(d)),
       weight: nums("weight").filter((w) => w >= 1 && w <= 5),
@@ -101,6 +104,7 @@ function serializeStateToUrl(
   const params = new URLSearchParams();
   if (debouncedSearch) params.set("q", debouncedSearch);
   if (filters.gameType) params.set("type", filters.gameType);
+  if (filters.rankTypes.length) params.set("rank", filters.rankTypes.join(","));
   if (filters.players.length) params.set("players", filters.players.join(","));
   if (filters.duration.length) params.set("duration", filters.duration.join(","));
   if (filters.weight.length) params.set("weight", filters.weight.join(","));
@@ -158,6 +162,21 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
 
     if (filters.gameType) {
       result = result.filter((g) => g.subtype === filters.gameType);
+    }
+
+    if (filters.rankTypes.length > 0) {
+      result = result.filter((g) => {
+        let ranks = g.rankTypes;
+        if (ranks.length === 0 && g.subtype === "boardgameexpansion") {
+          for (const bg of allGamesMap.values()) {
+            if (bg.expansions.some((exp) => exp.id === g.id)) {
+              ranks = bg.rankTypes;
+              break;
+            }
+          }
+        }
+        return filters.rankTypes.some((r) => ranks.includes(r));
+      });
     }
 
     if (filters.players.length > 0) {
@@ -225,7 +244,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     });
 
     return result;
-  }, [games, debouncedSearch, filters, sortBy]);
+  }, [games, debouncedSearch, filters, sortBy, allGamesMap]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
@@ -290,6 +309,11 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     return () => panel.removeEventListener("keydown", handleKeyDown);
   }, [mobileFilterOpen]);
 
+  const allRankTypes = useMemo(
+    () => [...new Set(games.flatMap((g) => g.rankTypes))].sort(),
+    [games]
+  );
+
   const allCategories = useMemo(
     () => [...new Set(games.flatMap((g) => g.categories))].sort(),
     [games]
@@ -304,6 +328,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     () =>
       filters.search !== "" ||
       filters.gameType !== "" ||
+      filters.rankTypes.length > 0 ||
       filters.players.length > 0 ||
       filters.duration.length > 0 ||
       filters.weight.length > 0 ||
@@ -351,7 +376,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
           {t("btn_filter")}
           {hasActiveFilters && (
             <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white/25 px-1 text-xs">
-              {filters.players.length + filters.duration.length + filters.weight.length + filters.age.length + filters.categories.length + filters.mechanics.length + (filters.gameType ? 1 : 0)}
+              {filters.rankTypes.length + filters.players.length + filters.duration.length + filters.weight.length + filters.age.length + filters.categories.length + filters.mechanics.length + (filters.gameType ? 1 : 0)}
             </span>
           )}
         </button>
@@ -398,9 +423,19 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
               onReset={resetFilters}
               hasActiveFilters={hasActiveFilters}
               totalResults={filtered.length}
+              availableRankTypes={allRankTypes}
               availableCategories={allCategories}
               availableMechanics={allMechanics}
             />
+          </div>
+          <div className="mt-4 flex justify-center">
+            <a href="https://boardgamegeek.com/" target="_blank" rel="noopener noreferrer">
+              <img
+                src="/images/logos/powered-by-bgg.png"
+                alt="Powered by BoardGameGeek"
+                className="h-auto w-40 opacity-70 transition-opacity hover:opacity-100"
+              />
+            </a>
           </div>
         </aside>
 
@@ -504,6 +539,16 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                   setCurrentPage(1);
                 }}
               />
+
+              <div className="mt-6 flex justify-center md:hidden">
+                <a href="https://boardgamegeek.com/" target="_blank" rel="noopener noreferrer">
+                  <img
+                    src="/images/logos/powered-by-bgg.png"
+                    alt="Powered by BoardGameGeek"
+                    className="h-auto w-36 opacity-70 transition-opacity hover:opacity-100"
+                  />
+                </a>
+              </div>
             </>
           )}
         </div>
@@ -527,6 +572,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                 onReset={resetFilters}
                 hasActiveFilters={hasActiveFilters}
                 totalResults={filtered.length}
+                availableRankTypes={allRankTypes}
                 availableCategories={allCategories}
                 availableMechanics={allMechanics}
                 onClose={() => setMobileFilterOpen(false)}

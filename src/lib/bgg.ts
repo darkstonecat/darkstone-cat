@@ -29,6 +29,7 @@ export interface BggGame {
   minAge: number;
   categories: string[];
   mechanics: string[];
+  rankTypes: string[];
   expansions: BggExpansion[];
 }
 
@@ -60,8 +61,8 @@ const MAX_RETRIES = 5;
 const BATCH_SIZE = 20;
 
 async function fetchBggXml(url: string): Promise<string> {
-  const token = process.env.BGG_API_TOKEN;
-  if (!token) throw new Error("BGG_API_TOKEN not set");
+  const token = process.env.BGG_API_KEY;
+  if (!token) throw new Error("BGG_API_KEY not set");
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
@@ -102,6 +103,13 @@ interface RawCollectionItem {
     rating?: {
       average?: { "@_value"?: string };
       averageweight?: { "@_value"?: string };
+      ranks?: {
+        rank?: Array<{
+          "@_type"?: string;
+          "@_name"?: string;
+          "@_value"?: string;
+        }> | { "@_type"?: string; "@_name"?: string; "@_value"?: string };
+      };
     };
   };
 }
@@ -117,6 +125,19 @@ function parseCollectionItems(xml: string): RawCollectionItem[] {
   const items = parsed?.items?.item;
   if (!items) return [];
   return Array.isArray(items) ? items : [items];
+}
+
+function extractRankTypes(ranks: unknown): string[] {
+  if (!ranks) return [];
+  const list = Array.isArray(ranks) ? ranks : [ranks];
+  return list
+    .filter(
+      (r) =>
+        r["@_type"] === "family" &&
+        r["@_name"] &&
+        r["@_value"] !== "Not Ranked"
+    )
+    .map((r) => r["@_name"] as string);
 }
 
 function rawToGame(item: RawCollectionItem): BggGame {
@@ -139,6 +160,7 @@ function rawToGame(item: RawCollectionItem): BggGame {
     minAge: 0,
     categories: [],
     mechanics: [],
+    rankTypes: extractRankTypes(item.stats?.rating?.ranks?.rank),
     expansions: [],
   };
 }
@@ -208,13 +230,19 @@ function parseMockThings(xml: string): Map<string, ThingData> {
       ) || 0;
     const minAge = parseInt(item?.minage?.["@_value"] ?? "0", 10) || 0;
 
+    const baseGameIds: string[] = [];
     const categories: string[] = [];
     const mechanics: string[] = [];
     const links = item?.link;
     if (Array.isArray(links)) {
       for (const link of links) {
         const type = link["@_type"];
-        if (type === "boardgamecategory" && link["@_value"]) {
+        if (
+          type === "boardgameexpansion" &&
+          link["@_inbound"] === "true"
+        ) {
+          baseGameIds.push(link["@_id"]);
+        } else if (type === "boardgamecategory" && link["@_value"]) {
           categories.push(link["@_value"]);
         } else if (type === "boardgamemechanic" && link["@_value"]) {
           mechanics.push(link["@_value"]);
@@ -222,12 +250,17 @@ function parseMockThings(xml: string): Map<string, ThingData> {
       }
     }
 
+    const rankTypes = extractRankTypes(
+      item?.statistics?.ratings?.ranks?.rank
+    );
+
     result.set(id, {
       weight: Math.round(weight * 10) / 10,
       minAge,
       categories,
       mechanics,
-      baseGameIds: [],
+      rankTypes,
+      baseGameIds,
     });
   }
 
@@ -243,6 +276,7 @@ interface ThingData {
   minAge: number;
   categories: string[];
   mechanics: string[];
+  rankTypes: string[];
   baseGameIds: string[];
 }
 
@@ -291,11 +325,16 @@ async function fetchThingData(
           }
         }
 
+        const rankTypes = extractRankTypes(
+          item?.statistics?.ratings?.ranks?.rank
+        );
+
         result.set(id, {
           weight: Math.round(weight * 10) / 10,
           minAge,
           categories,
           mechanics,
+          rankTypes,
           baseGameIds,
         });
       }
@@ -345,6 +384,8 @@ function enrichWithThingData(
       if (thing.minAge > 0) game.minAge = thing.minAge;
       if (thing.categories.length > 0) game.categories = thing.categories;
       if (thing.mechanics.length > 0) game.mechanics = thing.mechanics;
+      if (thing.rankTypes.length > 0 && game.rankTypes.length === 0)
+        game.rankTypes = thing.rankTypes;
     }
   }
 }
@@ -354,7 +395,7 @@ function enrichWithThingData(
 // ---------------------------------------------------------------------------
 
 export async function fetchBggCollection(): Promise<BggCollectionResult> {
-  const hasToken = !!process.env.BGG_API_TOKEN;
+  const hasToken = !!process.env.BGG_API_KEY;
   const username = process.env.BGG_USERNAME ?? "citizen987";
 
   try {
@@ -362,18 +403,25 @@ export async function fetchBggCollection(): Promise<BggCollectionResult> {
     let expansionItems: BggGame[];
 
     if (hasToken) {
-      // Production mode: single collection call with both subtypes
-      const collectionUrl = `${BGG_BASE}/collection?username=${username}&own=1&subtype=boardgame,boardgameexpansion&stats=1`;
-      const collectionXml = await fetchBggXml(collectionUrl);
-      const allItems = parseCollectionItems(collectionXml).map(rawToGame);
+      // Production mode: two separate calls (API doesn't accept combined subtypes)
+      const baseUrl = `${BGG_BASE}/collection?username=${username}&own=1&subtype=boardgame&stats=1`;
+      const expUrl = `${BGG_BASE}/collection?username=${username}&own=1&subtype=boardgameexpansion&stats=1`;
+      const [baseXml, expXml] = await Promise.all([
+        fetchBggXml(baseUrl),
+        fetchBggXml(expUrl),
+      ]);
 
-      baseGames = allItems.filter((g) => g.subtype === "boardgame");
-      expansionItems = allItems.filter(
-        (g) => g.subtype === "boardgameexpansion"
-      );
+      expansionItems = parseCollectionItems(expXml).map(rawToGame);
+
+      // BGG may return expansions in the base call with subtype="boardgame",
+      // so remove any overlap — the expansion call is the source of truth.
+      const expIds = new Set(expansionItems.map((g) => g.id));
+      baseGames = parseCollectionItems(baseXml)
+        .map(rawToGame)
+        .filter((g) => !expIds.has(g.id));
 
       // Fetch thing data for all items (weight, minAge, expansion links)
-      const allIds = allItems.map((g) => g.id);
+      const allIds = [...baseGames, ...expansionItems].map((g) => g.id);
       const thingMap = await fetchThingData(allIds);
       enrichWithThingData(baseGames, thingMap);
       enrichWithThingData(expansionItems, thingMap);
@@ -389,24 +437,12 @@ export async function fetchBggCollection(): Promise<BggCollectionResult> {
       const thingMap = parseMockThings(thingsXml);
       enrichWithThingData(allGames, thingMap);
 
-      // Separate expansions identified by "Expansion for Base-game" category
-      const EXPANSION_CAT = "Expansion for Base-game";
-      baseGames = allGames.filter((g) => !g.categories.includes(EXPANSION_CAT));
-      expansionItems = allGames.filter((g) =>
-        g.categories.includes(EXPANSION_CAT)
+      baseGames = allGames.filter((g) => g.subtype === "boardgame");
+      expansionItems = allGames.filter(
+        (g) => g.subtype === "boardgameexpansion"
       );
 
-      // Mark expansion subtypes (collection.xml has all as "boardgame")
-      for (const exp of expansionItems) {
-        exp.subtype = "boardgameexpansion";
-      }
-
-      // Strip the metadata category from display
-      for (const game of [...baseGames, ...expansionItems]) {
-        game.categories = game.categories.filter((c) => c !== EXPANSION_CAT);
-      }
-
-      linkExpansionsByName(baseGames, expansionItems);
+      linkExpansionsByThing(baseGames, expansionItems, thingMap);
     }
 
     // Combine base games + expansions, deduplicate

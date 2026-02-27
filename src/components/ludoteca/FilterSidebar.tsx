@@ -11,6 +11,7 @@ interface FilterSidebarProps {
   onReset: () => void;
   hasActiveFilters: boolean;
   totalResults: number;
+  availableRankTypes: string[];
   availableCategories: string[];
   availableMechanics: string[];
   onClose?: () => void;
@@ -42,6 +43,7 @@ export default function FilterSidebar({
   onReset,
   hasActiveFilters,
   totalResults,
+  availableRankTypes,
   availableCategories,
   availableMechanics,
   onClose,
@@ -223,6 +225,28 @@ export default function FilterSidebar({
           ))}
         </div>
       </div>
+
+      {/* Rank types */}
+      {availableRankTypes.length > 0 && (
+        <>
+          <hr className="border-stone-200" />
+          <div>
+            <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
+              {t("filter_rank_title")}
+            </h3>
+            <SearchableMultiSelect
+              options={availableRankTypes}
+              selected={filters.rankTypes}
+              onChange={(v) => update("rankTypes", v)}
+              placeholder={t("filter_select_placeholder")}
+              searchPlaceholder={t("filter_rank_placeholder")}
+              selectedLabel={(n) => t("filter_selected_count", { count: n })}
+              label={t("filter_rank_title")}
+              optionLabel={(rank) => t(`filter_rank_${rank}`)}
+            />
+          </div>
+        </>
+      )}
 
       {/* Categories */}
       {availableCategories.length > 0 && (

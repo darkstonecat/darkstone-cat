@@ -26,7 +26,7 @@ export default async function LudotecaPage() {
         totalWithExpansions={collection.totalWithExpansions}
       />
 
-      <section className="flex-1 bg-brand-beige pb-20">
+      <section className="flex-1 bg-brand-beige pb-8 md:pb-20">
         <Suspense>
           <LudotecaClient
             games={collection.games}
