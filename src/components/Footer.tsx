@@ -82,7 +82,7 @@ export default function Footer() {
               </span>
             </div>
 
-            <div className="mt-5 space-y-1">
+            <div className="mt-3 space-y-1">
               <p className="max-w-xs text-sm leading-relaxed text-stone-400">
                 {t("tagline")}
               </p>
@@ -91,13 +91,40 @@ export default function Footer() {
               </p>
             </div>
 
-            <div className="mt-6 border-t border-stone-800 pt-4">
+            <div className="mt-3 border-t border-stone-800 pt-4">
+              <span className="mb-3 block text-xs uppercase tracking-[0.15em] text-stone-500">
+                {t("supportedBy")}
+              </span>
+              <div className="flex items-center gap-10">
               <a
-                href="mailto:darkstone.cat@gmail.com"
-                className="text-sm text-stone-300 transition-colors hover:text-brand-orange"
+                href="https://www.terrassa.cat/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Ajuntament de Terrassa"
               >
-                darkstone.cat@gmail.com
+                <Image
+                  src="/images/icons/logo-terrassa.svg"
+                  alt="Ajuntament de Terrassa"
+                  width={167}
+                  height={33}
+                  className="opacity-60 transition-opacity hover:opacity-100"
+                />
               </a>
+              <a
+                href="https://www.diba.cat/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Diputació de Barcelona"
+              >
+                <Image
+                  src="/images/icons/logo_diputaciobarcelona.svg"
+                  alt="Diputació de Barcelona"
+                  width={99}
+                  height={33}
+                  className="brightness-0 invert opacity-60 transition-opacity hover:opacity-100"
+                />
+              </a>
+              </div>
             </div>
           </motion.div>
 
@@ -121,7 +148,7 @@ export default function Footer() {
 
           {/* Col 3 — Location + Schedule (right) */}
           <motion.div {...columnAnimation(0.2)} className="md:text-right md:flex md:flex-col md:items-end">
-            <span className="mb-5 block text-xs uppercase tracking-[0.15em] text-stone-500">
+            <span className="mb-3 block text-xs uppercase tracking-[0.15em] text-stone-500">
               {t("locationLabel")}
             </span>
             <a
@@ -141,7 +168,7 @@ export default function Footer() {
               </p>
             </a>
 
-            <span className="mt-6 mb-4 block text-xs uppercase tracking-[0.15em] text-stone-500">
+            <span className="mt-4 mb-2 block text-xs uppercase tracking-[0.15em] text-stone-500">
               {t("scheduleLabel")}
             </span>
             <div className="space-y-1">
@@ -151,6 +178,15 @@ export default function Footer() {
               <p className="text-sm text-stone-400">
                 {tSch("saturday")}: {tSch("saturday_start")} — {tSch("saturday_end")}
               </p>
+            </div>
+
+            <div className="mt-2 border-t border-stone-800 pt-2">
+              <a
+                href="mailto:darkstone.cat@gmail.com"
+                className="text-sm text-stone-300 transition-colors hover:text-brand-orange"
+              >
+                darkstone.cat@gmail.com
+              </a>
             </div>
           </motion.div>
         </div>
