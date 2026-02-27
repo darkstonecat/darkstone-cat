@@ -165,7 +165,7 @@ export default function Footer() {
               <span key={item.key} className="flex items-center gap-4">
                 <Link
                   href={item.href}
-                  className="text-xs text-stone-500 transition-colors hover:text-stone-300"
+                  className="text-xs text-stone-400 transition-colors hover:text-stone-300"
                 >
                   {t(item.key)}
                 </Link>
@@ -194,16 +194,16 @@ export default function Footer() {
 
           {/* Copyright & dev */}
           <div className="text-center md:text-right md:flex md:flex-col md:items-end">
-            <p className="text-xs text-stone-600">
+            <p className="text-xs text-stone-400">
               &copy; {currentYear} Darkstone Catalunya. {t("rights")}
             </p>
-            <p className="mt-0.5 text-xs text-stone-600">
+            <p className="mt-0.5 text-xs text-stone-400">
               {t("developedBy")}{" "}
               <a
                 href="https://www.linkedin.com/in/rubencodina/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-stone-400 transition-colors hover:text-stone-white-hover"
+                className="text-stone-300 underline decoration-stone-600 underline-offset-2 transition-colors hover:text-stone-white-hover hover:decoration-stone-400"
               >
                 Rubén Codina
               </a>
