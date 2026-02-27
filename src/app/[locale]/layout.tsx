@@ -50,6 +50,7 @@ const jsonLd = {
   foundingDate: "2024-09-14",
   address: {
     "@type": "PostalAddress",
+    streetAddress: "Plaça del Tint, 4",
     addressLocality: "Terrassa",
     addressRegion: "Barcelona",
     postalCode: "08224",
