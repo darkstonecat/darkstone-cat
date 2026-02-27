@@ -70,7 +70,7 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               <div className="relative h-9 w-9 overflow-hidden rounded-full">
                 <Image
-                  src="/images/darkstone_logo.png"
+                  src="/images/darkstone_logo_128px_bg.webp"
                   alt="Darkstone Logo"
                   fill
                   className="object-cover"

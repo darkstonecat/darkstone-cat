@@ -56,7 +56,7 @@ const jsonLd = {
   name: "Darkstone Catalunya",
   alternateName: "Associació de jugadors i jugadores de jocs de taula i rol Darkstone Catalunya",
   url: "https://darkstone.cat",
-  logo: "https://darkstone.cat/images/darkstone_logo.png",
+  logo: "https://darkstone.cat/images/darkstone_logo_768px.png",
   description:
     "Associació sense ànim de lucre dedicada als jocs de taula i jocs de rol a Terrassa.",
   foundingDate: "2024-09-14",

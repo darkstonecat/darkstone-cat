@@ -34,7 +34,7 @@ export default function OgImage() {
         {/* Logo */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://darkstone.cat/images/darkstone_logo.png"
+          src="https://darkstone.cat/images/darkstone_logo_768px.png"
           alt=""
           width={180}
           height={180}

@@ -127,7 +127,7 @@ export default function NavBar() {
           <Link href="/" className="group flex items-center gap-3">
             <div className="relative h-10 w-10 overflow-hidden rounded-full transition-transform duration-300 group-hover:scale-105">
               <Image
-                src="/images/darkstone_logo.png"
+                src="/images/darkstone_logo_128px_bg.webp"
                 alt="Darkstone Logo"
                 fill
                 className="object-cover"

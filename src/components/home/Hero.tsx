@@ -55,12 +55,13 @@ export default function Hero() {
             className="w-full h-full relative"
           >
             <Image
-              src="/images/darkstone_logo.png"
+              src="/images/darkstone_logo_768px.webp"
               alt="Darkstone Catalunya Logo"
               fill
               priority
+              fetchPriority="high"
               className="object-contain drop-shadow-2xl"
-              sizes="(max-width: 768px) 100vw, 1024px"
+              sizes="(max-width: 768px) 35vh, 45vh"
             />
           </m.div>
         </m.div>
