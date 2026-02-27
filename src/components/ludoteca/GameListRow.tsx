@@ -38,7 +38,7 @@ export default function GameListRow({ game, onClick }: GameListRowProps) {
     <button
       onClick={onClick}
       className="group flex w-full items-stretch gap-4 overflow-hidden rounded-2xl border border-stone-200/50 bg-white pr-3 text-left transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
-      aria-label={`${game.name} — ${t("card_aria")}`}
+      aria-label={t("card_aria")}
     >
       {/* Thumbnail */}
       <div className="relative aspect-square w-20 shrink-0 overflow-hidden bg-stone-100">
@@ -60,9 +60,9 @@ export default function GameListRow({ game, onClick }: GameListRowProps) {
       {/* Info */}
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 py-3">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="line-clamp-1 text-sm font-semibold text-stone-800">
+          <p className="line-clamp-1 text-sm font-semibold text-stone-800">
             {game.name}
-          </h3>
+          </p>
           {game.expansions.length > 0 && (
             <span className="shrink-0 rounded-full bg-stone-custom/90 px-2 py-0.5 text-xs font-semibold text-brand-white">
               +{game.expansions.length}

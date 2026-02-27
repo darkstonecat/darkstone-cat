@@ -318,9 +318,9 @@ function StatItem({
 }) {
   return (
     <div className="flex items-center gap-2.5 rounded-lg bg-stone-50 p-3">
-      <span className="text-stone-400">{icon}</span>
+      <span className="text-stone-500">{icon}</span>
       <div>
-        <p className="text-xs text-stone-400">{label}</p>
+        <p className="text-xs text-stone-500">{label}</p>
         <p className="text-sm font-semibold text-stone-700">{value}</p>
       </div>
     </div>

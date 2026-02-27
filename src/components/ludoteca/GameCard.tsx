@@ -43,6 +43,7 @@ function ProgressiveGameImage({ game }: { game: BggGame }) {
           src={game.thumbnail}
           alt={alt}
           fill
+          quality={60}
           className="object-cover transition-transform duration-300 group-hover:scale-110"
           sizes={IMAGE_SIZES}
         />
@@ -53,6 +54,7 @@ function ProgressiveGameImage({ game }: { game: BggGame }) {
           src={game.image}
           alt={alt}
           fill
+          quality={60}
           className={`object-cover transition duration-300 group-hover:scale-110 ${
             hiLoaded ? "opacity-100" : "opacity-0"
           }`}
@@ -77,7 +79,7 @@ export default function GameCard({ game, onClick }: GameCardProps) {
     <button
       onClick={onClick}
       className="group flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200/50 bg-white text-left transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md"
-      aria-label={`${game.name} — ${t("card_aria")}`}
+      aria-label={t("card_aria")}
     >
       {/* Image — ~60% of card height, progressive: thumbnail → full image */}
       <div className="relative aspect-4/5 w-full overflow-hidden bg-stone-100">
@@ -99,9 +101,9 @@ export default function GameCard({ game, onClick }: GameCardProps) {
 
       {/* Info — ~40% */}
       <div className="flex flex-1 flex-col gap-1.5 p-3">
-        <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-stone-800">
+        <p className="line-clamp-2 text-sm font-semibold leading-tight text-stone-800">
           {game.name}
-        </h3>
+        </p>
 
         <div className="mt-auto flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">

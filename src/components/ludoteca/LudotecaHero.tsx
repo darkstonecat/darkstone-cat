@@ -34,7 +34,7 @@ export default function LudotecaHero({
           {t("hero_subtitle")}
         </motion.p>
         <motion.p
-          className="mt-3 text-sm text-brand-white/35"
+          className="mt-3 text-sm text-brand-white/55"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}

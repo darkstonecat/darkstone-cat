@@ -433,6 +433,8 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
               <img
                 src="/images/logos/powered-by-bgg.png"
                 alt="Powered by BoardGameGeek"
+                width={160}
+                height={43}
                 className="h-auto w-40 opacity-70 transition-opacity hover:opacity-100"
               />
             </a>
@@ -545,6 +547,8 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                   <img
                     src="/images/logos/powered-by-bgg.png"
                     alt="Powered by BoardGameGeek"
+                    width={144}
+                    height={42}
                     className="h-auto w-36 opacity-70 transition-opacity hover:opacity-100"
                   />
                 </a>

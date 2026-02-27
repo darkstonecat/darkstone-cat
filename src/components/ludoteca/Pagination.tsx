@@ -73,7 +73,7 @@ export default function Pagination({
               <ChevronLeft className="h-4 w-4" />
               {t("pagination_prev")}
             </button>
-            <span className="text-xs text-stone-400">
+            <span className="text-xs text-stone-500">
               {currentPage}/{totalPages}
             </span>
             <button
@@ -107,7 +107,7 @@ export default function Pagination({
       {/* Desktop: single row — showing info | pages | per page */}
       <div className="hidden items-center sm:flex">
         {/* Left: showing info */}
-        <p className="flex-1 text-xs text-stone-400">
+        <p className="flex-1 text-xs text-stone-500">
           {t("pagination_showing", {
             start: startItem,
             end: endItem,
@@ -131,7 +131,7 @@ export default function Pagination({
               page === "..." ? (
                 <span
                   key={`ellipsis-${i}`}
-                  className="flex h-9 min-w-9 items-center justify-center text-sm text-stone-400"
+                  className="flex h-9 min-w-9 items-center justify-center text-sm text-stone-500"
                 >
                   ...
                 </span>
