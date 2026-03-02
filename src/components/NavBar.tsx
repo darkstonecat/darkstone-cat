@@ -32,7 +32,7 @@ const SECTION_THEMES: Record<string, { text: string; bg: string }> = {
   schedule: { text: "#FAFAF9", bg: "#1C1917" },
   "join-us": { text: "#1c1917", bg: "#EEE8DC" },
   location: { text: "#FAFAF9", bg: "#1C1917" },
-  collaborators: { text: "#1c1917", bg: "#EEE8DC" },
+  collaborators: { text: "#FAFAF9", bg: "#1C1917" },
 };
 
 // Fixed themes for subpages

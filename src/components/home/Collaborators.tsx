@@ -1,38 +1,109 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import TextReveal from "@/components/TextReveal";
-import CollaboratorModal from "./CollaboratorModal";
-import {
-  getCollaboratorsGrouped,
-  type Collaborator,
-} from "@/data/collaborators";
+import { collaborators, type Collaborator } from "@/data/collaborators";
 
-const groups = getCollaboratorsGrouped();
+const ROWS: { items: Collaborator[]; direction: "left" | "right"; duration: number }[] = [
+  { items: collaborators.slice(0, 9), direction: "left", duration: 40 },
+  { items: collaborators.slice(9, 18), direction: "right", duration: 35 },
+  { items: collaborators.slice(18), direction: "left", duration: 45 },
+];
+
+function LogoCard({
+  collaborator,
+  t,
+}: {
+  collaborator: Collaborator;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <a
+      href={collaborator.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group/card flex aspect-square w-[200px] shrink-0 items-center justify-center rounded-xl p-3 opacity-70 transition-[opacity,box-shadow] duration-300 hover:opacity-100 hover:shadow-lg hover:shadow-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+      style={{
+        backgroundColor: collaborator.brandColor ?? "rgba(255,255,255,0.08)",
+      }}
+      aria-label={collaborator.name}
+    >
+      <div className="relative h-full w-full transition-transform duration-300 group-hover/card:scale-110">
+        <Image
+          src={collaborator.logo}
+          alt={t("logo_alt", { name: collaborator.name })}
+          fill
+          className={cn("object-contain", collaborator.invertLogo && "brightness-0 invert")}
+          sizes="200px"
+          quality={60}
+        />
+      </div>
+    </a>
+  );
+}
+
+function MarqueeRow({
+  items,
+  direction,
+  duration,
+  t,
+}: {
+  items: Collaborator[];
+  direction: "left" | "right";
+  duration: number;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const animationClass =
+    direction === "left"
+      ? "animate-[marquee-left_var(--duration)_linear_infinite]"
+      : "animate-[marquee-right_var(--duration)_linear_infinite]";
+
+  return (
+    <div className="group flex gap-4 overflow-hidden" style={{ "--duration": `${duration}s` } as React.CSSProperties}>
+      {[0, 1].map((copy) => (
+        <div
+          key={copy}
+          className={cn(
+            "flex shrink-0 gap-4",
+            animationClass,
+            "group-hover:[animation-play-state:paused]"
+          )}
+          aria-hidden={copy === 1}
+        >
+          {items.map((collaborator) => (
+            <LogoCard
+              key={collaborator.id}
+              collaborator={collaborator}
+              t={t}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Collaborators() {
   const t = useTranslations("collaborators");
-  const [selected, setSelected] = useState<Collaborator | null>(null);
 
   return (
     <section
       id="collaborators"
-      className="relative bg-brand-beige pt-[30vh] pb-[30vh] text-stone-custom"
+      className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-stone-custom py-20 text-stone-white-hover"
     >
       <div className="container mx-auto px-6">
         {/* Title */}
-        <div className="text-center">
+        <div className="mb-14 text-center">
           <TextReveal
             text={t("title")}
             as="h2"
             className="text-4xl font-black tracking-tight md:text-6xl"
           />
           <motion.p
-            className="mx-auto mt-4 max-w-xl text-base text-stone-custom/60 md:text-lg"
+            className="mx-auto mt-4 max-w-xl text-base text-stone-white-hover/50 md:text-lg"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -41,70 +112,20 @@ export default function Collaborators() {
             {t("subtitle")}
           </motion.p>
         </div>
-
-        {/* Category groups */}
-        <div className="mt-16 space-y-14">
-          {groups.map((group, groupIdx) => (
-            <motion.div
-              key={group.category}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.5, delay: groupIdx * 0.05 }}
-            >
-              {/* Category heading */}
-              <h3 className="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-stone-custom/40">
-                {t(`categories.${group.category}`)}
-              </h3>
-
-              {/* Logo grid */}
-              <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-4">
-                {group.items.map((collaborator, i) => (
-                  <motion.button
-                    key={collaborator.id}
-                    onClick={() => setSelected(collaborator)}
-                    className="group flex aspect-[3/2] w-[calc(50%-0.5rem)] items-center justify-center rounded-xl p-4 transition-[filter,box-shadow] duration-300 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange sm:w-[calc(33.333%-0.75rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.666%-0.875rem)]"
-                    style={{
-                      backgroundColor: collaborator.brandColor ?? "rgba(255,255,255,0.6)",
-                    }}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-50px" }}
-                    transition={{
-                      duration: 0.4,
-                      delay: 0.05 + i * 0.04,
-                    }}
-                    whileHover={{ y: -4, transition: { duration: 0.2, delay: 0 } }}
-                    whileTap={{ scale: 0.97, transition: { duration: 0.1, delay: 0 } }}
-                    aria-label={collaborator.name}
-                  >
-                    <div className="relative h-full w-full">
-                      <Image
-                        src={collaborator.logo}
-                        alt={t("logo_alt", { name: collaborator.name })}
-                        fill
-                        className={cn("object-contain", collaborator.invertLogo && "brightness-0 invert")}
-                        sizes="(max-width: 640px) 40vw, (max-width: 1024px) 25vw, 160px"
-                        quality={60}
-                      />
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-        </div>
       </div>
 
-      {/* Modal */}
-      <AnimatePresence>
-        {selected && (
-          <CollaboratorModal
-            collaborator={selected}
-            onClose={() => setSelected(null)}
+      {/* Marquee rows — full width, no container constraint */}
+      <div className="space-y-4">
+        {ROWS.map((row, idx) => (
+          <MarqueeRow
+            key={idx}
+            items={row.items}
+            direction={row.direction}
+            duration={row.duration}
+            t={t}
           />
-        )}
-      </AnimatePresence>
+        ))}
+      </div>
     </section>
   );
 }

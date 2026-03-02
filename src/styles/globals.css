@@ -30,6 +30,16 @@
       transform: translateY(0);
     }
   }
+
+  @keyframes marquee-left {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-100% - 1rem)); }
+  }
+
+  @keyframes marquee-right {
+    from { transform: translateX(calc(-100% - 1rem)); }
+    to { transform: translateX(0); }
+  }
 }
 
 @layer base {

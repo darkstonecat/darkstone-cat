@@ -7,6 +7,7 @@ import AboutHero from "@/components/about/AboutHero";
 import AboutOrigin from "@/components/about/AboutOrigin";
 import AboutMissionValues from "@/components/about/AboutMissionValues";
 import AboutValues from "@/components/about/AboutValues";
+import AboutCollaborators from "@/components/about/AboutCollaborators";
 import SectionDivider from "@/components/home/SectionDivider";
 
 export async function generateMetadata({
@@ -31,6 +32,8 @@ export default function AboutPage() {
       <AboutOrigin />
       <AboutMissionValues />
       <AboutValues />
+      <AboutCollaborators />
+      <SectionDivider topColor="#EEE8DC" bottomColor="#111" variant="wave" animated />
       <Footer />
       <ScrollToTop />
     </main>

@@ -89,6 +89,7 @@ export const collaborators: Collaborator[] = [
     category: "publishers",
     logo: "/images/logos/collaborators/editorials/logo_dracoideas.webp",
     url: "https://dracoideas.com/editorial/",
+    brandColor: "#FFFFFF",
   },
   {
     id: "eclipse",
@@ -97,6 +98,7 @@ export const collaborators: Collaborator[] = [
     category: "publishers",
     logo: "/images/logos/collaborators/editorials/logo_eclipse.webp",
     url: "https://eclipseeditorial.com/games",
+    brandColor: "#FFFFFF",
   },
   {
     id: "games-4-gamers",
@@ -105,6 +107,7 @@ export const collaborators: Collaborator[] = [
     category: "publishers",
     logo: "/images/logos/collaborators/editorials/logo_g4g.webp",
     url: "https://games4gamers.com",
+    brandColor: "#FFFFFF",
   },
   {
     id: "juegorama",
@@ -113,6 +116,7 @@ export const collaborators: Collaborator[] = [
     category: "publishers",
     logo: "/images/logos/collaborators/editorials/logo_juegorama.webp",
     url: "https://juegorama.eu/",
+    brandColor: "#FFFFFF",
   },
   {
     id: "key-enigma",
@@ -222,6 +226,7 @@ export const collaborators: Collaborator[] = [
     category: "clubs",
     logo: "/images/logos/collaborators/clubs/logo_tastajocs.webp",
     url: "https://www.tastajocs.cat",
+    brandColor: "#FFFFFF",
   },
   {
     id: "darkstone-es",
