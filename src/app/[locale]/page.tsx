@@ -8,6 +8,7 @@ import Activities from "@/components/home/Activities";
 import Schedule from "@/components/home/Schedule";
 import JoinUs from "@/components/home/JoinUs";
 import Location from "@/components/home/Location";
+import Collaborators from "@/components/home/Collaborators";
 import SectionDivider from "@/components/home/SectionDivider";
 
 export default function HomePage() {
@@ -28,6 +29,7 @@ export default function HomePage() {
         <Schedule />
         <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="curve" flip />
         <JoinUs />
+        <Collaborators />
         <Location />
         <Footer />
         <ScrollToTop />

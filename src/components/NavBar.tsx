@@ -24,7 +24,7 @@ const NAV_LINKS = [
 ] as const;
 
 // Theme for the home page scroll sections (backdrop adaptation)
-const HOME_SECTION_IDS = ["about", "activities", "schedule", "join-us", "location"] as const;
+const HOME_SECTION_IDS = ["about", "activities", "schedule", "join-us", "location", "collaborators"] as const;
 const SECTION_THEMES: Record<string, { text: string; bg: string }> = {
   "": { text: "#1c1917", bg: "#EEE8DC" },
   about: { text: "#FAFAF9", bg: "#1C1917" },
@@ -32,6 +32,7 @@ const SECTION_THEMES: Record<string, { text: string; bg: string }> = {
   schedule: { text: "#FAFAF9", bg: "#1C1917" },
   "join-us": { text: "#1c1917", bg: "#EEE8DC" },
   location: { text: "#FAFAF9", bg: "#1C1917" },
+  collaborators: { text: "#1c1917", bg: "#EEE8DC" },
 };
 
 // Fixed themes for subpages
