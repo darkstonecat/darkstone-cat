@@ -102,14 +102,14 @@ function SocialIcon({ item }: { item: SocialItem }) {
     >
       <span
         ref={iconBoxRef}
-        className="flex h-28 w-28 items-center justify-center rounded-3xl bg-stone-custom/[0.06] text-stone-custom/70 transition-all duration-300 group-hover:text-white"
+        className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-2xl sm:rounded-3xl bg-stone-custom/[0.06] text-stone-custom/70 transition-all duration-300 group-hover:text-white"
         style={{
           animation: item.animation,
           transformOrigin:
             item.labelKey === "social_facebook" ? "bottom center" : "center",
         }}
       >
-        <Icon size={48} />
+        <Icon className="size-9 sm:size-12" />
       </span>
       <span className="flex items-center gap-1.5">
         <span className="text-xs font-medium text-stone-custom/50 transition-colors duration-300 group-hover:text-stone-custom/80">
@@ -146,7 +146,7 @@ export default function SocialLinks() {
       >
         {t("social_title")}
       </motion.p>
-      <div className="flex items-center gap-16">
+      <div className="flex items-center gap-8 sm:gap-16">
         {SOCIALS.map((item) => (
           <SocialIcon key={item.labelKey} item={item} />
         ))}
