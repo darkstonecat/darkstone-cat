@@ -26,10 +26,10 @@ export default function AboutCollaborators() {
           <TextReveal
             text={t("title")}
             as="h2"
-            className="text-4xl font-black tracking-tight md:text-6xl"
+            className="text-3xl font-black tracking-tight sm:text-4xl"
           />
           <motion.p
-            className="mx-auto mt-4 max-w-xl text-base text-stone-custom/60 md:text-lg"
+            className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-stone-custom/75"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -50,7 +50,7 @@ export default function AboutCollaborators() {
               transition={{ duration: 0.5, delay: groupIdx * 0.05 }}
             >
               {/* Category heading */}
-              <h3 className="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-stone-custom/40">
+              <h3 className="mb-6 text-center text-xs uppercase tracking-[0.2em] text-stone-custom/40">
                 {t(`categories.${group.category}`)}
               </h3>
 

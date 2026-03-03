@@ -80,7 +80,7 @@ export const collaborators: Collaborator[] = [
     slug: "dmz",
     category: "publishers",
     logo: "/images/logos/collaborators/editorials/logo_DMZ.webp",
-    url: "https://dmzgames.com",
+    url: "https://dmzgames.es/",
   },
   {
     id: "draco-ideas",
@@ -106,7 +106,7 @@ export const collaborators: Collaborator[] = [
     slug: "games-4-gamers",
     category: "publishers",
     logo: "/images/logos/collaborators/editorials/logo_g4g.webp",
-    url: "https://games4gamers.com",
+    url: "http://www.games4gamers.es/",
     brandColor: "#FFFFFF",
   },
   {
@@ -135,6 +135,15 @@ export const collaborators: Collaborator[] = [
     logo: "/images/logos/collaborators/editorials/logo_synergic_games.webp",
     url: "https://synergicgames.com",
     brandColor: "#000000",
+  },
+  {
+    id: "sd-games",
+    name: "SD Games",
+    slug: "sd-games",
+    category: "publishers",
+    logo: "/images/logos/collaborators/editorials/logo_sd_games.webp",
+    url: "https://playsdgames.com/",
+    brandColor: "#036EB6",
   },
   {
     id: "tranjis-games",
@@ -245,7 +254,7 @@ export const collaborators: Collaborator[] = [
     slug: "professor-mompi",
     category: "creators",
     logo: "/images/logos/collaborators/influencers/logo_mompi.webp",
-    url: "https://www.youtube.com/@ProfesorMompi",
+    url: "https://www.youtube.com/@professormompi",
   },
   {
     id: "jugador-inicial",
@@ -253,7 +262,7 @@ export const collaborators: Collaborator[] = [
     slug: "jugador-inicial",
     category: "creators",
     logo: "/images/logos/collaborators/influencers/logo_jugador_inicial.webp",
-    url: "https://www.youtube.com/@JugadorInicial",
+    url: "https://www.youtube.com/@jugadorinicial",
     brandColor: "#000000",
   },
   {
@@ -262,7 +271,7 @@ export const collaborators: Collaborator[] = [
     slug: "cunyadisme-ludic",
     category: "creators",
     logo: "/images/logos/collaborators/influencers/logo_cunyadisme_ludic.webp",
-    url: "https://www.instagram.com/cunyadismeludic",
+    url: "https://www.youtube.com/playlist?list=PLVm2n5qa3EeOqQ_c9i_lx-GT9VBL6sFMd",
   },
   {
     id: "barbut-indepe",

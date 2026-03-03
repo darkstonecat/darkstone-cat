@@ -25,7 +25,7 @@ function LogoCard({
       href={collaborator.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group/card flex aspect-square w-[200px] shrink-0 items-center justify-center rounded-xl p-3 opacity-70 transition-[opacity,box-shadow] duration-300 hover:opacity-100 hover:shadow-lg hover:shadow-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+      className="group/card flex aspect-square w-50 shrink-0 items-center justify-center rounded-xl p-3 opacity-70 transition-[opacity,box-shadow] duration-300 hover:opacity-100 hover:shadow-lg hover:shadow-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
       style={{
         backgroundColor: collaborator.brandColor ?? "rgba(255,255,255,0.08)",
       }}
@@ -69,7 +69,7 @@ function MarqueeRow({
           className={cn(
             "flex shrink-0 gap-4",
             animationClass,
-            "group-hover:[animation-play-state:paused]"
+            "group-hover:paused"
           )}
           aria-hidden={copy === 1}
         >

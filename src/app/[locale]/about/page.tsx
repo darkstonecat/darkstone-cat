@@ -33,7 +33,6 @@ export default function AboutPage() {
       <AboutMissionValues />
       <AboutValues />
       <AboutCollaborators />
-      <SectionDivider topColor="#EEE8DC" bottomColor="#111" variant="wave" animated />
       <Footer />
       <ScrollToTop />
     </main>
