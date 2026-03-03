@@ -163,6 +163,24 @@ export const collaborators: Collaborator[] = [
     url: "https://trencadaus.com",
     brandColor: "#1E1A3A",
   },
+  {
+    id: "ak-interactive",
+    name: "AK Interactive",
+    slug: "ak-interactive",
+    category: "publishers",
+    logo: "/images/logos/collaborators/editorials/logo_ak.webp",
+    url: "https://ak-interactive.com/es",
+    brandColor: "#FFFFFF",
+  },
+  {
+    id: "awaken-realms",
+    name: "Awaken Realms",
+    slug: "awaken-realms",
+    category: "publishers",
+    logo: "/images/logos/collaborators/editorials/logo_awaken_realms.webp",
+    url: "https://awakenrealms.com",
+    brandColor: "#000000",
+  },
 
   // ── Shops ──────────────────────────────────────────────────────
   {
