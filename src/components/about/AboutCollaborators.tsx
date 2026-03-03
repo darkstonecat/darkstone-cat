@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 import TextReveal from "@/components/TextReveal";
 import CollaboratorModal from "@/components/CollaboratorModal";
+import { Link } from "@/i18n/routing";
 import {
   getCollaboratorsGrouped,
   type Collaborator,
@@ -91,6 +92,34 @@ export default function AboutCollaborators() {
             </motion.div>
           ))}
         </div>
+
+        {/* Editorial invite */}
+        <motion.p
+          className="mx-auto mt-16 max-w-2xl text-center text-sm leading-relaxed text-stone-custom/60"
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          {t.rich("editorial_invite", {
+            contactLink: (chunks) => (
+              <Link
+                href="/contact"
+                className="font-medium text-brand-orange underline underline-offset-2 transition-colors hover:text-brand-orange/80"
+              >
+                {chunks}
+              </Link>
+            ),
+            emailLink: (chunks) => (
+              <a
+                href="mailto:darkstone.cat@gmail.com"
+                className="font-medium text-brand-orange underline underline-offset-2 transition-colors hover:text-brand-orange/80"
+              >
+                {chunks}
+              </a>
+            ),
+          })}
+        </motion.p>
       </div>
 
       {/* Modal */}

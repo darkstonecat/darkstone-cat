@@ -47,12 +47,12 @@ export default function AboutValues() {
   const secondRow = VALUES.slice(3);
 
   return (
-    <section className="bg-brand-beige px-6 py-20 text-stone-custom">
+    <section className="bg-stone-custom px-6 py-20 text-stone-white-hover">
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="mb-16 text-center">
           <motion.span
-            className="mb-3 block text-xs uppercase tracking-[0.2em] text-stone-custom/40"
+            className="mb-3 block text-xs uppercase tracking-[0.2em] text-stone-white-hover/40"
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
@@ -61,7 +61,7 @@ export default function AboutValues() {
             {t("values_title")}
           </motion.span>
           <motion.h2
-            className="text-4xl font-black text-stone-custom"
+            className="text-4xl font-black text-stone-white-hover"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}

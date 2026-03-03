@@ -29,6 +29,15 @@ export default function AboutOrigin() {
           >
             {t("origin_text")}
           </motion.p>
+          <motion.p
+            className="mt-6 text-xs text-stone-custom/40"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            {t("registration_note")}
+          </motion.p>
         </div>
 
         {/* Right column — founding date highlight */}
