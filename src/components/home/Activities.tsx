@@ -107,11 +107,6 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
-                <span className="absolute top-5 right-5 font-mono text-xs tracking-widest text-white/40">
-                  {String(i + 1).padStart(2, "0")} /{" "}
-                  {String(CARDS.length).padStart(2, "0")}
-                </span>
-
                 <div className="absolute bottom-0 left-0 p-8">
                   <h3 className="mb-3 text-4xl font-black leading-tight text-white">
                     {t(`items.${card.id}.title`)}
@@ -170,11 +165,6 @@ function MobileActivities({ t }: { t: ReturnType<typeof useTranslations<"activit
               sizes="calc(100vw - 3rem)"
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
-
-            <span className="absolute top-4 right-4 font-mono text-xs tracking-widest text-white/40">
-              {String(i + 1).padStart(2, "0")} /{" "}
-              {String(CARDS.length).padStart(2, "0")}
-            </span>
 
             <div className="absolute bottom-0 left-0 p-6">
               <h3 className="mb-2 text-2xl font-black leading-tight text-white">
