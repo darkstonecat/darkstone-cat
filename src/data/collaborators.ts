@@ -181,6 +181,24 @@ export const collaborators: Collaborator[] = [
     url: "https://awakenrealms.com",
     brandColor: "#000000",
   },
+  {
+    id: "mel-negra",
+    name: "Mel Negra",
+    slug: "mel-negra",
+    category: "publishers",
+    logo: "/images/logos/collaborators/editorials/logo_mel_negra.webp",
+    url: "https://www.melnegra.cat",
+    brandColor: "#FFFFFF",
+  },
+  {
+    id: "nosolorol",
+    name: "Nosolorol",
+    slug: "nosolorol",
+    category: "publishers",
+    logo: "/images/logos/collaborators/editorials/logo_nosolorol.webp",
+    url: "https://www.nosolorol.com/",
+    brandColor: "#000000",
+  },
 
   // ── Shops ──────────────────────────────────────────────────────
   {
