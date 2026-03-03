@@ -5,7 +5,8 @@ import { FaTelegram } from "react-icons/fa";
 import Image from "next/image";
 import { motion } from "motion/react";
 import TextReveal from "@/components/TextReveal";
-import MagneticButton from "@/components/MagneticButton";
+
+import SocialLinks from "@/components/home/SocialLinks";
 
 export default function JoinUs() {
   const t = useTranslations("join_us");
@@ -41,18 +42,17 @@ export default function JoinUs() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mt-10"
           >
-            <MagneticButton
-              as="a"
+            <a
               href="https://docs.google.com/forms/d/1OBM0vAOs0vvBioSeop4T0aYh__ysuNEOy36kprTJo7Q/viewform"
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105"
+              className="animate-cta-nudge group inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105 active:scale-[0.97]"
             >
               {t("cta_button")}
               <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
                 &rarr;
               </span>
-            </MagneticButton>
+            </a>
           </motion.div>
         </div>
 
@@ -136,6 +136,8 @@ export default function JoinUs() {
             </span>
           </motion.a>
         </div>
+
+        <SocialLinks />
       </div>
     </section>
   );

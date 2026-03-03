@@ -78,7 +78,7 @@ Common patterns:
 - **Viewport triggers**: `whileInView` with `viewport={{ once: true }}` for fade/slide
 - **Sticky scroll-pin**: Tall container (`370vh`) with `sticky` positioning and scale transforms (About cards, Activities desktop)
 - **AnimatePresence**: Direction-aware transitions, cookie banner slide-in
-- **MagneticButton**: Cursor-following button with proximity-based translate, disabled on touch
+
 
 ### Styling
 
@@ -102,7 +102,7 @@ All interactive components use `"use client"`. Components are organized by page:
 - `src/components/contact/` — Contact form (ContactHero, ContactForm, ContactInfo)
 - `src/components/conduct/` — Code of conduct (ConductContent)
 - `src/components/legal/` — Legal pages (LegalPageContent, LegalContent, PrivacyContent, CookiesContent)
-- Root-level: NavBar, Footer, SmoothScroll, CookieBanner, CookieConsentProvider, GoogleAnalytics, ScrollProgress, ScrollToTop, TextReveal, MagneticButton, LanguageSwitcher, ThemeLink, ErrorContent
+- Root-level: NavBar, Footer, SmoothScroll, CookieBanner, CookieConsentProvider, GoogleAnalytics, ScrollProgress, ScrollToTop, TextReveal, LanguageSwitcher, ThemeLink, ErrorContent
 
 ### Ludoteca (Game Library)
 

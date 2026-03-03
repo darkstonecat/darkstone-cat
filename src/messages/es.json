@@ -92,7 +92,11 @@
     "join_telegram": "Unirse a Telegram",
     "ludoya_title": "Ludoya",
     "ludoya_description": "Además usamos Ludoya, una app social específica para juegos de mesa. Aquí organizamos eventos y programamos las partidas, puedes apuntarte y chatear sobre ellas.",
-    "check_ludoya": "Descubrir Ludoya"
+    "check_ludoya": "Descubrir Ludoya",
+    "social_title": "Síguenos",
+    "social_facebook": "Facebook de Darkstone Catalunya",
+    "social_instagram": "Instagram de Darkstone Catalunya",
+    "social_x": "X (Twitter) de Darkstone Catalunya"
   },
   "about_page": {
     "hero_title": "¿Quiénes somos?",

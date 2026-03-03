@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import * as m from "motion/react-client";
 import { useRef } from "react";
 import { useScroll, useTransform, Transition } from "motion/react";
-import MagneticButton from "@/components/MagneticButton";
+
 
 
 export default function Hero() {
@@ -117,14 +117,13 @@ export default function Hero() {
             }}
             className="mt-10 origin-bottom"
           >
-            <MagneticButton
-              as="a"
+            <a
               href="#join-us"
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105"
+              className="animate-cta-nudge group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105 active:scale-[0.97]"
             >
               <span className="mr-2">{t("cta")}</span>
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-            </MagneticButton>
+            </a>
           </m.div>
         </m.div>
       </m.section>

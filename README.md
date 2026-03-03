@@ -68,7 +68,7 @@ src/
 │   ├── Footer.tsx          # Site footer
 │   ├── SmoothScroll.tsx    # Lenis smooth scrolling provider
 │   ├── CookieBanner.tsx    # GDPR cookie consent
-│   └── ...                 # ScrollProgress, TextReveal, MagneticButton, etc.
+│   └── ...                 # ScrollProgress, TextReveal, etc.
 ├── hooks/                  # Custom hooks (useCookieConsent)
 ├── i18n/                   # next-intl routing and request config
 ├── messages/               # Translation files (ca.json, es.json, en.json)

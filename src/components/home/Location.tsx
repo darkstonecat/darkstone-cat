@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import TextReveal from "@/components/TextReveal";
-import MagneticButton from "@/components/MagneticButton";
+
 
 const FGC_COLOR = "#009A44";
 const RODALIES_COLOR = "#E3000F";
@@ -157,18 +157,17 @@ export default function Location() {
 
         {/* CTA */}
         <div className="mt-2 border-t border-zinc-800 pt-5 text-center">
-          <MagneticButton
-            as="a"
+          <a
             href="https://maps.google.com/?q=Plaça+del+Tint,4,Terrassa"
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center mt-5 gap-2 rounded-full border border-zinc-600 px-5 py-2.5 text-sm text-white transition-colors hover:bg-zinc-800"
+            className="group inline-flex items-center mt-5 gap-2 rounded-full border border-zinc-600 px-5 py-2.5 text-sm text-white transition-colors hover:bg-zinc-800 active:scale-[0.97]"
           >
             {t("cta")}
             <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
               &rarr;
             </span>
-          </MagneticButton>
+          </a>
         </div>
       </motion.div>
 
