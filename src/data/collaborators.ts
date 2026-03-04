@@ -106,7 +106,7 @@ export const collaborators: Collaborator[] = [
     slug: "games-4-gamers",
     category: "publishers",
     logo: "/images/logos/collaborators/editorials/logo_g4g.webp",
-    url: "http://www.games4gamers.es/",
+    url: "https://www.instagram.com/g4mes4g4mers",
     brandColor: "#FFFFFF",
   },
   {

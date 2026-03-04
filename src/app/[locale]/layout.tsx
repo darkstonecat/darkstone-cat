@@ -179,6 +179,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#1C1917" />
         <link rel="preconnect" href="https://cf.geekdo-images.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
