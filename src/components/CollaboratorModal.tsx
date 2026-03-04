@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
-import { X, ExternalLink } from "lucide-react";
+import { MdClose, MdOpenInNew } from "react-icons/md";
 import { cn } from "@/lib/utils";
 import { useLenis } from "@/components/SmoothScroll";
 import type { Collaborator } from "@/data/collaborators";
@@ -85,7 +85,7 @@ export default function CollaboratorModal({
           className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-sm transition-colors hover:bg-black/40"
           aria-label={t("close")}
         >
-          <X className="h-5 w-5" />
+          <MdClose className="h-5 w-5" />
         </button>
 
         {/* Logo */}
@@ -132,7 +132,7 @@ export default function CollaboratorModal({
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-stone-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-stone-700"
           >
             {t("visit_website")}
-            <ExternalLink className="h-4 w-4" />
+            <MdOpenInNew className="h-4 w-4" />
           </a>
         </div>
       </motion.div>

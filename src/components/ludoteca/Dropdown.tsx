@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useId, useCallback, type ReactNode } from "react";
-import { ChevronDown, Check } from "lucide-react";
+import { MdExpandMore, MdCheck } from "react-icons/md";
 
 interface DropdownOption {
   value: string;
@@ -121,7 +121,7 @@ export default function Dropdown({
           )}
           <span>{activeLabel}</span>
         </span>
-        <ChevronDown
+        <MdExpandMore
           className={`h-3.5 w-3.5 text-stone-400 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
@@ -150,7 +150,7 @@ export default function Dropdown({
                   : "text-stone-600 hover:bg-stone-50"
               }`}
             >
-              <Check
+              <MdCheck
                 className={`h-3.5 w-3.5 shrink-0 ${value === opt.value ? "text-brand-orange" : "invisible"}`}
               />
               {opt.label}

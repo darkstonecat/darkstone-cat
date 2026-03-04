@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { FaFacebook, FaInstagram, FaTelegram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { Clock, Mail, MapPin } from "lucide-react";
+import { MdSchedule, MdEmail, MdLocationOn } from "react-icons/md";
 
 const SOCIALS = [
   { href: "https://instagram.com/darkstone.cat", label: "Instagram", icon: FaInstagram },
@@ -28,7 +28,7 @@ export default function ContactInfo() {
       {/* Direct email */}
       <div>
         <div className="mb-3 flex items-center gap-2 text-stone-custom/70">
-          <Mail className="h-5 w-5" />
+          <MdEmail className="h-5 w-5" />
           <span className="text-sm font-medium">{t("email_us")}</span>
         </div>
         <a
@@ -42,7 +42,7 @@ export default function ContactInfo() {
       {/* Location */}
       <div>
         <div className="mb-3 flex items-center gap-2 text-stone-custom/70">
-          <MapPin className="h-5 w-5" />
+          <MdLocationOn className="h-5 w-5" />
           <span className="text-sm font-medium">{t("location_title")}</span>
         </div>
         <p className="text-base font-medium text-stone-custom">
@@ -52,7 +52,7 @@ export default function ContactInfo() {
           {t("address_street")} · {t("address_city")}
         </p>
         <div className="mt-4 flex items-start gap-2 text-sm">
-          <Clock className="mt-0.5 h-4 w-4 shrink-0 text-stone-custom/40" />
+          <MdSchedule className="mt-0.5 h-4 w-4 shrink-0 text-stone-custom/40" />
           <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
             <span className="font-medium text-stone-custom">{tSchedule("friday")}</span>
             <span className="text-stone-custom/60">{tSchedule("friday_start")} – {tSchedule("friday_end")}</span>

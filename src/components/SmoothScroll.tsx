@@ -52,14 +52,41 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     lenisRef.current = instance;
     subscribersRef.current.forEach((cb) => cb());
 
+    let rafId: number;
+    let isScrolling = false;
+    let idleTimeout: ReturnType<typeof setTimeout>;
+
     function raf(time: number) {
       instance.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    function startLoop() {
+      if (!isScrolling) {
+        isScrolling = true;
+        rafId = requestAnimationFrame(raf);
+      }
+      clearTimeout(idleTimeout);
+      idleTimeout = setTimeout(() => {
+        isScrolling = false;
+        cancelAnimationFrame(rafId);
+      }, 200);
+    }
+
+    // Start rAF loop on any scroll-related activity
+    window.addEventListener("wheel", startLoop, { passive: true });
+    window.addEventListener("touchmove", startLoop, { passive: true });
+    window.addEventListener("scroll", startLoop, { passive: true });
+
+    // Initial kick to handle page load
+    startLoop();
 
     return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(idleTimeout);
+      window.removeEventListener("wheel", startLoop);
+      window.removeEventListener("touchmove", startLoop);
+      window.removeEventListener("scroll", startLoop);
       instance.destroy();
       lenisRef.current = null;
     };

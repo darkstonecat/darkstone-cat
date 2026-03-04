@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import Dropdown from "./Dropdown";
 
 const PAGE_SIZE_OPTIONS = [24, 48, 96, 192] as const;
@@ -75,7 +75,7 @@ export default function Pagination({
               className="flex h-10 flex-1 items-center justify-center gap-1 rounded-lg bg-stone-200 text-sm font-medium text-stone-700 transition-colors disabled:opacity-30"
               aria-label={t("pagination_prev")}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <MdChevronLeft className="h-4 w-4" />
               {t("pagination_prev")}
             </button>
             <span className="text-xs text-stone-500">
@@ -88,7 +88,7 @@ export default function Pagination({
               aria-label={t("pagination_next")}
             >
               {t("pagination_next")}
-              <ChevronRight className="h-4 w-4" />
+              <MdChevronRight className="h-4 w-4" />
             </button>
           </div>
         )}
@@ -126,7 +126,7 @@ export default function Pagination({
               className={`${btnBase} border border-stone-300 bg-white px-2 disabled:opacity-30`}
               aria-label={t("pagination_prev")}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <MdChevronLeft className="h-4 w-4" />
             </button>
 
             {pages.map((page, i) =>
@@ -162,7 +162,7 @@ export default function Pagination({
               className={`${btnBase} border border-stone-300 bg-white px-2 disabled:opacity-30`}
               aria-label={t("pagination_next")}
             >
-              <ChevronRight className="h-4 w-4" />
+              <MdChevronRight className="h-4 w-4" />
             </button>
           </div>
         )}

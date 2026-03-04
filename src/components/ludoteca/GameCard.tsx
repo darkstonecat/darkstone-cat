@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Users, Clock, Star, Baby } from "lucide-react";
+import { MdGroup, MdSchedule, MdStar, MdChildCare } from "react-icons/md";
 import type { BggGame } from "@/lib/bgg";
 
 interface GameCardProps {
@@ -87,7 +87,7 @@ export default function GameCard({ game, onClick }: GameCardProps) {
           <ProgressiveGameImage game={game} />
         ) : (
           <div className="flex h-full items-center justify-center text-stone-300">
-            <Star className="h-12 w-12" />
+            <MdStar className="h-12 w-12" />
           </div>
         )}
 
@@ -109,28 +109,28 @@ export default function GameCard({ game, onClick }: GameCardProps) {
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
             {game.minPlayers > 0 && (
               <span className="flex items-center gap-1">
-                <Users className="h-3 w-3" aria-hidden="true" />
+                <MdGroup className="h-3 w-3" aria-hidden="true" />
                 <span className="sr-only">{t("detail_players")}:</span>
                 {playersText}
               </span>
             )}
             {game.playingTime > 0 && (
               <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" aria-hidden="true" />
+                <MdSchedule className="h-3 w-3" aria-hidden="true" />
                 <span className="sr-only">{t("detail_duration")}:</span>
                 {game.playingTime}&prime;
               </span>
             )}
             {game.minAge > 0 && (
               <span className="flex items-center gap-1">
-                <Baby className="h-3 w-3" aria-hidden="true" />
+                <MdChildCare className="h-3 w-3" aria-hidden="true" />
                 <span className="sr-only">{t("detail_age")}:</span>
                 +{game.minAge}
               </span>
             )}
             {game.rating > 0 && (
               <span className="flex items-center gap-1">
-                <Star className="h-3 w-3" aria-hidden="true" />
+                <MdStar className="h-3 w-3" aria-hidden="true" />
                 <span className="sr-only">{t("detail_rating")}:</span>
                 {game.rating.toFixed(1)}
               </span>

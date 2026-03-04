@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates, getBreadcrumbJsonLd } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -39,15 +39,17 @@ export default async function LegalPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
   const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
     { name: locale === "ca" ? "Avís legal" : locale === "es" ? "Aviso legal" : "Legal notice", path: "/legal" },
   ]);
+  const webPageJsonLd = getWebPageJsonLd(locale, "/legal", t("legal_title"), t("legal_description"));
 
   return (
     <main id="main-content" className="relative min-h-screen font-sans selection:bg-stone-300">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
       />
       <NavBar />
       <LegalContent />

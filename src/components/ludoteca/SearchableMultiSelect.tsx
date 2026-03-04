@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useId } from "react";
-import { ChevronDown, Search, Check } from "lucide-react";
+import { MdExpandMore, MdSearch, MdCheck } from "react-icons/md";
 
 interface SearchableMultiSelectProps {
   options: string[];
@@ -154,7 +154,7 @@ export default function SearchableMultiSelect({
             ? selectedLabel(selected.length)
             : placeholder}
         </span>
-        <ChevronDown
+        <MdExpandMore
           className={`ml-2 h-4 w-4 shrink-0 transition-transform ${
             open ? "rotate-180" : ""
           }`}
@@ -171,7 +171,7 @@ export default function SearchableMultiSelect({
           {/* Search input */}
           <div className="border-b border-stone-100 p-2">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-stone-400" />
+              <MdSearch className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-stone-400" />
               <input
                 ref={searchRef}
                 type="text"
@@ -220,7 +220,7 @@ export default function SearchableMultiSelect({
                           : "border-stone-300 bg-white"
                       }`}
                     >
-                      {isSelected && <Check className="h-3 w-3" />}
+                      {isSelected && <MdCheck className="h-3 w-3" />}
                     </span>
                     <span className="truncate">{getLabel(option)}</span>
                   </li>

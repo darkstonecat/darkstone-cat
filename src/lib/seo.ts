@@ -39,3 +39,25 @@ export function getBreadcrumbJsonLd(
     ],
   };
 }
+
+export function getWebPageJsonLd(
+  locale: string,
+  path: string,
+  name: string,
+  description: string,
+) {
+  const prefix = locale === "ca" ? "" : `/${locale}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name,
+    description,
+    url: `${BASE_URL}${prefix}${path}`,
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Darkstone Catalunya",
+      url: BASE_URL,
+    },
+    inLanguage: locale === "ca" ? "ca" : locale === "es" ? "es" : "en",
+  };
+}

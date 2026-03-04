@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates, getBreadcrumbJsonLd } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { Suspense } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -41,19 +41,35 @@ export default async function LudotecaPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const [collection, tNav] = await Promise.all([
+  const [collection, tNav, t] = await Promise.all([
     fetchBggCollection(),
     getTranslations({ locale, namespace: "nav" }),
+    getTranslations({ locale, namespace: "metadata" }),
   ]);
   const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
     { name: tNav("ludoteca"), path: "/ludoteca" },
   ]);
+  const webPageJsonLd = getWebPageJsonLd(locale, "/ludoteca", t("ludoteca_title"), t("ludoteca_description"));
+
+  const baseGames = collection.games.filter((g) => g.subtype !== "boardgameexpansion");
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: t("ludoteca_title"),
+    numberOfItems: baseGames.length,
+    itemListElement: baseGames.slice(0, 50).map((game, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: game.name,
+      url: `https://boardgamegeek.com/boardgame/${game.id}`,
+    })),
+  };
 
   return (
     <main id="main-content" className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd, itemListJsonLd]) }}
       />
       <NavBar />
       <LudotecaHero

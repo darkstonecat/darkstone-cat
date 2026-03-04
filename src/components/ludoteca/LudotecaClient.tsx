@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "motion/react";
-import { SlidersHorizontal, ArrowDownUp, LayoutGrid, List } from "lucide-react";
+import { MdTune, MdSwapVert, MdGridView, MdViewList } from "react-icons/md";
 import type { BggGame } from "@/lib/bgg";
 import FilterSidebar from "./FilterSidebar";
 import GameGrid from "./GameGrid";
@@ -386,7 +386,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
           aria-expanded={mobileFilterOpen}
           className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-orange py-2.5 text-sm font-semibold text-white"
         >
-          <SlidersHorizontal className="h-4 w-4" />
+          <MdTune className="h-4 w-4" />
           {t("btn_filter")}
           {hasActiveFilters && (
             <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white/25 px-1 text-xs">
@@ -399,7 +399,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
             onClick={() => setMobileSortOpen(!mobileSortOpen)}
             className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-brand-orange py-2.5 text-sm font-semibold text-brand-orange"
           >
-            <ArrowDownUp className="h-4 w-4" />
+            <MdSwapVert className="h-4 w-4" />
             {t("btn_sort")}
           </button>
           {mobileSortOpen && (
@@ -482,7 +482,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                   }`}
                   aria-label={t("view_grid")}
                 >
-                  <LayoutGrid className="h-4 w-4" />
+                  <MdGridView className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
@@ -494,7 +494,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                   }`}
                   aria-label={t("view_list")}
                 >
-                  <List className="h-4 w-4" />
+                  <MdViewList className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -513,7 +513,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                 }`}
                 aria-label={t("view_grid")}
               >
-                <LayoutGrid className="h-4 w-4" />
+                <MdGridView className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
@@ -525,7 +525,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                 }`}
                 aria-label={t("view_list")}
               >
-                <List className="h-4 w-4" />
+                <MdViewList className="h-4 w-4" />
               </button>
             </div>
           </div>

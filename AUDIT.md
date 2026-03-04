@@ -88,7 +88,7 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 
 | # | Issue | Archivo | Línea | Descripción |
 |---|-------|---------|-------|-------------|
-| P01 | Dos librerías de iconos en el bundle | `package.json` | — | Se usan `lucide-react` Y `react-icons` simultáneamente. `lucide-react` en Ludoteca, `react-icons` en Footer/JoinUs. Consolidar a una sola para reducir ~20KB del bundle. |
+| ~~P01~~ | ~~Dos librerías de iconos en el bundle~~ | ~~`package.json`~~ | — | **CORREGIDO** — Migrados 25 iconos de `lucide-react` → `react-icons/md` (Material Design) en 14 archivos. `lucide-react` eliminado. |
 | ~~P02~~ | ~~Falta `<link rel="preconnect">` a dominios externos~~ | ~~`layout.tsx`~~ | — | **CORREGIDO** — Añadido preconnect para `cf.geekdo-images.com` y dns-prefetch para `googletagmanager.com`. |
 | ~~P03~~ | ~~NavBar scroll: `getBoundingClientRect` en scroll loop~~ | ~~`NavBar.tsx`~~ | — | **CORREGIDO** — Reemplazado con `IntersectionObserver` API. Scroll listener solo para backdrop blur (sin layout queries). |
 
@@ -98,8 +98,8 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 |---|-------|---------|-------|-------------|
 | P04 | Imágenes About sin `priority` | `src/components/home/About.tsx` | 79 | Cards de About section pueden ser LCP en viewport pero no tienen `priority`. ~~El `sizes="100vw"` también es impreciso.~~ (sizes corregido — ver S08) |
 | ~~P05~~ | ~~`--font-geist-sans` referenciado pero nunca definido~~ | ~~`src/styles/globals.css`~~ | 19-20 | **CORREGIDO** — Eliminada referencia a `var(--font-geist-sans)`. Font stack ahora comienza directamente con `ui-sans-serif`. |
-| P06 | Lenis rAF loop continuo | `src/components/SmoothScroll.tsx` | 57 | `requestAnimationFrame(raf)` corre continuamente incluso sin scroll. ~3-5% CPU overhead. Considerar pausar cuando no hay scroll activo. |
-| P07 | CTA nudge animation: 54 líneas de keyframes | `src/styles/globals.css` | 46-55 | Animación `cta-nudge` tiene 8 keyframe stops. Solo se usa en un elemento (JoinUs CTA). Funcional pero verbose. |
+| ~~P06~~ | ~~Lenis rAF loop continuo~~ | ~~`src/components/SmoothScroll.tsx`~~ | 57 | **CORREGIDO** — rAF loop ahora se auto-pausa 200ms después de que cesa el scroll. Se reactiva con `wheel`, `touchmove` y `scroll` events. Elimina ~3-5% CPU overhead en idle. |
+| ~~P07~~ | ~~CTA nudge animation verbose~~ | ~~`src/styles/globals.css`~~ | 46-55 | **CORREGIDO** — Reducido de 8 a 5 keyframe stops manteniendo el mismo efecto visual de wiggle. |
 
 ### Prioridad BAJA
 
@@ -115,7 +115,7 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 - Hero logo: `priority`, `fetchPriority="high"`, WebP format
 - GameDetailModal con `dynamic(() => import(...), { ssr: false })`
 - ISR correctamente configurado: `revalidate: 86400` para ludoteca/about
-- `optimizePackageImports` para `lucide-react` y `react-icons`
+- `optimizePackageImports` para `react-icons`
 - BGG API: exponential backoff (5 retries, 2s base), 30s timeout, batch 20 items
 - Todas las animaciones usan propiedades GPU (transform, opacity) — no causan layout shifts
 - Lenis respeta `prefers-reduced-motion`
@@ -168,16 +168,16 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 |---|-------|---------|-------|-------------|
 | ~~S01~~ | ~~Home page sin `generateMetadata()` explícito~~ | ~~`page.tsx`~~ | — | **CORREGIDO** — Añadido `generateMetadata()` en home page. Layout simplificado a defaults genéricos con title template. |
 | ~~S02~~ | ~~Páginas de error (404/500) sin `noindex`~~ | ~~`not-found.tsx`, `error.tsx`~~ | — | **CORREGIDO** — Añadido `<meta name="robots" content="noindex, follow" />` en ambas. |
-| S03 | OG images no enlazadas explícitamente en metadata | Todas las páginas | — | OG images se generan dinámicamente vía `opengraph-image.tsx` pero no se referencian en los objetos `openGraph` de cada página. Algunas plataformas sociales podrían no detectarlas. |
+| ~~S03~~ | ~~OG images no enlazadas explícitamente en metadata~~ | ~~`layout.tsx`~~ | — | **CORREGIDO** — Añadido `openGraph.images` con URL absoluta por locale en layout. Todas las páginas lo heredan. |
 
 ### Prioridad MEDIA
 
 | # | Issue | Archivo | Línea | Descripción |
 |---|-------|---------|-------|-------------|
-| S04 | Sin schema Event para "Egara Juga" | — | — | El sitio menciona horarios de eventos (viernes/sábados) pero no tiene schema `Event` para rich snippets de eventos en Google. |
-| S05 | Sin schema para catálogo de juegos | `src/app/[locale]/ludoteca/page.tsx` | — | Ludoteca con 250+ juegos podría beneficiarse de schema `ItemList` / `Product` para rich snippets. |
+| ~~S04~~ | ~~Sin schema Event para "Egara Juga"~~ | ~~`layout.tsx`~~ | — | **CORREGIDO** — Añadidos 2 schemas `Event` con `eventSchedule` (Schedule recurrente) para sesiones de viernes (17-21h) y sábado (10-14h). Incluye location, organizer y isAccessibleForFree. |
+| ~~S05~~ | ~~Sin schema para catálogo de juegos~~ | ~~`ludoteca/page.tsx`~~ | — | **CORREGIDO** — Añadido schema `ItemList` con los primeros 50 juegos base (nombre + link BGG). numberOfItems refleja el total real. |
 | ~~S06~~ | ~~Fechas sitemap desactualizadas~~ | ~~`src/app/sitemap.ts`~~ | 6-15 | **CORREGIDO** — Legal/Privacy/Cookies/Conduct: `lastModified` actualizado a `2026-02-01`. |
-| S07 | Sin schema `WebPage` en páginas individuales | — | — | Solo hay Organization y LocalBusiness (layout) + BreadcrumbList (páginas). Falta WebPage schema. |
+| ~~S07~~ | ~~Sin schema `WebPage` en páginas individuales~~ | ~~Todas las subpáginas~~ | — | **CORREGIDO** — Añadido `getWebPageJsonLd()` en `seo.ts`. WebPage schema inyectado en about, ludoteca, contact, conduct, legal, privacy y cookies. Incluye name, description, url, isPartOf (WebSite) e inLanguage. |
 
 ### Prioridad BAJA
 
@@ -212,7 +212,7 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 | # | Issue | Archivo | Línea | Descripción |
 |---|-------|---------|-------|-------------|
 | BP01 | Rate limiting en memoria (no persistente) | `src/app/api/contact/route.ts` | 8-11 | Rate limiter se resetea en cold start de Vercel. Considerar Vercel KV o Upstash para persistencia en producción. |
-| BP02 | Email regex básico | `src/app/api/contact/route.ts` | — | `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` es funcional pero no atrapa todos los emails inválidos. Suficiente para este caso de uso pero mejorable. |
+| ~~BP02~~ | ~~Email regex básico~~ | ~~`src/app/api/contact/route.ts`~~ | — | **CORREGIDO** — Regex mejorado basado en RFC 5322: valida caracteres permitidos en local-part, labels de dominio (max 63 chars), y exige al menos un punto en el dominio. |
 
 ### Ya implementado correctamente
 
@@ -237,7 +237,7 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 
 | # | Issue | Archivo | Línea | Descripción |
 |---|-------|---------|-------|-------------|
-| SEC01 | Sin CSP con `script-src` / `style-src` | `next.config.ts` | 6-31 | Headers de seguridad configurados (HSTS, X-Frame-Options, etc.) pero no hay Content Security Policy con directivas `script-src` para protección XSS adicional. |
+| ~~SEC01~~ | ~~Sin CSP con `script-src` / `style-src`~~ | ~~`next.config.ts`~~ | 6-31 | **CORREGIDO** — Añadida Content Security Policy completa: `script-src` (self + GTM + Vercel), `style-src`, `img-src`, `connect-src`, `frame-src`, `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`. |
 | SEC02 | Rate limiting volátil | `src/app/api/contact/route.ts` | 8-11 | In-memory rate limiter se pierde en cada cold start. Un atacante puede esperar el reset. Migrar a Vercel KV / Upstash Redis. |
 | SEC03 | IP spoofable via `x-forwarded-for` | `src/app/api/contact/route.ts` | — | Usa `x-forwarded-for` para identificar IPs. Funciona detrás de Vercel pero puede ser spoofed en otros entornos. |
 
@@ -273,13 +273,13 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 
 | Área | Score | Estado |
 |------|-------|--------|
-| **Accesibilidad** | 9.5/10 | Todos los issues de foco, contraste, aria-labels y reduced-motion corregidos. Solo queda A07 (orange borderline AA). |
-| **Performance** | 8/10 | Preconnect, IntersectionObserver, font stack y sizes corregidos. Quedan P01 (consolidar iconos), P04, P06-P07. |
+| **Accesibilidad** | 9.5/10 | Todos los issues de foco, contraste, aria-labels y reduced-motion corregidos. Solo queda A07 (orange borderline AA — decisión de diseño). |
+| **Performance** | 9/10 | Iconos consolidados, Lenis rAF optimizado, CTA keyframes simplificados, preconnect, IntersectionObserver. Solo queda P04 (priority en About images, below fold) y P09 (Service Worker, innecesario). |
 | **Core Web Vitals** | 9/10 | LCP bueno, CLS excelente, IntersectionObserver implementado. |
-| **SEO** | 9/10 | Metadata explícita en home, noindex en errores, sitemap sincronizado. Quedan schemas adicionales (S03-S05, S07). |
-| **Best Practices** | 9/10 | Código limpio, TypeScript estricto, patrones React correctos |
-| **Seguridad** | 8.5/10 | Headers robustos, validación de inputs, rate limiting mejorable |
-| **GLOBAL** | **8.8/10** | Proyecto sólido. A11y significativamente mejorado. Issues restantes son de baja prioridad o requieren servicios externos. |
+| **SEO** | 9.5/10 | Metadata completa, schemas Event/ItemList/WebPage añadidos, OG images explícitos, noindex en errores. |
+| **Best Practices** | 9.5/10 | Email regex mejorado (RFC 5322). Solo queda BP01 (rate limiting persistente — requiere servicio externo). |
+| **Seguridad** | 9/10 | CSP completo añadido. Headers robustos. Solo quedan SEC02-SEC05 (rate limiting persistente, CSRF, IP spoofing, API key docs — la mayoría requieren servicios externos o son de riesgo aceptable). |
+| **GLOBAL** | **9.3/10** | Proyecto excelente. Issues restantes son decisiones de diseño (A07), requieren servicios externos (SEC02/BP01) o son de riesgo aceptable en el contexto de Vercel. |
 
 ---
 
@@ -290,7 +290,7 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 2. ~~**A02** — CollaboratorModal: focus no restaurado al cerrar~~ **CORREGIDO**
 3. ~~**A03** — LanguageSwitcher: `aria-current="true"` → `"page"`~~ **CORREGIDO**
 4. ~~**A04** — CookieBanner: focus on open no funciona~~ **CORREGIDO**
-5. **P01** — Consolidar librerías de iconos (lucide + react-icons)
+5. ~~**P01** — Consolidar librerías de iconos (lucide + react-icons)~~ **CORREGIDO**
 6. ~~**P02** — Añadir `<link rel="preconnect">` a dominios externos~~ **CORREGIDO**
 7. ~~**P03** — NavBar: reemplazar scroll loop con IntersectionObserver~~ **CORREGIDO**
 8. ~~**S01** — Home page: añadir `generateMetadata()` explícito~~ **CORREGIDO**
@@ -308,19 +308,19 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 18. ~~**A14**~~ — ~~TextReveal: check explícito de reduced-motion~~ **CORREGIDO**
 19. **P04** — About images: añadir `priority` si son above-fold
 20. ~~**P05**~~ — ~~Documentar/corregir `--font-geist-sans`~~ **CORREGIDO**
-21. **S03** — Enlazar OG images explícitamente en metadata
-22. **S04-S05** — Añadir schemas Event e ItemList/Product
+21. ~~**S03**~~ — ~~Enlazar OG images explícitamente en metadata~~ **CORREGIDO**
+22. ~~**S04-S05**~~ — ~~Añadir schemas Event e ItemList~~ **CORREGIDO**
 23. ~~**S06**~~ — ~~Sincronizar fechas de sitemap~~ **CORREGIDO**
-24. **SEC01** — Añadir CSP con script-src/style-src
-25. **SEC02** — Migrar rate limiting a servicio persistente
+24. ~~**SEC01**~~ — ~~Añadir CSP con script-src/style-src~~ **CORREGIDO**
+25. **SEC02** — Migrar rate limiting a servicio persistente (requiere Vercel KV/Upstash)
 
 ### BAJA (nice to have)
 26. ~~**A15**~~ — ~~Contraste disabled button~~ **CORREGIDO**
 27. ~~**A16**~~ — ~~Section aria-labels~~ **CORREGIDO**
 28. ~~**A17**~~ — ~~Modal aria-describedby~~ **CORREGIDO**
 29. ~~**A18**~~ — ~~Button types~~ **CORREGIDO**
-30. **P06-P07, P09** — Lenis rAF optimization, CTA keyframes, Service Worker
-31. **S07** — WebPage schema
+30. ~~**P06-P07**~~ — ~~Lenis rAF optimization, CTA keyframes~~ **CORREGIDO**. P09 (Service Worker) — innecesario para este sitio
+31. ~~**S07**~~ — ~~WebPage schema~~ **CORREGIDO**
 32. ~~**S08**~~ — ~~Sizes precisos en About~~ **CORREGIDO**
 33. **SEC03-SEC05** — CSRF tokens, API key docs, IP validation
 

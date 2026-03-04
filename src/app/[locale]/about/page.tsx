@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates, getBreadcrumbJsonLd } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { fetchBggCollectionCount } from "@/lib/bgg";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -53,15 +53,17 @@ export default async function AboutPage({
     fetchBggCollectionCount(),
     getTranslations({ locale, namespace: "nav" }),
   ]);
+  const t = await getTranslations({ locale, namespace: "metadata" });
   const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
     { name: tNav("about"), path: "/about" },
   ]);
+  const webPageJsonLd = getWebPageJsonLd(locale, "/about", t("about_title"), t("about_description"));
 
   return (
     <main id="main-content" className="relative min-h-screen font-sans selection:bg-stone-300">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
       />
       <NavBar />
       <AboutHero />

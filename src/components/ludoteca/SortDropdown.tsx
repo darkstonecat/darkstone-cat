@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownUp } from "lucide-react";
+import { MdSwapVert } from "react-icons/md";
 import Dropdown from "./Dropdown";
 
 interface SortOption {
@@ -27,7 +27,7 @@ export default function SortDropdown({
       options={options}
       onChange={onChange}
       ariaLabel={ariaLabel}
-      icon={<ArrowDownUp className="h-3.5 w-3.5" />}
+      icon={<MdSwapVert className="h-3.5 w-3.5" />}
       className="min-w-52"
     />
   );

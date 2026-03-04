@@ -137,7 +137,7 @@ Client state in `LudotecaClient.tsx`:
 
 HSTS, CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy (camera/microphone/geolocation disabled). Remote image pattern: `cf.geekdo-images.com` (BGG images).
 
-- `experimental.optimizePackageImports`: `lucide-react`, `react-icons` — when adding new icon libraries, add them here for proper tree-shaking.
+- `experimental.optimizePackageImports`: `react-icons` — when adding new icon libraries, add them here for proper tree-shaking.
 
 ### Image Optimization
 
@@ -177,7 +177,7 @@ HSTS, CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Refer
 - **next-intl** v4 — i18n routing and translations
 - **fast-xml-parser** — BGG XML response parsing
 - **resend** — email delivery for contact form
-- **react-icons** + **lucide-react** — icon libraries
+- **react-icons** — icon library (Material Design `react-icons/md` + brand icons `react-icons/fa`)
 - **clsx** + **tailwind-merge** — class utilities (via `cn()`)
 - **@vercel/analytics** + **@vercel/speed-insights** — Vercel monitoring
 

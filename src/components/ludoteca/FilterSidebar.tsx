@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Search, X } from "lucide-react";
+import { MdSearch, MdClose } from "react-icons/md";
 import type { Filters } from "./LudotecaClient";
 import SearchableMultiSelect from "./SearchableMultiSelect";
 
@@ -80,7 +80,7 @@ export default function FilterSidebar({
             className="flex h-10 w-10 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100"
             aria-label={t("modal_close")}
           >
-            <X className="h-5 w-5" />
+            <MdClose className="h-5 w-5" />
           </button>
         </div>
       )}
@@ -88,7 +88,7 @@ export default function FilterSidebar({
       {/* Search */}
       <div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+          <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
           <input
             type="text"
             value={filters.search}

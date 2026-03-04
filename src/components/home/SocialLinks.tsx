@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { motion, useAnimate } from "motion/react";
 import { FaFacebook, FaInstagram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { ArrowRight } from "lucide-react";
+import { MdArrowForward } from "react-icons/md";
 import type { IconType } from "react-icons";
 
 interface SocialItem {
@@ -121,9 +121,8 @@ function SocialIcon({ item }: { item: SocialItem }) {
         </span>
         <span className="relative flex items-center justify-center">
           <span className="absolute h-5 w-5 scale-0 rounded-full bg-white transition-transform duration-300 group-hover:scale-100" />
-          <ArrowRight
+          <MdArrowForward
             size={14}
-            strokeWidth={2.5}
             className="relative z-10 text-stone-custom transition-transform duration-300 group-hover:-rotate-45"
           />
         </span>

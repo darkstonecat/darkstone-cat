@@ -3,10 +3,11 @@
 import { useRef, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion, useInView } from "motion/react";
-import { Users, Dices, type LucideIcon } from "lucide-react";
+import { MdGroup, MdCasino } from "react-icons/md";
+import type { IconType } from "react-icons";
 
 interface StatItem {
-  icon: LucideIcon;
+  icon: IconType;
   label: string;
   animatedValue?: number;
   fallback?: string;
@@ -41,12 +42,12 @@ export default function AboutStats({ gameCount }: { gameCount: number }) {
 
   const stats: StatItem[] = [
     {
-      icon: Users,
+      icon: MdGroup,
       animatedValue: 150,
       label: t("stat_members_label"),
     },
     {
-      icon: Dices,
+      icon: MdCasino,
       animatedValue: gameCount > 0 ? gameCount : undefined,
       fallback: t("stat_games_fallback"),
       label: t("stat_games_label"),

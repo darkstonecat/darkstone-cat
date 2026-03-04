@@ -48,7 +48,7 @@ export async function POST(request: Request) {
         { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
-    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email || typeof email !== "string" || !/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/.test(email)) {
       return NextResponse.json(
         { error: "email_invalid" },
         { status: 400, headers: NO_CACHE_HEADERS }

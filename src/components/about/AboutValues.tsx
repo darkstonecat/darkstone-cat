@@ -2,14 +2,14 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
-import { Heart, Languages, Users, Smile, ChessPawn } from "lucide-react";
+import { MdFavorite, MdTranslate, MdGroup, MdSentimentSatisfied, MdExtension } from "react-icons/md";
 
 const VALUES = [
-  { labelKey: "value_inclusivity_label", textKey: "value_inclusivity", icon: Heart },
-  { labelKey: "value_catalan_label", textKey: "value_catalan", icon: Languages },
-  { labelKey: "value_community_label", textKey: "value_community", icon: Users },
-  { labelKey: "value_fun_label", textKey: "value_fun", icon: Smile },
-  { labelKey: "value_alternative_label", textKey: "value_alternative", icon: ChessPawn },
+  { labelKey: "value_inclusivity_label", textKey: "value_inclusivity", icon: MdFavorite },
+  { labelKey: "value_catalan_label", textKey: "value_catalan", icon: MdTranslate },
+  { labelKey: "value_community_label", textKey: "value_community", icon: MdGroup },
+  { labelKey: "value_fun_label", textKey: "value_fun", icon: MdSentimentSatisfied },
+  { labelKey: "value_alternative_label", textKey: "value_alternative", icon: MdExtension },
 ] as const;
 
 function ValueCard({

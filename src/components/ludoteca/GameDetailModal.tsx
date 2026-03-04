@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
-import { X, Users, Clock, Star, Brain, User } from "lucide-react";
+import { MdClose, MdGroup, MdSchedule, MdStar, MdPsychology, MdPerson } from "react-icons/md";
 import { useLenis } from "@/components/SmoothScroll";
 import type { BggGame } from "@/lib/bgg";
 
@@ -109,7 +109,7 @@ export default function GameDetailModal({
           className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
           aria-label={t("modal_close")}
         >
-          <X className="h-5 w-5" />
+          <MdClose className="h-5 w-5" />
         </button>
 
         {/* Image */}
@@ -168,35 +168,35 @@ export default function GameDetailModal({
           <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {game.minPlayers > 0 && (
               <StatItem
-                icon={<Users className="h-4 w-4" />}
+                icon={<MdGroup className="h-4 w-4" />}
                 label={t("detail_players")}
                 value={playersText}
               />
             )}
             {game.playingTime > 0 && (
               <StatItem
-                icon={<Clock className="h-4 w-4" />}
+                icon={<MdSchedule className="h-4 w-4" />}
                 label={t("detail_duration")}
                 value={`${game.playingTime} min`}
               />
             )}
             {game.rating > 0 && (
               <StatItem
-                icon={<Star className="h-4 w-4" />}
+                icon={<MdStar className="h-4 w-4" />}
                 label={t("detail_rating")}
                 value={game.rating.toFixed(1)}
               />
             )}
             {game.weight > 0 && (
               <StatItem
-                icon={<Brain className="h-4 w-4" />}
+                icon={<MdPsychology className="h-4 w-4" />}
                 label={t("detail_weight")}
                 value={`${game.weight.toFixed(1)} / 5`}
               />
             )}
             {game.minAge > 0 && (
               <StatItem
-                icon={<User className="h-4 w-4" />}
+                icon={<MdPerson className="h-4 w-4" />}
                 label={t("detail_age")}
                 value={`${game.minAge}+`}
               />
@@ -259,7 +259,7 @@ export default function GameDetailModal({
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-stone-300">
-                        <Star className="h-5 w-5" />
+                        <MdStar className="h-5 w-5" />
                       </div>
                     )}
                   </div>
@@ -297,7 +297,7 @@ export default function GameDetailModal({
                           />
                         ) : (
                           <div className="flex h-full items-center justify-center text-stone-300">
-                            <Star className="h-5 w-5" />
+                            <MdStar className="h-5 w-5" />
                           </div>
                         )}
                       </div>

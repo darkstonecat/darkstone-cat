@@ -44,14 +44,11 @@
 }
 
 @keyframes cta-nudge {
-  0%, 86% { transform: translateX(0) rotate(0deg); }
-  88% { transform: translateX(-5px) rotate(-2deg); }
-  90% { transform: translateX(6px) rotate(2.5deg); }
-  92% { transform: translateX(-4px) rotate(-1.5deg); }
-  94% { transform: translateX(4px) rotate(1.5deg); }
-  96% { transform: translateX(-2px) rotate(-1deg); }
-  98% { transform: translateX(2px) rotate(0.5deg); }
-  100% { transform: translateX(0) rotate(0deg); }
+  0%, 86% { transform: translateX(0) rotate(0); }
+  89% { transform: translateX(-5px) rotate(-2deg); }
+  93% { transform: translateX(5px) rotate(2deg); }
+  97% { transform: translateX(-2px) rotate(-1deg); }
+  100% { transform: translateX(0) rotate(0); }
 }
 
 @keyframes social-rock {

@@ -37,6 +37,14 @@ export async function generateMetadata({
     openGraph: {
       siteName: "Darkstone Catalunya",
       type: "website",
+      images: [{
+        url: locale === "ca"
+          ? "https://darkstone.cat/opengraph-image/og"
+          : `https://darkstone.cat/${locale}/opengraph-image/og`,
+        width: 1200,
+        height: 630,
+        type: "image/png",
+      }],
     },
     twitter: {
       card: "summary_large_image",
@@ -84,6 +92,12 @@ export default async function LocaleLayout({
     "https://app.ludoya.com/darkstonecat",
   ];
 
+  const eventLocation = {
+    "@type": "Place",
+    name: "Darkstone Catalunya",
+    address,
+  };
+
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -121,6 +135,48 @@ export default async function LocaleLayout({
           closes: "14:00",
         },
       ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      name: "Egara Juga — Divendres",
+      description: t("home_description"),
+      eventSchedule: {
+        "@type": "Schedule",
+        repeatFrequency: "P1W",
+        byDay: "https://schema.org/Friday",
+        startTime: "17:00",
+        endTime: "21:00",
+      },
+      location: eventLocation,
+      organizer: {
+        "@type": "Organization",
+        name: "Darkstone Catalunya",
+        url: "https://darkstone.cat",
+      },
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      isAccessibleForFree: true,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      name: "Egara Juga — Dissabte",
+      description: t("home_description"),
+      eventSchedule: {
+        "@type": "Schedule",
+        repeatFrequency: "P1W",
+        byDay: "https://schema.org/Saturday",
+        startTime: "10:00",
+        endTime: "14:00",
+      },
+      location: eventLocation,
+      organizer: {
+        "@type": "Organization",
+        name: "Darkstone Catalunya",
+        url: "https://darkstone.cat",
+      },
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      isAccessibleForFree: true,
     },
   ];
 

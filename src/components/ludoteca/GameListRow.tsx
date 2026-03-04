@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Users, Clock, Star, Baby } from "lucide-react";
+import { MdGroup, MdSchedule, MdStar, MdChildCare } from "react-icons/md";
 import type { BggGame } from "@/lib/bgg";
 
 interface GameListRowProps {
@@ -53,7 +53,7 @@ export default function GameListRow({ game, onClick }: GameListRowProps) {
           />
         ) : (
           <div className="flex h-full items-center justify-center text-stone-300">
-            <Star className="h-8 w-8" />
+            <MdStar className="h-8 w-8" />
           </div>
         )}
       </div>
@@ -73,22 +73,22 @@ export default function GameListRow({ game, onClick }: GameListRowProps) {
 
         <div className="flex items-center text-xs text-stone-500">
           <span className="flex w-14 items-center gap-1">
-            <Users className="h-3 w-3 shrink-0" aria-hidden="true" />
+            <MdGroup className="h-3 w-3 shrink-0" aria-hidden="true" />
             <span className="sr-only">{t("detail_players")}:</span>
             {game.minPlayers > 0 ? playersText : "–"}
           </span>
           <span className="flex w-14 items-center gap-1">
-            <Clock className="h-3 w-3 shrink-0" aria-hidden="true" />
+            <MdSchedule className="h-3 w-3 shrink-0" aria-hidden="true" />
             <span className="sr-only">{t("detail_duration")}:</span>
             {game.playingTime > 0 ? <>{game.playingTime}&prime;</> : "–"}
           </span>
           <span className="flex w-12 items-center gap-1">
-            <Baby className="h-3 w-3 shrink-0" aria-hidden="true" />
+            <MdChildCare className="h-3 w-3 shrink-0" aria-hidden="true" />
             <span className="sr-only">{t("detail_age")}:</span>
             {game.minAge > 0 ? `+${game.minAge}` : "–"}
           </span>
           <span className="flex w-12 items-center gap-1">
-            <Star className="h-3 w-3 shrink-0" aria-hidden="true" />
+            <MdStar className="h-3 w-3 shrink-0" aria-hidden="true" />
             <span className="sr-only">{t("detail_rating")}:</span>
             {game.rating > 0 ? game.rating.toFixed(1) : "–"}
           </span>
