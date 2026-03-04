@@ -78,6 +78,8 @@ export default function ContactForm() {
         {status === "success" ? (
           <motion.div
             key="success"
+            role="status"
+            aria-live="polite"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -90,6 +92,7 @@ export default function ContactForm() {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={2.5}
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -125,6 +128,7 @@ export default function ContactForm() {
           >
             {status === "error" && (
               <motion.div
+                role="alert"
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
@@ -145,15 +149,18 @@ export default function ContactForm() {
                 type="text"
                 id="name"
                 name="name"
+                autoComplete="name"
                 placeholder={t("name_placeholder")}
                 disabled={isSending}
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "name-error" : undefined}
                 onChange={() =>
                   errors.name && setErrors((e) => ({ ...e, name: undefined }))
                 }
-                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange disabled:opacity-50"
+                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
               />
               {errors.name && (
-                <p className="mt-1 text-xs text-red-600">{errors.name}</p>
+                <p id="name-error" className="mt-1 text-xs text-red-600">{errors.name}</p>
               )}
             </div>
 
@@ -168,15 +175,18 @@ export default function ContactForm() {
                 type="email"
                 id="email"
                 name="email"
+                autoComplete="email"
                 placeholder={t("email_placeholder")}
                 disabled={isSending}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
                 onChange={() =>
                   errors.email && setErrors((e) => ({ ...e, email: undefined }))
                 }
-                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange disabled:opacity-50"
+                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
               />
               {errors.email && (
-                <p className="mt-1 text-xs text-red-600">{errors.email}</p>
+                <p id="email-error" className="mt-1 text-xs text-red-600">{errors.email}</p>
               )}
             </div>
 
@@ -193,14 +203,16 @@ export default function ContactForm() {
                 name="subject"
                 placeholder={t("subject_placeholder")}
                 disabled={isSending}
+                aria-invalid={!!errors.subject}
+                aria-describedby={errors.subject ? "subject-error" : undefined}
                 onChange={() =>
                   errors.subject &&
                   setErrors((e) => ({ ...e, subject: undefined }))
                 }
-                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange disabled:opacity-50"
+                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
               />
               {errors.subject && (
-                <p className="mt-1 text-xs text-red-600">{errors.subject}</p>
+                <p id="subject-error" className="mt-1 text-xs text-red-600">{errors.subject}</p>
               )}
             </div>
 
@@ -217,14 +229,16 @@ export default function ContactForm() {
                 rows={5}
                 placeholder={t("message_placeholder")}
                 disabled={isSending}
+                aria-invalid={!!errors.message}
+                aria-describedby={errors.message ? "message-error" : undefined}
                 onChange={() =>
                   errors.message &&
                   setErrors((e) => ({ ...e, message: undefined }))
                 }
-                className="w-full resize-none rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange disabled:opacity-50"
+                className="w-full resize-none rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
               />
               {errors.message && (
-                <p className="mt-1 text-xs text-red-600">{errors.message}</p>
+                <p id="message-error" className="mt-1 text-xs text-red-600">{errors.message}</p>
               )}
             </div>
 

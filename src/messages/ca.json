@@ -5,7 +5,8 @@
     "conduct": "Pautes de conducta",
     "contact": "Contacte",
     "ludoteca": "Ludoteca",
-    "menu_button": "Botó de menú"
+    "menu_button": "Botó de menú",
+    "skip_to_content": "Saltar al contingut principal"
   },
   "hero": {
     "tagline": "Associació de Jocs de Taula i Rol",
@@ -299,11 +300,12 @@
     "sort_weight_asc": "Complexitat ↑",
     "view_grid": "Quadrícula",
     "view_list": "Llista",
-    "card_aria": "veure detalls del joc",
+    "card_aria": "Veure detalls de {name}",
     "per_page": "Per pàgina",
     "pagination_showing": "Mostrant {start}–{end} de {total}",
     "pagination_prev": "Anterior",
     "pagination_next": "Següent",
+    "pagination_page": "Pàgina {page}",
     "modal_close": "Tancar",
     "modal_back": "Tornar al joc principal",
     "detail_players": "Jugadors",

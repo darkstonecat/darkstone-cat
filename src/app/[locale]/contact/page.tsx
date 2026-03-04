@@ -22,7 +22,7 @@ export async function generateMetadata({
 
 export default function ContactPage() {
   return (
-    <main className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
+    <main id="main-content" className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
       <NavBar />
       <ContactHero />
 

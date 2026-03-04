@@ -79,7 +79,7 @@ export default function GameCard({ game, onClick }: GameCardProps) {
     <button
       onClick={onClick}
       className="group flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200/50 bg-white text-left transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md"
-      aria-label={t("card_aria")}
+      aria-label={t("card_aria", { name: game.name })}
     >
       {/* Image — ~60% of card height, progressive: thumbnail → full image */}
       <div className="relative aspect-4/5 w-full overflow-hidden bg-stone-100">

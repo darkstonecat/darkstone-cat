@@ -8,7 +8,7 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
   const t = useTranslations("error_page");
 
   return (
-    <main className="relative min-h-screen font-sans bg-stone-custom selection:bg-stone-300">
+    <main id="main-content" className="relative min-h-screen font-sans bg-stone-custom selection:bg-stone-300">
       <NavBar />
       <ErrorContent
         code="500"

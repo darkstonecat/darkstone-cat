@@ -23,6 +23,7 @@ export default function ScrollToTop() {
 
   const scrollToTop = () => {
     lenis?.scrollTo(0);
+    document.getElementById("main-content")?.focus();
   };
 
   return (

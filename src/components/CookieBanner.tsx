@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { AnimatePresence, motion } from 'motion/react'
 import { useCookieConsentContext } from '@/components/CookieConsentProvider'
@@ -7,17 +8,42 @@ import { useCookieConsentContext } from '@/components/CookieConsentProvider'
 export default function CookieBanner() {
   const { status, accept, reject, isLoaded } = useCookieConsentContext()
   const t = useTranslations('cookies')
+  const bannerRef = useRef<HTMLDivElement>(null)
 
   const showBanner = isLoaded && status === null
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        reject()
+      }
+    },
+    [reject]
+  )
+
+  // Focus the banner when it appears and listen for Escape
+  useEffect(() => {
+    if (!showBanner) return
+    const timer = setTimeout(() => {
+      bannerRef.current?.focus()
+    }, 1800) // after entry animation (1.2s delay + 0.5s duration)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showBanner, handleKeyDown])
 
   return (
     <AnimatePresence>
       {showBanner && (
         <motion.div
+          ref={bannerRef}
           key="cookie-banner"
           role="dialog"
           aria-label={t('title')}
-          className="fixed bottom-6 right-6 z-50 w-[calc(100%-3rem)] max-w-90 overflow-hidden rounded-2xl border border-stone-custom/15 bg-brand-beige shadow-[0_8px_30px_rgba(0,0,0,0.6)] sm:w-auto"
+          tabIndex={-1}
+          className="fixed bottom-6 right-6 z-50 w-[calc(100%-3rem)] max-w-90 overflow-hidden rounded-2xl border border-stone-custom/15 bg-brand-beige shadow-[0_8px_30px_rgba(0,0,0,0.6)] outline-none sm:w-auto"
           initial={{ x: 40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 40, opacity: 0 }}

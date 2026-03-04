@@ -7,7 +7,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
   return (
     <html lang="ca">
       <body>
-        <main className="relative min-h-screen font-sans bg-stone-custom selection:bg-stone-300">
+        <main id="main-content" className="relative min-h-screen font-sans bg-stone-custom selection:bg-stone-300">
           <ErrorContent
             code="500"
             title="Alguna cosa ha anat malament"

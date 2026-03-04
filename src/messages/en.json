@@ -5,7 +5,8 @@
     "conduct": "Code of conduct",
     "contact": "Contact",
     "ludoteca": "Game Library",
-    "menu_button": "Menu button"
+    "menu_button": "Menu button",
+    "skip_to_content": "Skip to main content"
   },
   "hero": {
     "tagline": "Board Game and RPG Association",
@@ -299,11 +300,12 @@
     "sort_weight_asc": "Complexity ↑",
     "view_grid": "Grid",
     "view_list": "List",
-    "card_aria": "view game details",
+    "card_aria": "View details of {name}",
     "per_page": "Per page",
     "pagination_showing": "Showing {start}–{end} of {total}",
     "pagination_prev": "Previous",
     "pagination_next": "Next",
+    "pagination_page": "Page {page}",
     "modal_close": "Close",
     "modal_back": "Back to main game",
     "detail_players": "Players",

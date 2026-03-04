@@ -5,7 +5,8 @@
     "conduct": "Código de conducta",
     "contact": "Contacto",
     "ludoteca": "Ludoteca",
-    "menu_button": "Botón de menú"
+    "menu_button": "Botón de menú",
+    "skip_to_content": "Saltar al contenido principal"
   },
   "hero": {
     "tagline": "Asociación de Juegos de Mesa y Rol",
@@ -299,11 +300,12 @@
     "sort_weight_asc": "Complejidad ↑",
     "view_grid": "Cuadrícula",
     "view_list": "Lista",
-    "card_aria": "ver detalles del juego",
+    "card_aria": "Ver detalles de {name}",
     "per_page": "Por página",
     "pagination_showing": "Mostrando {start}–{end} de {total}",
     "pagination_prev": "Anterior",
     "pagination_next": "Siguiente",
+    "pagination_page": "Página {page}",
     "modal_close": "Cerrar",
     "modal_back": "Volver al juego principal",
     "detail_players": "Jugadores",

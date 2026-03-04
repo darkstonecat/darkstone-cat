@@ -14,6 +14,9 @@ import SortDropdown from "./SortDropdown";
 
 const GameDetailModal = dynamic(() => import("./GameDetailModal"), { ssr: false });
 
+const FOCUSABLE_SELECTOR =
+  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
 interface LudotecaClientProps {
   games: BggGame[];
   error?: "timeout" | "api_error" | "parse_error";
@@ -284,8 +287,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     const panel = mobileFilterPanelRef.current;
     if (!panel) return;
 
-    const FOCUSABLE =
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const FOCUSABLE = FOCUSABLE_SELECTOR;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Tab") return;
@@ -356,14 +358,14 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     );
   }
 
-  const sortOptions = [
+  const sortOptions = useMemo(() => [
     { value: "name-asc", label: t("sort_name_asc") },
     { value: "name-desc", label: t("sort_name_desc") },
     { value: "rating-desc", label: t("sort_rating_desc") },
     { value: "rating-asc", label: t("sort_rating_asc") },
     { value: "weight-desc", label: t("sort_weight_desc") },
     { value: "weight-asc", label: t("sort_weight_asc") },
-  ];
+  ], [t]);
 
   return (
     <div ref={resultsRef} className="container mx-auto max-w-7xl scroll-mt-16 px-4 pt-6 sm:px-6">

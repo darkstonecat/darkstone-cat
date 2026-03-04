@@ -9,7 +9,7 @@ export default function NotFound() {
   const t = useTranslations("not_found");
 
   return (
-    <main className="relative min-h-screen font-sans bg-stone-custom selection:bg-stone-300">
+    <main id="main-content" className="relative min-h-screen font-sans bg-stone-custom selection:bg-stone-300">
       <NavBar />
       <ErrorContent
         code="404"

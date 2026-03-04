@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useId } from "react";
 import { ChevronDown, Search, Check } from "lucide-react";
 
 interface SearchableMultiSelectProps {
@@ -30,6 +30,7 @@ export default function SearchableMultiSelect({
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const [focusIndex, setFocusIndex] = useState(-1);
+  const listboxId = useId();
 
   const getLabel = optionLabel ?? ((o: string) => o);
 
@@ -142,6 +143,7 @@ export default function SearchableMultiSelect({
         }`}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-controls={open ? listboxId : undefined}
         aria-label={label}
       >
         <span className="truncate">
@@ -173,7 +175,7 @@ export default function SearchableMultiSelect({
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setFocusIndex(-1); }}
                 placeholder={searchPlaceholder}
-                className="h-8 w-full rounded-md border border-stone-200 bg-stone-50 pl-8 pr-3 text-sm text-stone-700 outline-none placeholder:text-stone-400 focus:border-brand-orange"
+                className="h-8 w-full rounded-md border border-stone-200 bg-stone-50 pl-8 pr-3 text-sm text-stone-700 outline-none placeholder:text-stone-400 focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2"
                 aria-label={searchPlaceholder}
               />
             </div>
@@ -182,6 +184,7 @@ export default function SearchableMultiSelect({
           {/* Options list */}
           <ul
             ref={listRef}
+            id={listboxId}
             role="listbox"
             aria-multiselectable="true"
             aria-label={label}

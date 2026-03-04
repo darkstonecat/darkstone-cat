@@ -5,6 +5,14 @@ import type { BggGame } from "@/lib/bgg";
 import GameCard from "./GameCard";
 import GameListRow from "./GameListRow";
 
+const GRID_INITIAL = { opacity: 0, y: 16 } as const;
+const LIST_INITIAL = { opacity: 0, y: 12 } as const;
+const GRID_ANIMATE = { opacity: 1, y: 0 } as const;
+
+function gridTransition(i: number) {
+  return { duration: 0.25, delay: Math.min(i * 0.02, 0.4) };
+}
+
 interface GameGridProps {
   games: BggGame[];
   viewMode: "grid" | "list";
@@ -18,9 +26,9 @@ export default function GameGrid({ games, viewMode, onSelectGame }: GameGridProp
         {games.map((game, i) => (
           <motion.div
             key={game.id}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, delay: Math.min(i * 0.02, 0.4) }}
+            initial={LIST_INITIAL}
+            animate={GRID_ANIMATE}
+            transition={gridTransition(i)}
           >
             <GameListRow game={game} onClick={() => onSelectGame(game)} />
           </motion.div>
@@ -34,9 +42,9 @@ export default function GameGrid({ games, viewMode, onSelectGame }: GameGridProp
       {games.map((game, i) => (
         <motion.div
           key={game.id}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, delay: Math.min(i * 0.02, 0.4) }}
+          initial={GRID_INITIAL}
+          animate={GRID_ANIMATE}
+          transition={gridTransition(i)}
         >
           <GameCard game={game} onClick={() => onSelectGame(game)} />
         </motion.div>

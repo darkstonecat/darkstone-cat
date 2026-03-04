@@ -13,7 +13,7 @@ import SectionDivider from "@/components/home/SectionDivider";
 
 export default function HomePage() {
   return (
-    <main className="relative min-h-screen font-sans selection:bg-stone-300">
+    <main id="main-content" className="relative min-h-screen font-sans selection:bg-stone-300">
         <ScrollProgress />
         <NavBar />
         <Hero />

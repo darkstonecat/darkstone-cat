@@ -36,7 +36,7 @@ export default async function AboutPage() {
   const gameCount = collection.baseCount || 0;
 
   return (
-    <main className="relative min-h-screen font-sans selection:bg-stone-300">
+    <main id="main-content" className="relative min-h-screen font-sans selection:bg-stone-300">
       <NavBar />
       <AboutHero />
       <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="curve" flip />

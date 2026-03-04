@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Dropdown from "./Dropdown";
@@ -47,8 +47,13 @@ export default function Pagination({
   const btnBase =
     "flex h-9 min-w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors";
   const showPerPage = totalItems > PAGE_SIZE_OPTIONS[0];
-  const visibleSizeOptions = PAGE_SIZE_OPTIONS.filter((size, i) =>
-    i === 0 || PAGE_SIZE_OPTIONS[i - 1] < totalItems
+  const visibleSizeOptions = useMemo(
+    () => PAGE_SIZE_OPTIONS.filter((size, i) => i === 0 || PAGE_SIZE_OPTIONS[i - 1] < totalItems),
+    [totalItems]
+  );
+  const sizeDropdownOptions = useMemo(
+    () => visibleSizeOptions.map((size) => ({ value: String(size), label: String(size) })),
+    [visibleSizeOptions]
   );
   const maxVisibleSize = visibleSizeOptions[visibleSizeOptions.length - 1];
 
@@ -92,10 +97,7 @@ export default function Pagination({
             <span>{t("per_page")}</span>
             <Dropdown
               value={String(itemsPerPage)}
-              options={visibleSizeOptions.map((size) => ({
-                value: String(size),
-                label: String(size),
-              }))}
+              options={sizeDropdownOptions}
               onChange={(v) => onItemsPerPageChange(Number(v))}
               ariaLabel={t("per_page")}
               className="min-w-20"
@@ -107,7 +109,7 @@ export default function Pagination({
       {/* Desktop: single row — showing info | pages | per page */}
       <div className="hidden items-center sm:flex">
         {/* Left: showing info */}
-        <p className="flex-1 text-xs text-stone-500">
+        <p aria-live="polite" className="flex-1 text-xs text-stone-500">
           {t("pagination_showing", {
             start: startItem,
             end: endItem,
@@ -139,6 +141,8 @@ export default function Pagination({
                 <button
                   key={page}
                   onClick={() => onPageChange(page)}
+                  aria-label={t("pagination_page", { page })}
+                  aria-current={page === currentPage ? "page" : undefined}
                   className={`${btnBase} ${
                     page === currentPage
                       ? "bg-brand-orange text-white"
@@ -167,10 +171,7 @@ export default function Pagination({
             <span>{t("per_page")}</span>
             <Dropdown
               value={String(itemsPerPage)}
-              options={visibleSizeOptions.map((size) => ({
-                value: String(size),
-                label: String(size),
-              }))}
+              options={sizeDropdownOptions}
               onChange={(v) => onItemsPerPageChange(Number(v))}
               ariaLabel={t("per_page")}
               className="min-w-20"

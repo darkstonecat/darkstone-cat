@@ -19,7 +19,7 @@ function CardSkeleton() {
 
 export default function LudotecaLoading() {
   return (
-    <main className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
+    <main id="main-content" className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
       <NavBar />
 
       {/* Hero skeleton */}

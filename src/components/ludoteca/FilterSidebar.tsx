@@ -94,7 +94,7 @@ export default function FilterSidebar({
             value={filters.search}
             onChange={(e) => update("search", e.target.value)}
             placeholder={t("filter_search")}
-            className="h-10 w-full rounded-full border border-stone-300 bg-white pl-10 pr-4 text-sm text-stone-700 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange"
+            className="h-10 w-full rounded-full border border-stone-300 bg-white pl-10 pr-4 text-sm text-stone-700 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2"
             aria-label={t("filter_search")}
           />
         </div>
@@ -118,8 +118,7 @@ export default function FilterSidebar({
               className={`${chipBase} ${
                 filters.gameType.includes(opt.value) ? chipActive : chipInactive
               }`}
-              role="switch"
-              aria-checked={filters.gameType.includes(opt.value)}
+              aria-pressed={filters.gameType.includes(opt.value)}
             >
               {opt.label}
             </button>
@@ -142,8 +141,7 @@ export default function FilterSidebar({
               className={`${chipBase} ${n <= 10 ? "w-9 px-0" : ""} ${
                 filters.players.includes(n) ? chipActive : chipInactive
               }`}
-              role="switch"
-              aria-checked={filters.players.includes(n)}
+              aria-pressed={filters.players.includes(n)}
             >
               {n <= 10 ? n : t("filter_players_more")}
             </button>
@@ -168,8 +166,7 @@ export default function FilterSidebar({
               className={`${chipBase} ${
                 filters.duration.includes(key) ? chipActive : chipInactive
               }`}
-              role="switch"
-              aria-checked={filters.duration.includes(key)}
+              aria-pressed={filters.duration.includes(key)}
             >
               {t(`filter_duration_${key.replace("-", "_").replace("+", "plus")}`)}
             </button>
@@ -192,8 +189,7 @@ export default function FilterSidebar({
               className={`${chipBase} ${
                 filters.weight.includes(n) ? chipActive : chipInactive
               }`}
-              role="switch"
-              aria-checked={filters.weight.includes(n)}
+              aria-pressed={filters.weight.includes(n)}
             >
               {t(`filter_weight_${n}`)}
             </button>
@@ -216,8 +212,7 @@ export default function FilterSidebar({
               className={`${chipBase} w-11 px-0 ${
                 filters.age.includes(n) ? chipActive : chipInactive
               }`}
-              role="switch"
-              aria-checked={filters.age.includes(n)}
+              aria-pressed={filters.age.includes(n)}
             >
               +{n}
             </button>

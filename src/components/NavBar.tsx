@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Link, usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useLenis } from "./SmoothScroll";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -22,6 +22,8 @@ const NAV_LINKS = [
   { href: "/conduct", key: "conduct" },
   { href: "/contact", key: "contact" },
 ] as const;
+
+const NAV_TRANSITION = { duration: 0.4 } as const;
 
 // Theme for the home page scroll sections (backdrop adaptation)
 const HOME_SECTION_IDS = ["about", "activities", "schedule", "join-us", "location", "collaborators"] as const;
@@ -106,19 +108,19 @@ export default function NavBar() {
     };
   }, [mobileOpen, lenis]);
 
-  const isActive = (href: string) => pathname === href;
+  const isActive = useCallback((href: string) => pathname === href, [pathname]);
+
+  const navAnimate = useMemo(() => ({
+    backgroundColor: scrolled ? hexToRgba(theme.bg, 0.8) : "rgba(0, 0, 0, 0)",
+  }), [scrolled, theme.bg]);
 
   return (
     <>
       <motion.nav
         aria-label="Main navigation"
         className="fixed left-0 right-0 z-50 transition-[backdrop-filter] duration-500"
-        animate={{
-          backgroundColor: scrolled
-            ? hexToRgba(theme.bg, 0.8)
-            : "rgba(0, 0, 0, 0)",
-        }}
-        transition={{ duration: 0.4 }}
+        animate={navAnimate}
+        transition={NAV_TRANSITION}
         style={{
           top: "-60px",
           paddingTop: "60px",
