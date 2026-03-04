@@ -73,76 +73,26 @@ Nota: `LegalPageContent.tsx` y `ConductContent.tsx` permanecen como client compo
 
 ---
 
-## Fase 3 — Memoizacion y Re-renders (15-20 min cada fix)
+## Fase 3 — Memoizacion y Re-renders (15-20 min cada fix) ✅ COMPLETADA
 
 Optimizaciones de runtime React para evitar renders innecesarios.
 
-### 3.1 Memoizar sortOptions en LudotecaClient
+### 3.1 Memoizar sortOptions en LudotecaClient ✅
 
-**Problema:** Array de opciones de ordenacion recreado en cada render.
+- [x] `src/components/ludoteca/LudotecaClient.tsx` — Envuelto en `useMemo` con dep `[t]`, movido antes de early returns
 
-**Archivo:**
+### 3.2 Memoizar options en Pagination ✅
 
-- [ ] `src/components/ludoteca/LudotecaClient.tsx` (~linea 357)
+- [x] `src/components/ludoteca/Pagination.tsx` — `visibleSizeOptions` y `sizeDropdownOptions` memoizados con `useMemo`
 
-**Cambio:** Envolver en `useMemo`:
+### 3.3 Extraer objetos inline de props de motion ✅
 
-```typescript
-const sortOptions = useMemo(() => [
-  { value: "name-asc", label: t("sort_name_asc") },
-  // ...
-], [t]);
-```
+- [x] `src/components/NavBar.tsx` — `navAnimate` memoizado, `NAV_TRANSITION` como constante de modulo, `isActive` con `useCallback`
+- [x] `src/components/ludoteca/GameGrid.tsx` — `GRID_INITIAL`, `LIST_INITIAL`, `GRID_ANIMATE` como constantes, `gridTransition(i)` como funcion helper
 
----
+### 3.4 Extraer FOCUSABLE como constante de modulo ✅
 
-### 3.2 Memoizar options en Pagination
-
-**Problema:** `visibleSizeOptions.map(...)` crea array nuevo en cada render.
-
-**Archivo:**
-
-- [ ] `src/components/ludoteca/Pagination.tsx` (~lineas 95-98, 170-173)
-
-**Cambio:** Envolver en `useMemo` con dependencia en `visibleSizeOptions`.
-
----
-
-### 3.3 Extraer objetos inline de props de motion
-
-**Problema:** Objetos `animate={{...}}`, `transition={{...}}` creados inline fuerzan recalculos de animacion en cada render padre.
-
-**Archivos prioritarios:**
-
-- [ ] `src/components/NavBar.tsx` — `animate` del backdrop
-- [ ] `src/components/ludoteca/GameGrid.tsx` — `transition` con delay calculado
-- [ ] `src/components/ludoteca/Pagination.tsx` — `transition` objects
-
-**Cambio:** Extraer a constantes o `useMemo`:
-
-```typescript
-const backdropAnimate = useMemo(() => ({
-  backgroundColor: scrolled ? hexToRgba(theme.bg, 0.8) : "rgba(0,0,0,0)",
-}), [scrolled, theme.bg]);
-```
-
-**Nota:** En GameGrid, el `transition` depende del indice `i`, asi que se puede extraer a una funcion helper fuera del componente o usar una constante para la parte fija.
-
----
-
-### 3.4 Extraer FOCUSABLE como constante de modulo
-
-**Problema:** String selector recreado dentro de useEffect.
-
-**Archivo:**
-
-- [ ] `src/components/ludoteca/LudotecaClient.tsx` (~linea 285)
-
-**Cambio:** Mover fuera del componente:
-
-```typescript
-const FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-```
+- [x] `src/components/ludoteca/LudotecaClient.tsx` — `FOCUSABLE_SELECTOR` extraido fuera del componente
 
 ---
 

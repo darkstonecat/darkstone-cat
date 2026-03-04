@@ -342,6 +342,15 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     [filters]
   );
 
+  const sortOptions = useMemo(() => [
+    { value: "name-asc", label: t("sort_name_asc") },
+    { value: "name-desc", label: t("sort_name_desc") },
+    { value: "rating-desc", label: t("sort_rating_desc") },
+    { value: "rating-asc", label: t("sort_rating_asc") },
+    { value: "weight-desc", label: t("sort_weight_desc") },
+    { value: "weight-asc", label: t("sort_weight_asc") },
+  ], [t]);
+
   if (error) {
     return (
       <div className="container mx-auto max-w-6xl px-6 pt-16 text-center">
@@ -357,15 +366,6 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       </div>
     );
   }
-
-  const sortOptions = useMemo(() => [
-    { value: "name-asc", label: t("sort_name_asc") },
-    { value: "name-desc", label: t("sort_name_desc") },
-    { value: "rating-desc", label: t("sort_rating_desc") },
-    { value: "rating-asc", label: t("sort_rating_asc") },
-    { value: "weight-desc", label: t("sort_weight_desc") },
-    { value: "weight-asc", label: t("sort_weight_asc") },
-  ], [t]);
 
   return (
     <div ref={resultsRef} className="container mx-auto max-w-7xl scroll-mt-16 px-4 pt-6 sm:px-6">
