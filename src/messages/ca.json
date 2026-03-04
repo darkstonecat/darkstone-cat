@@ -18,7 +18,10 @@
     "text": "Darkstone Catalunya és una associació sense ànim de lucre dedicada a la promoció dels jocs de taula i de rol.",
     "card1_text": "Volem crear un punt de trobada per a tots els jugadors.",
     "card2_text": "Fomentar un ambient inclusiu i amable.",
-    "card3_text": "Convertir-nos en un referent local de l'oci alternatiu."
+    "card3_text": "Convertir-nos en un referent local de l'oci alternatiu.",
+    "card1_alt": "Jugadors gaudint d'una partida de jocs de taula a Darkstone Catalunya",
+    "card2_alt": "Ambient inclusiu i acollidor durant una sessió de jocs",
+    "card3_alt": "Col·lecció de jocs de taula disponibles a l'associació"
   },
   "activities": {
     "section_label": "02 — Què fem",

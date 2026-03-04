@@ -12,9 +12,9 @@ import {
 import TextReveal from "@/components/TextReveal";
 
 const ABOUT_CARDS = [
-  { key: "card1", image: "/images/photos/about_01.webp" },
-  { key: "card2", image: "/images/photos/about_02.webp" },
-  { key: "card3", image: "/images/photos/about_03.webp" },
+  { key: "card1", image: "/images/photos/about_01.webp", altKey: "card1_alt" },
+  { key: "card2", image: "/images/photos/about_02.webp", altKey: "card2_alt" },
+  { key: "card3", image: "/images/photos/about_03.webp", altKey: "card3_alt" },
 ];
 
 // Layout constants (in vh)
@@ -37,6 +37,7 @@ function entersAt(i: number) {
 function AboutCard({
   index,
   image,
+  alt,
   text,
   enterAt,
   stickAt,
@@ -46,6 +47,7 @@ function AboutCard({
 }: {
   index: number;
   image: string;
+  alt: string;
   text: string;
   enterAt: number;
   stickAt: number;
@@ -74,7 +76,7 @@ function AboutCard({
         className="relative h-full w-full origin-center overflow-hidden rounded-3xl will-change-transform"
         style={{ scale }}
       >
-        <Image src={image} alt="" fill className="object-cover" sizes="100vw" quality={60} />
+        <Image src={image} alt={alt} fill className="object-cover" sizes="100vw" quality={60} />
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
         <div className="absolute inset-0 flex items-center justify-center px-8 md:px-16">
           <p className="max-w-4xl text-center text-3xl font-black leading-tight text-white md:text-5xl lg:text-7xl">
@@ -150,6 +152,7 @@ export default function About() {
           key={card.key}
           index={i}
           image={card.image}
+          alt={t(card.altKey)}
           text={t(`${card.key}_text`)}
           enterAt={entersAt(i)}
           stickAt={sticksAt(i)}

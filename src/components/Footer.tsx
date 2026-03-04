@@ -134,7 +134,7 @@ export default function Footer() {
             <span className="mb-5 block text-xs uppercase tracking-[0.15em] text-stone-500">
               {t("navigation")}
             </span>
-            <nav className="flex flex-col gap-2">
+            <nav aria-label="Footer navigation" className="flex flex-col gap-2">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}

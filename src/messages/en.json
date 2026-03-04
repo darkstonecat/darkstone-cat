@@ -18,7 +18,10 @@
     "text": "Darkstone Catalunya is a non-profit association dedicated to promoting board games and role-playing games.",
     "card1_text": "We want to create a meeting point for all players.",
     "card2_text": "Foster an inclusive and friendly environment.",
-    "card3_text": "Become a local reference for alternative leisure."
+    "card3_text": "Become a local reference for alternative leisure.",
+    "card1_alt": "Players enjoying a board game session at Darkstone Catalunya",
+    "card2_alt": "Inclusive and welcoming atmosphere during a game session",
+    "card3_alt": "Board game collection available at the association"
   },
   "activities": {
     "section_label": "02 — What we do",

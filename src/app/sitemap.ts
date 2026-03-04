@@ -4,51 +4,34 @@ const BASE_URL = "https://darkstone.cat";
 const locales = ["ca", "es", "en"] as const;
 
 const pages = [
-  { path: "", changeFrequency: "weekly" as const, priority: 1.0 },
-  { path: "/about", changeFrequency: "monthly" as const, priority: 0.8 },
-  { path: "/ludoteca", changeFrequency: "daily" as const, priority: 0.8 },
-  { path: "/contact", changeFrequency: "monthly" as const, priority: 0.7 },
-  {
-    path: "/conduct",
-    changeFrequency: "yearly" as const,
-    priority: 0.5,
-  },
-  { path: "/legal", changeFrequency: "yearly" as const, priority: 0.3 },
-  { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3 },
-  { path: "/cookies", changeFrequency: "yearly" as const, priority: 0.3 },
+  { path: "", changeFrequency: "weekly" as const, priority: 1.0, lastModified: "2026-03-04" },
+  { path: "/about", changeFrequency: "monthly" as const, priority: 0.8, lastModified: "2026-02-01" },
+  { path: "/ludoteca", changeFrequency: "daily" as const, priority: 0.8, lastModified: "2026-03-04" },
+  { path: "/contact", changeFrequency: "monthly" as const, priority: 0.7, lastModified: "2026-01-15" },
+  { path: "/conduct", changeFrequency: "yearly" as const, priority: 0.5, lastModified: "2025-06-01" },
+  { path: "/legal", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2025-06-01" },
+  { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2025-06-01" },
+  { path: "/cookies", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2025-06-01" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const entries: MetadataRoute.Sitemap = [];
-
-  for (const page of pages) {
-    for (const locale of locales) {
-      const url =
-        locale === "ca"
-          ? `${BASE_URL}${page.path}`
-          : `${BASE_URL}/${locale}${page.path}`;
-
-      entries.push({
-        url,
-        lastModified: new Date("2025-03-01"),
-        changeFrequency: page.changeFrequency,
-        priority: page.priority,
-        alternates: {
-          languages: {
-            ...Object.fromEntries(
-              locales.map((l) => [
-                l,
-                l === "ca"
-                  ? `${BASE_URL}${page.path}`
-                  : `${BASE_URL}/${l}${page.path}`,
-              ])
-            ),
-            "x-default": `${BASE_URL}${page.path}`,
-          },
-        },
-      });
-    }
-  }
-
-  return entries;
+  return pages.map((page) => ({
+    url: `${BASE_URL}${page.path}`,
+    lastModified: new Date(page.lastModified),
+    changeFrequency: page.changeFrequency,
+    priority: page.priority,
+    alternates: {
+      languages: {
+        ...Object.fromEntries(
+          locales.map((l) => [
+            l,
+            l === "ca"
+              ? `${BASE_URL}${page.path}`
+              : `${BASE_URL}/${l}${page.path}`,
+          ])
+        ),
+        "x-default": `${BASE_URL}${page.path}`,
+      },
+    },
+  }));
 }
