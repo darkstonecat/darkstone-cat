@@ -85,7 +85,7 @@ Common patterns:
 Tailwind CSS v4 with CSS-based config (no `tailwind.config.ts`). Tokens in `src/styles/globals.css`:
 
 ```
---color-brand-red: #A61A1A      --color-brand-orange: #C05600
+--color-brand-red: #A61A1A      --color-brand-orange: #B54F00
 --color-brand-beige: #EEE8DC    --color-brand-blue: #05064D
 --color-stone-custom: #1C1917   --color-brand-white: #FFFFFF
 --color-stone-white-base: #D6D3D1   --color-stone-white-hover: #FAFAF9

@@ -47,7 +47,7 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 |---|-------|---------|-------|-------------|
 | ~~A05~~ | ~~Contraste: `text-stone-400` sobre `bg-stone-950` en Footer~~ | ~~`src/components/Footer.tsx`~~ | 87, 90 | **CORREGIDO** — Tagline: `text-stone-400` → `text-stone-300`. Descripción: `text-stone-500` → `text-stone-400`. |
 | ~~A06~~ | ~~Contraste: texto con `opacity-60` en About~~ | ~~`src/components/home/About.tsx`~~ | 139 | **CORREGIDO** — `opacity-60` → `opacity-70` para mejor legibilidad. |
-| A07 | Contraste: `#C05600` (orange) sobre blanco | Múltiples | — | Ratio 4.55:1 — apenas pasa AA (4.5:1), falla AAA (7:1). Afecta: FilterSidebar chips, GameDetailModal badges, JoinUs CTA. |
+| ~~A07~~ | ~~Contraste: `#C05600` (orange) sobre blanco~~ | ~~`globals.css`~~ | — | **CORREGIDO** — `#C05600` → `#B54F00` (ratio ~5.15:1, pasa AA cómodamente). Token `--color-brand-orange` actualizado globalmente. |
 | ~~A08~~ | ~~Campos del formulario sin indicador de `required`~~ | ~~`src/components/contact/ContactForm.tsx`~~ | 142-146 | **CORREGIDO** — Añadido `required` a todos los inputs y `*` visual en cada label. |
 | ~~A09~~ | ~~CookieBanner: sin gestión de foco al cerrar~~ | ~~`src/components/CookieBanner.tsx`~~ | 15-22 | **CORREGIDO** — Accept/reject/Escape ahora devuelven foco a `#main-content`. |
 | ~~A10~~ | ~~NavBar mobile: foco no restaurado al cerrar menú~~ | ~~`src/components/NavBar.tsx`~~ | 195-231 | **CORREGIDO** — `hamburgerRef` en botón hamburguesa; botón close restaura foco con `requestAnimationFrame`. |
@@ -96,7 +96,7 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 
 | # | Issue | Archivo | Línea | Descripción |
 |---|-------|---------|-------|-------------|
-| P04 | Imágenes About sin `priority` | `src/components/home/About.tsx` | 79 | Cards de About section pueden ser LCP en viewport pero no tienen `priority`. ~~El `sizes="100vw"` también es impreciso.~~ (sizes corregido — ver S08) |
+| ~~P04~~ | ~~Imágenes About sin `priority`~~ | ~~`src/components/home/About.tsx`~~ | 79 | **CORREGIDO** — Añadido `priority` a la primera AboutCard. ~~El `sizes="100vw"` también es impreciso.~~ (sizes corregido — ver S08) |
 | ~~P05~~ | ~~`--font-geist-sans` referenciado pero nunca definido~~ | ~~`src/styles/globals.css`~~ | 19-20 | **CORREGIDO** — Eliminada referencia a `var(--font-geist-sans)`. Font stack ahora comienza directamente con `ui-sans-serif`. |
 | ~~P06~~ | ~~Lenis rAF loop continuo~~ | ~~`src/components/SmoothScroll.tsx`~~ | 57 | **CORREGIDO** — rAF loop ahora se auto-pausa 200ms después de que cesa el scroll. Se reactiva con `wheel`, `touchmove` y `scroll` events. Elimina ~3-5% CPU overhead en idle. |
 | ~~P07~~ | ~~CTA nudge animation verbose~~ | ~~`src/styles/globals.css`~~ | 46-55 | **CORREGIDO** — Reducido de 8 a 5 keyframe stops manteniendo el mismo efecto visual de wiggle. |
@@ -131,8 +131,8 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 
 | # | Issue | Archivo | Impacto | Descripción |
 |---|-------|---------|---------|-------------|
-| CWV01 | Imágenes above-fold sin `priority` | `src/components/home/About.tsx` | LCP +200-500ms | Imágenes de About cards visibles en viewport no tienen `priority`. |
-| CWV02 | Falta preconnect a CDN de imágenes | `layout.tsx` | LCP +100-200ms | `cf.geekdo-images.com` sin preconnect; afecta carga de imágenes en Ludoteca. |
+| ~~CWV01~~ | ~~Imágenes above-fold sin `priority`~~ | ~~`src/components/home/About.tsx`~~ | LCP +200-500ms | **CORREGIDO** — Añadido `priority` a la primera AboutCard image. |
+| ~~CWV02~~ | ~~Falta preconnect a CDN de imágenes~~ | ~~`layout.tsx`~~ | LCP +100-200ms | **CORREGIDO** — (Arreglado en P02: preconnect a `cf.geekdo-images.com` en layout). |
 
 **Estado actual LCP:** Estimado 2.0-2.5s (bueno). Hero image ya tiene `priority` + `fetchPriority="high"`.
 
@@ -141,7 +141,7 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 | # | Issue | Archivo | Impacto | Descripción |
 |---|-------|---------|---------|-------------|
 | CWV03 | Sorting de ludoteca en main thread | `src/components/ludoteca/LudotecaClient.tsx` | 143 | `useMemo` filtra/ordena toda la colección. Con 500+ juegos y sort por rating, podría bloquear >50ms. Considerar Web Worker para colecciones grandes. |
-| CWV04 | NavBar: 6x `getBoundingClientRect` por scroll | `src/components/NavBar.tsx` | 70-95 | Layout thrashing potencial. Usar IntersectionObserver. |
+| ~~CWV04~~ | ~~NavBar: 6x `getBoundingClientRect` por scroll~~ | ~~`src/components/NavBar.tsx`~~ | 70-95 | **CORREGIDO** — (Arreglado en P03: reemplazado con IntersectionObserver). |
 
 **Estado actual INP:** Estimado <100ms (bueno). Riesgo medio solo en ludoteca con colecciones grandes.
 
@@ -273,13 +273,13 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 
 | Área | Score | Estado |
 |------|-------|--------|
-| **Accesibilidad** | 9.5/10 | Todos los issues de foco, contraste, aria-labels y reduced-motion corregidos. Solo queda A07 (orange borderline AA — decisión de diseño). |
-| **Performance** | 9/10 | Iconos consolidados, Lenis rAF optimizado, CTA keyframes simplificados, preconnect, IntersectionObserver. Solo queda P04 (priority en About images, below fold) y P09 (Service Worker, innecesario). |
+| **Accesibilidad** | 10/10 | Todos los issues corregidos: foco, contraste (A07 orange oscurecido a 5.15:1), aria-labels, reduced-motion. |
+| **Performance** | 9.5/10 | Iconos consolidados, Lenis rAF optimizado, About priority, CTA keyframes simplificados. Solo queda P09 (Service Worker, innecesario). |
 | **Core Web Vitals** | 9/10 | LCP bueno, CLS excelente, IntersectionObserver implementado. |
 | **SEO** | 9.5/10 | Metadata completa, schemas Event/ItemList/WebPage añadidos, OG images explícitos, noindex en errores. |
 | **Best Practices** | 9.5/10 | Email regex mejorado (RFC 5322). Solo queda BP01 (rate limiting persistente — requiere servicio externo). |
 | **Seguridad** | 9/10 | CSP completo añadido. Headers robustos. Solo quedan SEC02-SEC05 (rate limiting persistente, CSRF, IP spoofing, API key docs — la mayoría requieren servicios externos o son de riesgo aceptable). |
-| **GLOBAL** | **9.3/10** | Proyecto excelente. Issues restantes son decisiones de diseño (A07), requieren servicios externos (SEC02/BP01) o son de riesgo aceptable en el contexto de Vercel. |
+| **GLOBAL** | **9.5/10** | Proyecto excelente. Issues restantes requieren servicios externos (SEC02/BP01) o son de riesgo aceptable en el contexto de Vercel. |
 
 ---
 
@@ -299,14 +299,14 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 ### MEDIA (planificar)
 10. ~~**A05**~~ — ~~Mejorar contraste en Footer~~ **CORREGIDO**
 11. ~~**A06**~~ — ~~About opacity~~ **CORREGIDO**
-12. **A07** — Orange sobre blanco (ratio 4.55:1, borderline AA)
+12. ~~**A07**~~ — ~~Orange sobre blanco~~ **CORREGIDO** — `#C05600` → `#B54F00` (5.15:1)
 13. ~~**A08**~~ — ~~Formulario: indicador de campos required~~ **CORREGIDO**
 14. ~~**A09**~~ — ~~Focus management en CookieBanner~~ **CORREGIDO**
 15. ~~**A10-A11**~~ — ~~Focus management en NavBar mobile, SearchableMultiSelect~~ **CORREGIDO**
 16. ~~**A12**~~ — ~~Focus management en FilterSidebar mobile~~ **YA IMPLEMENTADO**
 17. ~~**A13**~~ — ~~Aria-labels en botones de expansión/base game~~ **CORREGIDO**
 18. ~~**A14**~~ — ~~TextReveal: check explícito de reduced-motion~~ **CORREGIDO**
-19. **P04** — About images: añadir `priority` si son above-fold
+19. ~~**P04**~~ — ~~About images: añadir `priority`~~ **CORREGIDO**
 20. ~~**P05**~~ — ~~Documentar/corregir `--font-geist-sans`~~ **CORREGIDO**
 21. ~~**S03**~~ — ~~Enlazar OG images explícitamente en metadata~~ **CORREGIDO**
 22. ~~**S04-S05**~~ — ~~Añadir schemas Event e ItemList~~ **CORREGIDO**

@@ -139,7 +139,7 @@ export default async function LocaleLayout({
     {
       "@context": "https://schema.org",
       "@type": "Event",
-      name: "Egara Juga — Divendres",
+      name: "Darkstone Catalunya — Portes obertes (divendres)",
       description: t("home_description"),
       eventSchedule: {
         "@type": "Schedule",
@@ -160,7 +160,7 @@ export default async function LocaleLayout({
     {
       "@context": "https://schema.org",
       "@type": "Event",
-      name: "Egara Juga — Dissabte",
+      name: "Darkstone Catalunya — Portes obertes (dissabte)",
       description: t("home_description"),
       eventSchedule: {
         "@type": "Schedule",

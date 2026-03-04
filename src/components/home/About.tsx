@@ -43,6 +43,7 @@ function AboutCard({
   stickAt,
   nextStickAt,
   isLast,
+  isFirst,
   progress,
 }: {
   index: number;
@@ -53,6 +54,7 @@ function AboutCard({
   stickAt: number;
   nextStickAt: number;
   isLast: boolean;
+  isFirst: boolean;
   progress: MotionValue<number>;
 }) {
   // Enter: 0.8 → 1.0 as card scrolls up to stick point
@@ -76,7 +78,7 @@ function AboutCard({
         className="relative h-full w-full origin-center overflow-hidden rounded-3xl will-change-transform"
         style={{ scale }}
       >
-        <Image src={image} alt={alt} fill className="object-cover" sizes="(max-width: 768px) calc(100vw - 24px), calc(100vw - 40px)" quality={60} />
+        <Image src={image} alt={alt} fill className="object-cover" sizes="(max-width: 768px) calc(100vw - 24px), calc(100vw - 40px)" quality={60} {...(isFirst ? { priority: true } : {})} />
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
         <div className="absolute inset-0 flex items-center justify-center px-8 md:px-16">
           <p className="max-w-4xl text-center text-3xl font-black leading-tight text-white md:text-5xl lg:text-7xl">
@@ -159,6 +161,7 @@ export default function About() {
           stickAt={sticksAt(i)}
           nextStickAt={i < NUM - 1 ? sticksAt(i + 1) : 2}
           isLast={i === NUM - 1}
+          isFirst={i === 0}
           progress={scrollYProgress}
         />
       ))}
