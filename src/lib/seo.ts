@@ -12,3 +12,30 @@ export function getAlternates(locale: string, path: string) {
     },
   };
 }
+
+export function getBreadcrumbJsonLd(
+  locale: string,
+  items: { name: string; path: string }[],
+) {
+  const prefix = locale === "ca" ? "" : `/${locale}`;
+  const homeName = locale === "ca" ? "Inici" : locale === "es" ? "Inicio" : "Home";
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: homeName,
+        item: `${BASE_URL}${prefix || "/"}`,
+      },
+      ...items.map((entry, i) => ({
+        "@type": "ListItem",
+        position: i + 2,
+        name: entry.name,
+        item: `${BASE_URL}${prefix}${entry.path}`,
+      })),
+    ],
+  };
+}

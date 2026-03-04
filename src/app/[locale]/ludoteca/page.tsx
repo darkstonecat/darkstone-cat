@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd } from "@/lib/seo";
 import { Suspense } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -35,11 +35,26 @@ export async function generateMetadata({
   };
 }
 
-export default async function LudotecaPage() {
-  const collection = await fetchBggCollection();
+export default async function LudotecaPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const [collection, tNav] = await Promise.all([
+    fetchBggCollection(),
+    getTranslations({ locale, namespace: "nav" }),
+  ]);
+  const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
+    { name: tNav("ludoteca"), path: "/ludoteca" },
+  ]);
 
   return (
     <main id="main-content" className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <NavBar />
       <LudotecaHero
         totalGames={collection.baseCount}

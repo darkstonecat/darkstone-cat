@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd } from "@/lib/seo";
 import { fetchBggCollection } from "@/lib/bgg";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -43,12 +43,27 @@ export async function generateMetadata({
   };
 }
 
-export default async function AboutPage() {
-  const collection = await fetchBggCollection();
+export default async function AboutPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const [collection, tNav] = await Promise.all([
+    fetchBggCollection(),
+    getTranslations({ locale, namespace: "nav" }),
+  ]);
   const gameCount = collection.baseCount || 0;
+  const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
+    { name: tNav("about"), path: "/about" },
+  ]);
 
   return (
     <main id="main-content" className="relative min-h-screen font-sans selection:bg-stone-300">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <NavBar />
       <AboutHero />
       <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="curve" flip />

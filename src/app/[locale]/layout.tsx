@@ -78,31 +78,62 @@ export default async function LocaleLayout({
     getTranslations({ locale, namespace: "metadata" }),
   ]);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "Darkstone Catalunya",
-    alternateName: "Associació de jugadors i jugadores de jocs de taula i rol Darkstone Catalunya",
-    url: "https://darkstone.cat",
-    logo: "https://darkstone.cat/images/darkstone_logo_768px.png",
-    description: t("home_description"),
-    foundingDate: "2024-09-14",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Plaça del Tint, 4",
-      addressLocality: "Terrassa",
-      addressRegion: "Barcelona",
-      postalCode: "08224",
-      addressCountry: "ES",
-    },
-    sameAs: [
-      "https://instagram.com/darkstone.cat",
-      "https://www.facebook.com/profile.php?id=61560270602862",
-      "https://x.com/darkstonecat",
-      "https://t.me/darkstonecat",
-      "https://app.ludoya.com/darkstonecat",
-    ],
+  const address = {
+    "@type": "PostalAddress",
+    streetAddress: "Plaça del Tint, 4",
+    addressLocality: "Terrassa",
+    addressRegion: "Barcelona",
+    postalCode: "08224",
+    addressCountry: "ES",
   };
+
+  const sameAs = [
+    "https://instagram.com/darkstone.cat",
+    "https://www.facebook.com/profile.php?id=61560270602862",
+    "https://x.com/darkstonecat",
+    "https://t.me/darkstonecat",
+    "https://app.ludoya.com/darkstonecat",
+  ];
+
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Darkstone Catalunya",
+      alternateName: "Associació de jugadors i jugadores de jocs de taula i rol Darkstone Catalunya",
+      url: "https://darkstone.cat",
+      logo: "https://darkstone.cat/images/darkstone_logo_768px.png",
+      description: t("home_description"),
+      foundingDate: "2024-09-14",
+      address,
+      sameAs,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      name: "Darkstone Catalunya",
+      description: t("home_description"),
+      url: "https://darkstone.cat",
+      image: "https://darkstone.cat/images/darkstone_logo_768px.png",
+      address,
+      email: "darkstone.cat@gmail.com",
+      sameAs,
+      openingHoursSpecification: [
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: "Friday",
+          opens: "17:00",
+          closes: "21:00",
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: "Saturday",
+          opens: "10:00",
+          closes: "14:00",
+        },
+      ],
+    },
+  ];
 
   return (
     <html lang={locale} suppressHydrationWarning>

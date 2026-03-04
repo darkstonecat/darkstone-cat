@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd } from "@/lib/seo";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -20,6 +20,7 @@ export async function generateMetadata({
     title: t("conduct_title"),
     description: t("conduct_description"),
     alternates,
+    robots: { index: false, follow: true },
     openGraph: {
       title: t("conduct_title"),
       description: t("conduct_description"),
@@ -32,9 +33,23 @@ export async function generateMetadata({
   };
 }
 
-export default function ConductPage() {
+export default async function ConductPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+  const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
+    { name: tNav("conduct"), path: "/conduct" },
+  ]);
+
   return (
     <main id="main-content" className="relative min-h-screen font-sans selection:bg-stone-300">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <NavBar />
       <ConductContent />
       <Footer />
