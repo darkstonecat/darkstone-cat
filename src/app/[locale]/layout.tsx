@@ -187,6 +187,11 @@ export default async function LocaleLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <noscript>
+          <div style={{ padding: "1rem", backgroundColor: "#B54F00", color: "#fff", textAlign: "center", fontSize: "0.875rem" }}>
+            This site requires JavaScript for interactive features like navigation, filters and forms.
+          </div>
+        </noscript>
         <NextIntlClientProvider messages={messages}>
           <SmoothScroll>
             <CookieConsentProvider>

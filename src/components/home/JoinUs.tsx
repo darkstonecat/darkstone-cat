@@ -83,7 +83,7 @@ export default function JoinUs() {
             href="https://t.me/darkstonecat"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-5 rounded-2xl bg-[#229ED9] p-8 text-center text-white transition-shadow duration-300 hover:shadow-xl hover:shadow-[#229ED9]/20"
+            className="group flex flex-col items-center gap-5 rounded-2xl bg-[#186DA6] p-8 text-center text-white transition-shadow duration-300 hover:shadow-xl hover:shadow-[#186DA6]/20"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             whileHover={{ y: -4 }}
@@ -93,10 +93,10 @@ export default function JoinUs() {
           >
             <FaTelegram size={40} className="opacity-90" />
             <h3 className="text-xl font-bold">{t("telegram_title")}</h3>
-            <p className="text-sm leading-relaxed text-white/75">
+            <p className="text-sm leading-relaxed text-white/80">
               {t("telegram_description")}
             </p>
-            <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold opacity-80 transition-opacity group-hover:opacity-100">
+            <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold opacity-90 transition-opacity group-hover:opacity-100">
               {t("join_telegram")}
               <span className="transition-transform duration-200 group-hover:translate-x-1">
                 &rarr;

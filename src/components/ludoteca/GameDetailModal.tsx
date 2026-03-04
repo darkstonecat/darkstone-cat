@@ -251,7 +251,7 @@ export default function GameDetailModal({
                     {baseGame.thumbnail ? (
                       <Image
                         src={baseGame.thumbnail}
-                        alt={baseGame.name}
+                        alt={`${baseGame.name} — ${t("base_game_title")}`}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-110"
                         sizes="56px"
@@ -289,7 +289,7 @@ export default function GameDetailModal({
                         {exp.thumbnail ? (
                           <Image
                             src={exp.thumbnail}
-                            alt={exp.name}
+                            alt={`${exp.name} — ${t("expansions_title")}`}
                             fill
                             className="object-cover transition-transform duration-300 group-hover:scale-110"
                             sizes="56px"

@@ -483,7 +483,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                 <button
                   onClick={() => setViewMode("grid")}
                   aria-pressed={viewMode === "grid"}
-                  className={`flex h-9 w-9 items-center justify-center rounded-l-lg transition-colors ${
+                  className={`flex h-10 w-10 items-center justify-center rounded-l-lg transition-colors ${
                     viewMode === "grid"
                       ? "bg-stone-custom text-white"
                       : "text-stone-400 hover:text-stone-600"
@@ -495,7 +495,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                 <button
                   onClick={() => setViewMode("list")}
                   aria-pressed={viewMode === "list"}
-                  className={`flex h-9 w-9 items-center justify-center rounded-r-lg border-l border-stone-300 transition-colors ${
+                  className={`flex h-10 w-10 items-center justify-center rounded-r-lg border-l border-stone-300 transition-colors ${
                     viewMode === "list"
                       ? "bg-stone-custom text-white"
                       : "text-stone-400 hover:text-stone-600"
@@ -514,7 +514,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
               <button
                 onClick={() => setViewMode("grid")}
                 aria-pressed={viewMode === "grid"}
-                className={`flex h-9 w-9 items-center justify-center rounded-l-lg transition-colors ${
+                className={`flex h-10 w-10 items-center justify-center rounded-l-lg transition-colors ${
                   viewMode === "grid"
                     ? "bg-stone-custom text-white"
                     : "text-stone-400 hover:text-stone-600"
@@ -526,7 +526,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
               <button
                 onClick={() => setViewMode("list")}
                 aria-pressed={viewMode === "list"}
-                className={`flex h-9 w-9 items-center justify-center rounded-r-lg border-l border-stone-300 transition-colors ${
+                className={`flex h-10 w-10 items-center justify-center rounded-r-lg border-l border-stone-300 transition-colors ${
                   viewMode === "list"
                     ? "bg-stone-custom text-white"
                     : "text-stone-400 hover:text-stone-600"
