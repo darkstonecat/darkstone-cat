@@ -109,25 +109,29 @@ export default function GameCard({ game, onClick }: GameCardProps) {
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
             {game.minPlayers > 0 && (
               <span className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
+                <Users className="h-3 w-3" aria-hidden="true" />
+                <span className="sr-only">{t("detail_players")}:</span>
                 {playersText}
               </span>
             )}
             {game.playingTime > 0 && (
               <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
+                <Clock className="h-3 w-3" aria-hidden="true" />
+                <span className="sr-only">{t("detail_duration")}:</span>
                 {game.playingTime}&prime;
               </span>
             )}
             {game.minAge > 0 && (
               <span className="flex items-center gap-1">
-                <Baby className="h-3 w-3" />
+                <Baby className="h-3 w-3" aria-hidden="true" />
+                <span className="sr-only">{t("detail_age")}:</span>
                 +{game.minAge}
               </span>
             )}
             {game.rating > 0 && (
               <span className="flex items-center gap-1">
-                <Star className="h-3 w-3" />
+                <Star className="h-3 w-3" aria-hidden="true" />
+                <span className="sr-only">{t("detail_rating")}:</span>
                 {game.rating.toFixed(1)}
               </span>
             )}

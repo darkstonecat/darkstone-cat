@@ -133,6 +133,8 @@ export default function Pagination({
               page === "..." ? (
                 <span
                   key={`ellipsis-${i}`}
+                  role="separator"
+                  aria-label={t("pagination_ellipsis")}
                   className="flex h-9 min-w-9 items-center justify-center text-sm text-stone-500"
                 >
                   ...

@@ -103,10 +103,10 @@ export default function FilterSidebar({
       <hr className="border-stone-200" />
 
       {/* Game type */}
-      <div>
-        <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
+      <fieldset className="m-0 border-0 p-0">
+        <legend className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
           {t("filter_type")}
-        </h3>
+        </legend>
         <div className="flex flex-wrap gap-2">
           {([
             { value: "boardgame", label: t("filter_type_base") },
@@ -124,15 +124,15 @@ export default function FilterSidebar({
             </button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       <hr className="border-stone-200" />
 
       {/* Players */}
-      <div>
-        <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
+      <fieldset className="m-0 border-0 p-0">
+        <legend className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
           {t("filter_players_title")}
-        </h3>
+        </legend>
         <div className="flex flex-wrap gap-2">
           {PLAYER_OPTIONS.map((n) => (
             <button
@@ -147,15 +147,15 @@ export default function FilterSidebar({
             </button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       <hr className="border-stone-200" />
 
       {/* Duration */}
-      <div>
-        <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
+      <fieldset className="m-0 border-0 p-0">
+        <legend className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
           {t("filter_duration_title")}
-        </h3>
+        </legend>
         <div className="flex flex-wrap gap-2">
           {DURATION_OPTIONS.map((key) => (
             <button
@@ -172,15 +172,15 @@ export default function FilterSidebar({
             </button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       <hr className="border-stone-200" />
 
       {/* Complexity */}
-      <div>
-        <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
+      <fieldset className="m-0 border-0 p-0">
+        <legend className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
           {t("filter_weight_title")}
-        </h3>
+        </legend>
         <div className="flex flex-wrap gap-2">
           {WEIGHT_OPTIONS.map((n) => (
             <button
@@ -195,15 +195,15 @@ export default function FilterSidebar({
             </button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       <hr className="border-stone-200" />
 
       {/* Age */}
-      <div>
-        <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
+      <fieldset className="m-0 border-0 p-0">
+        <legend className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
           {t("filter_age_title")}
-        </h3>
+        </legend>
         <div className="flex flex-wrap gap-2">
           {AGE_OPTIONS.map((n) => (
             <button
@@ -218,7 +218,7 @@ export default function FilterSidebar({
             </button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {/* Rank types */}
       {availableRankTypes.length > 0 && (

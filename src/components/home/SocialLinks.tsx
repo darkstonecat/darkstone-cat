@@ -112,7 +112,7 @@ function SocialIcon({ item }: { item: SocialItem }) {
         <Icon className="size-9 sm:size-12" />
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="text-xs font-medium text-stone-custom/50 transition-colors duration-300 group-hover:text-stone-custom/80">
+        <span className="text-xs font-medium text-stone-custom/60 transition-colors duration-300 group-hover:text-stone-custom/80">
           {Icon === FaFacebook
             ? "Facebook"
             : Icon === FaInstagram
@@ -138,9 +138,9 @@ export default function SocialLinks() {
   return (
     <div className="mt-16 flex flex-col items-center gap-8">
       <motion.p
-        className="text-sm font-semibold uppercase tracking-[0.3em] opacity-40"
+        className="text-sm font-semibold uppercase tracking-[0.3em] opacity-60"
         initial={{ opacity: 0 }}
-        whileInView={{ opacity: 0.4 }}
+        whileInView={{ opacity: 0.6 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.5 }}
       >

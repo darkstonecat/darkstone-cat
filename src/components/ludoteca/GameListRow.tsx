@@ -73,19 +73,23 @@ export default function GameListRow({ game, onClick }: GameListRowProps) {
 
         <div className="flex items-center text-xs text-stone-500">
           <span className="flex w-14 items-center gap-1">
-            <Users className="h-3 w-3 shrink-0" />
+            <Users className="h-3 w-3 shrink-0" aria-hidden="true" />
+            <span className="sr-only">{t("detail_players")}:</span>
             {game.minPlayers > 0 ? playersText : "–"}
           </span>
           <span className="flex w-14 items-center gap-1">
-            <Clock className="h-3 w-3 shrink-0" />
+            <Clock className="h-3 w-3 shrink-0" aria-hidden="true" />
+            <span className="sr-only">{t("detail_duration")}:</span>
             {game.playingTime > 0 ? <>{game.playingTime}&prime;</> : "–"}
           </span>
           <span className="flex w-12 items-center gap-1">
-            <Baby className="h-3 w-3 shrink-0" />
+            <Baby className="h-3 w-3 shrink-0" aria-hidden="true" />
+            <span className="sr-only">{t("detail_age")}:</span>
             {game.minAge > 0 ? `+${game.minAge}` : "–"}
           </span>
           <span className="flex w-12 items-center gap-1">
-            <Star className="h-3 w-3 shrink-0" />
+            <Star className="h-3 w-3 shrink-0" aria-hidden="true" />
+            <span className="sr-only">{t("detail_rating")}:</span>
             {game.rating > 0 ? game.rating.toFixed(1) : "–"}
           </span>
           {game.weight > 0 && <WeightBar weight={game.weight} />}

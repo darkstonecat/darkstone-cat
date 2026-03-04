@@ -306,6 +306,7 @@
     "pagination_prev": "Anterior",
     "pagination_next": "Següent",
     "pagination_page": "Pàgina {page}",
+    "pagination_ellipsis": "Més pàgines",
     "modal_close": "Tancar",
     "modal_back": "Tornar al joc principal",
     "detail_players": "Jugadors",

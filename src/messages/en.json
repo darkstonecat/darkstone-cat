@@ -306,6 +306,7 @@
     "pagination_prev": "Previous",
     "pagination_next": "Next",
     "pagination_page": "Page {page}",
+    "pagination_ellipsis": "More pages",
     "modal_close": "Close",
     "modal_back": "Back to main game",
     "detail_players": "Players",

@@ -157,7 +157,7 @@ export default function ContactForm() {
                 onChange={() =>
                   errors.name && setErrors((e) => ({ ...e, name: undefined }))
                 }
-                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
+                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/50 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
               />
               {errors.name && (
                 <p id="name-error" className="mt-1 text-xs text-red-600">{errors.name}</p>
@@ -183,7 +183,7 @@ export default function ContactForm() {
                 onChange={() =>
                   errors.email && setErrors((e) => ({ ...e, email: undefined }))
                 }
-                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
+                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/50 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
               />
               {errors.email && (
                 <p id="email-error" className="mt-1 text-xs text-red-600">{errors.email}</p>
@@ -209,7 +209,7 @@ export default function ContactForm() {
                   errors.subject &&
                   setErrors((e) => ({ ...e, subject: undefined }))
                 }
-                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
+                className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/50 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
               />
               {errors.subject && (
                 <p id="subject-error" className="mt-1 text-xs text-red-600">{errors.subject}</p>
@@ -235,7 +235,7 @@ export default function ContactForm() {
                   errors.message &&
                   setErrors((e) => ({ ...e, message: undefined }))
                 }
-                className="w-full resize-none rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/30 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
+                className="w-full resize-none rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/50 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
               />
               {errors.message && (
                 <p id="message-error" className="mt-1 text-xs text-red-600">{errors.message}</p>

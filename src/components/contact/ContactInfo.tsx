@@ -27,7 +27,7 @@ export default function ContactInfo() {
     >
       {/* Direct email */}
       <div>
-        <div className="mb-3 flex items-center gap-2 text-stone-custom/50">
+        <div className="mb-3 flex items-center gap-2 text-stone-custom/70">
           <Mail className="h-5 w-5" />
           <span className="text-sm font-medium">{t("email_us")}</span>
         </div>
@@ -41,7 +41,7 @@ export default function ContactInfo() {
 
       {/* Location */}
       <div>
-        <div className="mb-3 flex items-center gap-2 text-stone-custom/50">
+        <div className="mb-3 flex items-center gap-2 text-stone-custom/70">
           <MapPin className="h-5 w-5" />
           <span className="text-sm font-medium">{t("location_title")}</span>
         </div>
@@ -72,7 +72,7 @@ export default function ContactInfo() {
 
       {/* Social links */}
       <div>
-        <p className="mb-4 text-sm font-medium text-stone-custom/50">
+        <p className="mb-4 text-sm font-medium text-stone-custom/70">
           {t("social_title")}
         </p>
         <div className="flex gap-4">

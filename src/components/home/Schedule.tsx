@@ -30,9 +30,9 @@ export default function Schedule() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, delay: 0.15 }}
           >
-            <span className="text-xs font-semibold uppercase tracking-[0.3em] opacity-50">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.3em] opacity-50">
               {t("friday")}
-            </span>
+            </h3>
             <p className="text-center font-black leading-none text-[clamp(3rem,12vw,8rem)]">
               {t("friday_start")}
             </p>
@@ -59,9 +59,9 @@ export default function Schedule() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <span className="text-xs font-semibold uppercase tracking-[0.3em] opacity-50">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.3em] opacity-50">
               {t("saturday")}
-            </span>
+            </h3>
             <p className="text-center font-black leading-none text-[clamp(3rem,12vw,8rem)]">
               {t("saturday_start")}
             </p>
