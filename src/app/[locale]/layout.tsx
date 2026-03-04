@@ -41,13 +41,14 @@ export async function generateMetadata({
     openGraph: {
       title: t("home_og_title"),
       description: t("home_og_description"),
-      url: "https://darkstone.cat",
+      url: locale === "ca" ? "https://darkstone.cat" : `https://darkstone.cat/${locale}`,
       siteName: "Darkstone Catalunya",
       locale: localeToOg[locale] ?? "ca_ES",
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
+      site: "@darkstonecat",
       title: t("home_og_title"),
       description: t("home_og_description"),
     },
@@ -58,32 +59,6 @@ export async function generateMetadata({
     },
   };
 }
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Darkstone Catalunya",
-  alternateName: "Associació de jugadors i jugadores de jocs de taula i rol Darkstone Catalunya",
-  url: "https://darkstone.cat",
-  logo: "https://darkstone.cat/images/darkstone_logo_768px.png",
-  description:
-    "Associació sense ànim de lucre dedicada als jocs de taula i jocs de rol a Terrassa.",
-  foundingDate: "2024-09-14",
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Plaça del Tint, 4",
-    addressLocality: "Terrassa",
-    addressRegion: "Barcelona",
-    postalCode: "08224",
-    addressCountry: "ES",
-  },
-  sameAs: [
-    "https://instagram.com/darkstone.cat",
-    "https://x.com/darkstonecat",
-    "https://t.me/darkstonecat",
-    "https://app.ludoya.com/darkstonecat",
-  ],
-};
 
 export default async function LocaleLayout({
   children,
@@ -98,7 +73,36 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const messages = await getMessages();
+  const [messages, t] = await Promise.all([
+    getMessages(),
+    getTranslations({ locale, namespace: "metadata" }),
+  ]);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Darkstone Catalunya",
+    alternateName: "Associació de jugadors i jugadores de jocs de taula i rol Darkstone Catalunya",
+    url: "https://darkstone.cat",
+    logo: "https://darkstone.cat/images/darkstone_logo_768px.png",
+    description: t("home_description"),
+    foundingDate: "2024-09-14",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Plaça del Tint, 4",
+      addressLocality: "Terrassa",
+      addressRegion: "Barcelona",
+      postalCode: "08224",
+      addressCountry: "ES",
+    },
+    sameAs: [
+      "https://instagram.com/darkstone.cat",
+      "https://www.facebook.com/profile.php?id=61560270602862",
+      "https://x.com/darkstonecat",
+      "https://t.me/darkstonecat",
+      "https://app.ludoya.com/darkstonecat",
+    ],
+  };
 
   return (
     <html lang={locale} suppressHydrationWarning>

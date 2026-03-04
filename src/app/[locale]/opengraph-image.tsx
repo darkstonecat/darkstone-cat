@@ -1,10 +1,39 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Darkstone Catalunya — Associació de jocs de taula i rol";
+const OG_STRINGS: Record<string, { alt: string; subtitle: string; friday: string; saturday: string }> = {
+  ca: {
+    alt: "Darkstone Catalunya — Associacio de jocs de taula i rol",
+    subtitle: "Associacio de jocs de taula i rol · Terrassa",
+    friday: "Divendres 16–20:30h",
+    saturday: "Dissabtes 10–13:30h",
+  },
+  es: {
+    alt: "Darkstone Catalunya — Asociacion de juegos de mesa y rol",
+    subtitle: "Asociacion de juegos de mesa y rol · Terrassa",
+    friday: "Viernes 16–20:30h",
+    saturday: "Sabados 10–13:30h",
+  },
+  en: {
+    alt: "Darkstone Catalunya — Board games & RPG association",
+    subtitle: "Board games & RPG association · Terrassa",
+    friday: "Fridays 4–8:30 PM",
+    saturday: "Saturdays 10 AM–1:30 PM",
+  },
+};
+
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OgImage() {
+export async function generateImageMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const strings = OG_STRINGS[locale] ?? OG_STRINGS.ca;
+  return [{ id: "og", alt: strings.alt, size, contentType }];
+}
+
+export default async function OgImage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const strings = OG_STRINGS[locale] ?? OG_STRINGS.ca;
+
   return new ImageResponse(
     (
       <div
@@ -61,7 +90,7 @@ export default function OgImage() {
             marginTop: 16,
           }}
         >
-          Associació de jocs de taula i rol · Terrassa
+          {strings.subtitle}
         </div>
 
         {/* Schedule badge */}
@@ -83,7 +112,7 @@ export default function OgImage() {
               border: "1px solid #C05600",
             }}
           >
-            Divendres 16–20:30h
+            {strings.friday}
           </div>
           <div
             style={{
@@ -94,7 +123,7 @@ export default function OgImage() {
               border: "1px solid #C05600",
             }}
           >
-            Dissabtes 10–13:30h
+            {strings.saturday}
           </div>
         </div>
       </div>

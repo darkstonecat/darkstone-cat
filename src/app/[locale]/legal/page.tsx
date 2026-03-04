@@ -15,10 +15,20 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
+  const alternates = getAlternates(locale, "/legal");
   return {
     title: t("legal_title"),
     description: t("legal_description"),
-    alternates: getAlternates(locale, "/legal"),
+    alternates,
+    openGraph: {
+      title: t("legal_title"),
+      description: t("legal_description"),
+      url: alternates.canonical,
+    },
+    twitter: {
+      title: t("legal_title"),
+      description: t("legal_description"),
+    },
   };
 }
 
