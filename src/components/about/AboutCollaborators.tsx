@@ -67,7 +67,7 @@ export default function AboutCollaborators() {
                       modalTriggerRef.current = document.activeElement as HTMLElement;
                       setSelected(collaborator);
                     }}
-                    className="group flex aspect-[3/2] w-[calc(50%-0.5rem)] items-center justify-center rounded-xl p-4 transition-[filter,box-shadow] duration-300 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange sm:w-[calc(33.333%-0.75rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.666%-0.875rem)]"
+                    className="group flex aspect-3/2 w-[calc(50%-0.5rem)] items-center justify-center rounded-xl p-4 transition-[filter,box-shadow] duration-300 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange sm:w-[calc(33.333%-0.75rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.666%-0.875rem)]"
                     style={{
                       backgroundColor: collaborator.brandColor ?? "rgba(255,255,255,0.6)",
                     }}

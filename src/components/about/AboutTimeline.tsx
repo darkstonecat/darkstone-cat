@@ -107,7 +107,7 @@ export default function AboutTimeline() {
                       </>
                     ) : (
                       <p className="text-xs leading-snug text-stone-white-hover/45">
-                        <span className="uppercase tracking-[0.1em]">
+                        <span className="uppercase tracking-widest">
                           {t(event.dateKey)}
                         </span>
                         {" · "}
