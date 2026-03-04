@@ -3,6 +3,7 @@
 import { useSyncExternalStore, useCallback } from 'react'
 
 const STORAGE_KEY = 'darkstone_cookie_consent'
+const CONSENT_EXPIRY_MS = 365 * 24 * 60 * 60 * 1000 // 12 months
 
 type ConsentStatus = 'accepted' | 'rejected' | null
 
@@ -38,6 +39,12 @@ function getSnapshot(): ConsentStatus {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       const data: ConsentData = JSON.parse(stored)
+      // Check if consent has expired (12 months)
+      const consentDate = new Date(data.date).getTime()
+      if (Date.now() - consentDate > CONSENT_EXPIRY_MS) {
+        localStorage.removeItem(STORAGE_KEY)
+        return null
+      }
       return data.status
     }
   } catch {

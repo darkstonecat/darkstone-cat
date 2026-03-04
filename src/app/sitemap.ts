@@ -5,10 +5,10 @@ const locales = ["ca", "es", "en"] as const;
 
 const pages = [
   { path: "", changeFrequency: "weekly" as const, priority: 1.0, lastModified: "2026-03-04" },
-  { path: "/about", changeFrequency: "monthly" as const, priority: 0.8, lastModified: "2026-02-01" },
+  { path: "/about", changeFrequency: "monthly" as const, priority: 0.8, lastModified: "2026-03-04" },
   { path: "/ludoteca", changeFrequency: "daily" as const, priority: 0.8, lastModified: "2026-03-04" },
-  { path: "/contact", changeFrequency: "monthly" as const, priority: 0.7, lastModified: "2026-01-15" },
-  { path: "/conduct", changeFrequency: "yearly" as const, priority: 0.5, lastModified: "2026-02-01" },
+  { path: "/contact", changeFrequency: "monthly" as const, priority: 0.7, lastModified: "2026-03-04" },
+  { path: "/conduct", changeFrequency: "yearly" as const, priority: 0.5, lastModified: "2026-03-04" },
   { path: "/legal", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-02-01" },
   { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-02-01" },
   { path: "/cookies", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-02-01" },

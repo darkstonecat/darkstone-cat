@@ -25,8 +25,12 @@ export async function generateMetadata({
       title: t("conduct_title"),
       description: t("conduct_description"),
       url: alternates.canonical,
+      images: [{ url: `${alternates.canonical}/opengraph-image`, width: 1200, height: 630, alt: t("conduct_title") }],
     },
     twitter: {
+      card: "summary_large_image",
+      site: "@darkstonecat",
+      creator: "@darkstonecat",
       title: t("conduct_title"),
       description: t("conduct_description"),
     },
