@@ -51,7 +51,9 @@ export default function CookieBanner() {
           ref={bannerRef}
           key="cookie-banner"
           role="dialog"
+          aria-modal="true"
           aria-label={t('title')}
+          aria-describedby="cookie-banner-desc"
           tabIndex={-1}
           className="fixed bottom-6 right-6 z-50 w-[calc(100%-3rem)] max-w-90 overflow-hidden rounded-2xl border border-stone-custom/15 bg-brand-beige shadow-[0_8px_30px_rgba(0,0,0,0.6)] outline-none sm:w-auto"
           initial={{ x: 40, opacity: 0 }}
@@ -68,7 +70,7 @@ export default function CookieBanner() {
             <p className="text-sm font-semibold uppercase tracking-widest text-stone-custom">
               {t('title')}
             </p>
-            <p className="mt-1 text-sm leading-relaxed text-stone-custom/70">
+            <p id="cookie-banner-desc" className="mt-1 text-sm leading-relaxed text-stone-custom/70">
               {t('description')}
             </p>
 

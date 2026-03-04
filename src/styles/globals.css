@@ -115,6 +115,11 @@
   .animate-cta-nudge:hover {
     animation: none;
   }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-cta-nudge {
+      animation: none;
+    }
+  }
 
   /* Ocultar barra de scroll para Chrome, Safari y Opera */
   .no-scrollbar::-webkit-scrollbar {
