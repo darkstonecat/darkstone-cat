@@ -16,7 +16,6 @@ export interface UseCookieConsent {
   status: ConsentStatus
   accept: () => void
   reject: () => void
-  isLoaded: boolean
 }
 
 // --- localStorage as an external store ---
@@ -57,12 +56,8 @@ function getServerSnapshot(): ConsentStatus {
   return null
 }
 
-// isLoaded: false on server, true on client (prevents banner flash during SSR)
-const noopSubscribe = () => () => {}
-
 export function useCookieConsent(): UseCookieConsent {
   const status = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
-  const isLoaded = useSyncExternalStore(noopSubscribe, () => true, () => false)
 
   const save = useCallback((newStatus: 'accepted' | 'rejected') => {
     const data: ConsentData = {
@@ -80,5 +75,5 @@ export function useCookieConsent(): UseCookieConsent {
   const accept = useCallback(() => save('accepted'), [save])
   const reject = useCallback(() => save('rejected'), [save])
 
-  return { status, accept, reject, isLoaded }
+  return { status, accept, reject }
 }

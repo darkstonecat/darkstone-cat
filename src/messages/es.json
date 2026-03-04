@@ -213,7 +213,7 @@
   },
   "cookies": {
     "title": "Cookies",
-    "description": "Usamos Google Analytics para entender cómo se usa la web. Ningún dato se vende a terceros.",
+    "description": "Usamos cookies de analítica (Google Analytics y Vercel) para entender cómo se usa la web. Ningún dato se vende a terceros.",
     "accept": "Aceptar",
     "reject": "Rechazar"
   },

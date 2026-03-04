@@ -213,7 +213,7 @@
   },
   "cookies": {
     "title": "Cookies",
-    "description": "Usem Google Analytics per entendre com s'usa la web. Cap dada es ven a tercers.",
+    "description": "Usem cookies d'analítica (Google Analytics i Vercel) per entendre com s'usa la web. Cap dada es ven a tercers.",
     "accept": "Acceptar",
     "reject": "Rebutjar"
   },

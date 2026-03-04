@@ -1,17 +1,25 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence } from 'motion/react'
+import * as m from 'motion/react-client'
 import { useCookieConsentContext } from '@/components/CookieConsentProvider'
 
 export default function CookieBanner() {
-  const { status, accept, reject, isLoaded } = useCookieConsentContext()
+  const { status, accept, reject } = useCookieConsentContext()
   const t = useTranslations('cookies')
   const bannerRef = useRef<HTMLDivElement>(null)
   const acceptBtnRef = useRef<HTMLButtonElement>(null)
 
-  const showBanner = isLoaded && status === null
+  // Prevent SSR rendering of motion components (AnimatePresence uses
+  // React.lazy internally which produces a <Suspense> on the server
+  // but a <div> on the client, causing a hydration mismatch).
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- mount detection requires setState in effect
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
+  const showBanner = mounted && status === null
 
   const focusMainContent = useCallback(() => {
     const main = document.getElementById('main-content')
@@ -44,10 +52,12 @@ export default function CookieBanner() {
     }
   }, [showBanner, handleKeyDown])
 
+  if (!mounted) return null
+
   return (
     <AnimatePresence>
       {showBanner && (
-        <motion.div
+        <m.div
           ref={bannerRef}
           key="cookie-banner"
           role="dialog"
@@ -57,12 +67,15 @@ export default function CookieBanner() {
           tabIndex={-1}
           className="fixed bottom-6 right-6 z-50 w-[calc(100%-3rem)] max-w-90 overflow-hidden rounded-2xl border border-stone-custom/15 bg-brand-beige shadow-[0_8px_30px_rgba(0,0,0,0.6)] outline-none sm:w-auto"
           initial={{ x: 40, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: 40, opacity: 0 }}
-          transition={{
-            duration: 0.5,
-            ease: [0.22, 1, 0.36, 1],
-            delay: 1.2,
+          animate={{
+            x: 0,
+            opacity: 1,
+            transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 1.2 },
+          }}
+          exit={{
+            x: 40,
+            opacity: 0,
+            transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
           }}
         >
           {/* Content */}
@@ -93,7 +106,7 @@ export default function CookieBanner() {
               </button>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   )

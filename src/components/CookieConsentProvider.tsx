@@ -7,7 +7,6 @@ const CookieConsentContext = createContext<UseCookieConsent>({
   status: null,
   accept: () => {},
   reject: () => {},
-  isLoaded: false,
 })
 
 export function useCookieConsentContext(): UseCookieConsent {

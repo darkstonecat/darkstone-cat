@@ -213,7 +213,7 @@
   },
   "cookies": {
     "title": "Cookies",
-    "description": "We use Google Analytics to understand how the site is used. No data is sold to third parties.",
+    "description": "We use analytics cookies (Google Analytics and Vercel) to understand how the site is used. No data is sold to third parties.",
     "accept": "Accept",
     "reject": "Reject"
   },
