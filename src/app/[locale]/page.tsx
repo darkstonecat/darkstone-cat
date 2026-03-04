@@ -14,6 +14,8 @@ import Location from "@/components/home/Location";
 import Collaborators from "@/components/home/Collaborators";
 import SectionDivider from "@/components/home/SectionDivider";
 
+export const revalidate = 3600;
+
 const localeToOg: Record<string, string> = {
   ca: "ca_ES",
   es: "es_ES",

@@ -87,7 +87,7 @@ export default function Footer() {
               <p className="max-w-xs text-sm leading-relaxed text-stone-300">
                 {t("tagline")}
               </p>
-              <p className="max-w-xs pt-1 text-xs leading-relaxed text-stone-400">
+              <p className="max-w-xs pt-1 text-xs leading-relaxed text-stone-300">
                 {t("description")}
               </p>
             </div>
@@ -139,7 +139,7 @@ export default function Footer() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="py-0.5 text-sm text-stone-400 transition-colors hover:text-stone-white-hover"
+                  className="py-0.5 text-sm text-stone-300 transition-colors hover:text-stone-white-hover"
                 >
                   {tNav(link.key)}
                 </Link>
@@ -158,13 +158,13 @@ export default function Footer() {
               rel="noopener noreferrer"
               className="group block transition-colors"
             >
-              <p className="text-sm text-stone-400 group-hover:text-stone-300">
+              <p className="text-sm text-stone-300 group-hover:text-stone-white-hover">
                 {tLoc("centre_name")}
               </p>
-              <p className="mt-1 text-sm text-stone-400 group-hover:text-stone-300">
+              <p className="mt-1 text-sm text-stone-300 group-hover:text-stone-white-hover">
                 {t("address_street")}
               </p>
-              <p className="text-sm text-stone-400 group-hover:text-stone-300">
+              <p className="text-sm text-stone-300 group-hover:text-stone-white-hover">
                 {t("address_city")}
               </p>
             </a>
@@ -173,10 +173,10 @@ export default function Footer() {
               {t("scheduleLabel")}
             </span>
             <div className="space-y-1">
-              <p className="text-sm text-stone-400">
+              <p className="text-sm text-stone-300">
                 {tSch("friday")}: {tSch("friday_start")} — {tSch("friday_end")}
               </p>
-              <p className="text-sm text-stone-400">
+              <p className="text-sm text-stone-300">
                 {tSch("saturday")}: {tSch("saturday_start")} — {tSch("saturday_end")}
               </p>
             </div>
@@ -202,7 +202,7 @@ export default function Footer() {
               <span key={item.key} className="flex items-center gap-4">
                 <Link
                   href={item.href}
-                  className="text-xs text-stone-400 transition-colors hover:text-stone-300"
+                  className="text-xs text-stone-300 transition-colors hover:text-stone-white-hover"
                 >
                   {t(item.key)}
                 </Link>
@@ -231,10 +231,10 @@ export default function Footer() {
 
           {/* Copyright & dev */}
           <div className="text-center md:text-right md:flex md:flex-col md:items-end">
-            <p className="text-xs text-stone-400">
+            <p className="text-xs text-stone-300">
               &copy; {currentYear} Darkstone Catalunya. {t("rights")}
             </p>
-            <p className="mt-0.5 text-xs text-stone-400">
+            <p className="mt-0.5 text-xs text-stone-300">
               {t("developedBy")}{" "}
               <a
                 href="https://www.linkedin.com/in/rubencodina/"

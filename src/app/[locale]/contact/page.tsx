@@ -8,6 +8,8 @@ import ContactHero from "@/components/contact/ContactHero";
 import ContactForm from "@/components/contact/ContactForm";
 import ContactInfo from "@/components/contact/ContactInfo";
 
+export const revalidate = false;
+
 export async function generateMetadata({
   params,
 }: {
