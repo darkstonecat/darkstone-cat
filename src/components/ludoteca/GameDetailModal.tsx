@@ -144,7 +144,7 @@ export default function GameDetailModal({
                 <p className="mt-1 text-sm text-stone-400">{game.year}</p>
               )}
               <p id="game-modal-desc" className="sr-only">
-                {t("detail_players")}: {game.minPlayers}–{game.maxPlayers}, {t("detail_time")}: {game.playingTime}min
+                {t("detail_players")}: {game.minPlayers}–{game.maxPlayers}, {t("detail_duration")}: {game.playingTime}min
               </p>
             </div>
             <a
