@@ -111,7 +111,7 @@ export default function NavBar() {
   return (
     <>
       <motion.nav
-        className="fixed top-0 left-0 right-0 z-50 transition-[backdrop-filter] duration-500"
+        className="fixed left-0 right-0 z-50 transition-[backdrop-filter] duration-500"
         animate={{
           backgroundColor: scrolled
             ? hexToRgba(theme.bg, 0.8)
@@ -119,6 +119,8 @@ export default function NavBar() {
         }}
         transition={{ duration: 0.4 }}
         style={{
+          top: "-60px",
+          paddingTop: "60px",
           backdropFilter: scrolled ? "blur(12px)" : "none",
           WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
         }}
