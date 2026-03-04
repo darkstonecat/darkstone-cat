@@ -113,6 +113,8 @@ export default function NavBar() {
     return () => observer.disconnect();
   }, [isHomePage]);
 
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
   // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (mobileOpen) {
@@ -126,6 +128,60 @@ export default function NavBar() {
       document.body.style.overflow = "";
     };
   }, [mobileOpen, lenis]);
+
+  // Focus trap + Escape handler for mobile menu
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMobileOpen(false);
+        requestAnimationFrame(() => hamburgerRef.current?.focus());
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const menu = mobileMenuRef.current;
+        if (!menu) return;
+        const focusable = menu.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    // Auto-focus the close button after animation starts
+    const timer = setTimeout(() => {
+      const menu = mobileMenuRef.current;
+      if (menu) {
+        const firstFocusable = menu.querySelector<HTMLElement>(
+          'a[href], button:not([disabled])'
+        );
+        firstFocusable?.focus();
+      }
+    }, 100);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      clearTimeout(timer);
+    };
+  }, [mobileOpen]);
 
   const isActive = useCallback((href: string) => pathname === href, [pathname]);
 
@@ -256,6 +312,10 @@ export default function NavBar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
+            ref={mobileMenuRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("menu_button")}
             className="fixed inset-0 z-55 flex flex-col items-center justify-center bg-stone-custom"
             initial={{ clipPath: "circle(0% at calc(100% - 40px) 28px)" }}
             animate={{ clipPath: "circle(150% at calc(100% - 40px) 28px)" }}

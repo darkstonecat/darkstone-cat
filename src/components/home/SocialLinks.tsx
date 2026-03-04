@@ -112,7 +112,7 @@ function SocialIcon({ item }: { item: SocialItem }) {
         <Icon className="size-9 sm:size-12" />
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="text-xs font-medium text-stone-custom/60 transition-colors duration-300 group-hover:text-stone-custom/80">
+        <span className="text-xs font-medium text-stone-custom/65 transition-colors duration-300 group-hover:text-stone-custom/80">
           {Icon === FaFacebook
             ? "Facebook"
             : Icon === FaInstagram

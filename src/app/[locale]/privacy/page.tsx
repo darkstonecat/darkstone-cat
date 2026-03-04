@@ -25,8 +25,17 @@ export async function generateMetadata({
       title: t("privacy_title"),
       description: t("privacy_description"),
       url: alternates.canonical,
+      images: [{
+        url: locale === "ca"
+          ? "https://darkstone.cat/opengraph-image/og"
+          : `https://darkstone.cat/${locale}/opengraph-image/og`,
+        width: 1200,
+        height: 630,
+        type: "image/png",
+      }],
     },
     twitter: {
+      card: "summary_large_image",
       title: t("privacy_title"),
       description: t("privacy_description"),
     },

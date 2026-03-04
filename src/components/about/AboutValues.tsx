@@ -33,7 +33,7 @@ function ValueCard({
       <h3 className="mb-2 text-xl font-bold text-stone-custom">
         {t(value.labelKey)}
       </h3>
-      <p className="text-sm leading-relaxed text-stone-custom/60">
+      <p className="text-sm leading-relaxed text-stone-custom/65">
         {t(value.textKey)}
       </p>
     </motion.div>
@@ -52,7 +52,7 @@ export default function AboutValues() {
         {/* Header */}
         <div className="mb-16 text-center">
           <motion.span
-            className="mb-3 block text-xs uppercase tracking-[0.2em] text-stone-white-hover/40"
+            className="mb-3 block text-xs uppercase tracking-[0.2em] text-stone-white-hover/50"
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}

@@ -75,9 +75,9 @@ export default function Schedule() {
 
         {/* Subtitle */}
         <motion.p
-          className="mt-16 text-center text-lg opacity-40 md:mt-24"
+          className="mt-16 text-center text-lg opacity-50 md:mt-24"
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.4 }}
+          whileInView={{ opacity: 0.5 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >

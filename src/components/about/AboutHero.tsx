@@ -10,7 +10,7 @@ export default function AboutHero() {
     <section className="relative flex items-center justify-center bg-stone-custom pt-32 pb-16">
       <div className="container mx-auto px-6 text-center">
         <motion.p
-          className="text-sm font-medium uppercase tracking-widest text-brand-white/40"
+          className="text-sm font-medium uppercase tracking-widest text-brand-white/50"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -26,7 +26,7 @@ export default function AboutHero() {
           {t("hero_title")}
         </motion.h1>
         <motion.p
-          className="mx-auto mt-6 text-lg text-brand-white/50"
+          className="mx-auto mt-6 text-lg text-brand-white/60"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}

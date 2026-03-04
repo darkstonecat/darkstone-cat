@@ -58,7 +58,7 @@ export default function AboutBoard() {
               <h3 className="text-center text-base font-bold text-stone-custom md:text-lg">
                 {member.name}
               </h3>
-              <p className="mt-1 text-center text-sm text-stone-custom/60">
+              <p className="mt-1 text-center text-sm text-stone-custom/65">
                 {t(member.roleKey)}
               </p>
             </motion.div>

@@ -30,7 +30,7 @@ export default function AboutOrigin() {
             {t("origin_text")}
           </motion.p>
           <motion.p
-            className="mt-6 text-xs text-stone-custom/40"
+            className="mt-6 text-xs text-stone-custom/65"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-40px" }}
@@ -54,7 +54,7 @@ export default function AboutOrigin() {
           <span className="mt-1 block text-2xl font-bold text-stone-custom/70">
             {t("founding_month_year")}
           </span>
-          <span className="mt-3 block text-xs uppercase tracking-[0.2em] text-stone-custom/40">
+          <span className="mt-3 block text-xs uppercase tracking-[0.2em] text-stone-custom/65">
             {t("founding_label")}
           </span>
         </motion.div>

@@ -58,7 +58,7 @@ export default function AboutStats({ gameCount }: { gameCount: number }) {
     <section className="bg-stone-custom py-20 text-stone-white-hover">
       <div className="mx-auto max-w-4xl px-6" ref={ref}>
         <motion.span
-          className="mb-12 block text-center text-xs uppercase tracking-[0.2em] text-stone-white-hover/40"
+          className="mb-12 block text-center text-xs uppercase tracking-[0.2em] text-stone-white-hover/50"
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}

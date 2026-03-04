@@ -75,6 +75,9 @@ export default async function LocaleLayout({
     getTranslations({ locale, namespace: "metadata" }),
   ]);
 
+  const orgId = "https://darkstone.cat/#organization";
+  const placeId = "https://darkstone.cat/#place";
+
   const address = {
     "@type": "PostalAddress",
     streetAddress: "Plaça del Tint, 4",
@@ -92,93 +95,86 @@ export default async function LocaleLayout({
     "https://app.ludoya.com/darkstonecat",
   ];
 
-  const eventLocation = {
-    "@type": "Place",
-    name: "Darkstone Catalunya",
-    address,
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": orgId,
+        additionalType: "https://schema.org/NGO",
+        name: "Darkstone Catalunya",
+        alternateName: "Associació de jugadors i jugadores de jocs de taula i rol Darkstone Catalunya",
+        url: "https://darkstone.cat",
+        logo: "https://darkstone.cat/images/darkstone_logo_768px.webp",
+        image: "https://darkstone.cat/images/darkstone_logo_768px.webp",
+        description: t("home_description"),
+        foundingDate: "2024-09-14",
+        email: "darkstone.cat@gmail.com",
+        address,
+        location: { "@id": placeId },
+        sameAs,
+        openingHoursSpecification: [
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: "Friday",
+            opens: "17:00",
+            closes: "21:00",
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: "Saturday",
+            opens: "10:00",
+            closes: "14:00",
+          },
+        ],
+      },
+      {
+        "@type": "Place",
+        "@id": placeId,
+        name: "Darkstone Catalunya",
+        address,
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: 41.5637,
+          longitude: 2.0089,
+        },
+      },
+      {
+        "@type": "Event",
+        name: `Darkstone Catalunya — ${t("event_friday_name")}`,
+        description: t("home_description"),
+        startDate: "2024-09-14",
+        eventSchedule: {
+          "@type": "Schedule",
+          repeatFrequency: "P1W",
+          byDay: "https://schema.org/Friday",
+          startTime: "17:00",
+          endTime: "21:00",
+        },
+        location: { "@id": placeId },
+        organizer: { "@id": orgId },
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        isAccessibleForFree: true,
+      },
+      {
+        "@type": "Event",
+        name: `Darkstone Catalunya — ${t("event_saturday_name")}`,
+        description: t("home_description"),
+        startDate: "2024-09-14",
+        eventSchedule: {
+          "@type": "Schedule",
+          repeatFrequency: "P1W",
+          byDay: "https://schema.org/Saturday",
+          startTime: "10:00",
+          endTime: "14:00",
+        },
+        location: { "@id": placeId },
+        organizer: { "@id": orgId },
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        isAccessibleForFree: true,
+      },
+    ],
   };
-
-  const jsonLd = [
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      name: "Darkstone Catalunya",
-      alternateName: "Associació de jugadors i jugadores de jocs de taula i rol Darkstone Catalunya",
-      url: "https://darkstone.cat",
-      logo: "https://darkstone.cat/images/darkstone_logo_768px.webp",
-      description: t("home_description"),
-      foundingDate: "2024-09-14",
-      address,
-      sameAs,
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      name: "Darkstone Catalunya",
-      description: t("home_description"),
-      url: "https://darkstone.cat",
-      image: "https://darkstone.cat/images/darkstone_logo_768px.webp",
-      address,
-      email: "darkstone.cat@gmail.com",
-      sameAs,
-      openingHoursSpecification: [
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: "Friday",
-          opens: "17:00",
-          closes: "21:00",
-        },
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: "Saturday",
-          opens: "10:00",
-          closes: "14:00",
-        },
-      ],
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Event",
-      name: "Darkstone Catalunya — Portes obertes (divendres)",
-      description: t("home_description"),
-      eventSchedule: {
-        "@type": "Schedule",
-        repeatFrequency: "P1W",
-        byDay: "https://schema.org/Friday",
-        startTime: "17:00",
-        endTime: "21:00",
-      },
-      location: eventLocation,
-      organizer: {
-        "@type": "Organization",
-        name: "Darkstone Catalunya",
-        url: "https://darkstone.cat",
-      },
-      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-      isAccessibleForFree: true,
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Event",
-      name: "Darkstone Catalunya — Portes obertes (dissabte)",
-      description: t("home_description"),
-      eventSchedule: {
-        "@type": "Schedule",
-        repeatFrequency: "P1W",
-        byDay: "https://schema.org/Saturday",
-        startTime: "10:00",
-        endTime: "14:00",
-      },
-      location: eventLocation,
-      organizer: {
-        "@type": "Organization",
-        name: "Darkstone Catalunya",
-        url: "https://darkstone.cat",
-      },
-      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-      isAccessibleForFree: true,
-    },
-  ];
 
   return (
     <html lang={locale} suppressHydrationWarning>

@@ -41,6 +41,14 @@ export async function generateMetadata({
       siteName: "Darkstone Catalunya",
       locale: localeToOg[locale] ?? "ca_ES",
       type: "website",
+      images: [{
+        url: locale === "ca"
+          ? "https://darkstone.cat/opengraph-image/og"
+          : `https://darkstone.cat/${locale}/opengraph-image/og`,
+        width: 1200,
+        height: 630,
+        type: "image/png",
+      }],
     },
     twitter: {
       card: "summary_large_image",

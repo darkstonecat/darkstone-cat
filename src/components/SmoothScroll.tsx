@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import Lenis from "lenis";
+import { MotionConfig } from "motion/react";
 
 const LenisContext = createContext<{
   subscribe: (cb: () => void) => () => void;
@@ -93,8 +94,10 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
   }, []);
 
   return (
-    <LenisContext.Provider value={{ subscribe, getSnapshot }}>
-      {children}
-    </LenisContext.Provider>
+    <MotionConfig reducedMotion="user">
+      <LenisContext.Provider value={{ subscribe, getSnapshot }}>
+        {children}
+      </LenisContext.Provider>
+    </MotionConfig>
   );
 }

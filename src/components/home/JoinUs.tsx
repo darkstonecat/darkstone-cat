@@ -27,9 +27,9 @@ export default function JoinUs() {
           />
 
           <motion.p
-            className="mt-6 text-lg opacity-50 md:text-xl"
+            className="mt-6 text-lg opacity-65 md:text-xl"
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 0.5 }}
+            whileInView={{ opacity: 0.65 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
@@ -68,9 +68,9 @@ export default function JoinUs() {
 
         {/* Channel Cards */}
         <motion.p
-          className="mb-10 text-center text-sm font-semibold uppercase tracking-[0.3em] opacity-40"
+          className="mb-10 text-center text-sm font-semibold uppercase tracking-[0.3em] opacity-55"
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.4 }}
+          whileInView={{ opacity: 0.55 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >

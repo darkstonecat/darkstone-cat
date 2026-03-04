@@ -33,7 +33,7 @@ export default function AboutTimeline() {
         {/* Header */}
         <div className="mb-16 text-center">
           <motion.span
-            className="mb-3 block text-xs uppercase tracking-[0.2em] text-stone-white-hover/40"
+            className="mb-3 block text-xs uppercase tracking-[0.2em] text-stone-white-hover/50"
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}

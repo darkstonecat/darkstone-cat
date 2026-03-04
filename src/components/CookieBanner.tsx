@@ -34,6 +34,31 @@ export default function CookieBanner() {
       if (e.key === 'Escape') {
         reject()
         focusMainContent()
+        return
+      }
+
+      // Focus trap within the dialog
+      if (e.key === 'Tab') {
+        const banner = bannerRef.current
+        if (!banner) return
+        const focusable = banner.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+        )
+        if (focusable.length === 0) return
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault()
+            last.focus()
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault()
+            first.focus()
+          }
+        }
       }
     },
     [reject, focusMainContent]

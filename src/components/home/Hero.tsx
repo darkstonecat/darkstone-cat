@@ -91,7 +91,7 @@ export default function Hero() {
               ...textBounceTransition,
               delay: 0.4,
             }}
-            className="mt-6 max-w-2xl text-xl font-light opacity-60 md:text-2xl origin-bottom"
+            className="mt-6 max-w-2xl text-xl font-light opacity-65 md:text-2xl origin-bottom"
           >
             {t("tagline")}
           </m.p>
@@ -103,7 +103,7 @@ export default function Hero() {
               ...textBounceTransition,
               delay: 0.55
             }}
-            className="mt-4 max-w-lg opacity-50 origin-bottom"
+            className="mt-4 max-w-lg opacity-65 origin-bottom"
           >
             {t("description")}
           </m.p>

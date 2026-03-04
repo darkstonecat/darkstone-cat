@@ -19,9 +19,9 @@ export default function AboutCTA() {
           />
 
           <motion.p
-            className="mt-6 text-lg text-stone-custom/60 md:text-xl"
+            className="mt-6 text-lg text-stone-custom/65 md:text-xl"
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 0.6, y: 0 }}
+            whileInView={{ opacity: 0.65, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >

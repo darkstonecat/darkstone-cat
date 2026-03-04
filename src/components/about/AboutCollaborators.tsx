@@ -54,7 +54,7 @@ export default function AboutCollaborators() {
               transition={{ duration: 0.5, delay: groupIdx * 0.05 }}
             >
               {/* Category heading */}
-              <h3 className="mb-6 text-center text-xs uppercase tracking-[0.2em] text-stone-custom/40">
+              <h3 className="mb-6 text-center text-xs uppercase tracking-[0.2em] text-stone-custom/65">
                 {t(`categories.${group.category}`)}
               </h3>
 
@@ -101,7 +101,7 @@ export default function AboutCollaborators() {
 
         {/* Editorial invite */}
         <motion.p
-          className="mx-auto mt-16 max-w-2xl text-center text-sm leading-relaxed text-stone-custom/60"
+          className="mx-auto mt-16 max-w-2xl text-center text-sm leading-relaxed text-stone-custom/65"
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
