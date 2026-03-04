@@ -116,6 +116,7 @@ export default function About() {
   return (
     <section
       id="about"
+      aria-label={t("title")}
       ref={containerRef}
       className="relative bg-stone-custom text-stone-white-hover"
       style={{ height: `${TOTAL_H}vh` }}
@@ -136,9 +137,9 @@ export default function About() {
           delay={0.05}
         />
         <motion.p
-          className="mx-auto mt-6 max-w-xl text-center text-lg leading-relaxed opacity-60"
+          className="mx-auto mt-6 max-w-xl text-center text-lg leading-relaxed opacity-70"
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 0.6 }}
+          whileInView={{ opacity: 0.7 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >

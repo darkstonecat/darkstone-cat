@@ -13,13 +13,22 @@ export default function CookieBanner() {
 
   const showBanner = isLoaded && status === null
 
+  const focusMainContent = useCallback(() => {
+    const main = document.getElementById('main-content')
+    if (main) {
+      main.tabIndex = -1
+      main.focus({ preventScroll: true })
+    }
+  }, [])
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         reject()
+        focusMainContent()
       }
     },
-    [reject]
+    [reject, focusMainContent]
   )
 
   // Focus the accept button when banner appears and listen for Escape
@@ -67,14 +76,14 @@ export default function CookieBanner() {
             <div className="mt-4 flex items-center gap-3">
               <button
                 ref={acceptBtnRef}
-                onClick={accept}
+                onClick={() => { accept(); focusMainContent() }}
                 type="button"
                 className="rounded-full bg-brand-orange px-5 py-2 font-semibold text-white transition-transform hover:scale-105"
               >
                 {t('accept')}
               </button>
               <button
-                onClick={reject}
+                onClick={() => { reject(); focusMainContent() }}
                 type="button"
                 className="text-sm text-stone-custom/80 underline transition-colors hover:text-stone-custom"
               >

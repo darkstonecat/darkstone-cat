@@ -10,6 +10,7 @@ export default function Schedule() {
   return (
     <section
       id="schedule"
+      aria-label={t("title")}
       className="relative flex min-h-screen items-center justify-center overflow-hidden bg-stone-custom py-24 text-stone-white-hover"
     >
       <div className="container mx-auto px-6">

@@ -187,7 +187,7 @@ export default function Activities() {
   const t = useTranslations("activities");
 
   return (
-    <section id="activities" className="bg-brand-beige text-stone-custom">
+    <section id="activities" aria-label={t("title")} className="bg-brand-beige text-stone-custom">
       <DesktopActivities t={t} />
       <MobileActivities t={t} />
     </section>

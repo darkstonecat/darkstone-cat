@@ -92,6 +92,7 @@ export default function Collaborators() {
   return (
     <section
       id="collaborators"
+      aria-label={t("title")}
       className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-stone-custom py-20 text-stone-white-hover"
     >
       <div className="container mx-auto px-6">

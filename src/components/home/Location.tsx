@@ -58,6 +58,7 @@ export default function Location() {
   return (
     <section
       id="location"
+      aria-label={t("title")}
       className="relative flex min-h-screen flex-col bg-stone-custom text-stone-white-hover lg:flex-row"
     >
       {/* Info column — 42% */}

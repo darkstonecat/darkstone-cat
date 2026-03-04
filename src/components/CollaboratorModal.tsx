@@ -68,6 +68,7 @@ export default function CollaboratorModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="collaborator-modal-title"
+      aria-describedby="collaborator-modal-desc"
     >
       <motion.div
         ref={dialogRef}
@@ -119,7 +120,7 @@ export default function CollaboratorModal({
           </span>
 
           {/* Description */}
-          <p className="mt-4 text-sm leading-relaxed text-stone-600">
+          <p id="collaborator-modal-desc" className="mt-4 text-sm leading-relaxed text-stone-600">
             {t(`descriptions.${collaborator.slug}`)}
           </p>
 

@@ -14,6 +14,7 @@ export default function JoinUs() {
   return (
     <section
       id="join-us"
+      aria-label={t("cta_title")}
       className="flex min-h-screen flex-col items-center justify-center bg-brand-beige py-24 text-stone-custom"
     >
       {/* CTA Zone */}

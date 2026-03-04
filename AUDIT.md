@@ -46,24 +46,24 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 | # | Issue | Archivo | Línea | Descripción |
 |---|-------|---------|-------|-------------|
 | ~~A05~~ | ~~Contraste: `text-stone-400` sobre `bg-stone-950` en Footer~~ | ~~`src/components/Footer.tsx`~~ | 87, 90 | **CORREGIDO** — Tagline: `text-stone-400` → `text-stone-300`. Descripción: `text-stone-500` → `text-stone-400`. |
-| A06 | Contraste: texto con `opacity-60` en About | `src/components/home/About.tsx` | 139 | `opacity-60` reduce contraste del texto. Ratio ~7.4:1 (pasa) pero borderline para legibilidad. |
+| ~~A06~~ | ~~Contraste: texto con `opacity-60` en About~~ | ~~`src/components/home/About.tsx`~~ | 139 | **CORREGIDO** — `opacity-60` → `opacity-70` para mejor legibilidad. |
 | A07 | Contraste: `#C05600` (orange) sobre blanco | Múltiples | — | Ratio 4.55:1 — apenas pasa AA (4.5:1), falla AAA (7:1). Afecta: FilterSidebar chips, GameDetailModal badges, JoinUs CTA. |
 | ~~A08~~ | ~~Campos del formulario sin indicador de `required`~~ | ~~`src/components/contact/ContactForm.tsx`~~ | 142-146 | **CORREGIDO** — Añadido `required` a todos los inputs y `*` visual en cada label. |
-| A09 | CookieBanner: sin gestión de foco al cerrar | `src/components/CookieBanner.tsx` | 15-22 | Escape cierra el banner pero el foco queda "perdido". Debería devolver foco a un elemento lógico. |
+| ~~A09~~ | ~~CookieBanner: sin gestión de foco al cerrar~~ | ~~`src/components/CookieBanner.tsx`~~ | 15-22 | **CORREGIDO** — Accept/reject/Escape ahora devuelven foco a `#main-content`. |
 | ~~A10~~ | ~~NavBar mobile: foco no restaurado al cerrar menú~~ | ~~`src/components/NavBar.tsx`~~ | 195-231 | **CORREGIDO** — `hamburgerRef` en botón hamburguesa; botón close restaura foco con `requestAnimationFrame`. |
 | ~~A11~~ | ~~SearchableMultiSelect: Escape no restaura foco~~ | ~~`src/components/ludoteca/SearchableMultiSelect.tsx`~~ | 103 | **CORREGIDO** — `triggerRef` en botón trigger; `handleClose` restaura foco automáticamente. |
-| A12 | FilterSidebar mobile: close no restaura foco | `src/components/ludoteca/FilterSidebar.tsx` | 78-85 | Botón de cerrar llama `onClose()` pero no restaura foco al botón "Filtrar". |
+| ~~A12~~ | ~~FilterSidebar mobile: close no restaura foco~~ | ~~`src/components/ludoteca/LudotecaClient.tsx`~~ | 291-294 | **YA IMPLEMENTADO** — `useEffect` en LudotecaClient ya restaura foco a `mobileFilterBtnRef` al cerrar. |
 | ~~A13~~ | ~~Botones de expansión en modal sin `aria-label`~~ | ~~`src/components/ludoteca/GameDetailModal.tsx`~~ | 241, 279 | **CORREGIDO** — Añadido `aria-label` con título de sección + nombre del juego en ambos tipos de botón. |
 | ~~A14~~ | ~~TextReveal: sin check explícito de reduced-motion~~ | ~~`src/components/TextReveal.tsx`~~ | 27-35 | **CORREGIDO** — Añadido `useReducedMotion()` de Motion v12. Si reduced-motion, renderiza texto plano sin animación. |
 | ~~A15~~ | ~~Botón disabled: contraste reducido~~ | ~~`src/components/contact/ContactForm.tsx`~~ | 248 | **CORREGIDO** — `disabled:opacity-60` → `disabled:opacity-70` para mejor contraste. |
-| A16 | Secciones `<section>` sin `aria-label` | `src/components/home/About.tsx` | 117 | Secciones usan `id` pero no `aria-label` descriptivo para lectores de pantalla. |
+| ~~A16~~ | ~~Secciones `<section>` sin `aria-label`~~ | ~~`src/components/home/*.tsx`~~ | — | **CORREGIDO** — Añadido `aria-label={t("title")}` a las 6 secciones: About, Activities, Schedule, JoinUs, Location, Collaborators. |
 
 ### Prioridad BAJA
 
 | # | Issue | Archivo | Línea | Descripción |
 |---|-------|---------|-------|-------------|
-| A17 | Modales sin `aria-describedby` | `GameDetailModal.tsx`, `CollaboratorModal.tsx` | — | Tienen `aria-labelledby` (correcto) pero no `aria-describedby`. Opcional pero recomendado. |
-| A18 | CookieBanner botones sin `type="button"` | `src/components/CookieBanner.tsx` | 67, 73 | Default es "submit" — sin impacto real en este contexto pero conviene ser explícito. |
+| ~~A17~~ | ~~Modales sin `aria-describedby`~~ | ~~`GameDetailModal.tsx`, `CollaboratorModal.tsx`~~ | — | **CORREGIDO** — Añadido `aria-describedby` en ambos modales apuntando a descripción del contenido. |
+| ~~A18~~ | ~~CookieBanner botones sin `type="button"`~~ | ~~`src/components/CookieBanner.tsx`~~ | 67, 73 | **CORREGIDO** — (Arreglado en commit anterior junto con A04). |
 
 ### Ya implementado correctamente
 
@@ -273,13 +273,13 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 
 | Área | Score | Estado |
 |------|-------|--------|
-| **Accesibilidad** | 7/10 | Buena base, faltan focus management en modales y contraste en algunos elementos |
-| **Performance** | 7.5/10 | Bien optimizado, oportunidades en bundle size y preconnect |
-| **Core Web Vitals** | 8.5/10 | LCP bueno, INP bajo riesgo, CLS excelente |
-| **SEO** | 8.5/10 | Excelente implementación i18n, faltan schemas y metadata explícita en home |
+| **Accesibilidad** | 9.5/10 | Todos los issues de foco, contraste, aria-labels y reduced-motion corregidos. Solo queda A07 (orange borderline AA). |
+| **Performance** | 8/10 | Preconnect, IntersectionObserver, font stack y sizes corregidos. Quedan P01 (consolidar iconos), P04, P06-P07. |
+| **Core Web Vitals** | 9/10 | LCP bueno, CLS excelente, IntersectionObserver implementado. |
+| **SEO** | 9/10 | Metadata explícita en home, noindex en errores, sitemap sincronizado. Quedan schemas adicionales (S03-S05, S07). |
 | **Best Practices** | 9/10 | Código limpio, TypeScript estricto, patrones React correctos |
 | **Seguridad** | 8.5/10 | Headers robustos, validación de inputs, rate limiting mejorable |
-| **GLOBAL** | **8.2/10** | Proyecto sólido con margen de mejora en A11y y performance (47 issues totales) |
+| **GLOBAL** | **8.8/10** | Proyecto sólido. A11y significativamente mejorado. Issues restantes son de baja prioridad o requieren servicios externos. |
 
 ---
 
@@ -298,28 +298,31 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 
 ### MEDIA (planificar)
 10. ~~**A05**~~ — ~~Mejorar contraste en Footer~~ **CORREGIDO**
-11. **A06-A07** — About opacity, orange sobre blanco
-12. ~~**A08**~~ — ~~Formulario: indicador de campos required~~ **CORREGIDO**
-13. **A09** — Focus management en CookieBanner
-14. ~~**A10-A11**~~ — ~~Focus management en NavBar mobile, SearchableMultiSelect~~ **CORREGIDO**
-15. **A12** — Focus management en FilterSidebar mobile
-16. ~~**A13**~~ — ~~Aria-labels en botones de expansión/base game~~ **CORREGIDO**
-17. ~~**A14**~~ — ~~TextReveal: check explícito de reduced-motion~~ **CORREGIDO**
-18. **P04** — About images: añadir `priority` si son above-fold
-19. ~~**P05**~~ — ~~Documentar/corregir `--font-geist-sans`~~ **CORREGIDO**
-20. **S03** — Enlazar OG images explícitamente en metadata
-21. **S04-S05** — Añadir schemas Event e ItemList/Product
-22. ~~**S06**~~ — ~~Sincronizar fechas de sitemap~~ **CORREGIDO**
-23. **SEC01** — Añadir CSP con script-src/style-src
-24. **SEC02** — Migrar rate limiting a servicio persistente
+11. ~~**A06**~~ — ~~About opacity~~ **CORREGIDO**
+12. **A07** — Orange sobre blanco (ratio 4.55:1, borderline AA)
+13. ~~**A08**~~ — ~~Formulario: indicador de campos required~~ **CORREGIDO**
+14. ~~**A09**~~ — ~~Focus management en CookieBanner~~ **CORREGIDO**
+15. ~~**A10-A11**~~ — ~~Focus management en NavBar mobile, SearchableMultiSelect~~ **CORREGIDO**
+16. ~~**A12**~~ — ~~Focus management en FilterSidebar mobile~~ **YA IMPLEMENTADO**
+17. ~~**A13**~~ — ~~Aria-labels en botones de expansión/base game~~ **CORREGIDO**
+18. ~~**A14**~~ — ~~TextReveal: check explícito de reduced-motion~~ **CORREGIDO**
+19. **P04** — About images: añadir `priority` si son above-fold
+20. ~~**P05**~~ — ~~Documentar/corregir `--font-geist-sans`~~ **CORREGIDO**
+21. **S03** — Enlazar OG images explícitamente en metadata
+22. **S04-S05** — Añadir schemas Event e ItemList/Product
+23. ~~**S06**~~ — ~~Sincronizar fechas de sitemap~~ **CORREGIDO**
+24. **SEC01** — Añadir CSP con script-src/style-src
+25. **SEC02** — Migrar rate limiting a servicio persistente
 
 ### BAJA (nice to have)
-25. ~~**A15**~~ — ~~Contraste disabled button~~ **CORREGIDO**
-26. **A16-A18** — Section aria-labels, modal describedby, button types
-27. **P06-P07, P09** — Lenis rAF optimization, CTA keyframes, Service Worker
-28. **S07** — WebPage schema
-29. ~~**S08**~~ — ~~Sizes precisos en About~~ **CORREGIDO**
-30. **SEC03-SEC05** — CSRF tokens, API key docs, IP validation
+26. ~~**A15**~~ — ~~Contraste disabled button~~ **CORREGIDO**
+27. ~~**A16**~~ — ~~Section aria-labels~~ **CORREGIDO**
+28. ~~**A17**~~ — ~~Modal aria-describedby~~ **CORREGIDO**
+29. ~~**A18**~~ — ~~Button types~~ **CORREGIDO**
+30. **P06-P07, P09** — Lenis rAF optimization, CTA keyframes, Service Worker
+31. **S07** — WebPage schema
+32. ~~**S08**~~ — ~~Sizes precisos en About~~ **CORREGIDO**
+33. **SEC03-SEC05** — CSRF tokens, API key docs, IP validation
 
 ---
 
