@@ -35,8 +35,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# claude
+# AI
 .claude
+.agent
+.agents
+skills-lock.json
 
 # Analytics
 lighthouse-*
