@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import * as m from "motion/react-client";
 import type { BggGame } from "@/lib/bgg";
 import GameCard from "./GameCard";
@@ -21,13 +20,7 @@ interface GameGridProps {
 }
 
 export default function GameGrid({ games, viewMode, onSelectGame }: GameGridProps) {
-  const hasAnimated = useRef(false);
-  const shouldAnimate = !hasAnimated.current && games.length <= 48;
-
-  // After first render, skip entrance animations on subsequent filter/page changes
-  if (!hasAnimated.current && games.length > 0) {
-    hasAnimated.current = true;
-  }
+  const shouldAnimate = games.length <= 48;
 
   if (viewMode === "list") {
     return (
