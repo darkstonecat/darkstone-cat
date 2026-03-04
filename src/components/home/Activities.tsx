@@ -20,6 +20,7 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
   const [viewportWidth, setViewportWidth] = useState(0);
 
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
     const measure = () => {
       setViewportWidth(window.innerWidth);
       if (innerRef.current) {
@@ -27,8 +28,15 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
       }
     };
     measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    const handleResize = () => {
+      clearTimeout(timer);
+      timer = setTimeout(measure, 150);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const { scrollYProgress } = useScroll({

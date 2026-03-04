@@ -35,7 +35,7 @@ export default function LanguageSwitcher({ colorOverride }: LanguageSwitcherProp
           className={`rounded-sm transition-opacity duration-200 ${
             locale === lang.code
               ? "opacity-100 underline decoration-2 underline-offset-4"
-              : "opacity-50 hover:opacity-100"
+              : "opacity-70 hover:opacity-100"
           }`}
         >
           {lang.label}

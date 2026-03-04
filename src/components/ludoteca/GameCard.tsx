@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { MdGroup, MdSchedule, MdStar, MdChildCare } from "react-icons/md";
@@ -67,7 +67,7 @@ function ProgressiveGameImage({ game }: { game: BggGame }) {
   );
 }
 
-export default function GameCard({ game, onClick }: GameCardProps) {
+const GameCard = memo(function GameCard({ game, onClick }: GameCardProps) {
   const t = useTranslations("ludoteca");
 
   const playersText =
@@ -106,7 +106,7 @@ export default function GameCard({ game, onClick }: GameCardProps) {
         </p>
 
         <div className="mt-auto flex flex-col gap-1.5">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-600">
             {game.minPlayers > 0 && (
               <span className="flex items-center gap-1">
                 <MdGroup className="h-3 w-3" aria-hidden="true" />
@@ -141,4 +141,6 @@ export default function GameCard({ game, onClick }: GameCardProps) {
       </div>
     </button>
   );
-}
+});
+
+export default GameCard;

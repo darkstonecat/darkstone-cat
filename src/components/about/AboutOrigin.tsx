@@ -13,8 +13,8 @@ export default function AboutOrigin() {
         <div>
           <motion.h2
             className="mb-6 text-3xl font-black tracking-tight text-stone-custom"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ y: 20 }}
+            whileInView={{ y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.5 }}
           >
@@ -22,8 +22,8 @@ export default function AboutOrigin() {
           </motion.h2>
           <motion.p
             className="text-base leading-relaxed text-stone-custom/75"
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ y: 15 }}
+            whileInView={{ y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
@@ -43,10 +43,10 @@ export default function AboutOrigin() {
         {/* Right column — founding date highlight */}
         <motion.div
           className="text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ y: 20 }}
+          whileInView={{ y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.5, delay: 0.15 }}
+          transition={{ duration: 0.5 }}
         >
           <span className="block text-8xl font-black leading-none text-brand-orange">
             {t("founding_day")}

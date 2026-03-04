@@ -4,9 +4,16 @@ import {createNavigation} from 'next-intl/navigation';
 export const routing = defineRouting({
   // A list of all locales that are supported
   locales: ['ca', 'es', 'en'],
- 
+
   // Used when no locale matches
-  defaultLocale: 'ca'
+  defaultLocale: 'ca',
+
+  // Default locale (ca) omits prefix: /about = Catalan, /es/about = Spanish
+  localePrefix: 'as-needed',
+
+  // Disable Accept-Language redirect — users land on Catalan (default) and
+  // switch language via the UI. The NEXT_LOCALE cookie remembers their choice.
+  localeDetection: false
 });
  
 // Lightweight wrappers around Next.js' navigation APIs

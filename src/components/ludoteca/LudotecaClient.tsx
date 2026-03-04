@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef, startTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
@@ -157,9 +157,11 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   const mobileFilterPanelRef = useRef<HTMLDivElement>(null);
   const mobileFilterBtnRef = useRef<HTMLButtonElement>(null);
 
-  // Debounce search
+  // Debounce search — wrapped in startTransition to avoid blocking the main thread
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(filters.search), 300);
+    const timer = setTimeout(() => {
+      startTransition(() => setDebouncedSearch(filters.search));
+    }, 300);
     return () => clearTimeout(timer);
   }, [filters.search]);
 
@@ -267,14 +269,18 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   const paginatedGames = filtered.slice(startIndex, startIndex + itemsPerPage);
 
   const setFiltersAndReset = useCallback((newFilters: Filters) => {
-    setFilters(newFilters);
-    setCurrentPage(1);
+    startTransition(() => {
+      setFilters(newFilters);
+      setCurrentPage(1);
+    });
   }, []);
 
   const resetFilters = useCallback(() => {
-    setFilters(DEFAULT_FILTERS);
-    setDebouncedSearch("");
-    setCurrentPage(1);
+    startTransition(() => {
+      setFilters(DEFAULT_FILTERS);
+      setDebouncedSearch("");
+      setCurrentPage(1);
+    });
   }, []);
 
   const handlePageChange = useCallback((page: number) => {
@@ -448,7 +454,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                 src="/images/logos/powered-by-bgg.png"
                 alt="Powered by BoardGameGeek"
                 width={160}
-                height={43}
+                height={47}
                 className="h-auto w-40 opacity-70 transition-opacity hover:opacity-100"
               />
             </a>

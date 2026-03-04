@@ -11,9 +11,9 @@ export default function ContactHero() {
       <div className="container mx-auto px-6 text-center">
         <motion.h1
           className="text-4xl font-bold tracking-tight text-brand-white sm:text-5xl md:text-6xl"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          initial={{ y: 20 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
         >
           {t("title")}
         </motion.h1>

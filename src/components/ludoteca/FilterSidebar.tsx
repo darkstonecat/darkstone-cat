@@ -71,13 +71,13 @@ export default function FilterSidebar({
             <h2 className="text-lg font-bold text-stone-900">
               {t("filter_panel_title")}
             </h2>
-            <p className="text-sm text-stone-500">
+            <p className="text-sm text-stone-600">
               {t("results_count", { count: totalResults, total: totalResults })}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-stone-600 transition-colors hover:bg-stone-100"
             aria-label={t("modal_close")}
           >
             <MdClose className="h-5 w-5" />
@@ -225,9 +225,9 @@ export default function FilterSidebar({
         <>
           <hr className="border-stone-200" />
           <div>
-            <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
+            <h2 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
               {t("filter_rank_title")}
-            </h3>
+            </h2>
             <SearchableMultiSelect
               options={availableRankTypes}
               selected={filters.rankTypes}
@@ -247,9 +247,9 @@ export default function FilterSidebar({
         <>
           <hr className="border-stone-200" />
           <div>
-            <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
+            <h2 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
               {t("filter_categories_title")}
-            </h3>
+            </h2>
             <SearchableMultiSelect
               options={availableCategories}
               selected={filters.categories}
@@ -268,9 +268,9 @@ export default function FilterSidebar({
         <>
           <hr className="border-stone-200" />
           <div>
-            <h3 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
+            <h2 className="mb-2.5 text-sm font-bold tracking-tight text-stone-custom">
               {t("filter_mechanics_title")}
-            </h3>
+            </h2>
             <SearchableMultiSelect
               options={availableMechanics}
               selected={filters.mechanics}

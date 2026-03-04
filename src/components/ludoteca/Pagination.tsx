@@ -78,7 +78,7 @@ export default function Pagination({
               <MdChevronLeft className="h-4 w-4" />
               {t("pagination_prev")}
             </button>
-            <span className="text-xs text-stone-500">
+            <span className="text-xs text-stone-600">
               {currentPage}/{totalPages}
             </span>
             <button
@@ -93,7 +93,7 @@ export default function Pagination({
           </div>
         )}
         {showPerPage && (
-          <div className="flex items-center justify-end gap-2 text-sm text-stone-500">
+          <div className="flex items-center justify-end gap-2 text-sm text-stone-600">
             <span>{t("per_page")}</span>
             <Dropdown
               value={String(itemsPerPage)}
@@ -109,7 +109,7 @@ export default function Pagination({
       {/* Desktop: single row — showing info | pages | per page */}
       <div className="hidden items-center sm:flex">
         {/* Left: showing info */}
-        <p aria-live="polite" className="flex-1 text-xs text-stone-500">
+        <p aria-live="polite" className="flex-1 text-xs text-stone-600">
           {t("pagination_showing", {
             start: startItem,
             end: endItem,
@@ -135,7 +135,7 @@ export default function Pagination({
                   key={`ellipsis-${i}`}
                   role="separator"
                   aria-label={t("pagination_ellipsis")}
-                  className="flex h-9 min-w-9 items-center justify-center text-sm text-stone-500"
+                  className="flex h-9 min-w-9 items-center justify-center text-sm text-stone-600"
                 >
                   ...
                 </span>
@@ -169,7 +169,7 @@ export default function Pagination({
 
         {/* Right: per page */}
         {showPerPage && (
-          <div className="flex flex-1 items-center justify-end gap-2 text-sm text-stone-500">
+          <div className="flex flex-1 items-center justify-end gap-2 text-sm text-stone-600">
             <span>{t("per_page")}</span>
             <Dropdown
               value={String(itemsPerPage)}

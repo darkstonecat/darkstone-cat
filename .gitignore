@@ -48,3 +48,7 @@ lighthouse-*
 .vscode
 .idea
 .antigravity
+
+# Audit
+AUDIT.md
+audits/
