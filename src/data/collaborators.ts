@@ -199,6 +199,15 @@ export const collaborators: Collaborator[] = [
     url: "https://www.nosolorol.com/",
     brandColor: "#000000",
   },
+  {
+    id: "looping-games",
+    name: "Looping Games",
+    slug: "looping-games",
+    category: "publishers",
+    logo: "/images/logos/collaborators/editorials/logo_looping_games.webp",
+    url: "https://www.loopinggames.com",
+    brandColor: "#FFFFFF",
+  },
 
   // ── Shops ──────────────────────────────────────────────────────
   {
