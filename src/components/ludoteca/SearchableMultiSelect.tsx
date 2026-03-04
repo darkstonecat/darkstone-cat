@@ -27,6 +27,7 @@ export default function SearchableMultiSelect({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const [focusIndex, setFocusIndex] = useState(-1);
@@ -46,6 +47,7 @@ export default function SearchableMultiSelect({
   const handleClose = useCallback(() => {
     setOpen(false);
     setQuery("");
+    triggerRef.current?.focus();
   }, []);
 
   // Close on click outside
@@ -134,6 +136,7 @@ export default function SearchableMultiSelect({
     <div ref={containerRef} className="relative">
       {/* Trigger */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => (open ? handleClose() : handleOpen())}
         className={`flex h-10 w-full items-center justify-between rounded-lg border px-3 text-sm transition-colors ${

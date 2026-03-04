@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 
 interface TextRevealProps {
   text: string;
@@ -18,7 +18,12 @@ export default function TextReveal({
 }: TextRevealProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const shouldReduceMotion = useReducedMotion();
   const words = text.split(" ");
+
+  if (shouldReduceMotion) {
+    return <Tag ref={ref} className={className}>{text}</Tag>;
+  }
 
   return (
     <Tag ref={ref} className={className}>

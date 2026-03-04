@@ -143,12 +143,13 @@ export default function ContactForm() {
                 htmlFor="name"
                 className="mb-2 block text-sm font-medium text-stone-custom/70"
               >
-                {t("name_label")}
+                {t("name_label")} <span className="text-brand-red" aria-hidden="true">*</span>
               </label>
               <input
                 type="text"
                 id="name"
                 name="name"
+                required
                 autoComplete="name"
                 placeholder={t("name_placeholder")}
                 disabled={isSending}
@@ -169,12 +170,13 @@ export default function ContactForm() {
                 htmlFor="email"
                 className="mb-2 block text-sm font-medium text-stone-custom/70"
               >
-                {t("email_label")}
+                {t("email_label")} <span className="text-brand-red" aria-hidden="true">*</span>
               </label>
               <input
                 type="email"
                 id="email"
                 name="email"
+                required
                 autoComplete="email"
                 placeholder={t("email_placeholder")}
                 disabled={isSending}
@@ -195,12 +197,13 @@ export default function ContactForm() {
                 htmlFor="subject"
                 className="mb-2 block text-sm font-medium text-stone-custom/70"
               >
-                {t("subject_label")}
+                {t("subject_label")} <span className="text-brand-red" aria-hidden="true">*</span>
               </label>
               <input
                 type="text"
                 id="subject"
                 name="subject"
+                required
                 placeholder={t("subject_placeholder")}
                 disabled={isSending}
                 aria-invalid={!!errors.subject}
@@ -221,11 +224,12 @@ export default function ContactForm() {
                 htmlFor="message"
                 className="mb-2 block text-sm font-medium text-stone-custom/70"
               >
-                {t("message_label")}
+                {t("message_label")} <span className="text-brand-red" aria-hidden="true">*</span>
               </label>
               <textarea
                 id="message"
                 name="message"
+                required
                 rows={5}
                 placeholder={t("message_placeholder")}
                 disabled={isSending}
@@ -245,7 +249,7 @@ export default function ContactForm() {
             <button
               type="submit"
               disabled={isSending}
-              className="w-full rounded-xl bg-stone-custom px-6 py-3.5 text-sm font-semibold text-brand-white transition-colors hover:bg-stone-custom/90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
+              className="w-full rounded-xl bg-stone-custom px-6 py-3.5 text-sm font-semibold text-brand-white transition-colors hover:bg-stone-custom/90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-70"
             >
               {isSending ? t("sending") : t("submit")}
             </button>

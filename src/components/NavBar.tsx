@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Link, usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useLenis } from "./SmoothScroll";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -57,6 +57,7 @@ export default function NavBar() {
   const [scrolled, setScrolled] = useState(false);
   const [homeActiveSection, setHomeActiveSection] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
 
   // Determine theme based on page context
   const theme = useMemo(() => {
@@ -211,6 +212,7 @@ export default function NavBar() {
 
           {/* Mobile hamburger */}
           <button
+            ref={hamburgerRef}
             onClick={() => setMobileOpen(!mobileOpen)}
             className="relative z-60 flex h-10 w-10 items-center justify-center md:hidden"
             aria-label={t("menu_button")}
@@ -262,7 +264,10 @@ export default function NavBar() {
           >
             {/* Close button */}
             <button
-              onClick={() => setMobileOpen(false)}
+              onClick={() => {
+                setMobileOpen(false);
+                requestAnimationFrame(() => hamburgerRef.current?.focus());
+              }}
               className="absolute top-4 right-6 flex h-10 w-10 items-center justify-center text-brand-white/70 hover:text-brand-white transition-colors"
               aria-label={t("menu_button")}
             >

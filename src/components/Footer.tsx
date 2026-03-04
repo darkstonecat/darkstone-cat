@@ -84,10 +84,10 @@ export default function Footer() {
             </div>
 
             <div className="mt-3 space-y-1">
-              <p className="max-w-xs text-sm leading-relaxed text-stone-400">
+              <p className="max-w-xs text-sm leading-relaxed text-stone-300">
                 {t("tagline")}
               </p>
-              <p className="max-w-xs pt-1 text-xs leading-relaxed text-stone-500">
+              <p className="max-w-xs pt-1 text-xs leading-relaxed text-stone-400">
                 {t("description")}
               </p>
             </div>

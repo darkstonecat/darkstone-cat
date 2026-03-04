@@ -8,10 +8,10 @@ const pages = [
   { path: "/about", changeFrequency: "monthly" as const, priority: 0.8, lastModified: "2026-02-01" },
   { path: "/ludoteca", changeFrequency: "daily" as const, priority: 0.8, lastModified: "2026-03-04" },
   { path: "/contact", changeFrequency: "monthly" as const, priority: 0.7, lastModified: "2026-01-15" },
-  { path: "/conduct", changeFrequency: "yearly" as const, priority: 0.5, lastModified: "2025-06-01" },
-  { path: "/legal", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2025-06-01" },
-  { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2025-06-01" },
-  { path: "/cookies", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2025-06-01" },
+  { path: "/conduct", changeFrequency: "yearly" as const, priority: 0.5, lastModified: "2026-02-01" },
+  { path: "/legal", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-02-01" },
+  { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-02-01" },
+  { path: "/cookies", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-02-01" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

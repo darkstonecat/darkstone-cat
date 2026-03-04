@@ -45,17 +45,17 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 
 | # | Issue | Archivo | Línea | Descripción |
 |---|-------|---------|-------|-------------|
-| A05 | Contraste: `text-stone-400` sobre `bg-stone-950` en Footer | `src/components/Footer.tsx` | 87, 90 | Ratio ~4.1:1 — apenas pasa AA, falla AAA. Considerar usar `text-stone-300`. |
+| ~~A05~~ | ~~Contraste: `text-stone-400` sobre `bg-stone-950` en Footer~~ | ~~`src/components/Footer.tsx`~~ | 87, 90 | **CORREGIDO** — Tagline: `text-stone-400` → `text-stone-300`. Descripción: `text-stone-500` → `text-stone-400`. |
 | A06 | Contraste: texto con `opacity-60` en About | `src/components/home/About.tsx` | 139 | `opacity-60` reduce contraste del texto. Ratio ~7.4:1 (pasa) pero borderline para legibilidad. |
 | A07 | Contraste: `#C05600` (orange) sobre blanco | Múltiples | — | Ratio 4.55:1 — apenas pasa AA (4.5:1), falla AAA (7:1). Afecta: FilterSidebar chips, GameDetailModal badges, JoinUs CTA. |
-| A08 | Campos del formulario sin indicador de `required` | `src/components/contact/ContactForm.tsx` | 142-146 | Labels no indican que los campos son obligatorios. Añadir `<span aria-label="required">*</span>` o atributo `required`. |
+| ~~A08~~ | ~~Campos del formulario sin indicador de `required`~~ | ~~`src/components/contact/ContactForm.tsx`~~ | 142-146 | **CORREGIDO** — Añadido `required` a todos los inputs y `*` visual en cada label. |
 | A09 | CookieBanner: sin gestión de foco al cerrar | `src/components/CookieBanner.tsx` | 15-22 | Escape cierra el banner pero el foco queda "perdido". Debería devolver foco a un elemento lógico. |
-| A10 | NavBar mobile: foco no restaurado al cerrar menú | `src/components/NavBar.tsx` | 195-231 | Al cerrar menú hamburguesa, el foco no vuelve al botón que lo abrió. |
-| A11 | SearchableMultiSelect: Escape no restaura foco | `src/components/ludoteca/SearchableMultiSelect.tsx` | 103 | Al cerrar dropdown con Escape, no se devuelve foco al trigger. |
+| ~~A10~~ | ~~NavBar mobile: foco no restaurado al cerrar menú~~ | ~~`src/components/NavBar.tsx`~~ | 195-231 | **CORREGIDO** — `hamburgerRef` en botón hamburguesa; botón close restaura foco con `requestAnimationFrame`. |
+| ~~A11~~ | ~~SearchableMultiSelect: Escape no restaura foco~~ | ~~`src/components/ludoteca/SearchableMultiSelect.tsx`~~ | 103 | **CORREGIDO** — `triggerRef` en botón trigger; `handleClose` restaura foco automáticamente. |
 | A12 | FilterSidebar mobile: close no restaura foco | `src/components/ludoteca/FilterSidebar.tsx` | 78-85 | Botón de cerrar llama `onClose()` pero no restaura foco al botón "Filtrar". |
-| A13 | Botones de expansión en modal sin `aria-label` | `src/components/ludoteca/GameDetailModal.tsx` | 241, 279 | Botones de navegar a expansiones/base game no tienen aria-label descriptivo. Añadir `aria-label="Ver juego base: [nombre]"`. |
-| A14 | TextReveal: sin check explícito de reduced-motion | `src/components/TextReveal.tsx` | 27-35 | Anima `y: "100%" → 0` sin verificar `prefers-reduced-motion`. Depende del rule global CSS que puede no atrapar spring animations de Motion v12. |
-| A15 | Botón disabled: contraste reducido | `src/components/contact/ContactForm.tsx` | 248 | `disabled:opacity-60` reduce contraste del texto. Puede fallar el ratio 3:1 para componentes UI. |
+| ~~A13~~ | ~~Botones de expansión en modal sin `aria-label`~~ | ~~`src/components/ludoteca/GameDetailModal.tsx`~~ | 241, 279 | **CORREGIDO** — Añadido `aria-label` con título de sección + nombre del juego en ambos tipos de botón. |
+| ~~A14~~ | ~~TextReveal: sin check explícito de reduced-motion~~ | ~~`src/components/TextReveal.tsx`~~ | 27-35 | **CORREGIDO** — Añadido `useReducedMotion()` de Motion v12. Si reduced-motion, renderiza texto plano sin animación. |
+| ~~A15~~ | ~~Botón disabled: contraste reducido~~ | ~~`src/components/contact/ContactForm.tsx`~~ | 248 | **CORREGIDO** — `disabled:opacity-60` → `disabled:opacity-70` para mejor contraste. |
 | A16 | Secciones `<section>` sin `aria-label` | `src/components/home/About.tsx` | 117 | Secciones usan `id` pero no `aria-label` descriptivo para lectores de pantalla. |
 
 ### Prioridad BAJA
@@ -96,8 +96,8 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 
 | # | Issue | Archivo | Línea | Descripción |
 |---|-------|---------|-------|-------------|
-| P04 | Imágenes About sin `priority` | `src/components/home/About.tsx` | 79 | Cards de About section pueden ser LCP en viewport pero no tienen `priority`. El `sizes="100vw"` también es impreciso. |
-| P05 | `--font-geist-sans` referenciado pero nunca definido | `src/styles/globals.css` | 19-20 | Variable CSS `var(--font-geist-sans)` nunca se define. Fallback a `ui-sans-serif` funciona, pero debería documentarse o corregirse. |
+| P04 | Imágenes About sin `priority` | `src/components/home/About.tsx` | 79 | Cards de About section pueden ser LCP en viewport pero no tienen `priority`. ~~El `sizes="100vw"` también es impreciso.~~ (sizes corregido — ver S08) |
+| ~~P05~~ | ~~`--font-geist-sans` referenciado pero nunca definido~~ | ~~`src/styles/globals.css`~~ | 19-20 | **CORREGIDO** — Eliminada referencia a `var(--font-geist-sans)`. Font stack ahora comienza directamente con `ui-sans-serif`. |
 | P06 | Lenis rAF loop continuo | `src/components/SmoothScroll.tsx` | 57 | `requestAnimationFrame(raf)` corre continuamente incluso sin scroll. ~3-5% CPU overhead. Considerar pausar cuando no hay scroll activo. |
 | P07 | CTA nudge animation: 54 líneas de keyframes | `src/styles/globals.css` | 46-55 | Animación `cta-nudge` tiene 8 keyframe stops. Solo se usa en un elemento (JoinUs CTA). Funcional pero verbose. |
 
@@ -176,14 +176,14 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 |---|-------|---------|-------|-------------|
 | S04 | Sin schema Event para "Egara Juga" | — | — | El sitio menciona horarios de eventos (viernes/sábados) pero no tiene schema `Event` para rich snippets de eventos en Google. |
 | S05 | Sin schema para catálogo de juegos | `src/app/[locale]/ludoteca/page.tsx` | — | Ludoteca con 250+ juegos podría beneficiarse de schema `ItemList` / `Product` para rich snippets. |
-| S06 | Fechas sitemap desactualizadas | `src/app/sitemap.ts` | 6-15 | Legal/Privacy/Cookies: `lastModified: 2025-06-01` pero el contenido dice "Last updated: February 2026". Sincronizar fechas. |
+| ~~S06~~ | ~~Fechas sitemap desactualizadas~~ | ~~`src/app/sitemap.ts`~~ | 6-15 | **CORREGIDO** — Legal/Privacy/Cookies/Conduct: `lastModified` actualizado a `2026-02-01`. |
 | S07 | Sin schema `WebPage` en páginas individuales | — | — | Solo hay Organization y LocalBusiness (layout) + BreadcrumbList (páginas). Falta WebPage schema. |
 
 ### Prioridad BAJA
 
 | # | Issue | Archivo | Línea | Descripción |
 |---|-------|---------|-------|-------------|
-| S08 | About section images sin `sizes` precisos | `src/components/home/About.tsx` | 79 | `sizes="100vw"` es impreciso para las cards de about. Debería reflejar el layout real (ej: `sizes="(max-width: 768px) 100vw, 50vw"`). |
+| ~~S08~~ | ~~About section images sin `sizes` precisos~~ | ~~`src/components/home/About.tsx`~~ | 79 | **CORREGIDO** — `sizes="100vw"` → `sizes="(max-width: 768px) calc(100vw - 24px), calc(100vw - 40px)"` reflejando padding real. |
 
 ### Ya implementado correctamente
 
@@ -297,24 +297,29 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 9. ~~**S02** — Error pages: añadir `robots: { index: false }`~~ **CORREGIDO**
 
 ### MEDIA (planificar)
-10. **A05-A07** — Mejorar contraste en Footer, About opacity, orange sobre blanco
-11. **A08** — Formulario: indicador de campos required
-12. **A09-A12** — Focus management en CookieBanner, NavBar mobile, SearchableMultiSelect, FilterSidebar
-13. **A13** — Aria-labels en botones de expansión/base game
-14. **A14** — TextReveal: check explícito de reduced-motion
-15. **P04** — About images: añadir `priority` si son above-fold
-16. **P05** — Documentar/corregir `--font-geist-sans`
-18. **S03** — Enlazar OG images explícitamente en metadata
-19. **S04-S05** — Añadir schemas Event e ItemList/Product
-20. **S06** — Sincronizar fechas de sitemap
-21. **SEC01** — Añadir CSP con script-src/style-src
-22. **SEC02** — Migrar rate limiting a servicio persistente
+10. ~~**A05**~~ — ~~Mejorar contraste en Footer~~ **CORREGIDO**
+11. **A06-A07** — About opacity, orange sobre blanco
+12. ~~**A08**~~ — ~~Formulario: indicador de campos required~~ **CORREGIDO**
+13. **A09** — Focus management en CookieBanner
+14. ~~**A10-A11**~~ — ~~Focus management en NavBar mobile, SearchableMultiSelect~~ **CORREGIDO**
+15. **A12** — Focus management en FilterSidebar mobile
+16. ~~**A13**~~ — ~~Aria-labels en botones de expansión/base game~~ **CORREGIDO**
+17. ~~**A14**~~ — ~~TextReveal: check explícito de reduced-motion~~ **CORREGIDO**
+18. **P04** — About images: añadir `priority` si son above-fold
+19. ~~**P05**~~ — ~~Documentar/corregir `--font-geist-sans`~~ **CORREGIDO**
+20. **S03** — Enlazar OG images explícitamente en metadata
+21. **S04-S05** — Añadir schemas Event e ItemList/Product
+22. ~~**S06**~~ — ~~Sincronizar fechas de sitemap~~ **CORREGIDO**
+23. **SEC01** — Añadir CSP con script-src/style-src
+24. **SEC02** — Migrar rate limiting a servicio persistente
 
 ### BAJA (nice to have)
-24. **A15-A18** — Contraste disabled button, section aria-labels, modal describedby, button types
-25. **P06-P09** — Lenis rAF optimization, CTA keyframes, OG logo format, Service Worker
-26. **S07-S08** — WebPage schema, sizes precisos en About
-27. **SEC03-SEC05** — CSRF tokens, API key docs, IP validation
+25. ~~**A15**~~ — ~~Contraste disabled button~~ **CORREGIDO**
+26. **A16-A18** — Section aria-labels, modal describedby, button types
+27. **P06-P07, P09** — Lenis rAF optimization, CTA keyframes, Service Worker
+28. **S07** — WebPage schema
+29. ~~**S08**~~ — ~~Sizes precisos en About~~ **CORREGIDO**
+30. **SEC03-SEC05** — CSRF tokens, API key docs, IP validation
 
 ---
 

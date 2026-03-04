@@ -240,6 +240,7 @@ export default function GameDetailModal({
               <div className="mt-3">
                 <button
                   onClick={() => navigateTo(baseGame.id)}
+                  aria-label={`${t("base_game_title")}: ${baseGame.name}`}
                   className="group flex w-full items-center gap-3 overflow-hidden rounded-xl bg-stone-100 text-left transition-transform duration-300 hover:scale-[1.02]"
                 >
                   <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-stone-100">
@@ -277,6 +278,7 @@ export default function GameDetailModal({
                   <li key={exp.id}>
                     <button
                       onClick={() => navigateTo(exp.id)}
+                      aria-label={`${t("expansions_title")}: ${exp.name}`}
                       className="group flex w-full items-center gap-3 overflow-hidden rounded-xl bg-stone-100 text-left transition-transform duration-300 hover:scale-[1.02]"
                     >
                       <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-stone-100">
