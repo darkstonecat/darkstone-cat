@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useSyncExternalStore } from 'react'
 import { useTranslations } from 'next-intl'
 import { AnimatePresence } from 'motion/react'
 import * as m from 'motion/react-client'
@@ -12,12 +12,7 @@ export default function CookieBanner() {
   const bannerRef = useRef<HTMLDivElement>(null)
   const acceptBtnRef = useRef<HTMLButtonElement>(null)
 
-  // Prevent SSR rendering of motion components (AnimatePresence uses
-  // React.lazy internally which produces a <Suspense> on the server
-  // but a <div> on the client, causing a hydration mismatch).
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- mount detection requires setState in effect
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   const showBanner = mounted && status === null
 
