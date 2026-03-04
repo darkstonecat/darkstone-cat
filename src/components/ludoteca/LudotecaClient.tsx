@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useEffect, useRef, startTransition } fr
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { MdTune, MdSwapVert, MdGridView, MdViewList } from "react-icons/md";
 import type { BggGame } from "@/lib/bgg";
@@ -450,11 +451,12 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
           </div>
           <div className="mt-4 flex justify-center">
             <a href="https://boardgamegeek.com/" target="_blank" rel="noopener noreferrer">
-              <img
+              <Image
                 src="/images/logos/powered-by-bgg.png"
                 alt="Powered by BoardGameGeek"
                 width={160}
                 height={47}
+                quality={60}
                 className="h-auto w-40 opacity-70 transition-opacity hover:opacity-100"
               />
             </a>
@@ -571,11 +573,12 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
 
               <div className="mt-6 flex justify-center md:hidden">
                 <a href="https://boardgamegeek.com/" target="_blank" rel="noopener noreferrer">
-                  <img
+                  <Image
                     src="/images/logos/powered-by-bgg.png"
                     alt="Powered by BoardGameGeek"
                     width={144}
                     height={42}
+                    quality={60}
                     className="h-auto w-36 opacity-70 transition-opacity hover:opacity-100"
                   />
                 </a>
