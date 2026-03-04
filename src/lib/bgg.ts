@@ -70,7 +70,11 @@ async function fetchBggXml(url: string): Promise<string> {
 
   let delay = 2000;
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    const res = await fetch(url, { headers, next: { revalidate: 86400 } });
+    const res = await fetch(url, {
+      headers,
+      signal: AbortSignal.timeout(30_000),
+      next: { revalidate: 86400 },
+    });
 
     if (res.status === 200) return res.text();
     if (res.status === 202) {

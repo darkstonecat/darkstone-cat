@@ -96,75 +96,25 @@ Optimizaciones de runtime React para evitar renders innecesarios.
 
 ---
 
-## Fase 4 — Seguridad y Robustez de API (30-45 min cada fix)
+## Fase 4 — Seguridad y Robustez de API (30-45 min cada fix) ✅ COMPLETADA
 
 Proteccion del endpoint y resiliencia ante servicios externos.
 
-### 4.1 Rate limiting en API de contacto
+### 4.1 Rate limiting en API de contacto ✅
 
-**Problema:** Sin limite de peticiones, cualquiera puede agotar la cuota de Resend.
+- [x] `src/app/api/contact/route.ts` — Rate limiting en memoria (Map<IP, timestamps>), 5 envios/hora por IP, responde 429
 
-**Archivo:**
+### 4.2 Timeout en fetch a BGG API ✅
 
-- [ ] `src/app/api/contact/route.ts`
+- [x] `src/lib/bgg.ts` — `AbortSignal.timeout(30_000)` en cada fetch
 
-**Opciones:**
+### 4.3 Timeout en Resend API ✅
 
-- **Opcion A (simple):** Map en memoria con IP + timestamp, limite de 5 envios/hora por IP. Funciona en single-instance (Vercel serverless resetea entre cold starts).
-- **Opcion B (robusta):** Usar Vercel KV o Upstash Redis para rate limiting persistente.
-- **Opcion C (middleware):** Rate limiting a nivel de middleware con headers.
+- [x] `src/app/api/contact/route.ts` — `Promise.race` con timeout de 15s
 
-**Cambio minimo (Opcion A):**
+### 4.4 Cache-Control en respuesta de API ✅
 
-```typescript
-const rateLimit = new Map<string, number[]>();
-const WINDOW_MS = 3600000; // 1 hora
-const MAX_REQUESTS = 5;
-```
-
----
-
-### 4.2 Timeout en fetch a BGG API
-
-**Problema:** Sin timeout, las peticiones a BGG pueden colgar indefinidamente.
-
-**Archivo:**
-
-- [ ] `src/lib/bgg.ts` (~linea 73)
-
-**Cambio:** Anadir `AbortSignal.timeout()`:
-
-```typescript
-const response = await fetch(url, {
-  headers,
-  signal: AbortSignal.timeout(30000),
-  next: { revalidate: 86400 },
-});
-```
-
----
-
-### 4.3 Timeout en Resend API
-
-**Problema:** Sin timeout en el envio de email.
-
-**Archivo:**
-
-- [ ] `src/app/api/contact/route.ts`
-
-**Cambio:** Anadir timeout de 10-15 segundos al call de Resend o envolver en `Promise.race`.
-
----
-
-### 4.4 Cache-Control en respuesta de API
-
-**Problema:** Sin headers de cache explicitos, el browser podria cachear respuestas POST.
-
-**Archivo:**
-
-- [ ] `src/app/api/contact/route.ts`
-
-**Cambio:** Anadir header `Cache-Control: no-store` en las respuestas.
+- [x] `src/app/api/contact/route.ts` — `Cache-Control: no-store, no-cache, must-revalidate` en todas las respuestas
 
 ---
 
