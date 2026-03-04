@@ -104,7 +104,9 @@ grep -n "aria-live" src/components/ludoteca/Pagination.tsx        # Conteo
 
 ---
 
-## Fase 2 — Importantes (Impacto alto, esfuerzo medio)
+## Fase 2 — Importantes (Impacto alto, esfuerzo medio) — COMPLETADA
+
+> Todos los fixes de esta fase ya estaban implementados en el código. Verificado el 2026-03-04.
 
 ### 2.1 `aria-current="page"` en navegación
 
@@ -244,7 +246,9 @@ grep -n "aria-controls" src/components/ludoteca/SearchableMultiSelect.tsx  # Tri
 
 ---
 
-## Fase 3 — Moderados (Impacto medio, esfuerzo bajo)
+## Fase 3 — Moderados (Impacto medio, esfuerzo bajo) — COMPLETADA
+
+> Todos los fixes de esta fase ya estaban implementados en el código. Verificado el 2026-03-04.
 
 ### 3.1 Mejorar contraste de placeholders y textos con opacidad
 
