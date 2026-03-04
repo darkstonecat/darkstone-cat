@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd } from "@/lib/seo";
-import { fetchBggCollection } from "@/lib/bgg";
+import { fetchBggCollectionCount } from "@/lib/bgg";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -49,11 +49,10 @@ export default async function AboutPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const [collection, tNav] = await Promise.all([
-    fetchBggCollection(),
+  const [gameCount, tNav] = await Promise.all([
+    fetchBggCollectionCount(),
     getTranslations({ locale, namespace: "nav" }),
   ]);
-  const gameCount = collection.baseCount || 0;
   const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
     { name: tNav("about"), path: "/about" },
   ]);

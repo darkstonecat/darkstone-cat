@@ -398,6 +398,26 @@ function enrichWithThingData(
 // Public API
 // ---------------------------------------------------------------------------
 
+export async function fetchBggCollectionCount(): Promise<number> {
+  const hasToken = !!process.env.BGG_API_KEY;
+  const username = process.env.BGG_USERNAME ?? "citizen987";
+
+  try {
+    if (hasToken) {
+      const url = `${BGG_BASE}/collection?username=${username}&own=1&subtype=boardgame&stats=1`;
+      const xml = await fetchBggXml(url);
+      return parseCollectionItems(xml).length;
+    } else {
+      const xml = await readMockXml("collection.xml");
+      const items = parseCollectionItems(xml);
+      return items.filter((i) => i["@_subtype"] === "boardgame").length;
+    }
+  } catch (err) {
+    console.error("Failed to fetch BGG collection count:", err);
+    return 0;
+  }
+}
+
 export async function fetchBggCollection(): Promise<BggCollectionResult> {
   const hasToken = !!process.env.BGG_API_KEY;
   const username = process.env.BGG_USERNAME ?? "citizen987";

@@ -141,6 +141,15 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   const [currentPage, setCurrentPage] = useState(() => initFromUrl()?.page ?? 1);
   const [selectedGame, setSelectedGame] = useState<BggGame | null>(null);
   const allGamesMap = useMemo(() => new Map(games.map((g) => [g.id, g])), [games]);
+  const expansionToBaseMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const game of games) {
+      for (const exp of game.expansions) {
+        map.set(exp.id, game.id);
+      }
+    }
+    return map;
+  }, [games]);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [mobileSortOpen, setMobileSortOpen] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -173,11 +182,10 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       result = result.filter((g) => {
         let ranks = g.rankTypes;
         if (ranks.length === 0 && g.subtype === "boardgameexpansion") {
-          for (const bg of allGamesMap.values()) {
-            if (bg.expansions.some((exp) => exp.id === g.id)) {
-              ranks = bg.rankTypes;
-              break;
-            }
+          const baseId = expansionToBaseMap.get(g.id);
+          if (baseId) {
+            const base = allGamesMap.get(baseId);
+            if (base) ranks = base.rankTypes;
           }
         }
         return filters.rankTypes.some((r) => ranks.includes(r));
@@ -249,7 +257,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     });
 
     return result;
-  }, [games, debouncedSearch, filters, sortBy, allGamesMap]);
+  }, [games, debouncedSearch, filters, sortBy, allGamesMap, expansionToBaseMap]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));

@@ -118,67 +118,22 @@ Proteccion del endpoint y resiliencia ante servicios externos.
 
 ---
 
-## Fase 5 — Optimizacion de Ludoteca (45-60 min total)
+## Fase 5 — Optimizacion de Ludoteca (45-60 min total) ✅ COMPLETADA
 
 Mejoras de rendimiento en el flujo de filtrado y renderizado de juegos.
 
-### 5.1 Pre-computar mapa inverso de expansiones
+### 5.1 Pre-computar mapa inverso de expansiones ✅
 
-**Problema:** Filtro de rankTypes recorre todo `allGamesMap` por cada expansion — O(n²).
+- [x] `src/components/ludoteca/LudotecaClient.tsx` — `expansionToBaseMap` con `useMemo`, lookup O(1) en filtro de rankTypes
 
-**Archivo:**
+### 5.2 Limitar animaciones de stagger en GameGrid ✅
 
-- [ ] `src/components/ludoteca/LudotecaClient.tsx` (~lineas 170-176)
+- [x] `src/components/ludoteca/GameGrid.tsx` — `shouldAnimate = games.length <= 48`, desactiva animaciones para listas grandes
 
-**Cambio:** Crear mapa inverso una sola vez:
+### 5.3 Optimizar About page — no fetchar toda la coleccion BGG ✅
 
-```typescript
-const expansionToBaseMap = useMemo(() => {
-  const map = new Map<number, number>();
-  for (const game of games) {
-    for (const exp of game.expansions) {
-      map.set(exp.id, game.id);
-    }
-  }
-  return map;
-}, [games]);
-```
-
-Luego en el filtro: `const baseId = expansionToBaseMap.get(g.id)` — O(1).
-
----
-
-### 5.2 Limitar animaciones de stagger en GameGrid
-
-**Problema:** Con 192 items, se lanzan 192 animaciones simultaneas causando jank.
-
-**Archivo:**
-
-- [ ] `src/components/ludoteca/GameGrid.tsx`
-
-**Cambio:** Limitar delay maximo y/o desactivar animaciones cuando hay muchos items:
-
-```typescript
-const shouldAnimate = games.length <= 48;
-// O reducir delay maximo:
-delay: Math.min(i * 0.02, 0.2) // Cap 200ms en vez de 400ms
-```
-
----
-
-### 5.3 Optimizar About page — no fetchar toda la coleccion BGG
-
-**Problema:** La pagina About fetcha y parsea toda la coleccion BGG solo para obtener `gameCount`.
-
-**Archivo:**
-
-- [ ] `src/app/[locale]/about/page.tsx` (~linea 34)
-
-**Opciones:**
-
-- **Opcion A:** Crear funcion `fetchBggCollectionCount()` que solo devuelva el count sin parsear items.
-- **Opcion B:** Cachear el count como variable de entorno o constante actualizada periodicamente.
-- **Opcion C:** Pasar el count como dato estatico si no cambia frecuentemente.
+- [x] `src/lib/bgg.ts` — Nueva funcion `fetchBggCollectionCount()` que solo fetcha boardgames y cuenta items (sin expansiones, sin thing enrichment)
+- [x] `src/app/[locale]/about/page.tsx` — Usa `fetchBggCollectionCount()` en vez de `fetchBggCollection()`
 
 ---
 

@@ -20,15 +20,17 @@ interface GameGridProps {
 }
 
 export default function GameGrid({ games, viewMode, onSelectGame }: GameGridProps) {
+  const shouldAnimate = games.length <= 48;
+
   if (viewMode === "list") {
     return (
       <div className="mt-4 flex flex-col gap-3">
         {games.map((game, i) => (
           <motion.div
             key={game.id}
-            initial={LIST_INITIAL}
+            initial={shouldAnimate ? LIST_INITIAL : false}
             animate={GRID_ANIMATE}
-            transition={gridTransition(i)}
+            transition={shouldAnimate ? gridTransition(i) : undefined}
           >
             <GameListRow game={game} onClick={() => onSelectGame(game)} />
           </motion.div>
@@ -42,9 +44,9 @@ export default function GameGrid({ games, viewMode, onSelectGame }: GameGridProp
       {games.map((game, i) => (
         <motion.div
           key={game.id}
-          initial={GRID_INITIAL}
+          initial={shouldAnimate ? GRID_INITIAL : false}
           animate={GRID_ANIMATE}
-          transition={gridTransition(i)}
+          transition={shouldAnimate ? gridTransition(i) : undefined}
         >
           <GameCard game={game} onClick={() => onSelectGame(game)} />
         </motion.div>
