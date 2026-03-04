@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import TextReveal from "@/components/TextReveal";
@@ -50,11 +51,13 @@ function MarqueeRow({
   direction,
   duration,
   t,
+  paused,
 }: {
   items: Collaborator[];
   direction: "left" | "right";
   duration: number;
   t: ReturnType<typeof useTranslations>;
+  paused: boolean;
 }) {
   const animationClass =
     direction === "left"
@@ -69,7 +72,8 @@ function MarqueeRow({
           className={cn(
             "flex shrink-0 gap-4",
             animationClass,
-            "group-hover:paused"
+            "group-hover:paused",
+            paused && "[animation-play-state:paused]"
           )}
           aria-hidden={copy === 1}
         >
@@ -88,9 +92,23 @@ function MarqueeRow({
 
 export default function Collaborators() {
   const t = useTranslations("collaborators");
+  const sectionRef = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section
+      ref={sectionRef}
       id="collaborators"
       aria-label={t("title")}
       className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-stone-custom py-20 text-stone-white-hover"
@@ -124,6 +142,7 @@ export default function Collaborators() {
             direction={row.direction}
             duration={row.duration}
             t={t}
+            paused={!isVisible}
           />
         ))}
       </div>

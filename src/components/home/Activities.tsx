@@ -105,6 +105,7 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
                   className="object-cover"
                   sizes="70vw"
                   quality={60}
+                  {...(i === 0 ? { priority: true } : {})}
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
