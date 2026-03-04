@@ -66,32 +66,50 @@ export default function NavBar() {
     return SUBPAGE_THEMES[pathname] ?? SECTION_THEMES[""];
   }, [isHomePage, homeActiveSection, pathname]);
 
-  // Track scroll for backdrop blur + home page section detection
+  // Track scroll for backdrop blur
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-
-      if (!isHomePage) return;
-
-      const viewportCenter = window.innerHeight / 2;
-      let current = "";
-
-      for (const id of HOME_SECTION_IDS) {
-        const el = document.getElementById(id);
-        if (!el) continue;
-        const rect = el.getBoundingClientRect();
-        if (rect.top <= viewportCenter && rect.bottom >= viewportCenter) {
-          current = id;
-          break;
-        }
-      }
-
-      setHomeActiveSection(current);
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Detect active home section via IntersectionObserver (no layout thrashing)
+  useEffect(() => {
+    if (!isHomePage) return;
+
+    const visibleSections = new Map<string, number>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            visibleSections.set(entry.target.id, entry.intersectionRatio);
+          } else {
+            visibleSections.delete(entry.target.id);
+          }
+        }
+
+        // Pick the section with the highest intersection ratio
+        let best = "";
+        let bestRatio = 0;
+        for (const [id, ratio] of visibleSections) {
+          if (ratio > bestRatio) {
+            best = id;
+            bestRatio = ratio;
+          }
+        }
+        setHomeActiveSection(best);
+      },
+      { threshold: [0, 0.25, 0.5, 0.75] }
+    );
+
+    for (const id of HOME_SECTION_IDS) {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    }
+
+    return () => observer.disconnect();
   }, [isHomePage]);
 
   // Lock body scroll when mobile menu is open

@@ -400,7 +400,7 @@ function enrichWithThingData(
 
 export async function fetchBggCollectionCount(): Promise<number> {
   const hasToken = !!process.env.BGG_API_KEY;
-  const username = process.env.BGG_USERNAME ?? "citizen987";
+  const username = process.env.BGG_USERNAME!;
 
   try {
     if (hasToken) {
@@ -420,7 +420,7 @@ export async function fetchBggCollectionCount(): Promise<number> {
 
 export async function fetchBggCollection(): Promise<BggCollectionResult> {
   const hasToken = !!process.env.BGG_API_KEY;
-  const username = process.env.BGG_USERNAME ?? "citizen987";
+  const username = process.env.BGG_USERNAME!;
 
   try {
     let baseGames: BggGame[];

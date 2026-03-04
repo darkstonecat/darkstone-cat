@@ -9,6 +9,7 @@ export default function CookieBanner() {
   const { status, accept, reject, isLoaded } = useCookieConsentContext()
   const t = useTranslations('cookies')
   const bannerRef = useRef<HTMLDivElement>(null)
+  const acceptBtnRef = useRef<HTMLButtonElement>(null)
 
   const showBanner = isLoaded && status === null
 
@@ -21,11 +22,11 @@ export default function CookieBanner() {
     [reject]
   )
 
-  // Focus the banner when it appears and listen for Escape
+  // Focus the accept button when banner appears and listen for Escape
   useEffect(() => {
     if (!showBanner) return
     const timer = setTimeout(() => {
-      bannerRef.current?.focus()
+      acceptBtnRef.current?.focus()
     }, 1800) // after entry animation (1.2s delay + 0.5s duration)
     document.addEventListener('keydown', handleKeyDown)
     return () => {
@@ -65,13 +66,16 @@ export default function CookieBanner() {
             {/* Buttons */}
             <div className="mt-4 flex items-center gap-3">
               <button
+                ref={acceptBtnRef}
                 onClick={accept}
+                type="button"
                 className="rounded-full bg-brand-orange px-5 py-2 font-semibold text-white transition-transform hover:scale-105"
               >
                 {t('accept')}
               </button>
               <button
                 onClick={reject}
+                type="button"
                 className="text-sm text-stone-custom/80 underline transition-colors hover:text-stone-custom"
               >
                 {t('reject')}

@@ -140,6 +140,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
   const [itemsPerPage, setItemsPerPage] = useState(() => initFromUrl()?.perPage ?? DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(() => initFromUrl()?.page ?? 1);
   const [selectedGame, setSelectedGame] = useState<BggGame | null>(null);
+  const modalTriggerRef = useRef<HTMLElement | null>(null);
   const allGamesMap = useMemo(() => new Map(games.map((g) => [g.id, g])), [games]);
   const expansionToBaseMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -544,7 +545,10 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
               <GameGrid
                 games={paginatedGames}
                 viewMode={viewMode}
-                onSelectGame={setSelectedGame}
+                onSelectGame={(game) => {
+                  modalTriggerRef.current = document.activeElement as HTMLElement;
+                  setSelectedGame(game);
+                }}
               />
 
               <Pagination
@@ -618,7 +622,10 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
           <GameDetailModal
             game={selectedGame}
             allGames={allGamesMap}
-            onClose={() => setSelectedGame(null)}
+            onClose={() => {
+              setSelectedGame(null);
+              requestAnimationFrame(() => modalTriggerRef.current?.focus());
+            }}
           />
         )}
       </AnimatePresence>

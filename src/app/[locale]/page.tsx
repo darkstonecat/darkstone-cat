@@ -1,3 +1,6 @@
+import { type Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { getAlternates } from "@/lib/seo";
 import NavBar from "@/components/NavBar";
 import ScrollProgress from "@/components/ScrollProgress";
 import Footer from "@/components/Footer";
@@ -10,6 +13,41 @@ import JoinUs from "@/components/home/JoinUs";
 import Location from "@/components/home/Location";
 import Collaborators from "@/components/home/Collaborators";
 import SectionDivider from "@/components/home/SectionDivider";
+
+const localeToOg: Record<string, string> = {
+  ca: "ca_ES",
+  es: "es_ES",
+  en: "en_US",
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  const alternates = getAlternates(locale, "");
+  return {
+    title: t("home_title"),
+    description: t("home_description"),
+    alternates,
+    openGraph: {
+      title: t("home_og_title"),
+      description: t("home_og_description"),
+      url: alternates.canonical,
+      siteName: "Darkstone Catalunya",
+      locale: localeToOg[locale] ?? "ca_ES",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: "@darkstonecat",
+      title: t("home_og_title"),
+      description: t("home_og_description"),
+    },
+  };
+}
 
 export default function HomePage() {
   return (

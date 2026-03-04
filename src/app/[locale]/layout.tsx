@@ -5,7 +5,6 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import { getAlternates } from '@/lib/seo';
 import '@/styles/globals.css';
 import SmoothScroll from "@/components/SmoothScroll";
 import CookieConsentProvider from "@/components/CookieConsentProvider";
@@ -19,12 +18,6 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-const localeToOg: Record<string, string> = {
-  ca: "ca_ES",
-  es: "es_ES",
-  en: "en_US",
-};
-
 export async function generateMetadata({
   params,
 }: {
@@ -34,25 +27,21 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
-    title: t("home_title"),
+    title: {
+      default: t("home_title"),
+      template: `%s | Darkstone Catalunya`,
+    },
     description: t("home_description"),
     icons: [{ rel: "icon", url: "/favicon.ico" }],
     metadataBase: new URL("https://darkstone.cat"),
     openGraph: {
-      title: t("home_og_title"),
-      description: t("home_og_description"),
-      url: locale === "ca" ? "https://darkstone.cat" : `https://darkstone.cat/${locale}`,
       siteName: "Darkstone Catalunya",
-      locale: localeToOg[locale] ?? "ca_ES",
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
       site: "@darkstonecat",
-      title: t("home_og_title"),
-      description: t("home_og_description"),
     },
-    alternates: getAlternates(locale, ""),
     robots: {
       index: true,
       follow: true,
@@ -102,7 +91,7 @@ export default async function LocaleLayout({
       name: "Darkstone Catalunya",
       alternateName: "Associació de jugadors i jugadores de jocs de taula i rol Darkstone Catalunya",
       url: "https://darkstone.cat",
-      logo: "https://darkstone.cat/images/darkstone_logo_768px.png",
+      logo: "https://darkstone.cat/images/darkstone_logo_768px.webp",
       description: t("home_description"),
       foundingDate: "2024-09-14",
       address,
@@ -114,7 +103,7 @@ export default async function LocaleLayout({
       name: "Darkstone Catalunya",
       description: t("home_description"),
       url: "https://darkstone.cat",
-      image: "https://darkstone.cat/images/darkstone_logo_768px.png",
+      image: "https://darkstone.cat/images/darkstone_logo_768px.webp",
       address,
       email: "darkstone.cat@gmail.com",
       sameAs,
@@ -137,6 +126,10 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://cf.geekdo-images.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      </head>
       <body>
         <script
           type="application/ld+json"

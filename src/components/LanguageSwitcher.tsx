@@ -30,7 +30,7 @@ export default function LanguageSwitcher({ colorOverride }: LanguageSwitcherProp
           key={lang.code}
           onClick={() => handleLanguageChange(lang.code)}
           style={{ color }}
-          aria-current={locale === lang.code ? "true" : undefined}
+          aria-current={locale === lang.code ? "page" : undefined}
           aria-label={`Switch to ${lang.label}`}
           className={`rounded-sm transition-opacity duration-200 ${
             locale === lang.code

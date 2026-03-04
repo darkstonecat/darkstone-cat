@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
@@ -20,6 +20,7 @@ const groups = getCollaboratorsGrouped();
 export default function AboutCollaborators() {
   const t = useTranslations("collaborators");
   const [selected, setSelected] = useState<Collaborator | null>(null);
+  const modalTriggerRef = useRef<HTMLElement | null>(null);
 
   return (
     <section className="relative bg-brand-beige py-20 text-stone-custom">
@@ -62,7 +63,10 @@ export default function AboutCollaborators() {
                 {group.items.map((collaborator, i) => (
                   <motion.button
                     key={collaborator.id}
-                    onClick={() => setSelected(collaborator)}
+                    onClick={() => {
+                      modalTriggerRef.current = document.activeElement as HTMLElement;
+                      setSelected(collaborator);
+                    }}
                     className="group flex aspect-[3/2] w-[calc(50%-0.5rem)] items-center justify-center rounded-xl p-4 transition-[filter,box-shadow] duration-300 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange sm:w-[calc(33.333%-0.75rem)] md:w-[calc(25%-0.75rem)] lg:w-[calc(16.666%-0.875rem)]"
                     style={{
                       backgroundColor: collaborator.brandColor ?? "rgba(255,255,255,0.6)",
@@ -129,7 +133,10 @@ export default function AboutCollaborators() {
         {selected && (
           <CollaboratorModal
             collaborator={selected}
-            onClose={() => setSelected(null)}
+            onClose={() => {
+              setSelected(null);
+              requestAnimationFrame(() => modalTriggerRef.current?.focus());
+            }}
           />
         )}
       </AnimatePresence>
