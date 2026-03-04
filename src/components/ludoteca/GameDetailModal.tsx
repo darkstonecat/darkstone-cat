@@ -121,6 +121,7 @@ export default function GameDetailModal({
               className="object-contain mt-4 "
               sizes="(max-width: 672px) 100vw, 672px"
               priority
+              quality={60}
             />
           </div>
         )}
@@ -249,6 +250,7 @@ export default function GameDetailModal({
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-110"
                         sizes="56px"
+                        quality={60}
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-stone-300">
@@ -285,6 +287,7 @@ export default function GameDetailModal({
                             fill
                             className="object-cover transition-transform duration-300 group-hover:scale-110"
                             sizes="56px"
+                            quality={60}
                           />
                         ) : (
                           <div className="flex h-full items-center justify-center text-stone-300">

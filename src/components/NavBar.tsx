@@ -111,6 +111,7 @@ export default function NavBar() {
   return (
     <>
       <motion.nav
+        aria-label="Main navigation"
         className="fixed left-0 right-0 z-50 transition-[backdrop-filter] duration-500"
         animate={{
           backgroundColor: scrolled
@@ -135,6 +136,7 @@ export default function NavBar() {
                 fill
                 className="object-cover"
                 sizes="40px"
+                quality={60}
               />
             </div>
             <motion.span
@@ -154,6 +156,7 @@ export default function NavBar() {
                 key={link.href}
                 href={link.href}
                 className="relative px-3 py-2 text-sm font-medium transition-opacity duration-200"
+                aria-current={isActive(link.href) ? "page" : undefined}
               >
                 <motion.span
                   animate={{ color: theme.text }}
@@ -249,7 +252,7 @@ export default function NavBar() {
               </svg>
             </button>
 
-            <nav className="flex flex-col items-center gap-6">
+            <nav aria-label="Mobile navigation" className="flex flex-col items-center gap-6">
               {NAV_LINKS.map((link, i) => (
                 <motion.div
                   key={link.href}
@@ -261,6 +264,7 @@ export default function NavBar() {
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
                     className="text-3xl font-bold tracking-tight text-brand-white/90 transition-colors hover:text-brand-white"
+                    aria-current={isActive(link.href) ? "page" : undefined}
                   >
                     {t(link.key)}
                   </Link>

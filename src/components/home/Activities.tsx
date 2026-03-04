@@ -104,6 +104,7 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
                   fill
                   className="object-cover"
                   sizes="70vw"
+                  quality={60}
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
@@ -163,6 +164,7 @@ function MobileActivities({ t }: { t: ReturnType<typeof useTranslations<"activit
               fill
               className="object-cover"
               sizes="calc(100vw - 3rem)"
+              quality={60}
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 

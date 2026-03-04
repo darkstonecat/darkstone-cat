@@ -74,7 +74,7 @@ function AboutCard({
         className="relative h-full w-full origin-center overflow-hidden rounded-3xl will-change-transform"
         style={{ scale }}
       >
-        <Image src={image} alt="" fill className="object-cover" sizes="100vw" />
+        <Image src={image} alt="" fill className="object-cover" sizes="100vw" quality={60} />
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
         <div className="absolute inset-0 flex items-center justify-center px-8 md:px-16">
           <p className="max-w-4xl text-center text-3xl font-black leading-tight text-white md:text-5xl lg:text-7xl">

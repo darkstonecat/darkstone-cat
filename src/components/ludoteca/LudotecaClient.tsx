@@ -3,14 +3,16 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "motion/react";
 import { SlidersHorizontal, ArrowDownUp, LayoutGrid, List } from "lucide-react";
 import type { BggGame } from "@/lib/bgg";
 import FilterSidebar from "./FilterSidebar";
 import GameGrid from "./GameGrid";
-import GameDetailModal from "./GameDetailModal";
 import Pagination from "./Pagination";
 import SortDropdown from "./SortDropdown";
+
+const GameDetailModal = dynamic(() => import("./GameDetailModal"), { ssr: false });
 
 interface LudotecaClientProps {
   games: BggGame[];
@@ -370,6 +372,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
         <button
           ref={mobileFilterBtnRef}
           onClick={() => setMobileFilterOpen(true)}
+          aria-expanded={mobileFilterOpen}
           className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-orange py-2.5 text-sm font-semibold text-white"
         >
           <SlidersHorizontal className="h-4 w-4" />
@@ -460,6 +463,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
               <div className="flex rounded-lg border border-stone-300 bg-white">
                 <button
                   onClick={() => setViewMode("grid")}
+                  aria-pressed={viewMode === "grid"}
                   className={`flex h-9 w-9 items-center justify-center rounded-l-lg transition-colors ${
                     viewMode === "grid"
                       ? "bg-stone-custom text-white"
@@ -471,6 +475,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
+                  aria-pressed={viewMode === "list"}
                   className={`flex h-9 w-9 items-center justify-center rounded-r-lg border-l border-stone-300 transition-colors ${
                     viewMode === "list"
                       ? "bg-stone-custom text-white"
@@ -489,6 +494,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
             <div className="flex rounded-lg border border-stone-300 bg-white">
               <button
                 onClick={() => setViewMode("grid")}
+                aria-pressed={viewMode === "grid"}
                 className={`flex h-9 w-9 items-center justify-center rounded-l-lg transition-colors ${
                   viewMode === "grid"
                     ? "bg-stone-custom text-white"
@@ -500,6 +506,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
               </button>
               <button
                 onClick={() => setViewMode("list")}
+                aria-pressed={viewMode === "list"}
                 className={`flex h-9 w-9 items-center justify-center rounded-r-lg border-l border-stone-300 transition-colors ${
                   viewMode === "list"
                     ? "bg-stone-custom text-white"
@@ -513,7 +520,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="mt-16 text-center">
+            <div role="status" aria-live="polite" className="mt-16 text-center">
               <p className="text-lg text-stone-600">{t("no_results")}</p>
               <button
                 onClick={resetFilters}

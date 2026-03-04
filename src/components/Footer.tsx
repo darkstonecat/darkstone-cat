@@ -75,6 +75,7 @@ export default function Footer() {
                   fill
                   className="object-cover"
                   sizes="36px"
+                  quality={60}
                 />
               </div>
               <span className="text-lg font-bold tracking-tight text-stone-white-hover">

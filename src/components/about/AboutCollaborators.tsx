@@ -3,11 +3,13 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 import TextReveal from "@/components/TextReveal";
-import CollaboratorModal from "@/components/CollaboratorModal";
 import { Link } from "@/i18n/routing";
+
+const CollaboratorModal = dynamic(() => import("@/components/CollaboratorModal"), { ssr: false });
 import {
   getCollaboratorsGrouped,
   type Collaborator,

@@ -1,8 +1,10 @@
 
 import { type Metadata } from "next";
+import { Suspense } from "react";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { routing } from '@/i18n/routing';
 import '@/styles/globals.css';
 import SmoothScroll from "@/components/SmoothScroll";
 import CookieConsentProvider from "@/components/CookieConsentProvider";
@@ -10,6 +12,11 @@ import CookieBanner from "@/components/CookieBanner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import SkipLink from "@/components/SkipLink";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 const localeToOg: Record<string, string> = {
   ca: "ca_ES",
@@ -101,11 +108,14 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <SmoothScroll>
             <CookieConsentProvider>
+              <SkipLink />
               {children}
-              <CookieBanner />
-              <GoogleAnalytics />
-              <Analytics />
-              <SpeedInsights />
+              <Suspense>
+                <CookieBanner />
+                <GoogleAnalytics />
+                <Analytics />
+                <SpeedInsights />
+              </Suspense>
             </CookieConsentProvider>
           </SmoothScroll>
         </NextIntlClientProvider>

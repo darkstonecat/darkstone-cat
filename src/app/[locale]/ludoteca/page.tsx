@@ -27,7 +27,7 @@ export default async function LudotecaPage() {
   const collection = await fetchBggCollection();
 
   return (
-    <main className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
+    <main id="main-content" className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
       <NavBar />
       <LudotecaHero
         totalGames={collection.baseCount}
@@ -35,7 +35,29 @@ export default async function LudotecaPage() {
       />
 
       <section className="flex-1 bg-brand-beige pb-8 md:pb-20">
-        <Suspense>
+        <Suspense
+          fallback={
+            <div className="container mx-auto px-4 pt-8 md:px-6">
+              {/* Toolbar skeleton */}
+              <div className="mb-6 flex items-center justify-between gap-4">
+                <div className="h-10 w-32 animate-pulse rounded-lg bg-stone-200" />
+                <div className="flex gap-2">
+                  <div className="h-10 w-28 animate-pulse rounded-lg bg-stone-200" />
+                  <div className="h-10 w-10 animate-pulse rounded-lg bg-stone-200" />
+                  <div className="h-10 w-10 animate-pulse rounded-lg bg-stone-200" />
+                </div>
+              </div>
+              {/* Grid skeleton */}
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div key={i} className="animate-pulse rounded-2xl bg-stone-200">
+                    <div className="aspect-4/5" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          }
+        >
           <LudotecaClient
             games={collection.games}
             error={collection.error}

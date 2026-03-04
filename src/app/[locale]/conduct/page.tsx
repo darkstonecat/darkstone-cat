@@ -5,6 +5,8 @@ import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import ConductContent from "@/components/conduct/ConductContent";
 
+export const revalidate = false;
+
 export async function generateMetadata({
   params,
 }: {
@@ -20,7 +22,7 @@ export async function generateMetadata({
 
 export default function ConductPage() {
   return (
-    <main className="relative min-h-screen font-sans selection:bg-stone-300">
+    <main id="main-content" className="relative min-h-screen font-sans selection:bg-stone-300">
       <NavBar />
       <ConductContent />
       <Footer />

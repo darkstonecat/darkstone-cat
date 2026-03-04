@@ -189,6 +189,7 @@ export default function Location() {
               fill
               sizes="(min-width: 1024px) 29vw, 50vw"
               className="object-cover object-top"
+              quality={60}
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/15 to-transparent" />
             <div className="absolute bottom-4 left-4">
@@ -205,6 +206,7 @@ export default function Location() {
               fill
               sizes="(min-width: 1024px) 29vw, 50vw"
               className="object-cover object-center"
+              quality={60}
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4">

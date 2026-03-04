@@ -42,10 +42,10 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/about` | `about/page.tsx` | Origin story, mission, values |
 | `/ludoteca` | `ludoteca/page.tsx` | Game library with BGG integration (ISR, revalidate: 86400) |
 | `/contact` | `contact/page.tsx` | Contact form (Resend email) |
-| `/conduct` | `conduct/page.tsx` | Code of conduct |
-| `/legal` | `legal/page.tsx` | Terms & conditions |
-| `/privacy` | `privacy/page.tsx` | Privacy policy |
-| `/cookies` | `cookies/page.tsx` | Cookie policy |
+| `/conduct` | `conduct/page.tsx` | Code of conduct (`revalidate = false`) |
+| `/legal` | `legal/page.tsx` | Terms & conditions (`revalidate = false`) |
+| `/privacy` | `privacy/page.tsx` | Privacy policy (`revalidate = false`) |
+| `/cookies` | `cookies/page.tsx` | Cookie policy (`revalidate = false`) |
 
 API route: `src/app/api/contact/route.ts` — POST endpoint using Resend to send emails.
 
@@ -131,14 +131,17 @@ Client state in `LudotecaClient.tsx`:
 - `src/app/[locale]/opengraph-image.tsx` — Dynamic OG image (1200×630)
 - Layout: JSON-LD Organization schema, OpenGraph + Twitter metadata
 - Metadata base: `https://darkstone.cat`
+- **When adding or modifying pages**: update `lastModified` date and the `pages` array in `src/app/sitemap.ts`
 
-### Security Headers (next.config.ts)
+### Security Headers & Build Config (next.config.ts)
 
 HSTS, CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy (camera/microphone/geolocation disabled). Remote image pattern: `cf.geekdo-images.com` (BGG images).
 
+- `experimental.optimizePackageImports`: `lucide-react`, `react-icons` — when adding new icon libraries, add them here for proper tree-shaking.
+
 ### Image Optimization
 
-- All images use `quality={60}` for faster LCP and smaller transfer
+- **All `<Image>` components must include `quality={60}`** — intentional for LCP performance. SVGs are excluded (Next.js doesn't optimize them).
 - WebP format in `/public/images/photos/`
 - Progressive loading in GameCard: low-res thumbnail → high-res fade-in
 - `sizes` prop on all `<Image>` for responsive breakpoints
@@ -184,9 +187,9 @@ HSTS, CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Refer
 2. **i18n routing** — Always use `Link`/`usePathname`/`useRouter` from `@/i18n/routing`, not Next.js primitives.
 3. **Default locale** — Catalan (`ca`) has no URL prefix. `/about` = Catalan, `/es/about` = Spanish.
 4. **Section IDs** — Home page sections must have `id` attributes matching `SECTION_THEMES` keys in NavBar for theme detection to work.
-5. **No Zustand theme store** — Despite earlier plans, theme state lives entirely in NavBar scroll detection logic, not in a Zustand store.
+5. **No Zustand** — Theme state lives entirely in NavBar scroll detection logic. Zustand is not installed as a dependency.
 6. **Cookie consent hydration** — Uses `useSyncExternalStore` (not `useEffect`) to avoid hydration mismatch.
-7. **Image quality** — All images use `quality={60}` intentionally for LCP performance.
+7. **Image quality** — All `<Image>` components must have `quality={60}`. SVGs are excluded (not optimized by Next.js).
 8. **BGG mock mode** — Without `BGG_API_KEY`, ludoteca falls back to local XML files in `/public/mock/`.
 9. **Metadata async** — `generateMetadata()` must `await params` to get locale, uses `getTranslations()` from `next-intl/server`.
 10. **Activities dual mode** — Desktop uses scroll-pinned horizontal parallax; mobile uses stacked cards with direction-aware slides. Completely separate implementations.

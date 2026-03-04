@@ -29,7 +29,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
       entries.push({
         url,
-        lastModified: new Date(),
+        lastModified: new Date("2025-03-01"),
         changeFrequency: page.changeFrequency,
         priority: page.priority,
         alternates: {

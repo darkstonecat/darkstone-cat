@@ -1,5 +1,3 @@
-"use client";
-
 import LegalPageContent from "./LegalPageContent";
 
 const SECTIONS = [
