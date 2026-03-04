@@ -29,7 +29,7 @@
 | i18n | [next-intl](https://next-intl-docs.vercel.app/) |
 | XML Parsing | [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) |
 | Email | [Resend](https://resend.com) |
-| Icons | [React Icons](https://react-icons.github.io/react-icons/) + [Lucide](https://lucide.dev/) |
+| Icons | [React Icons](https://react-icons.github.io/react-icons/) (Material Design) |
 | Monitoring | [Vercel Analytics](https://vercel.com/analytics) + [Speed Insights](https://vercel.com/docs/speed-insights) |
 | Deployment | [Vercel](https://vercel.com) |
 
@@ -128,6 +128,19 @@ The ludoteca works in **mock mode** when `BGG_API_KEY` is not set — it reads l
 **Smooth Scrolling** — [Lenis](https://lenis.darkroom.engineering/) wraps the entire app in a React Context, providing buttery-smooth inertia scrolling with reduced-motion support.
 
 **Cookie Consent** — GDPR-compliant consent banner backed by `useSyncExternalStore` for hydration-safe localStorage access. Google Analytics only loads after explicit user acceptance.
+
+## Future Improvements
+
+### Persistent Rate Limiting
+
+The contact form API (`src/app/api/contact/route.ts`) uses an in-memory `Map` for rate limiting (5 requests per IP per hour). This has two limitations:
+
+1. **Cold starts**: When Vercel spins up a new serverless instance, the `Map` starts empty and previous request history is lost.
+2. **Multiple instances**: If Vercel scales to 2+ instances, each has its own independent `Map`. Requests distributed across instances bypass the shared limit.
+
+**Recommended solution**: Migrate to [Vercel KV](https://vercel.com/docs/storage/vercel-kv) (built on Upstash Redis). The free Hobby plan includes 30,000 requests/month, more than enough for this use case. The change involves replacing `rateLimitMap.get()`/`.set()` with `kv.get()`/`kv.set()` with automatic TTL expiry.
+
+Related: IP identification currently relies solely on the `x-forwarded-for` header (SEC03). This works correctly behind Vercel's proxy, but if the rate limiter is migrated to a persistent store, the IP identification strategy should also be reviewed.
 
 ---
 
