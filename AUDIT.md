@@ -245,7 +245,7 @@ El proyecto presenta una base sólida con buenas prácticas en la mayoría de á
 
 | # | Issue | Archivo | Línea | Descripción |
 |---|-------|---------|-------|-------------|
-| SEC04 | Sin validación CSRF en contact form | `src/app/api/contact/route.ts` | — | No hay token CSRF. Aceptable para formularios same-origin en Vercel pero podría añadirse como defensa en profundidad. |
+| ~~SEC04~~ | ~~Sin validación CSRF en contact form~~ | ~~`src/app/api/contact/route.ts`~~ | — | **CORREGIDO** — Validación de `Origin` header contra whitelist (`darkstone.cat`, `localhost:3000`). Rechaza peticiones cross-origin con 403. |
 | SEC05 | BGG API key en Authorization header | `src/lib/bgg.ts` | — | Bearer token enviado en plain header. Seguro sobre HTTPS (enforced por Vercel) pero documentar la dependencia. |
 
 ### Ya implementado correctamente

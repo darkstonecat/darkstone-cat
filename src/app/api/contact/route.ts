@@ -26,7 +26,22 @@ const NO_CACHE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate",
 } as const;
 
+const ALLOWED_ORIGINS = new Set([
+  "https://darkstone.cat",
+  "https://www.darkstone.cat",
+  "http://localhost:3000",
+]);
+
 export async function POST(request: Request) {
+  // CSRF protection: validate Origin header
+  const origin = request.headers.get("origin");
+  if (!origin || !ALLOWED_ORIGINS.has(origin)) {
+    return NextResponse.json(
+      { error: "forbidden" },
+      { status: 403, headers: NO_CACHE_HEADERS }
+    );
+  }
+
   // Rate limiting by IP
   const forwarded = request.headers.get("x-forwarded-for");
   const ip = forwarded?.split(",")[0].trim() ?? "unknown";
