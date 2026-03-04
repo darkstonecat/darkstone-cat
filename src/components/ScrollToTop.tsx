@@ -8,21 +8,20 @@ export default function ScrollToTop() {
   const lenis = useLenis();
 
   useEffect(() => {
-    if (!lenis) return;
-
-    const toggleVisibility = ({ scroll }: { scroll: number }) => {
-      setIsVisible(scroll > 300);
+    const toggleVisibility = () => {
+      setIsVisible(window.scrollY > 300);
     };
 
-    lenis.on("scroll", toggleVisibility);
-
-    return () => {
-      lenis.off("scroll", toggleVisibility);
-    };
-  }, [lenis]);
+    window.addEventListener("scroll", toggleVisibility, { passive: true });
+    return () => window.removeEventListener("scroll", toggleVisibility);
+  }, []);
 
   const scrollToTop = () => {
-    lenis?.scrollTo(0);
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo({ top: 0 });
+    }
     document.getElementById("main-content")?.focus();
   };
 
