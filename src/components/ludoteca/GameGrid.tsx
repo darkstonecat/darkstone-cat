@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion } from "motion/react";
+import * as m from "motion/react-client";
 import type { BggGame } from "@/lib/bgg";
 import GameCard from "./GameCard";
 import GameListRow from "./GameListRow";
@@ -33,14 +33,14 @@ export default function GameGrid({ games, viewMode, onSelectGame }: GameGridProp
     return (
       <div className="mt-4 flex flex-col gap-3">
         {games.map((game, i) => (
-          <motion.div
+          <m.div
             key={game.id}
             initial={shouldAnimate ? LIST_INITIAL : false}
             animate={GRID_ANIMATE}
             transition={shouldAnimate ? gridTransition(i) : undefined}
           >
             <GameListRow game={game} onClick={() => onSelectGame(game)} />
-          </motion.div>
+          </m.div>
         ))}
       </div>
     );
@@ -49,14 +49,14 @@ export default function GameGrid({ games, viewMode, onSelectGame }: GameGridProp
   return (
     <div className="mt-4 grid grid-cols-2 gap-4 min-[1200px]:grid-cols-3">
       {games.map((game, i) => (
-        <motion.div
+        <m.div
           key={game.id}
           initial={shouldAnimate ? GRID_INITIAL : false}
           animate={GRID_ANIMATE}
           transition={shouldAnimate ? gridTransition(i) : undefined}
         >
           <GameCard game={game} onClick={() => onSelectGame(game)} />
-        </motion.div>
+        </m.div>
       ))}
     </div>
   );
