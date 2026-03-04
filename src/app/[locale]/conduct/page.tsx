@@ -1,5 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { getAlternates } from "@/lib/seo";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -17,6 +18,7 @@ export async function generateMetadata({
   return {
     title: t("conduct_title"),
     description: t("conduct_description"),
+    alternates: getAlternates(locale, "/conduct"),
   };
 }
 

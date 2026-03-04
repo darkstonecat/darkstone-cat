@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import { getAlternates } from '@/lib/seo';
 import '@/styles/globals.css';
 import SmoothScroll from "@/components/SmoothScroll";
 import CookieConsentProvider from "@/components/CookieConsentProvider";
@@ -50,6 +51,7 @@ export async function generateMetadata({
       title: t("home_og_title"),
       description: t("home_og_description"),
     },
+    alternates: getAlternates(locale, ""),
     robots: {
       index: true,
       follow: true,

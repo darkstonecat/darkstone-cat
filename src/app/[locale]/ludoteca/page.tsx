@@ -1,5 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { getAlternates } from "@/lib/seo";
 import { Suspense } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -20,6 +21,7 @@ export async function generateMetadata({
   return {
     title: t("ludoteca_title"),
     description: t("ludoteca_description"),
+    alternates: getAlternates(locale, "/ludoteca"),
   };
 }
 

@@ -6,6 +6,7 @@ const locales = ["ca", "es", "en"] as const;
 const pages = [
   { path: "", changeFrequency: "weekly" as const, priority: 1.0 },
   { path: "/about", changeFrequency: "monthly" as const, priority: 0.8 },
+  { path: "/ludoteca", changeFrequency: "daily" as const, priority: 0.8 },
   { path: "/contact", changeFrequency: "monthly" as const, priority: 0.7 },
   {
     path: "/conduct",
@@ -33,14 +34,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: page.changeFrequency,
         priority: page.priority,
         alternates: {
-          languages: Object.fromEntries(
-            locales.map((l) => [
-              l,
-              l === "ca"
-                ? `${BASE_URL}${page.path}`
-                : `${BASE_URL}/${l}${page.path}`,
-            ])
-          ),
+          languages: {
+            ...Object.fromEntries(
+              locales.map((l) => [
+                l,
+                l === "ca"
+                  ? `${BASE_URL}${page.path}`
+                  : `${BASE_URL}/${l}${page.path}`,
+              ])
+            ),
+            "x-default": `${BASE_URL}${page.path}`,
+          },
         },
       });
     }

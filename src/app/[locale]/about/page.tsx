@@ -1,5 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { getAlternates } from "@/lib/seo";
 import { fetchBggCollection } from "@/lib/bgg";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -28,6 +29,7 @@ export async function generateMetadata({
   return {
     title: t("about_title"),
     description: t("about_description"),
+    alternates: getAlternates(locale, "/about"),
   };
 }
 
