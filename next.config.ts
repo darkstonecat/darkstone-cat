@@ -5,7 +5,7 @@ import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const gitSha = process.env.VERCEL_GIT_COMMIT_SHA
   ?? (() => { try { return execSync("git rev-parse HEAD").toString().trim(); } catch { return "unknown"; } })();
-const buildDate = new Date().toISOString().split("T")[0];
+const buildDate = new Date().toISOString().slice(0, 16).replace("T", " ");
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const analyzer = withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
