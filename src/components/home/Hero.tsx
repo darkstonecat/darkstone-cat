@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import * as m from "motion/react-client";
 import { useRef } from "react";
-import { useScroll, useTransform, Transition } from "motion/react";
+import { useScroll, useTransform } from "motion/react";
 
 
 
@@ -23,19 +23,6 @@ export default function Hero() {
   const yText = useTransform(scrollYProgress, [0, 0.5], [0, -20]);
   const opacityHero = useTransform(scrollYProgress, [0.6, 1], [1, 0]);
 
-  const textBounceTransition: Transition = {
-    type: "spring",
-    stiffness: 260,
-    damping: 15,
-  };
-
-  const logoBounceTransition: Transition = {
-    type: "spring",
-    stiffness: 200,
-    damping: 10,
-    mass: 1.6,
-  };
-
 
   return (
     <div ref={containerRef} className="relative h-[150vh] bg-brand-beige text-stone-custom">
@@ -48,12 +35,7 @@ export default function Hero() {
           style= {{ scale: scaleLogo }}
           className="relative aspect-square h-[35vh] md:h-[45vh] max-w-5xl"
         >
-          <m.div
-            initial={{ opacity: 0, y: 50, scale: 0.5 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={ logoBounceTransition }
-            className="w-full h-full relative"
-          >
+          <div className="w-full h-full relative animate-hero-logo-spring">
             <Image
               src="/images/darkstone_logo_768px.webp"
               alt="Darkstone Catalunya Logo"
@@ -64,18 +46,12 @@ export default function Hero() {
               className="object-contain drop-shadow-2xl"
               sizes="(max-width: 768px) 35vh, 45vh"
             />
-          </m.div>
+          </div>
         </m.div>
 
         <m.h1
           style={{ scale: scaleTitle }}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            ...textBounceTransition,
-            delay: 0.2,
-          }}
-          className="w-full font-extrabold tracking-tight text-[clamp(2rem,6vw,8rem)] leading-none"
+          className="w-full font-extrabold tracking-tight text-[clamp(2rem,6vw,8rem)] leading-none animate-hero-text-spring [animation-delay:0.2s] [--spring-y:30px] [--spring-r:0deg]"
         >
           Darkstone Catalunya
         </m.h1>
@@ -84,38 +60,20 @@ export default function Hero() {
           style={{ opacity: opacityText, y: yText }}
           className="flex flex-col items-center"
         >
-          <m.p
-            initial={{ opacity: 0, y: 50, rotate: -6 }}
-            animate={{ opacity: 1, y: 0, rotate: 0 }}
-            transition={{
-              ...textBounceTransition,
-              delay: 0.4,
-            }}
-            className="mt-6 max-w-2xl text-xl font-light opacity-65 md:text-2xl origin-bottom"
+          <p
+            className="mt-6 max-w-2xl text-xl font-light opacity-65 md:text-2xl origin-bottom animate-hero-text-spring [animation-delay:0.4s] [--spring-y:50px] [--spring-r:-6deg]"
           >
             {t("tagline")}
-          </m.p>
+          </p>
 
-          <m.p
-            initial={{ opacity: 0, y: 50, rotate: -3 }}
-            animate={{ opacity: 1, y: 0, rotate: 0 }}
-            transition={{
-              ...textBounceTransition,
-              delay: 0.55
-            }}
-            className="mt-4 max-w-lg opacity-65 origin-bottom"
+          <p
+            className="mt-4 max-w-lg opacity-65 origin-bottom animate-hero-text-spring [animation-delay:0.55s] [--spring-y:50px] [--spring-r:-3deg]"
           >
             {t("description")}
-          </m.p>
+          </p>
 
-          <m.div
-            initial={{ opacity: 0, y: 50, rotate: 6 }}
-            animate={{ opacity: 1, y: 0, rotate: 0 }}
-            transition={{
-              ...textBounceTransition,
-              delay: 0.7
-            }}
-            className="mt-10 origin-bottom"
+          <div
+            className="mt-10 origin-bottom animate-hero-text-spring [animation-delay:0.7s] [--spring-y:50px] [--spring-r:6deg]"
           >
             <a
               href="#join-us"
@@ -124,7 +82,7 @@ export default function Hero() {
               <span className="mr-2">{t("cta")}</span>
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
             </a>
-          </m.div>
+          </div>
         </m.div>
       </m.section>
     </div>

@@ -79,6 +79,34 @@
   100% { transform: translate(0, 0) rotate(0deg); }
 }
 
+/* spring: stiffness=200, damping=10, mass=1.6 → ζ≈0.28, ωd≈10.74 */
+@keyframes hero-logo-spring {
+  0%      { opacity: 0; transform: translateY(50px) scale(0); }
+  5%      { opacity: 1; transform: translateY(34px) scale(0.32); }
+  10.8%   { opacity: 1; transform: translateY(0) scale(1); }
+  18.3%   { opacity: 1; transform: translateY(-12px) scale(1.25); }
+  29.1%   { opacity: 1; transform: translateY(0) scale(1); }
+  36.6%   { opacity: 1; transform: translateY(5px) scale(0.90); }
+  47.4%   { opacity: 1; transform: translateY(0) scale(1); }
+  54.9%   { opacity: 1; transform: translateY(-3px) scale(1.065); }
+  65.6%   { opacity: 1; transform: translateY(0) scale(1); }
+  73.2%   { opacity: 1; transform: translateY(1.3px) scale(0.974); }
+  83.9%   { opacity: 1; transform: translateY(0) scale(1); }
+  91.4%   { opacity: 1; transform: translateY(-0.5px) scale(1.011); }
+  100%    { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes hero-text-spring {
+  0%   { opacity: 0; transform: translateY(var(--spring-y, 30px)) rotate(var(--spring-r, 0deg)); }
+  12%  { opacity: 1; transform: translateY(calc(var(--spring-y, 30px) * 0.35)) rotate(calc(var(--spring-r, 0deg) * 0.35)); }
+  24%  { opacity: 1; transform: translateY(calc(var(--spring-y, 30px) * -0.16)) rotate(calc(var(--spring-r, 0deg) * -0.16)); }
+  32%  { opacity: 1; transform: translateY(calc(var(--spring-y, 30px) * -0.14)) rotate(calc(var(--spring-r, 0deg) * -0.14)); }
+  44%  { opacity: 1; transform: translateY(calc(var(--spring-y, 30px) * 0.05)) rotate(calc(var(--spring-r, 0deg) * 0.05)); }
+  55%  { opacity: 1; transform: translateY(calc(var(--spring-y, 30px) * -0.02)) rotate(calc(var(--spring-r, 0deg) * -0.02)); }
+  70%  { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+
 @layer base {
   html {
     @apply relative;
@@ -129,5 +157,18 @@
   .no-scrollbar {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+  }
+
+  .animate-hero-logo-spring {
+    animation-name: hero-logo-spring;
+    animation-duration: 1.6s;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+  }
+  .animate-hero-text-spring {
+    animation-name: hero-text-spring;
+    animation-duration: 0.9s;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
   }
 }

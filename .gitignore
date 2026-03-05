@@ -39,7 +39,7 @@ next-env.d.ts
 .claude
 .agent
 .agents
-skills-lock.json
+# skills-lock.json
 
 # Analytics
 lighthouse-*
