@@ -13,13 +13,30 @@ The primary language of the association is **Catalan**. All user-facing text mus
 ## Commands
 
 ```bash
-npm run dev      # Start development server
-npm run build    # Production build
-npm run start    # Start production server
-npm run lint     # Run ESLint
+npm run dev              # Start development server
+npm run build            # Production build
+npm run start            # Start production server
+npm run lint             # Run ESLint
+npm run lighthouse       # Lighthouse audit — local (build + start + audit + cleanup)
+npm run lighthouse:prod  # Lighthouse audit — production (darkstone.cat)
 ```
 
 No test runner is configured.
+
+### Lighthouse Audits
+
+Automated Lighthouse audits for all 8 pages (Catalan locale) on mobile + desktop (16 audits total). Scripts in `scripts/lighthouse/`:
+
+| File | Purpose |
+|---|---|
+| `run-audit.mjs` | Entry point / orchestrator (`--prod` flag for production) |
+| `config.mjs` | Pages, thresholds, categories, Lighthouse flags |
+| `auditor.mjs` | Chrome launcher + Lighthouse runner (shares a single Chrome instance) |
+| `server.mjs` | Builds project and starts local Next.js server with cleanup |
+| `report.mjs` | Generates classified Markdown report (scores, CWV, issues, opportunities) |
+| `utils.mjs` | Helpers (emoji scoring, port finding, timestamps, logging) |
+
+Output goes to `audits/lighthouse/<timestamp>/` (gitignored) with `REPORT.md` and `raw/` containing JSON + HTML reports per page/device.
 
 ## Architecture
 
@@ -130,7 +147,7 @@ Client state in `LudotecaClient.tsx`:
 - `src/app/robots.ts` — robots.txt
 - `src/app/[locale]/opengraph-image.tsx` — Dynamic OG image (1200×630)
 - Layout: JSON-LD Organization schema, OpenGraph + Twitter metadata
-- Metadata base: `https://darkstone.cat`
+- Metadata base: `https://www.darkstone.cat`
 - **When adding or modifying pages**: update `lastModified` date and the `pages` array in `src/app/sitemap.ts`
 
 ### Security Headers & Build Config (next.config.ts)

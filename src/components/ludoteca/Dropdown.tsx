@@ -147,7 +147,7 @@ export default function Dropdown({
               } ${
                 value === opt.value
                   ? "font-semibold text-brand-orange"
-                  : "text-stone-600 hover:bg-stone-50"
+                  : "text-stone-700 hover:bg-stone-50"
               }`}
             >
               <MdCheck

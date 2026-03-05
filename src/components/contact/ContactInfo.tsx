@@ -48,16 +48,16 @@ export default function ContactInfo() {
         <p className="text-base font-medium text-stone-custom">
           {t("location_name")}
         </p>
-        <p className="text-sm text-stone-custom/65">
+        <p className="text-sm text-stone-custom/80">
           {t("address_street")} · {t("address_city")}
         </p>
         <div className="mt-4 flex items-start gap-2 text-sm">
-          <MdSchedule className="mt-0.5 h-4 w-4 shrink-0 text-stone-custom/65" />
+          <MdSchedule className="mt-0.5 h-4 w-4 shrink-0 text-stone-custom/80" />
           <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
             <span className="font-medium text-stone-custom">{tSchedule("friday")}</span>
-            <span className="text-stone-custom/65">{tSchedule("friday_start")} – {tSchedule("friday_end")}</span>
+            <span className="text-stone-custom/80">{tSchedule("friday_start")} – {tSchedule("friday_end")}</span>
             <span className="font-medium text-stone-custom">{tSchedule("saturday")}</span>
-            <span className="text-stone-custom/65">{tSchedule("saturday_start")} – {tSchedule("saturday_end")}</span>
+            <span className="text-stone-custom/80">{tSchedule("saturday_start")} – {tSchedule("saturday_end")}</span>
           </div>
         </div>
         <a
@@ -83,7 +83,7 @@ export default function ContactInfo() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={social.label}
-              className="flex h-11 w-11 items-center justify-center rounded-xl bg-stone-custom/5 text-stone-custom/65 transition-colors hover:bg-stone-custom/10 hover:text-stone-custom"
+              className="flex h-11 w-11 items-center justify-center rounded-xl bg-stone-custom/5 text-stone-custom/80 transition-colors hover:bg-stone-custom/10 hover:text-stone-custom"
             >
               <social.icon size={20} />
             </a>

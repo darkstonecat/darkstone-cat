@@ -27,8 +27,8 @@ export async function generateMetadata({
       url: alternates.canonical,
       images: [{
         url: locale === "ca"
-          ? "https://darkstone.cat/opengraph-image/og"
-          : `https://darkstone.cat/${locale}/opengraph-image/og`,
+          ? "https://www.darkstone.cat/opengraph-image/og"
+          : `https://www.darkstone.cat/${locale}/opengraph-image/og`,
         width: 1200,
         height: 630,
         type: "image/png",

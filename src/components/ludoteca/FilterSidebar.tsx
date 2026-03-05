@@ -60,7 +60,7 @@ export default function FilterSidebar({
   const chipActive =
     "border-transparent bg-brand-orange text-white";
   const chipInactive =
-    "border-stone-300 bg-white text-stone-600 hover:bg-stone-100";
+    "border-stone-300 bg-white text-stone-700 hover:bg-stone-100";
 
   return (
     <div className="flex flex-col gap-6">

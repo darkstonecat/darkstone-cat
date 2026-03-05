@@ -142,12 +142,11 @@ export default function SearchableMultiSelect({
         className={`flex h-10 w-full items-center justify-between rounded-lg border px-3 text-sm transition-colors ${
           selected.length > 0
             ? "border-brand-orange bg-brand-orange/5 text-stone-800"
-            : "border-stone-300 bg-white text-stone-500"
+            : "border-stone-300 bg-white text-stone-700"
         }`}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? listboxId : undefined}
-        aria-label={label}
       >
         <span className="truncate">
           {selected.length > 0
@@ -211,7 +210,7 @@ export default function SearchableMultiSelect({
                       isFocused
                         ? "bg-stone-100"
                         : "hover:bg-stone-50"
-                    } ${isSelected ? "font-medium text-stone-800" : "text-stone-600"}`}
+                    } ${isSelected ? "font-medium text-stone-800" : "text-stone-700"}`}
                   >
                     <span
                       className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${

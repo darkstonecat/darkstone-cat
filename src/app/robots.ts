@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: "/api/",
     },
-    sitemap: "https://darkstone.cat/sitemap.xml",
+    sitemap: "https://www.darkstone.cat/sitemap.xml",
   };
 }

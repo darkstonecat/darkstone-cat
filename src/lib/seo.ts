@@ -1,4 +1,4 @@
-const BASE_URL = "https://darkstone.cat";
+const BASE_URL = "https://www.darkstone.cat";
 
 export function getAlternates(locale: string, path: string) {
   return {

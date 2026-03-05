@@ -4,7 +4,6 @@ import Image from "next/image";
 import { Link, usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { useLenis } from "./SmoothScroll";
 import LanguageSwitcher from "./LanguageSwitcher";
 
@@ -22,8 +21,6 @@ const NAV_LINKS = [
   { href: "/conduct", key: "conduct" },
   { href: "/contact", key: "contact" },
 ] as const;
-
-const NAV_TRANSITION = { duration: 0.4 } as const;
 
 // Theme for the home page scroll sections (backdrop adaptation)
 const HOME_SECTION_IDS = ["about", "activities", "schedule", "join-us", "location", "collaborators"] as const;
@@ -57,6 +54,7 @@ export default function NavBar() {
   const [scrolled, setScrolled] = useState(false);
   const [homeActiveSection, setHomeActiveSection] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuClosing, setMenuClosing] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
 
   // Determine theme based on page context
@@ -135,8 +133,7 @@ export default function NavBar() {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setMobileOpen(false);
-        requestAnimationFrame(() => hamburgerRef.current?.focus());
+        closeMobileMenu();
         return;
       }
 
@@ -181,26 +178,34 @@ export default function NavBar() {
       document.removeEventListener("keydown", handleKeyDown);
       clearTimeout(timer);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mobileOpen]);
+
+  const closeMobileMenu = useCallback(() => {
+    setMenuClosing(true);
+    setTimeout(() => {
+      setMobileOpen(false);
+      setMenuClosing(false);
+      requestAnimationFrame(() => hamburgerRef.current?.focus());
+    }, 500);
+  }, []);
 
   const isActive = useCallback((href: string) => pathname === href, [pathname]);
 
-  const navAnimate = useMemo(() => ({
-    backgroundColor: scrolled ? hexToRgba(theme.bg, 0.8) : "rgba(0, 0, 0, 0)",
-  }), [scrolled, theme.bg]);
+  const hamburgerColor = mobileOpen ? "#FAFAF9" : theme.text;
 
   return (
     <>
-      <motion.nav
+      <nav
         aria-label="Main navigation"
-        className="fixed left-0 right-0 z-50 transition-[backdrop-filter] duration-500"
-        animate={navAnimate}
-        transition={NAV_TRANSITION}
+        className="fixed left-0 right-0 z-50"
         style={{
           top: "-60px",
           paddingTop: "60px",
+          backgroundColor: scrolled ? hexToRgba(theme.bg, 0.8) : "rgba(0, 0, 0, 0)",
           backdropFilter: scrolled ? "blur(12px)" : "none",
           WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
+          transition: "background-color 0.4s, backdrop-filter 0.5s",
         }}
       >
         <div className="container mx-auto flex items-center justify-between px-6 py-3">
@@ -216,14 +221,13 @@ export default function NavBar() {
                 quality={60}
               />
             </div>
-            <motion.span
+            <span
               className="text-xl font-bold tracking-tight"
-              animate={{ color: theme.text }}
-              transition={{ duration: 0.4 }}
+              style={{ color: theme.text, transition: "color 0.4s" }}
             >
               Darkstone
               <span className="font-light opacity-65">.cat</span>
-            </motion.span>
+            </span>
           </Link>
 
           {/* Desktop nav links */}
@@ -232,30 +236,23 @@ export default function NavBar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="relative px-3 py-2 text-sm font-medium transition-opacity duration-200"
+                className="relative px-3 py-2 text-sm font-medium"
                 aria-current={isActive(link.href) ? "page" : undefined}
               >
-                <motion.span
-                  animate={{ color: theme.text }}
-                  transition={{ duration: 0.4 }}
+                <span
                   style={{
+                    color: theme.text,
                     opacity: isActive(link.href) ? 1 : 0.55,
+                    transition: "color 0.4s, opacity 0.2s",
                   }}
                 >
                   {t(link.key)}
-                </motion.span>
+                </span>
                 {/* Active indicator line */}
                 {isActive(link.href) && (
-                  <motion.div
-                    layoutId="nav-indicator"
+                  <span
                     className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
-                    initial={{ backgroundColor: theme.text }}
-                    animate={{ backgroundColor: theme.text }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 350,
-                      damping: 30,
-                    }}
+                    style={{ backgroundColor: theme.text, transition: "background-color 0.4s" }}
                   />
                 )}
               </Link>
@@ -269,105 +266,103 @@ export default function NavBar() {
           {/* Mobile hamburger */}
           <button
             ref={hamburgerRef}
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => mobileOpen ? closeMobileMenu() : setMobileOpen(true)}
             className="relative z-60 flex h-10 w-10 items-center justify-center md:hidden"
             aria-label={t("menu_button")}
           >
             <div className="flex w-6 flex-col items-end gap-1.5">
-              <motion.span
+              <span
                 className="block h-0.5 rounded-full"
-                style={{ backgroundColor: mobileOpen ? "#FAFAF9" : theme.text }}
-                animate={{
-                  width: mobileOpen ? 24 : 24,
-                  rotate: mobileOpen ? 45 : 0,
-                  y: mobileOpen ? 8 : 0,
+                style={{
+                  backgroundColor: hamburgerColor,
+                  width: 24,
+                  transform: mobileOpen ? "rotate(45deg) translateY(8px)" : "none",
+                  transition: "transform 0.3s, background-color 0.3s",
                 }}
-                transition={{ duration: 0.3 }}
               />
-              <motion.span
+              <span
                 className="block h-0.5 rounded-full"
-                style={{ backgroundColor: mobileOpen ? "#FAFAF9" : theme.text }}
-                animate={{
+                style={{
+                  backgroundColor: hamburgerColor,
                   width: mobileOpen ? 0 : 16,
                   opacity: mobileOpen ? 0 : 1,
+                  transition: "width 0.2s, opacity 0.2s, background-color 0.3s",
                 }}
-                transition={{ duration: 0.2 }}
               />
-              <motion.span
+              <span
                 className="block h-0.5 rounded-full"
-                style={{ backgroundColor: mobileOpen ? "#FAFAF9" : theme.text }}
-                animate={{
+                style={{
+                  backgroundColor: hamburgerColor,
                   width: mobileOpen ? 24 : 20,
-                  rotate: mobileOpen ? -45 : 0,
-                  y: mobileOpen ? -8 : 0,
+                  transform: mobileOpen ? "rotate(-45deg) translateY(-8px)" : "none",
+                  transition: "transform 0.3s, width 0.3s, background-color 0.3s",
                 }}
-                transition={{ duration: 0.3 }}
               />
             </div>
           </button>
         </div>
-      </motion.nav>
+      </nav>
 
       {/* Mobile fullscreen menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            ref={mobileMenuRef}
-            role="dialog"
-            aria-modal="true"
+      {(mobileOpen || menuClosing) && (
+        <div
+          ref={mobileMenuRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("menu_button")}
+          className="fixed inset-0 z-55 flex flex-col items-center justify-center bg-stone-custom"
+          style={{
+            animation: menuClosing
+              ? "nav-menu-close 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards"
+              : "nav-menu-open 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards",
+          }}
+        >
+          {/* Close button */}
+          <button
+            onClick={closeMobileMenu}
+            className="absolute top-4 right-6 flex h-10 w-10 items-center justify-center text-brand-white/70 hover:text-brand-white transition-colors"
             aria-label={t("menu_button")}
-            className="fixed inset-0 z-55 flex flex-col items-center justify-center bg-stone-custom"
-            initial={{ clipPath: "circle(0% at calc(100% - 40px) 28px)" }}
-            animate={{ clipPath: "circle(150% at calc(100% - 40px) 28px)" }}
-            exit={{ clipPath: "circle(0% at calc(100% - 40px) 28px)" }}
-            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
           >
-            {/* Close button */}
-            <button
-              onClick={() => {
-                setMobileOpen(false);
-                requestAnimationFrame(() => hamburgerRef.current?.focus());
-              }}
-              className="absolute top-4 right-6 flex h-10 w-10 items-center justify-center text-brand-white/70 hover:text-brand-white transition-colors"
-              aria-label={t("menu_button")}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <line x1="6" y1="6" x2="18" y2="18" />
-                <line x1="18" y1="6" x2="6" y2="18" />
-              </svg>
-            </button>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="6" y1="6" x2="18" y2="18" />
+              <line x1="18" y1="6" x2="6" y2="18" />
+            </svg>
+          </button>
 
-            <nav aria-label="Mobile navigation" className="flex flex-col items-center gap-6">
-              {NAV_LINKS.map((link, i) => (
-                <motion.div
-                  key={link.href}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 + i * 0.05, duration: 0.4 }}
-                >
-                  <Link
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="text-3xl font-bold tracking-tight text-brand-white/90 transition-colors hover:text-brand-white"
-                    aria-current={isActive(link.href) ? "page" : undefined}
-                  >
-                    {t(link.key)}
-                  </Link>
-                </motion.div>
-              ))}
-
-              <motion.div
-                className="mt-6 pt-6 border-t border-brand-white/15"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.45, duration: 0.4 }}
+          <nav aria-label="Mobile navigation" className="flex flex-col items-center gap-6">
+            {NAV_LINKS.map((link, i) => (
+              <div
+                key={link.href}
+                style={{
+                  animation: menuClosing
+                    ? "none"
+                    : `nav-link-enter 0.4s ease-out ${0.15 + i * 0.05}s both`,
+                }}
               >
-                <LanguageSwitcher colorOverride="#FAFAF9" />
-              </motion.div>
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                <Link
+                  href={link.href}
+                  onClick={closeMobileMenu}
+                  className="text-3xl font-bold tracking-tight text-brand-white/90 transition-colors hover:text-brand-white"
+                  aria-current={isActive(link.href) ? "page" : undefined}
+                >
+                  {t(link.key)}
+                </Link>
+              </div>
+            ))}
+
+            <div
+              className="mt-6 pt-6 border-t border-brand-white/15"
+              style={{
+                animation: menuClosing
+                  ? "none"
+                  : "nav-link-enter 0.4s ease-out 0.45s both",
+              }}
+            >
+              <LanguageSwitcher colorOverride="#FAFAF9" />
+            </div>
+          </nav>
+        </div>
+      )}
     </>
   );
 }

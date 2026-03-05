@@ -33,14 +33,14 @@ export async function generateMetadata({
     },
     description: t("home_description"),
     icons: [{ rel: "icon", url: "/favicon.ico" }],
-    metadataBase: new URL("https://darkstone.cat"),
+    metadataBase: new URL("https://www.darkstone.cat"),
     openGraph: {
       siteName: "Darkstone Catalunya",
       type: "website",
       images: [{
         url: locale === "ca"
-          ? "https://darkstone.cat/opengraph-image/og"
-          : `https://darkstone.cat/${locale}/opengraph-image/og`,
+          ? "https://www.darkstone.cat/opengraph-image/og"
+          : `https://www.darkstone.cat/${locale}/opengraph-image/og`,
         width: 1200,
         height: 630,
         type: "image/png",
@@ -75,8 +75,8 @@ export default async function LocaleLayout({
     getTranslations({ locale, namespace: "metadata" }),
   ]);
 
-  const orgId = "https://darkstone.cat/#organization";
-  const placeId = "https://darkstone.cat/#place";
+  const orgId = "https://www.darkstone.cat/#organization";
+  const placeId = "https://www.darkstone.cat/#place";
 
   const address = {
     "@type": "PostalAddress",
@@ -104,9 +104,9 @@ export default async function LocaleLayout({
         additionalType: "https://schema.org/NGO",
         name: "Darkstone Catalunya",
         alternateName: "Associació de jugadors i jugadores de jocs de taula i rol Darkstone Catalunya",
-        url: "https://darkstone.cat",
-        logo: "https://darkstone.cat/images/darkstone_logo_768px.webp",
-        image: "https://darkstone.cat/images/darkstone_logo_768px.webp",
+        url: "https://www.darkstone.cat",
+        logo: "https://www.darkstone.cat/images/darkstone_logo_768px.webp",
+        image: "https://www.darkstone.cat/images/darkstone_logo_768px.webp",
         description: t("home_description"),
         foundingDate: "2024-09-14",
         email: "darkstone.cat@gmail.com",

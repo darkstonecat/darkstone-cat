@@ -107,6 +107,30 @@
   100% { opacity: 1; transform: translateY(0) rotate(0deg); }
 }
 
+/* Cookie banner entrance / exit */
+@keyframes cookie-banner-enter {
+  from { transform: translateX(40px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes cookie-banner-exit {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(40px); opacity: 0; }
+}
+
+/* NavBar mobile menu */
+@keyframes nav-menu-open {
+  from { clip-path: circle(0% at calc(100% - 40px) 28px); }
+  to { clip-path: circle(150% at calc(100% - 40px) 28px); }
+}
+@keyframes nav-menu-close {
+  from { clip-path: circle(150% at calc(100% - 40px) 28px); }
+  to { clip-path: circle(0% at calc(100% - 40px) 28px); }
+}
+@keyframes nav-link-enter {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @layer base {
   html {
     @apply relative;

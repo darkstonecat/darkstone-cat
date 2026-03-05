@@ -21,11 +21,14 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
+    let rafId: number;
     const measure = () => {
-      setViewportWidth(window.innerWidth);
-      if (innerRef.current) {
-        setScrollRange(innerRef.current.scrollWidth - window.innerWidth);
-      }
+      rafId = requestAnimationFrame(() => {
+        setViewportWidth(window.innerWidth);
+        if (innerRef.current) {
+          setScrollRange(innerRef.current.scrollWidth - window.innerWidth);
+        }
+      });
     };
     measure();
     const handleResize = () => {
@@ -35,6 +38,7 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
     window.addEventListener("resize", handleResize);
     return () => {
       clearTimeout(timer);
+      cancelAnimationFrame(rafId);
       window.removeEventListener("resize", handleResize);
     };
   }, []);

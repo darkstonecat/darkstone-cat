@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE_URL = "https://darkstone.cat";
+const BASE_URL = "https://www.darkstone.cat";
 const locales = ["ca", "es", "en"] as const;
 
 const pages = [

@@ -141,7 +141,7 @@ export default function ContactForm() {
             <div>
               <label
                 htmlFor="name"
-                className="mb-2 block text-sm font-medium text-stone-custom/70"
+                className="mb-2 block text-sm font-medium text-stone-custom/80"
               >
                 {t("name_label")} <span className="text-brand-red" aria-hidden="true">*</span>
               </label>
@@ -168,7 +168,7 @@ export default function ContactForm() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-2 block text-sm font-medium text-stone-custom/70"
+                className="mb-2 block text-sm font-medium text-stone-custom/80"
               >
                 {t("email_label")} <span className="text-brand-red" aria-hidden="true">*</span>
               </label>
@@ -195,7 +195,7 @@ export default function ContactForm() {
             <div>
               <label
                 htmlFor="subject"
-                className="mb-2 block text-sm font-medium text-stone-custom/70"
+                className="mb-2 block text-sm font-medium text-stone-custom/80"
               >
                 {t("subject_label")} <span className="text-brand-red" aria-hidden="true">*</span>
               </label>
@@ -222,7 +222,7 @@ export default function ContactForm() {
             <div>
               <label
                 htmlFor="message"
-                className="mb-2 block text-sm font-medium text-stone-custom/70"
+                className="mb-2 block text-sm font-medium text-stone-custom/80"
               >
                 {t("message_label")} <span className="text-brand-red" aria-hidden="true">*</span>
               </label>

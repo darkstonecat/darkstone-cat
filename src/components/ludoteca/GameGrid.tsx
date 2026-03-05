@@ -48,7 +48,7 @@ export default function GameGrid({ games, viewMode, onSelectGame }: GameGridProp
           animate={GRID_ANIMATE}
           transition={shouldAnimate ? gridTransition(i) : undefined}
         >
-          <GameCard game={game} onClick={() => onSelectGame(game)} />
+          <GameCard game={game} onClick={() => onSelectGame(game)} priority={i < 4} />
         </m.div>
       ))}
     </div>

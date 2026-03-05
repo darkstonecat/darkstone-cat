@@ -9,6 +9,7 @@ import type { BggGame } from "@/lib/bgg";
 interface GameCardProps {
   game: BggGame;
   onClick: () => void;
+  priority?: boolean;
 }
 
 function WeightBar({ weight }: { weight: number }) {
@@ -29,7 +30,7 @@ function WeightBar({ weight }: { weight: number }) {
 
 const IMAGE_SIZES = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw";
 
-function ProgressiveGameImage({ game }: { game: BggGame }) {
+function ProgressiveGameImage({ game, priority = false }: { game: BggGame; priority?: boolean }) {
   const [hiLoaded, setHiLoaded] = useState(false);
   const [hiVisible, setHiVisible] = useState(false);
   const alt = `${game.originalName ?? game.name} — board game cover`;
@@ -46,6 +47,7 @@ function ProgressiveGameImage({ game }: { game: BggGame }) {
           quality={60}
           className="object-cover transition-transform duration-300 group-hover:scale-110"
           sizes={IMAGE_SIZES}
+          {...(priority && { priority: true, loading: "eager" as const })}
         />
       )}
       {/* High-res image — fades in over the thumbnail, then hides it */}
@@ -67,7 +69,7 @@ function ProgressiveGameImage({ game }: { game: BggGame }) {
   );
 }
 
-const GameCard = memo(function GameCard({ game, onClick }: GameCardProps) {
+const GameCard = memo(function GameCard({ game, onClick, priority = false }: GameCardProps) {
   const t = useTranslations("ludoteca");
 
   const playersText =
@@ -84,7 +86,7 @@ const GameCard = memo(function GameCard({ game, onClick }: GameCardProps) {
       {/* Image — ~60% of card height, progressive: thumbnail → full image */}
       <div className="relative aspect-4/5 w-full overflow-hidden bg-stone-100">
         {game.thumbnail ? (
-          <ProgressiveGameImage game={game} />
+          <ProgressiveGameImage game={game} priority={priority} />
         ) : (
           <div className="flex h-full items-center justify-center text-stone-300">
             <MdStar className="h-12 w-12" />
