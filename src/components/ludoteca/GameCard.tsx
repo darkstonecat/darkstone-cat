@@ -44,6 +44,7 @@ function ProgressiveGameImage({ game, priority = false }: { game: BggGame; prior
         alt={alt}
         fill
         priority
+        fetchPriority="high"
         quality={60}
         className="object-cover transition-transform duration-300 group-hover:scale-110"
         sizes={IMAGE_SIZES}
