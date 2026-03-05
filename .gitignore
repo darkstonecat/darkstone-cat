@@ -52,3 +52,4 @@ lighthouse-*
 # Audit
 AUDIT.md
 audits/
+.unlighthouse/
