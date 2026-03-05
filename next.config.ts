@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
+import { execSync } from "child_process";
 import createNextIntlPlugin from 'next-intl/plugin';
 import withBundleAnalyzer from '@next/bundle-analyzer';
+
+const gitSha = process.env.VERCEL_GIT_COMMIT_SHA
+  ?? (() => { try { return execSync("git rev-parse HEAD").toString().trim(); } catch { return "unknown"; } })();
+const buildDate = new Date().toISOString().split("T")[0];
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const analyzer = withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
@@ -49,6 +54,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_BUILD_VERSION: gitSha.slice(0, 7),
+    NEXT_PUBLIC_BUILD_DATE: buildDate,
+  },
   experimental: {
     optimizePackageImports: ["react-icons"],
   },
