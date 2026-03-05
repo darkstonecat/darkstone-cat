@@ -302,7 +302,7 @@ export default function FilterSidebar({
         <button
           onClick={onReset}
           disabled={!hasActiveFilters}
-          className="text-sm font-medium text-brand-orange underline underline-offset-2 disabled:cursor-not-allowed disabled:opacity-40 disabled:no-underline"
+          className="text-sm font-medium text-brand-orange-text underline underline-offset-2 disabled:cursor-not-allowed disabled:opacity-40 disabled:no-underline"
         >
           {t("filter_clear")}
         </button>

@@ -36,6 +36,21 @@ function ProgressiveGameImage({ game, priority = false }: { game: BggGame; prior
   const alt = `${game.originalName ?? game.name} — board game cover`;
   const hasHiRes = !!game.image;
 
+  // Priority cards: render hi-res directly (no progressive loading) for LCP discovery
+  if (priority && hasHiRes) {
+    return (
+      <Image
+        src={game.image}
+        alt={alt}
+        fill
+        priority
+        quality={60}
+        className="object-cover transition-transform duration-300 group-hover:scale-110"
+        sizes={IMAGE_SIZES}
+      />
+    );
+  }
+
   return (
     <>
       {/* Low-res thumbnail — visible until high-res fade-in completes */}
@@ -47,7 +62,6 @@ function ProgressiveGameImage({ game, priority = false }: { game: BggGame; prior
           quality={60}
           className="object-cover transition-transform duration-300 group-hover:scale-110"
           sizes={IMAGE_SIZES}
-          {...(priority && { priority: true, loading: "eager" as const })}
         />
       )}
       {/* High-res image — fades in over the thumbnail, then hides it */}
@@ -81,7 +95,6 @@ const GameCard = memo(function GameCard({ game, onClick, priority = false }: Gam
     <button
       onClick={onClick}
       className="group flex w-full flex-col overflow-hidden rounded-2xl border border-stone-200/50 bg-white text-left transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md"
-      aria-label={t("card_aria", { name: game.name })}
     >
       {/* Image — ~60% of card height, progressive: thumbnail → full image */}
       <div className="relative aspect-4/5 w-full overflow-hidden bg-stone-100">

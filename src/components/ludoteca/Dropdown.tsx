@@ -110,7 +110,7 @@ export default function Dropdown({
           }
         }}
         className="flex h-9 w-full items-center justify-between gap-2 rounded-full border border-stone-300 bg-white px-4 text-sm text-stone-700 transition-colors hover:bg-stone-50"
-        aria-label={ariaLabel}
+        aria-label={activeLabel ? `${ariaLabel}: ${activeLabel}` : ariaLabel}
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-controls={open ? menuId : undefined}
@@ -146,12 +146,12 @@ export default function Dropdown({
                 i === focusIndex ? "bg-stone-100" : ""
               } ${
                 value === opt.value
-                  ? "font-semibold text-brand-orange"
+                  ? "font-semibold text-brand-orange-text"
                   : "text-stone-700 hover:bg-stone-50"
               }`}
             >
               <MdCheck
-                className={`h-3.5 w-3.5 shrink-0 ${value === opt.value ? "text-brand-orange" : "invisible"}`}
+                className={`h-3.5 w-3.5 shrink-0 ${value === opt.value ? "text-brand-orange-text" : "invisible"}`}
               />
               {opt.label}
             </button>

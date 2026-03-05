@@ -404,7 +404,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
         <div className="relative flex-1">
           <button
             onClick={() => setMobileSortOpen(!mobileSortOpen)}
-            className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-brand-orange py-2.5 text-sm font-semibold text-brand-orange"
+            className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-brand-orange py-2.5 text-sm font-semibold text-brand-orange-text"
           >
             <MdSwapVert className="h-4 w-4" />
             {t("btn_sort")}
@@ -421,7 +421,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                   }}
                   className={`w-full px-4 py-2.5 text-left text-sm transition-colors first:rounded-t-2xl last:rounded-b-2xl ${
                     sortBy === opt.value
-                      ? "bg-brand-orange/10 font-semibold text-brand-orange"
+                      ? "bg-brand-orange/10 font-semibold text-brand-orange-text"
                       : "text-stone-700 hover:bg-stone-50"
                   }`}
                 >

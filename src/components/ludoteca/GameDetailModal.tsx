@@ -209,7 +209,7 @@ export default function GameDetailModal({
               <h3 className="text-xs font-semibold text-stone-400">{t("detail_rank_types")}</h3>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {(game.rankTypes.length > 0 ? game.rankTypes : baseGame?.rankTypes ?? []).map((rank) => (
-                  <span key={rank} className="rounded-full bg-brand-orange/10 px-3 py-1 text-xs font-medium text-brand-orange">{t(`filter_rank_${rank}`)}</span>
+                  <span key={rank} className="rounded-full bg-brand-orange/10 px-3 py-1 text-xs font-medium text-brand-orange-text">{t(`filter_rank_${rank}`)}</span>
                 ))}
               </div>
             </div>

@@ -33,7 +33,7 @@ export default function ContactInfo() {
         </div>
         <a
           href="mailto:darkstone.cat@gmail.com"
-          className="text-lg font-semibold text-brand-orange transition-opacity hover:opacity-80"
+          className="text-lg font-semibold text-brand-orange-text transition-opacity hover:opacity-80"
         >
           darkstone.cat@gmail.com
         </a>
@@ -64,7 +64,7 @@ export default function ContactInfo() {
           href="https://maps.google.com/?q=Plaça+del+Tint,4,Terrassa"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 inline-block text-sm font-medium text-brand-orange transition-opacity hover:opacity-80"
+          className="mt-3 inline-block text-sm font-medium text-brand-orange-text transition-opacity hover:opacity-80"
         >
           {t("maps_link")}
         </a>

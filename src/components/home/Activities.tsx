@@ -70,6 +70,8 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
             <motion.img
               src="/images/icons/meeple.svg"
               alt=""
+              width={512}
+              height={512}
               className="h-full w-auto opacity-[0.07]"
               style={{ rotate: meepleRotate }}
             />
