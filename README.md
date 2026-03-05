@@ -103,6 +103,8 @@ Open [http://localhost:3000](http://localhost:3000) to see the site.
 | `npm run build` | Production build |
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint |
+| `npm run lighthouse` | Lighthouse audit (local build) |
+| `npm run lighthouse:prod` | Lighthouse audit (production) |
 
 ### Environment Variables
 

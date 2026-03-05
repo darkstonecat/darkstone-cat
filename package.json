@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "analyze": "ANALYZE=true next build"
+    "analyze": "ANALYZE=true next build",
+    "lighthouse": "node scripts/lighthouse/run-audit.mjs",
+    "lighthouse:local": "node scripts/lighthouse/run-audit.mjs",
+    "lighthouse:prod": "node scripts/lighthouse/run-audit.mjs --prod"
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1",
