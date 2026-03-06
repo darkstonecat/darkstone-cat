@@ -340,23 +340,48 @@ function CarouselControls({
   onGoTo: (p: number) => void;
 }) {
   const t = useTranslations("events");
+  const total = maxPage + 1;
+
+  // Sliding window: show max 5 dots, centered on active page
+  const MAX_DOTS = 5;
+  const useSlidingWindow = total > MAX_DOTS;
+
+  let windowStart = 0;
+  let windowEnd = total;
+  if (useSlidingWindow) {
+    const half = Math.floor(MAX_DOTS / 2);
+    windowStart = Math.max(0, Math.min(page - half, total - MAX_DOTS));
+    windowEnd = windowStart + MAX_DOTS;
+  }
 
   return (
     <div className="mt-6 flex items-center justify-between">
       {/* Dots */}
-      <div className="flex items-center gap-2">
-        {Array.from({ length: maxPage + 1 }, (_, i) => (
-          <button
-            key={i}
-            onClick={() => onGoTo(i)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              i === page
-                ? "w-6 bg-brand-orange"
-                : "w-2 bg-brand-white/30 hover:bg-brand-white/50"
-            }`}
-            aria-label={`${t("carousel_page")} ${i + 1}`}
-          />
-        ))}
+      <div className="flex items-center gap-1.5">
+        {Array.from({ length: windowEnd - windowStart }, (_, idx) => {
+          const i = windowStart + idx;
+          const isActive = i === page;
+          // Dots at window edges are smaller when there are more pages beyond
+          const isEdge =
+            useSlidingWindow &&
+            ((idx === 0 && windowStart > 0) ||
+              (idx === MAX_DOTS - 1 && windowEnd < total));
+
+          return (
+            <button
+              key={i}
+              onClick={() => onGoTo(i)}
+              className={`rounded-full transition-all duration-300 ${
+                isActive
+                  ? "h-2 w-5 bg-brand-orange"
+                  : isEdge
+                    ? "h-1.5 w-1.5 bg-brand-white/20"
+                    : "h-2 w-2 bg-brand-white/30 hover:bg-brand-white/50"
+              }`}
+              aria-label={`${t("carousel_page")} ${i + 1}`}
+            />
+          );
+        })}
       </div>
 
       {/* Prev / Next */}
