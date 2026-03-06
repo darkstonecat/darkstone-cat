@@ -98,7 +98,6 @@ El sitio actual es estatico. Google favorece sitios con contenido nuevo y recurr
 |---|---|---|---|
 | **Pagina de eventos/activitats** | Medio | Alto | "eventos juegos de mesa Terrassa", "partides jocs de taula" |
 | **Blog** (1-2 posts/mes) | Alto | Muy alto (largo plazo) | Long-tail: "millors jocs de taula cooperatius", "on jugar jocs de taula Terrassa" |
-| **Paginas individuales por juego** en ludoteca | Medio | Medio | Nombres de juegos especificos |
 **Ideas de articulos:**
 - "Els millors jocs de taula per a principiants" (mejores juegos para principiantes)
 - "On jugar a jocs de taula a Terrassa" (donde jugar en Terrassa — nosotros somos la respuesta principal)
