@@ -6,7 +6,8 @@
     "contact": "Contact",
     "ludoteca": "Game Library",
     "menu_button": "Menu button",
-    "skip_to_content": "Skip to main content"
+    "skip_to_content": "Skip to main content",
+    "faq": "FAQ"
   },
   "hero": {
     "tagline": "Board Game and RPG Association",
@@ -81,6 +82,7 @@
     "address_city": "08224 Terrassa",
     "rights": "All rights reserved.",
     "developedBy": "Developed by",
+    "faq": "FAQ",
     "legal": "Legal notice",
     "privacy": "Privacy",
     "cookies": "Cookies",
@@ -344,7 +346,9 @@
     "ludoteca_title": "Game Library — Board game collection",
     "ludoteca_description": "Discover the Darkstone Catalunya board game collection. Over 100 games available to play at our Friday and Saturday sessions.",
     "event_friday_name": "Open doors (Friday)",
-    "event_saturday_name": "Open doors (Saturday)"
+    "event_saturday_name": "Open doors (Saturday)",
+    "faq_title": "FAQ — Board games in Terrassa",
+    "faq_description": "Answers to the most common questions about Darkstone Catalunya: schedule, prices, how to join, available games and more."
   },
   "not_found": {
     "title": "Page not found",
@@ -459,5 +463,29 @@
     "manage_text": "You can accept or reject analytical cookies via the banner that appears the first time you visit the website. You can also configure your browser to block or delete cookies. Please note that blocking all cookies may affect the functionality of some features.",
     "updates_title": "Updates",
     "updates_text": "This cookie policy may be updated periodically to reflect changes in the cookies used or applicable regulations."
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "subtitle": "Everything you need to know about Darkstone Catalunya",
+    "what_is_q": "What is Darkstone Catalunya?",
+    "what_is_a": "We are a non-profit association dedicated to board games and role-playing games in Terrassa. We meet every week to play, share the hobby and promote the Catalan language in the gaming community.",
+    "cost_q": "How much does membership cost?",
+    "cost_a": "Membership is completely free! There are no fees or payments. With your registration you get access to all sessions and the association's game library with over 100 games.",
+    "bring_games_q": "Do I need to bring my own games?",
+    "bring_games_a": "Not at all! The association has a game library with over 100 board games you can browse on our website. If you want to bring your own games, you're welcome to!",
+    "age_q": "What age can you come?",
+    "age_a": "Everyone is welcome! Minors must be accompanied by a responsible adult. We have games for all ages and experience levels.",
+    "location_q": "Where do you meet?",
+    "location_a": "We meet at the Casal Cívic at Plaça del Tint, 4 in Terrassa (08224). The space is accessible and well connected by public transport.",
+    "schedule_q": "What are your opening hours?",
+    "schedule_a": "We are open every Friday from 17:00 to 21:00 and every Saturday from 10:00 to 14:00. You can come whenever you like during these hours — no booking or notice required.",
+    "non_member_q": "Can I come without being a member?",
+    "non_member_a": "Yes! You don't need to be a member to come and play — everyone is welcome at any session. Becoming a member is not mandatory, but it helps us a lot to keep the association and activities running.",
+    "game_types_q": "What types of games do you have?",
+    "game_types_a": "We have all kinds of board games: strategy, cooperative, family, party games, wargames, eurogames, ameritrash and much more. You can browse the full catalogue in our online game library.",
+    "rpg_q": "Do you run role-playing game sessions?",
+    "rpg_a": "Yes! We organise role-playing game sessions regularly. If you want to run or join a game, talk to us and we'll coordinate schedules and tables.",
+    "join_q": "How can I become a member?",
+    "join_a": "Come to any session and talk to us, or contact us through the contact form on the website. The process is quick and simple: just fill in a registration form. It's free!"
   }
 }

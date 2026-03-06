@@ -61,6 +61,7 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/about` | `about/page.tsx` | Origin story, mission, values |
 | `/ludoteca` | `ludoteca/page.tsx` | Game library with BGG integration (ISR, revalidate: 86400) |
 | `/contact` | `contact/page.tsx` | Contact form (Resend email) |
+| `/faq` | `faq/page.tsx` | FAQ with accordion UI, FAQPage schema (`revalidate = false`) |
 | `/conduct` | `conduct/page.tsx` | Code of conduct (`revalidate = false`) |
 | `/legal` | `legal/page.tsx` | Terms & conditions (`revalidate = false`) |
 | `/privacy` | `privacy/page.tsx` | Privacy policy (`revalidate = false`) |
@@ -120,6 +121,7 @@ All interactive components use `"use client"`. Components are organized by page:
 - `src/components/about/` — About page (AboutHero, AboutOrigin, AboutMissionValues, AboutValues)
 - `src/components/ludoteca/` — Game library (LudotecaClient, GameGrid, GameCard, GameListRow, GameDetailModal, FilterSidebar, SearchableMultiSelect, Dropdown, SortDropdown, Pagination)
 - `src/components/contact/` — Contact form (ContactHero, ContactForm, ContactInfo)
+- `src/components/faq/` — FAQ page (FaqContent)
 - `src/components/conduct/` — Code of conduct (ConductContent)
 - `src/components/legal/` — Legal pages (LegalPageContent, LegalContent, PrivacyContent, CookiesContent)
 - Root-level: NavBar, Footer, SmoothScroll, CookieBanner, CookieConsentProvider, GoogleAnalytics, ScrollProgress, ScrollToTop, TextReveal, LanguageSwitcher, ThemeLink, ErrorContent
@@ -151,7 +153,19 @@ Client state in `LudotecaClient.tsx`:
 - `src/app/[locale]/opengraph-image.tsx` — Dynamic OG image (1200×630)
 - Layout: JSON-LD Organization schema, OpenGraph + Twitter metadata
 - Metadata base: `https://www.darkstone.cat`
-- **When adding or modifying pages**: update `lastModified` date and the `pages` array in `src/app/sitemap.ts`
+#### Checklist: Adding a new page
+
+When adding a new page, update **all** of the following:
+
+1. `src/app/[locale]/<page>/page.tsx` — Page with `generateMetadata()`, JSON-LD (BreadcrumbList + WebPage + any page-specific schema), revalidate
+2. `src/components/<page>/` — Page component(s)
+3. `src/messages/{ca,es,en}.json` — Add keys in `metadata` namespace (`<page>_title`, `<page>_description`), `nav` namespace (breadcrumb name), `footer` namespace (if linked from footer), and page-specific namespace
+4. `src/app/sitemap.ts` — Add entry to `pages` array with path, changeFrequency, priority, lastModified
+5. `src/components/NavBar.tsx` — Add `"/<page>"` to `SUBPAGE_THEMES` map (required for theme detection)
+6. `src/components/Footer.tsx` — Optionally add link to `NAV_LINKS` (main pages) or `LEGAL_LINKS` (support/legal pages)
+7. `scripts/lighthouse/config.mjs` — Add entry to `PAGES` array
+8. `CLAUDE.md` — Update Pages table, Component Structure list, and Translation Key Namespaces
+9. `README.md` — Update Pages table
 
 ### Security Headers & Build Config (next.config.ts)
 
@@ -184,7 +198,7 @@ HSTS, CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Refer
 
 ## Translation Key Namespaces
 
-`nav`, `hero`, `about`, `activities`, `schedule`, `join_us`, `location`, `footer`, `about_page`, `ludoteca`, `contact_page`, `cookies`, `conduct`, `legal`, `privacy`, `error_page`, `not_found`, `metadata`
+`nav`, `hero`, `about`, `activities`, `schedule`, `join_us`, `location`, `footer`, `about_page`, `ludoteca`, `contact_page`, `faq`, `cookies`, `conduct`, `legal`, `privacy`, `error_page`, `not_found`, `metadata`
 
 ## Path Alias
 

@@ -6,7 +6,8 @@
     "contact": "Contacte",
     "ludoteca": "Ludoteca",
     "menu_button": "Botó de menú",
-    "skip_to_content": "Saltar al contingut principal"
+    "skip_to_content": "Saltar al contingut principal",
+    "faq": "Preguntes freqüents"
   },
   "hero": {
     "tagline": "Associació de Jocs de Taula i Rol",
@@ -81,6 +82,7 @@
     "address_city": "08224 Terrassa",
     "rights": "Tots els drets reservats.",
     "developedBy": "Desenvolupat per",
+    "faq": "FAQ",
     "legal": "Avís legal",
     "privacy": "Privadesa",
     "cookies": "Cookies",
@@ -344,7 +346,9 @@
     "ludoteca_title": "Ludoteca — Catàleg de jocs de taula",
     "ludoteca_description": "Descobreix la col·lecció de jocs de taula de Darkstone Catalunya. Més de 100 jocs disponibles per jugar a les nostres sessions de divendres i dissabte.",
     "event_friday_name": "Portes obertes (divendres)",
-    "event_saturday_name": "Portes obertes (dissabte)"
+    "event_saturday_name": "Portes obertes (dissabte)",
+    "faq_title": "Preguntes freqüents — Jocs de taula a Terrassa",
+    "faq_description": "Respostes a les preguntes més habituals sobre l'Associació Darkstone Catalunya: horaris, preus, com fer-se soci, jocs disponibles i més."
   },
   "not_found": {
     "title": "Pàgina no trobada",
@@ -459,5 +463,29 @@
     "manage_text": "Podeu acceptar o rebutjar les cookies analítiques mitjançant el bàner que apareix la primera vegada que visiteu el lloc web. També podeu configurar el vostre navegador per bloquejar o eliminar cookies. Tingueu en compte que bloquejar totes les cookies pot afectar el funcionament d'algunes funcionalitats.",
     "updates_title": "Actualitzacions",
     "updates_text": "Aquesta política de cookies pot ser actualitzada periòdicament per reflectir canvis en les cookies utilitzades o la normativa aplicable."
+  },
+  "faq": {
+    "title": "Preguntes freqüents",
+    "subtitle": "Tot el que necessites saber sobre Darkstone Catalunya",
+    "what_is_q": "Què és Darkstone Catalunya?",
+    "what_is_a": "Som una associació sense ànim de lucre dedicada als jocs de taula i jocs de rol a Terrassa. Ens reunim cada setmana per jugar, compartir l'afició i fomentar la llengua catalana en l'àmbit lúdic.",
+    "cost_q": "Quant costa ser soci?",
+    "cost_a": "Ser soci és completament gratuït! No hi ha quotes ni pagaments. Amb la teva inscripció tens accés a totes les sessions i a la ludoteca de l'associació amb més de 100 jocs.",
+    "bring_games_q": "Cal portar jocs?",
+    "bring_games_a": "No cal! L'associació disposa d'una ludoteca amb més de 100 jocs de taula que pots consultar a la nostra web. Si vols portar els teus jocs, ets benvingut!",
+    "age_q": "A quina edat es pot venir?",
+    "age_a": "Tothom és benvingut! Els menors d'edat han de venir acompanyats d'un adult responsable. Tenim jocs per a totes les edats i nivells d'experiència.",
+    "location_q": "On ens trobem?",
+    "location_a": "Ens reunim al Casal Cívic de la Plaça del Tint, 4 a Terrassa (08224). L'espai és accessible i està ben comunicat amb transport públic.",
+    "schedule_q": "Quin horari teniu?",
+    "schedule_a": "Obrim cada divendres de 17:00 a 21:00 i cada dissabte de 10:00 a 14:00. Pots venir quan vulguis dins d'aquest horari, no cal reservar ni avisar.",
+    "non_member_q": "Es pot venir sense ser soci?",
+    "non_member_a": "Sí! No cal ser soci per venir a jugar, tothom és benvingut a qualsevol sessió. Fer-te soci no és obligatori, però ens ajuda molt a mantenir l'associació i les activitats.",
+    "game_types_q": "Quins tipus de jocs teniu?",
+    "game_types_a": "Tenim jocs de taula de tot tipus: estratègia, cooperatius, familiars, party games, jocs de guerra, eurogames, ameritrash i molt més. Pots consultar el catàleg complet a la nostra ludoteca online.",
+    "rpg_q": "Feu partides de jocs de rol?",
+    "rpg_a": "Sí! Organitzem partides de jocs de rol regularment. Si vols dirigir o jugar una partida, parla amb nosaltres i coordinarem horaris i taules.",
+    "join_q": "Com puc fer-me soci?",
+    "join_a": "Vine a qualsevol sessió i parla amb nosaltres, o contacta'ns a través del formulari de contacte de la web. El procés és ràpid i senzill: només cal omplir un formulari d'inscripció. És gratuït!"
   }
 }

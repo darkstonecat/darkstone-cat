@@ -43,6 +43,7 @@ const SUBPAGE_THEMES: Record<string, { text: string; bg: string }> = {
   "/legal": { text: "#FAFAF9", bg: "#1C1917" },
   "/privacy": { text: "#FAFAF9", bg: "#1C1917" },
   "/cookies": { text: "#FAFAF9", bg: "#1C1917" },
+  "/faq": { text: "#FAFAF9", bg: "#1C1917" },
 };
 
 export default function NavBar() {

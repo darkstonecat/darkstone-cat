@@ -6,7 +6,8 @@
     "contact": "Contacto",
     "ludoteca": "Ludoteca",
     "menu_button": "Botón de menú",
-    "skip_to_content": "Saltar al contenido principal"
+    "skip_to_content": "Saltar al contenido principal",
+    "faq": "Preguntas frecuentes"
   },
   "hero": {
     "tagline": "Asociación de Juegos de Mesa y Rol",
@@ -81,6 +82,7 @@
     "address_city": "08224 Terrassa",
     "rights": "Todos los derechos reservados.",
     "developedBy": "Desarrollado por",
+    "faq": "FAQ",
     "legal": "Aviso legal",
     "privacy": "Privacidad",
     "cookies": "Cookies",
@@ -344,7 +346,9 @@
     "ludoteca_title": "Ludoteca — Catálogo de juegos de mesa",
     "ludoteca_description": "Descubre la colección de juegos de mesa de Darkstone Catalunya. Más de 100 juegos disponibles para jugar en nuestras sesiones de viernes y sábado.",
     "event_friday_name": "Puertas abiertas (viernes)",
-    "event_saturday_name": "Puertas abiertas (sábado)"
+    "event_saturday_name": "Puertas abiertas (sábado)",
+    "faq_title": "Preguntas frecuentes — Juegos de mesa en Terrassa",
+    "faq_description": "Respuestas a las preguntas más habituales sobre la Asociación Darkstone Catalunya: horarios, precios, cómo hacerse socio, juegos disponibles y más."
   },
   "not_found": {
     "title": "Página no encontrada",
@@ -459,5 +463,29 @@
     "manage_text": "Puede aceptar o rechazar las cookies analíticas mediante el banner que aparece la primera vez que visita el sitio web. También puede configurar su navegador para bloquear o eliminar cookies. Tenga en cuenta que bloquear todas las cookies puede afectar el funcionamiento de algunas funcionalidades.",
     "updates_title": "Actualizaciones",
     "updates_text": "Esta política de cookies puede ser actualizada periódicamente para reflejar cambios en las cookies utilizadas o la normativa aplicable."
+  },
+  "faq": {
+    "title": "Preguntas frecuentes",
+    "subtitle": "Todo lo que necesitas saber sobre Darkstone Catalunya",
+    "what_is_q": "¿Qué es Darkstone Catalunya?",
+    "what_is_a": "Somos una asociación sin ánimo de lucro dedicada a los juegos de mesa y juegos de rol en Terrassa. Nos reunimos cada semana para jugar, compartir la afición y fomentar la lengua catalana en el ámbito lúdico.",
+    "cost_q": "¿Cuánto cuesta ser socio?",
+    "cost_a": "¡Ser socio es completamente gratuito! No hay cuotas ni pagos. Con tu inscripción tienes acceso a todas las sesiones y a la ludoteca de la asociación con más de 100 juegos.",
+    "bring_games_q": "¿Hay que traer juegos?",
+    "bring_games_a": "¡No hace falta! La asociación dispone de una ludoteca con más de 100 juegos de mesa que puedes consultar en nuestra web. Si quieres traer tus propios juegos, ¡eres bienvenido!",
+    "age_q": "¿A qué edad se puede venir?",
+    "age_a": "¡Todo el mundo es bienvenido! Los menores de edad deben venir acompañados de un adulto responsable. Tenemos juegos para todas las edades y niveles de experiencia.",
+    "location_q": "¿Dónde nos encontramos?",
+    "location_a": "Nos reunimos en el Casal Cívic de la Plaça del Tint, 4 en Terrassa (08224). El espacio es accesible y está bien comunicado con transporte público.",
+    "schedule_q": "¿Qué horario tenéis?",
+    "schedule_a": "Abrimos cada viernes de 17:00 a 21:00 y cada sábado de 10:00 a 14:00. Puedes venir cuando quieras dentro de este horario, no hace falta reservar ni avisar.",
+    "non_member_q": "¿Se puede venir sin ser socio?",
+    "non_member_a": "¡Sí! No hace falta ser socio para venir a jugar, todo el mundo es bienvenido en cualquier sesión. Hacerte socio no es obligatorio, pero nos ayuda mucho a mantener la asociación y las actividades.",
+    "game_types_q": "¿Qué tipos de juegos tenéis?",
+    "game_types_a": "Tenemos juegos de mesa de todo tipo: estrategia, cooperativos, familiares, party games, juegos de guerra, eurogames, ameritrash y mucho más. Puedes consultar el catálogo completo en nuestra ludoteca online.",
+    "rpg_q": "¿Hacéis partidas de juegos de rol?",
+    "rpg_a": "¡Sí! Organizamos partidas de juegos de rol regularmente. Si quieres dirigir o jugar una partida, habla con nosotros y coordinaremos horarios y mesas.",
+    "join_q": "¿Cómo puedo hacerme socio?",
+    "join_a": "Ven a cualquier sesión y habla con nosotros, o contáctanos a través del formulario de contacto de la web. El proceso es rápido y sencillo: solo hay que rellenar un formulario de inscripción. ¡Es gratuito!"
   }
 }

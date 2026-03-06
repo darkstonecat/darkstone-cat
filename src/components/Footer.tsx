@@ -39,6 +39,7 @@ const SOCIALS = [
 ] as const;
 
 const LEGAL_LINKS = [
+  { href: "/faq", key: "faq" },
   { href: "/legal", key: "legal" },
   { href: "/privacy", key: "privacy" },
   { href: "/cookies", key: "cookies" },

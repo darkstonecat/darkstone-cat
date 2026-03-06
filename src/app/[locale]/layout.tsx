@@ -111,6 +111,15 @@ export default async function LocaleLayout({
         email: "darkstone.cat@gmail.com",
         address,
         location: { "@id": placeId },
+        areaServed: {
+          "@type": "City",
+          name: "Terrassa",
+          containedInPlace: {
+            "@type": "AdministrativeArea",
+            name: "Barcelona",
+          },
+        },
+        knowsLanguage: ["ca", "es", "en"],
         sameAs,
         openingHoursSpecification: [
           {
@@ -126,6 +135,19 @@ export default async function LocaleLayout({
             closes: "14:00",
           },
         ],
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.darkstone.cat/#website",
+        name: "Darkstone Catalunya",
+        url: "https://www.darkstone.cat",
+        publisher: { "@id": orgId },
+        inLanguage: ["ca", "es", "en"],
+        potentialAction: {
+          "@type": "SearchAction",
+          target: "https://www.darkstone.cat/ludoteca?q={search_term_string}",
+          "query-input": "required name=search_term_string",
+        },
       },
       {
         "@type": "Place",
@@ -154,6 +176,12 @@ export default async function LocaleLayout({
         organizer: { "@id": orgId },
         eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
         isAccessibleForFree: true,
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "EUR",
+          availability: "https://schema.org/InStock",
+        },
       },
       {
         "@type": "Event",
@@ -171,6 +199,12 @@ export default async function LocaleLayout({
         organizer: { "@id": orgId },
         eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
         isAccessibleForFree: true,
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "EUR",
+          availability: "https://schema.org/InStock",
+        },
       },
     ],
   };

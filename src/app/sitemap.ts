@@ -4,10 +4,11 @@ const BASE_URL = "https://www.darkstone.cat";
 const locales = ["ca", "es", "en"] as const;
 
 const pages = [
-  { path: "", changeFrequency: "weekly" as const, priority: 1.0, lastModified: "2026-03-04" },
+  { path: "", changeFrequency: "monthly" as const, priority: 1.0, lastModified: "2026-03-04" },
   { path: "/about", changeFrequency: "monthly" as const, priority: 0.8, lastModified: "2026-03-04" },
-  { path: "/ludoteca", changeFrequency: "daily" as const, priority: 0.8, lastModified: "2026-03-04" },
-  { path: "/contact", changeFrequency: "monthly" as const, priority: 0.7, lastModified: "2026-03-04" },
+  { path: "/ludoteca", changeFrequency: "monthly" as const, priority: 0.8, lastModified: "2026-03-04" },
+  { path: "/contact", changeFrequency: "yearly" as const, priority: 0.7, lastModified: "2026-03-04" },
+  { path: "/faq", changeFrequency: "yearly" as const, priority: 0.6, lastModified: "2026-03-06" },
   { path: "/conduct", changeFrequency: "yearly" as const, priority: 0.5, lastModified: "2026-03-04" },
   { path: "/legal", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-02-01" },
   { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-02-01" },
