@@ -38,6 +38,8 @@ Automated Lighthouse audits for all 8 pages (Catalan locale) on mobile + desktop
 
 Output goes to `audits/lighthouse/<timestamp>/` (gitignored) with `REPORT.md` and `raw/` containing JSON + HTML reports per page/device.
 
+**Known limitations**: `AUDIT.md` documents Lighthouse issues caused by Next.js framework constraints (legacy JS polyfills, bfcache, render-blocking CSS, network chains, unused shared chunks) and expected behavior from page complexity (ludoteca LCP, heavy animation pages). These should be ignored in future audits.
+
 ## Architecture
 
 ### Routing & i18n

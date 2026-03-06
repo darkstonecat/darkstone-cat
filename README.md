@@ -131,6 +131,12 @@ The ludoteca works in **mock mode** when `BGG_API_KEY` is not set — it reads l
 
 **Cookie Consent** — GDPR-compliant consent banner backed by `useSyncExternalStore` for hydration-safe localStorage access. Google Analytics only loads after explicit user acceptance.
 
+## Lighthouse Audit
+
+The project maintains near-perfect Lighthouse scores across all 8 pages (100/100/100/100 on desktop, 91–100 Performance on mobile with 100 Accessibility/Best Practices/SEO).
+
+Known audit limitations caused by Next.js framework constraints and expected page complexity are documented in [`AUDIT.md`](AUDIT.md).
+
 ## Future Improvements
 
 ### Persistent Rate Limiting

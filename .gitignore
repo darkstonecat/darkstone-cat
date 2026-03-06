@@ -50,6 +50,6 @@ lighthouse-*
 .antigravity
 
 # Audit
-AUDIT.md
 audits/
+.lighthouse/
 .unlighthouse/
