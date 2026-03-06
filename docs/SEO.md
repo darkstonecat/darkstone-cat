@@ -88,49 +88,7 @@ Una vez verificado el GBP:
 
 ### Fase 3 — Mes 1-2
 
-#### 7. Mejoras Tecnicas Menores
-
-El SEO tecnico ya esta al 100%, pero hay schema adicional que puede generar **rich results** (resultados enriquecidos en Google):
-
-**a) FAQPage Schema**
-Anadir una seccion de preguntas frecuentes en la home o about con datos estructurados. Google puede mostrar las preguntas directamente en los resultados de busqueda:
-- "Quant costa ser soci?"
-- "Cal portar jocs?"
-- "A quina edat es pot venir?"
-- "On ens trobem?"
-
-**b) WebSite Schema con SearchAction**
-Indicar a Google que la ludoteca tiene buscador:
-```json
-{
-  "@type": "WebSite",
-  "name": "Darkstone Catalunya",
-  "url": "https://www.darkstone.cat",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "https://www.darkstone.cat/ludoteca?q={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
-}
-```
-
-**c) Enriquecer Organization Schema**
-Anadir campos adicionales al JSON-LD existente:
-- `areaServed`: `{"@type": "City", "name": "Terrassa"}`
-- `knowsLanguage`: `["ca", "es", "en"]`
-
-**d) Anadir `offers` a Event Schema**
-Explicitar que los eventos son gratuitos (puede mostrarse como "Gratis" en resultados):
-```json
-"offers": {
-  "@type": "Offer",
-  "price": "0",
-  "priceCurrency": "EUR",
-  "availability": "https://schema.org/InStock"
-}
-```
-
-#### 8. Estrategia de Contenido
+#### 7. Estrategia de Contenido
 
 El sitio actual es estatico. Google favorece sitios con contenido nuevo y recurrente.
 
@@ -141,8 +99,6 @@ El sitio actual es estatico. Google favorece sitios con contenido nuevo y recurr
 | **Pagina de eventos/activitats** | Medio | Alto | "eventos juegos de mesa Terrassa", "partides jocs de taula" |
 | **Blog** (1-2 posts/mes) | Alto | Muy alto (largo plazo) | Long-tail: "millors jocs de taula cooperatius", "on jugar jocs de taula Terrassa" |
 | **Paginas individuales por juego** en ludoteca | Medio | Medio | Nombres de juegos especificos |
-| **Seccion FAQ** | Bajo | Medio | Preguntas conversacionales y voice search |
-
 **Ideas de articulos:**
 - "Els millors jocs de taula per a principiants" (mejores juegos para principiantes)
 - "On jugar a jocs de taula a Terrassa" (donde jugar en Terrassa — nosotros somos la respuesta principal)
@@ -150,7 +106,7 @@ El sitio actual es estatico. Google favorece sitios con contenido nuevo y recurr
 - Resenas de juegos de la coleccion
 - Cronicas de sesiones con fotos
 
-#### 9. Backlinks Adicionales
+#### 8. Backlinks Adicionales
 
 | Fuente | Accion | Esfuerzo |
 |---|---|---|
@@ -192,15 +148,17 @@ El sitio actual es estatico. Google favorece sitios con contenido nuevo y recurr
 | 4 | Pedir link desde darkstone.es | Medio | 1 email |
 | 5 | Directorios: Ajuntament, BGG, Wikidata | Alto | 2-3 horas |
 | 6 | Reviews de socios en Google | Alto | Continuo |
-| 7 | FAQ con schema FAQPage | Medio | 2-3 horas (dev) |
-| 8 | Schema adicional (WebSite, offers, areaServed) | Bajo-medio | 1 hora (dev) |
-| 9 | Pagina de eventos | Alto | 1-2 dias (dev) |
-| 10 | Blog / contenido recurrente | Muy alto (largo plazo) | Continuo |
+| 7 | Pagina de eventos | Alto | 1-2 dias (dev) |
+| 8 | Blog / contenido recurrente | Muy alto (largo plazo) | Continuo |
 
-## Lo que YA esta bien (no tocar)
+## Ya implementado
 
+- Pagina `/faq` con acordeon y schema FAQPage (10 Q&A en 3 idiomas)
+- WebSite schema con SearchAction (buscador de ludoteca)
+- Organization schema enriquecido: `areaServed` (Terrassa), `knowsLanguage` (ca/es/en)
+- Event schema con `offers` (eventos gratuitos)
 - Sitemap con hreflang y alternates para 3 locales
-- JSON-LD: Organization (NGO), Place (GeoCoordinates), Event (recurring), BreadcrumbList, WebPage, ItemList
+- JSON-LD: Organization (NGO), Place (GeoCoordinates), Event (recurring), BreadcrumbList, WebPage, ItemList, FAQPage
 - Meta descriptions con keywords locales en los 3 idiomas
 - Canonical tags + hreflang en todas las paginas
 - OpenGraph + Twitter Cards con imagen dinamica por locale
