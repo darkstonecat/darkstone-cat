@@ -7,7 +7,8 @@
     "ludoteca": "Game Library",
     "menu_button": "Menu button",
     "skip_to_content": "Skip to main content",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "events": "Events"
   },
   "hero": {
     "tagline": "Board Game and RPG Association",
@@ -86,6 +87,7 @@
     "legal": "Legal notice",
     "privacy": "Privacy",
     "cookies": "Cookies",
+    "events": "Events",
     "supportedBy": "Supported by"
   },
   "join_us": {
@@ -348,7 +350,9 @@
     "event_friday_name": "Open doors (Friday)",
     "event_saturday_name": "Open doors (Saturday)",
     "faq_title": "FAQ — Board games in Terrassa",
-    "faq_description": "Answers to the most common questions about Darkstone Catalunya: schedule, prices, how to join, available games and more."
+    "faq_description": "Answers to the most common questions about Darkstone Catalunya: schedule, prices, how to join, available games and more.",
+    "events_title": "Upcoming Events — Darkstone Catalunya",
+    "events_description": "Check out the upcoming board game events and sessions at Darkstone Catalunya in Terrassa."
   },
   "not_found": {
     "title": "Page not found",
@@ -463,6 +467,20 @@
     "manage_text": "You can accept or reject analytical cookies via the banner that appears the first time you visit the website. You can also configure your browser to block or delete cookies. Please note that blocking all cookies may affect the functionality of some features.",
     "updates_title": "Updates",
     "updates_text": "This cookie policy may be updated periodically to reflect changes in the cookies used or applicable regulations."
+  },
+  "events": {
+    "title": "Events",
+    "subtitle": "Come play with us!",
+    "regular_title": "Upcoming sessions",
+    "special_title": "Special events",
+    "view_event": "View on Ludoya",
+    "error_title": "Could not load events",
+    "error_description": "You can check our events directly on Ludoya.",
+    "error_link": "View events on Ludoya",
+    "no_events": "No events scheduled at the moment",
+    "carousel_page": "Page",
+    "carousel_prev": "Previous",
+    "carousel_next": "Next"
   },
   "faq": {
     "title": "Frequently asked questions",

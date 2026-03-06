@@ -7,6 +7,7 @@ export const PAGES = [
   { slug: 'about', path: '/about' },
   { slug: 'ludoteca', path: '/ludoteca' },
   { slug: 'contact', path: '/contact' },
+  { slug: 'events', path: '/events' },
   { slug: 'faq', path: '/faq' },
   { slug: 'conduct', path: '/conduct' },
   { slug: 'legal', path: '/legal' },

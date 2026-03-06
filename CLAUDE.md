@@ -61,6 +61,7 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/about` | `about/page.tsx` | Origin story, mission, values |
 | `/ludoteca` | `ludoteca/page.tsx` | Game library with BGG integration (ISR, revalidate: 86400) |
 | `/contact` | `contact/page.tsx` | Contact form (Resend email) |
+| `/events` | `events/page.tsx` | Upcoming events from Ludoya API (ISR, revalidate: 86400) |
 | `/faq` | `faq/page.tsx` | FAQ with accordion UI, FAQPage schema (`revalidate = false`) |
 | `/conduct` | `conduct/page.tsx` | Code of conduct (`revalidate = false`) |
 | `/legal` | `legal/page.tsx` | Terms & conditions (`revalidate = false`) |
@@ -121,6 +122,7 @@ All interactive components use `"use client"`. Components are organized by page:
 - `src/components/about/` — About page (AboutHero, AboutOrigin, AboutMissionValues, AboutValues)
 - `src/components/ludoteca/` — Game library (LudotecaClient, GameGrid, GameCard, GameListRow, GameDetailModal, FilterSidebar, SearchableMultiSelect, Dropdown, SortDropdown, Pagination)
 - `src/components/contact/` — Contact form (ContactHero, ContactForm, ContactInfo)
+- `src/components/events/` — Events page (EventsHero, EventsContent)
 - `src/components/faq/` — FAQ page (FaqContent)
 - `src/components/conduct/` — Code of conduct (ConductContent)
 - `src/components/legal/` — Legal pages (LegalPageContent, LegalContent, PrivacyContent, CookiesContent)
@@ -198,7 +200,7 @@ HSTS, CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Refer
 
 ## Translation Key Namespaces
 
-`nav`, `hero`, `about`, `activities`, `schedule`, `join_us`, `location`, `footer`, `about_page`, `ludoteca`, `contact_page`, `faq`, `cookies`, `conduct`, `legal`, `privacy`, `error_page`, `not_found`, `metadata`
+`nav`, `hero`, `about`, `activities`, `schedule`, `join_us`, `location`, `footer`, `about_page`, `ludoteca`, `contact_page`, `events`, `faq`, `cookies`, `conduct`, `legal`, `privacy`, `error_page`, `not_found`, `metadata`
 
 ## Path Alias
 

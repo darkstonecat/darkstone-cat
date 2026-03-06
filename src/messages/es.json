@@ -7,7 +7,8 @@
     "ludoteca": "Ludoteca",
     "menu_button": "Botón de menú",
     "skip_to_content": "Saltar al contenido principal",
-    "faq": "Preguntas frecuentes"
+    "faq": "Preguntas frecuentes",
+    "events": "Eventos"
   },
   "hero": {
     "tagline": "Asociación de Juegos de Mesa y Rol",
@@ -86,6 +87,7 @@
     "legal": "Aviso legal",
     "privacy": "Privacidad",
     "cookies": "Cookies",
+    "events": "Eventos",
     "supportedBy": "Con el apoyo de"
   },
   "join_us": {
@@ -348,7 +350,9 @@
     "event_friday_name": "Puertas abiertas (viernes)",
     "event_saturday_name": "Puertas abiertas (sábado)",
     "faq_title": "Preguntas frecuentes — Juegos de mesa en Terrassa",
-    "faq_description": "Respuestas a las preguntas más habituales sobre la Asociación Darkstone Catalunya: horarios, precios, cómo hacerse socio, juegos disponibles y más."
+    "faq_description": "Respuestas a las preguntas más habituales sobre la Asociación Darkstone Catalunya: horarios, precios, cómo hacerse socio, juegos disponibles y más.",
+    "events_title": "Próximos Eventos — Darkstone Catalunya",
+    "events_description": "Consulta los próximos eventos y partidas de juegos de mesa de Darkstone Catalunya en Terrassa."
   },
   "not_found": {
     "title": "Página no encontrada",
@@ -463,6 +467,20 @@
     "manage_text": "Puede aceptar o rechazar las cookies analíticas mediante el banner que aparece la primera vez que visita el sitio web. También puede configurar su navegador para bloquear o eliminar cookies. Tenga en cuenta que bloquear todas las cookies puede afectar el funcionamiento de algunas funcionalidades.",
     "updates_title": "Actualizaciones",
     "updates_text": "Esta política de cookies puede ser actualizada periódicamente para reflejar cambios en las cookies utilizadas o la normativa aplicable."
+  },
+  "events": {
+    "title": "Eventos",
+    "subtitle": "¡Ven a jugar con nosotros!",
+    "regular_title": "Próximas sesiones",
+    "special_title": "Eventos especiales",
+    "view_event": "Ver en Ludoya",
+    "error_title": "No se han podido cargar los eventos",
+    "error_description": "Puedes consultar nuestros eventos directamente en Ludoya.",
+    "error_link": "Ver eventos en Ludoya",
+    "no_events": "No hay eventos programados próximamente",
+    "carousel_page": "Página",
+    "carousel_prev": "Anterior",
+    "carousel_next": "Siguiente"
   },
   "faq": {
     "title": "Preguntas frecuentes",

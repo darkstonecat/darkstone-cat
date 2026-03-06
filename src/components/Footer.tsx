@@ -10,6 +10,7 @@ import { FaXTwitter } from "react-icons/fa6";
 const NAV_LINKS = [
   { href: "/", key: "home" },
   { href: "/about", key: "about" },
+  { href: "/events", key: "events" },
   { href: "/ludoteca", key: "ludoteca" },
   { href: "/conduct", key: "conduct" },
   { href: "/contact", key: "contact" },

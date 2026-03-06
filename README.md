@@ -41,6 +41,7 @@
 | `/about` | Origin story, mission, and values |
 | `/ludoteca` | Game library with filters, search, and BGG data |
 | `/contact` | Contact form |
+| `/events` | Upcoming events from Ludoya |
 | `/faq` | Frequently asked questions |
 | `/conduct` | Code of conduct |
 | `/legal` | Terms & conditions |
