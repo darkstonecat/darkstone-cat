@@ -81,6 +81,19 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      // Legacy route renamed in ecd08af (/pautes-de-conducta → /conduct)
+      { source: "/pautes-de-conducta", destination: "/conduct", permanent: true },
+      { source: "/:locale(es|en)/pautes-de-conducta", destination: "/:locale/conduct", permanent: true },
+      // Default locale (ca) has no URL prefix. next-intl's middleware already
+      // redirects /ca/* → /* but with a temporary 307; these run before the
+      // middleware and make the redirect permanent (308) so search engines
+      // consolidate signals on the unprefixed URL.
+      { source: "/ca", destination: "/", permanent: true },
+      { source: "/ca/:path*", destination: "/:path*", permanent: true },
+    ];
+  },
 };
 
 export default analyzer(withNextIntl(nextConfig));

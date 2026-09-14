@@ -150,8 +150,11 @@ Client state in `LudotecaClient.tsx`:
 
 ### SEO
 
-- `src/app/sitemap.ts` — Dynamic sitemap with locale alternates
+- `src/app/sitemap.ts` — Dynamic sitemap: one entry per page **and locale** with hreflang alternates. **Only indexable pages** — never list a page that sets `robots: noindex` (Search Console flags it as a contradiction)
 - `src/app/robots.ts` — robots.txt
+- `src/lib/seo.ts` — `getLocalizedUrl()` / `getAlternates()` build canonical + hreflang URLs. The root is always `https://www.darkstone.cat/` (with trailing slash)
+- `src/app/[locale]/[...rest]/page.tsx` — Catch-all that calls `notFound()` so unknown paths render the custom `not-found.tsx` instead of the Next.js default 404
+- `next.config.ts` `redirects()` — Permanent (308) redirects: legacy `/pautes-de-conducta` → `/conduct`, and `/ca/*` → `/*` (next-intl's middleware only does a temporary 307). **When renaming a route, add a permanent redirect from the old path here.**
 - `src/app/[locale]/opengraph-image.tsx` — Dynamic OG image (1200×630)
 - Layout: JSON-LD Organization schema, OpenGraph + Twitter metadata
 - Metadata base: `https://www.darkstone.cat`
@@ -162,7 +165,7 @@ When adding a new page, update **all** of the following:
 1. `src/app/[locale]/<page>/page.tsx` — Page with `generateMetadata()`, JSON-LD (BreadcrumbList + WebPage + any page-specific schema), revalidate
 2. `src/components/<page>/` — Page component(s)
 3. `src/messages/{ca,es,en}.json` — Add keys in `metadata` namespace (`<page>_title`, `<page>_description`), `nav` namespace (breadcrumb name), `footer` namespace (if linked from footer), and page-specific namespace
-4. `src/app/sitemap.ts` — Add entry to `pages` array with path, changeFrequency, priority, lastModified
+4. `src/app/sitemap.ts` — Add entry to `pages` array with path, changeFrequency, priority, lastModified (**skip if the page is `noindex`**)
 5. `src/components/NavBar.tsx` — Add `"/<page>"` to `SUBPAGE_THEMES` map (required for theme detection)
 6. `src/components/Footer.tsx` — Optionally add link to `NAV_LINKS` (main pages) or `LEGAL_LINKS` (support/legal pages)
 7. `scripts/lighthouse/config.mjs` — Add entry to `PAGES` array

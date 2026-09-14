@@ -43,10 +43,6 @@ export async function generateMetadata({
       card: "summary_large_image",
       site: "@darkstonecat",
     },
-    robots: {
-      index: true,
-      follow: true,
-    },
   };
 }
 
@@ -224,7 +220,6 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#1C1917" />
-        <meta name="description" content={t("home_description")} />
         <meta name="version" content={`${process.env.NEXT_PUBLIC_BUILD_DATE} | ${process.env.NEXT_PUBLIC_BUILD_VERSION}`} />
         <link rel="preconnect" href="https://cf.geekdo-images.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
