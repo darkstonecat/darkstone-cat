@@ -41,7 +41,7 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://cf.geekdo-images.com https://img.ludoya.com https://www.googletagmanager.com",
+      "img-src 'self' data: blob: https://cf.geekdo-images.com https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net https://www.googletagmanager.com",
       "font-src 'self'",
       "connect-src 'self' https://*.google-analytics.com https://www.googletagmanager.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
       "frame-src 'self' https://www.google.com",
@@ -69,7 +69,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "img.ludoya.com",
+        hostname: "ludoya-images.s3.eu-west-par.io.cloud.ovh.net",
       },
     ],
   },

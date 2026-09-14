@@ -19,6 +19,7 @@ npm run start            # Start production server
 npm run lint             # Run ESLint
 npm run lighthouse       # Lighthouse audit — local (build + start + audit + cleanup)
 npm run lighthouse:prod  # Lighthouse audit — production (darkstone.cat)
+npm run ludoya:check     # Verify Ludoya API endpoints and response shapes (live)
 ```
 
 No test runner is configured.
@@ -61,14 +62,18 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/about` | `about/page.tsx` | Origin story, mission, values |
 | `/ludoteca` | `ludoteca/page.tsx` | Game library with BGG integration (ISR, revalidate: 86400) |
 | `/contact` | `contact/page.tsx` | Contact form (Resend email) |
-| `/events` | `events/page.tsx` | Upcoming events from Ludoya API (ISR, revalidate: 86400) |
+| `/events` | `events/page.tsx` | Upcoming events from Ludoya API (`revalidate: 86400`) |
+| `/events/images` | `events/images/page.tsx` | Internal tool: preview/download shareable event images (`noindex`, not in sitemap) |
 | `/faq` | `faq/page.tsx` | FAQ with accordion UI, FAQPage schema (`revalidate = false`) |
 | `/conduct` | `conduct/page.tsx` | Code of conduct (`revalidate = false`) |
 | `/legal` | `legal/page.tsx` | Terms & conditions (`revalidate = false`) |
 | `/privacy` | `privacy/page.tsx` | Privacy policy (`revalidate = false`) |
 | `/cookies` | `cookies/page.tsx` | Cookie policy (`revalidate = false`) |
 
-API route: `src/app/api/contact/route.ts` — POST endpoint using Resend to send emails.
+API routes:
+- `src/app/api/contact/route.ts` — POST endpoint using Resend to send emails
+- `src/app/api/events/[eventId]/image/route.ts` — GET 1080×1080 PNG for an event (Satori via `next/og`, `src/lib/event-image/`)
+- `src/app/api/test-image/[count]/route.ts` — GET test image with 1–8 hardcoded games, for layout checks
 
 ### Provider Stack (layout.tsx)
 
@@ -122,7 +127,7 @@ All interactive components use `"use client"`. Components are organized by page:
 - `src/components/about/` — About page (AboutHero, AboutOrigin, AboutMissionValues, AboutValues)
 - `src/components/ludoteca/` — Game library (LudotecaClient, GameGrid, GameCard, GameListRow, GameDetailModal, FilterSidebar, SearchableMultiSelect, Dropdown, SortDropdown, Pagination)
 - `src/components/contact/` — Contact form (ContactHero, ContactForm, ContactInfo)
-- `src/components/events/` — Events page (EventsHero, EventsContent)
+- `src/components/events/` — Events page (EventsHero, EventsContent) and event images tool (EventImagesHero, EventImagesContent)
 - `src/components/faq/` — FAQ page (FaqContent)
 - `src/components/conduct/` — Code of conduct (ConductContent)
 - `src/components/legal/` — Legal pages (LegalPageContent, LegalContent, PrivacyContent, CookiesContent)
@@ -143,6 +148,17 @@ Client state in `LudotecaClient.tsx`:
 - Sort: name/rating/weight × asc/desc
 - View: grid/list, pagination (24/48/96/192 per page)
 - URL serialization: query params (`q`, `type`, `rank`, `players`, `duration`, `weight`, `age`, `cat`, `mech`, `sort`, `view`, `pp`, `page`)
+
+### Events (Ludoya)
+
+Undocumented Ludoya API, adapter in `src/lib/ludoya/`. Full reference and recovery steps in `docs/ludoya-api-reference.md`.
+- `config.ts` — hosts, group id/username, endpoint paths (env-overridable). `client.ts` — fetch with retry, typed errors, mock mode, group-id rediscovery on 404. `normalize.ts` — the **only** file that knows raw shapes; guards throw `LudoyaShapeError` with the exact field path. `index.ts` — `fetchUpcomingEvents()`.
+- Components only use `LudoyaEvent` from `types.ts`. When Ludoya changes, touch `config.ts`/`normalize.ts`, not components.
+- Flow: `GET /users/{groupId}/events?displayAllRecurring=true` → for events with `childEventCounts.games > 0`, `GET /events/{id}/children` (children with a `game` are planned plays)
+- Event images (`/events/images`, `src/lib/game-matching.ts`): BGG is the source of truth for cover/weight/type. Ludoya only bridges to the BGG id via `GET /boardgames/{slug}` (`resolveBggIds`, cached 30 days). Order: BGG id → club collection by id → BGG thing by id → name match (collection, then BGG search) → Ludoya cover with default frame. Logs `[EventImage] Resolved N/M games: …` with the path each game took
+- Mock mode: `LUDOYA_MOCK=1` reads fixtures from `/public/mock/ludoya/`
+- Monitoring: `.github/workflows/ludoya-check.yml` runs `scripts/ludoya/check.mjs` weekly
+- Ludoya images are served as `application/octet-stream`; image host must be in `next.config.ts` `remotePatterns` and CSP `img-src`
 
 ### Cookie Consent
 
@@ -213,6 +229,10 @@ The `public` schema is the primary working schema.
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID |
 | `BGG_USERNAME` | BoardGameGeek username for ludoteca collection |
 | `BGG_API_KEY` | BoardGameGeek XML API key |
+| `LUDOYA_GROUP_ID` | Optional. Ludoya group id override (default in `src/lib/ludoya/config.ts`) |
+| `LUDOYA_GROUP_USERNAME` / `LUDOYA_GROUP_SEARCH_QUERY` | Optional. Used to rediscover the group id |
+| `LUDOYA_API_URL` / `LUDOYA_APP_URL` / `LUDOYA_IMAGE_BASE_URL` | Optional. Ludoya host overrides |
+| `LUDOYA_MOCK` | Optional. `1` serves Ludoya fixtures from `/public/mock/ludoya/` |
 
 ## Translation Key Namespaces
 
@@ -242,6 +262,8 @@ The `public` schema is the primary working schema.
 5. **No Zustand** — Theme state lives entirely in NavBar scroll detection logic. Zustand is not installed as a dependency.
 6. **Cookie consent hydration** — Uses `useSyncExternalStore` (not `useEffect`) to avoid hydration mismatch.
 7. **Image quality** — All `<Image>` components must have `quality={60}`. SVGs are excluded (not optimized by Next.js).
-8. **BGG mock mode** — Without `BGG_API_KEY`, ludoteca falls back to local XML files in `/public/mock/`.
+8. **BGG mock mode** — Without `BGG_API_KEY`, ludoteca falls back to local XML files in `/public/mock/`. Event images degrade without it: planned plays not in the mock collection get Ludoya's cover and the default orange frame.
 9. **Metadata async** — `generateMetadata()` must `await params` to get locale, uses `getTranslations()` from `next-intl/server`.
 10. **Activities dual mode** — Desktop uses scroll-pinned horizontal parallax; mobile uses stacked cards with direction-aware slides. Completely separate implementations.
+11. **Ludoya API is undocumented** — It changed in Sep 2026 (meetups → events, new group id). Run `npm run ludoya:check` first and follow `docs/ludoya-api-reference.md`.
+12. **Routes render dynamically** — `next build` marks every `[locale]` route as dynamic (ƒ), so page-level `revalidate` does not produce ISR. Caching comes from the `fetch` data cache: only 200 responses are stored, and a stale entry keeps being served while it refetches in the background, so an upstream outage shows the last good data.

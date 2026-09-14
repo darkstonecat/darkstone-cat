@@ -9,6 +9,7 @@
     "lint": "eslint",
     "analyze": "ANALYZE=true next build",
     "lighthouse": "node scripts/lighthouse/run-audit.mjs",
+    "ludoya:check": "node scripts/ludoya/check.mjs",
     "lighthouse:local": "node scripts/lighthouse/run-audit.mjs",
     "lighthouse:prod": "node scripts/lighthouse/run-audit.mjs --prod",
     "unlighthouse": "node scripts/unlighthouse/run-audit.mjs",

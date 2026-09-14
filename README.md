@@ -43,6 +43,7 @@
 | `/ludoteca` | Game library with filters, search, and BGG data |
 | `/contact` | Contact form |
 | `/events` | Upcoming events from Ludoya |
+| `/events/images` | Internal tool to generate shareable event images (not indexed) |
 | `/faq` | Frequently asked questions |
 | `/conduct` | Code of conduct |
 | `/legal` | Terms & conditions |
@@ -58,6 +59,7 @@ src/
 ├── app/
 │   ├── [locale]/           # Localized pages (home, about, ludoteca, contact, etc.)
 │   ├── api/contact/        # Contact form API endpoint
+│   ├── api/events/         # Shareable event image generation
 │   ├── sitemap.ts          # Dynamic sitemap generation
 │   └── robots.ts           # Robots.txt configuration
 ├── components/
@@ -65,6 +67,7 @@ src/
 │   ├── about/              # About page sections
 │   ├── ludoteca/           # Game library (grid, cards, filters, modal, pagination)
 │   ├── contact/            # Contact form and info
+│   ├── events/             # Events carousel and event images tool
 │   ├── conduct/            # Code of conduct content
 │   ├── legal/              # Legal, privacy, and cookies pages
 │   ├── NavBar.tsx          # Navigation with language switcher
@@ -108,6 +111,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the site.
 | `npm run lint` | Run ESLint |
 | `npm run lighthouse` | Lighthouse audit (local build) |
 | `npm run lighthouse:prod` | Lighthouse audit (production) |
+| `npm run ludoya:check` | Verify the Ludoya API still matches what the events page expects |
 
 ### Environment Variables
 
@@ -117,10 +121,13 @@ Open [http://localhost:3000](http://localhost:3000) to see the site.
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID |
 | `BGG_USERNAME` | BoardGameGeek username for the ludoteca collection |
 | `BGG_API_KEY` | BoardGameGeek XML API key |
+| `LUDOYA_*` | Optional Ludoya overrides, see `docs/ludoya-api-reference.md` |
 
 ### Development without API keys
 
 The ludoteca works in **mock mode** when `BGG_API_KEY` is not set — it reads local XML fixtures from `/public/mock/` so you can develop the UI without hitting the BoardGameGeek API.
+
+The events page can run offline with `LUDOYA_MOCK=1`, which reads JSON fixtures from `/public/mock/ludoya/`.
 
 ## Architecture Highlights
 
