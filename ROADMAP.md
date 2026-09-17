@@ -204,7 +204,7 @@ inside the peer range.
 
 ---
 
-## Phase 4 — ESLint 9.39.5 → 10.10.0
+## Phase 4 — ESLint 9.39.5 → 10.10.0 ✅ COMPLETED (with a caveat)
 
 `eslint-config-next@16.3.5` declares `eslint >= 9.0.0`, so ESLint 10 is
 permitted by the peer range. The config is already flat
@@ -217,6 +217,63 @@ when `eslint-plugin-react-hooks` 7.0.1 → 7.1.1 turned up two real errors in
 `NavBar.tsx` that had been hidden behind an `exhaustive-deps` suppression.
 
 Budget time for fixing what it finds, not just for the bump.
+
+### Result (measured)
+
+**The premise in this phase was incomplete, and a first attempt failed.**
+`eslint-config-next@16.3.5` does declare `eslint >=9.0.0`, but three transitive
+plugins cap at ESLint 9, and **no published version of any of them supports 10**
+— all three are already at their latest release:
+
+| Plugin | Version | Declared `eslint` peer |
+|---|---|---|
+| `eslint-plugin-import` | 2.32.0 | `^2 \|\| … \|\| ^9` |
+| `eslint-plugin-jsx-a11y` | 6.10.2 | `^3 \|\| … \|\| ^9` |
+| `eslint-plugin-react` | 7.37.5 | `^3 \|\| … \|\| ^9.7` |
+
+Only `eslint-plugin-react-hooks@7.1.1` allows `^10.0.0`.
+
+npm 11 installs ESLint 10 **without an ERESOLVE error**, which is the trap: the
+incompatibility only surfaces when lint actually runs, with exit 2:
+
+```
+TypeError: Error while loading rule 'react/display-name':
+contextOrFilename.getFilename is not a function
+  at resolveBasedir (eslint-plugin-react/lib/util/version.js:31:100)
+  at detectReactVersion (.../version.js:85)
+```
+
+ESLint 10 removed `context.getFilename()`; the plugin still calls it.
+
+**Fix applied (user decision):** declare the React version explicitly in
+`eslint.config.mjs` — `settings: { react: { version: "19.3.0" } }` — which skips
+`detectReactVersion` entirely. **This must be kept in sync with the `react` pin
+in `package.json`.**
+
+| Check | Before | After |
+|---|---|---|
+| `npm run build` (clean) | exit 0, 38/38 | exit 0, 38/38 |
+| `npm run lint` | 0 errors, 0 warnings | 0 errors, 0 warnings (113 files) |
+| `npm run ludoya:check` | pass | pass |
+| `npm audit` / `--omit=dev` | 0 / 0 | 0 / 0 |
+| `npm run lighthouse` | exit 0, 22/22 | exit 0, 22/22, no orphans |
+| Packages | 522 | **516** |
+
+A clean lint run proves nothing on its own, so rule coverage was verified
+against a deliberately broken probe file rather than assumed. All five plugin
+families still fire under ESLint 10, and 86 rules are enabled:
+
+- `react/display-name`, `react/jsx-key`, `react/no-unescaped-entities`
+- `import/no-anonymous-default-export`
+- `@typescript-eslint/no-unused-vars`
+- `@next/next/no-img-element`
+- `jsx-a11y/alt-text`
+
+**Standing risk:** three plugins now run outside their declared peer range. A
+future ESLint 10 minor could break them again, and the `settings.react.version`
+pin only covers the one code path that broke here. Revisit when
+`eslint-plugin-react`, `eslint-plugin-import` and `eslint-plugin-jsx-a11y`
+publish ESLint 10 support.
 
 ---
 

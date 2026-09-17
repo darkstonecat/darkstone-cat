@@ -21,6 +21,14 @@ const eslintConfig = defineConfig([
     "coverage/**",
   ]),
   {
+    // eslint-plugin-react@7.37.5 supports eslint up to ^9.7 only. Under ESLint
+    // 10 its version auto-detection crashes, because detectReactVersion ->
+    // resolveBasedir still calls context.getFilename(), which ESLint 10
+    // removed. Declaring the version explicitly skips that code path entirely.
+    // Keep this in sync with the react pin in package.json.
+    settings: { react: { version: "19.3.0" } },
+  },
+  {
     // This directory renders JSX through Satori (via next/og) to produce a PNG.
     // Satori has no browser DOM and cannot resolve next/image, so <img> is the
     // only option here and no-img-element is a false positive.
