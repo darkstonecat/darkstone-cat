@@ -11,10 +11,7 @@
     "lighthouse": "node scripts/lighthouse/run-audit.mjs",
     "ludoya:check": "node scripts/ludoya/check.mjs",
     "lighthouse:local": "node scripts/lighthouse/run-audit.mjs",
-    "lighthouse:prod": "node scripts/lighthouse/run-audit.mjs --prod",
-    "unlighthouse": "node scripts/unlighthouse/run-audit.mjs",
-    "unlighthouse:prod": "node scripts/unlighthouse/run-audit.mjs --prod",
-    "unlighthouse:serve": "npx sirv-cli ./audits/unlighthouse --port 4000 --open"
+    "lighthouse:prod": "node scripts/lighthouse/run-audit.mjs --prod"
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1",
@@ -37,11 +34,9 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@unlighthouse/cli": "^0.18.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "lighthouse": "^13.0.3",
-    "puppeteer": "^25.11.0",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.4.0",
     "typescript": "^5"

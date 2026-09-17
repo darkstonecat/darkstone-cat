@@ -17,7 +17,6 @@ const eslintConfig = defineConfig([
     // otherwise flood the next lint run with errors from bundled reports.
     "audits/**",
     ".lighthouse/**",
-    ".unlighthouse/**",
     "lighthouse-*",
     "coverage/**",
   ]),
