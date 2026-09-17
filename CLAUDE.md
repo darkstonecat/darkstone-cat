@@ -26,7 +26,7 @@ No test runner is configured.
 
 ### Lighthouse Audits
 
-Automated Lighthouse audits for all 8 pages (Catalan locale) on mobile + desktop (16 audits total). Scripts in `scripts/lighthouse/`:
+Automated Lighthouse audits for all 11 pages (Catalan locale) on mobile + desktop (22 audits total). Scripts in `scripts/lighthouse/`:
 
 | File | Purpose |
 |---|---|
@@ -139,7 +139,7 @@ Server-side BGG integration in `src/lib/bgg.ts`:
 - Fetches from BoardGameGeek XML API v2, parses with `fast-xml-parser`
 - Mock mode (local XML files in `/public/mock/`) when no API key
 - Separate fetches for boardgames vs expansions, then enriches with thing endpoint (weight, categories, mechanics)
-- Expansion linking: thing-based inbound links + name-based heuristic fallback
+- Expansion linking: thing-based inbound links (`linkExpansionsByThing`), used by both the live and the mock path
 - Batch fetching: 20 items/request, retry: 5 attempts with exponential backoff (2s base)
 - ISR: `revalidate: 86400` (1 day)
 

@@ -170,51 +170,6 @@ function rawToGame(item: RawCollectionItem): BggGame {
 }
 
 // ---------------------------------------------------------------------------
-// Expansion linking: name-based heuristic
-// ---------------------------------------------------------------------------
-
-function normalizeForMatch(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[()[\]]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function linkExpansionsByName(
-  baseGames: BggGame[],
-  expansionItems: BggGame[]
-): void {
-  const sortedBases = [...baseGames].sort(
-    (a, b) => b.name.length - a.name.length
-  );
-
-  for (const exp of expansionItems) {
-    const expNameNorm = normalizeForMatch(exp.originalName ?? exp.name);
-
-    for (const base of sortedBases) {
-      const baseNameNorm = normalizeForMatch(base.originalName ?? base.name);
-      if (baseNameNorm.length < 3) continue;
-
-      if (
-        expNameNorm.startsWith(baseNameNorm + ":") ||
-        expNameNorm.startsWith(baseNameNorm + " –") ||
-        expNameNorm.startsWith(baseNameNorm + " —") ||
-        expNameNorm.startsWith(baseNameNorm + " -")
-      ) {
-        base.expansions.push({
-          id: exp.id,
-          name: exp.originalName ?? exp.name,
-          year: exp.year,
-          thumbnail: exp.thumbnail,
-        });
-        break;
-      }
-    }
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Mock things.xml parser
 // ---------------------------------------------------------------------------
 

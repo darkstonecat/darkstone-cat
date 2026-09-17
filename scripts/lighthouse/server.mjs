@@ -3,7 +3,7 @@
  */
 
 import { spawn } from 'child_process';
-import { findFreePort, log, logError, ROOT } from './utils.mjs';
+import { findFreePort, log, ROOT } from './utils.mjs';
 
 /**
  * Run `npm run build` and wait for completion.

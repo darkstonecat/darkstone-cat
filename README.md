@@ -143,7 +143,7 @@ The events page can run offline with `LUDOYA_MOCK=1`, which reads JSON fixtures 
 
 ## Lighthouse Audit
 
-The project maintains near-perfect Lighthouse scores across all 8 pages (100/100/100/100 on desktop, 91–100 Performance on mobile with 100 Accessibility/Best Practices/SEO).
+The project maintains near-perfect Lighthouse scores across all 11 pages (100/100/100/100 on desktop, 91–100 Performance on mobile with 100 Accessibility/Best Practices/SEO).
 
 Known audit limitations caused by Next.js framework constraints and expected page complexity are documented in [`docs/AUDIT.md`](docs/AUDIT.md).
 

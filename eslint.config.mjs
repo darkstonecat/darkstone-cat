@@ -20,6 +20,15 @@ const eslintConfig = defineConfig([
     "lighthouse-*",
     "coverage/**",
   ]),
+  {
+    // This directory renders JSX through Satori (via next/og) to produce a PNG.
+    // Satori has no browser DOM and cannot resolve next/image, so <img> is the
+    // only option here and no-img-element is a false positive.
+    files: ["src/lib/event-image/**"],
+    rules: {
+      "@next/next/no-img-element": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

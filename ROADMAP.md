@@ -35,7 +35,7 @@ after any phase leaves the repository in a consistent state.
 
 ---
 
-## Phase 1 — Clear the 11 warnings
+## Phase 1 — Clear the 11 warnings ✅ COMPLETED
 
 Zero dependency risk. Nothing here requires an upgrade, so it can land today
 and it makes every later phase easier to read: after this, any new warning is
@@ -92,6 +92,33 @@ Verified against `scripts/lighthouse/config.mjs`: `PAGES` has **11** entries and
 `package.json` has no `engines` field. Nothing currently constrains the Node
 version used to build. Local development runs Node 24. Declare a floor so a
 mismatched CI or deploy fails loudly instead of silently.
+
+### Result (measured)
+
+| Check | Before | After |
+|---|---|---|
+| `npm run lint` | 0 errors, 11 warnings | **0 errors, 0 warnings** |
+| `npm run build` (clean) | exit 0, 38/38 | exit 0, 38/38 |
+| `npm run ludoya:check` | pass | pass |
+| `npm audit` / `--omit=dev` | 0 / 0 | 0 / 0 |
+| `npm run lighthouse` | exit 0, 22/22 | exit 0, 22/22, no orphans |
+| Packages | 522 | 522 |
+
+Notes:
+
+- **1.2 `linkExpansionsByName` was genuinely dead, and `CLAUDE.md` was wrong
+  about it.** It was never a fallback chained after the thing-based linker. In
+  `e9a5a50` it was the *mock-branch* linker while the live branch already used
+  `linkExpansionsByThing`; `7394c8f` migrated the mock branch to the thing-based
+  linker too (mock `things.xml` was added in that commit) and left the function
+  orphaned. Removed together with its only helper, `normalizeForMatch`.
+  `CLAUDE.md:142` updated to stop describing a fallback that never existed.
+- **1.5 floor chosen: `node >=22.13.0`.** It clears every current dependency
+  floor (`next` needs `>=20.9.0`) *and* the one Phase 4 introduces: ESLint 10
+  declares `^20.19.0 || ^22.13.0 || >=24`. Covers Node 22 LTS and local Node 24.
+  `package-lock.json` was resynced with `npm install --package-lock-only`: it
+  added the `engines` field plus the bundled wasi deps of
+  `@tailwindcss/oxide-wasm32-wasi`, with **zero version changes or removals**.
 
 ---
 
