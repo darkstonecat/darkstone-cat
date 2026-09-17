@@ -176,7 +176,7 @@ the next deploy.
 
 ---
 
-## Phase 3 — React 19.2.1 → 19.3.0
+## Phase 3 — React 19.2.1 → 19.3.0 ✅ COMPLETED
 
 `react` and `react-dom` are pinned to exact versions in `package.json`, which
 is why `npm update` left them alone. That pin is a deliberate choice, so
@@ -184,6 +184,23 @@ changing it is a decision, not maintenance.
 
 `next@16.3.5` accepts `^19.0.0`, so 19.3.0 is allowed. Decide whether to keep
 pinning exactly (bump both to `19.3.0`) or relax to a caret range.
+
+### Result (measured)
+
+**Decision: bump both, keep the exact pin.** `react` and `react-dom` are now
+exactly `19.3.0` in `package.json` — the deliberate-pin policy is preserved, so
+future patches stay a conscious choice rather than an `npm update` side effect.
+Installed with `--save-exact`. `next@16.3.5` accepts `^19.0.0`, so 19.3.0 is
+inside the peer range.
+
+| Check | Before | After |
+|---|---|---|
+| `npm run build` (clean) | exit 0, 38/38 | exit 0, 38/38 |
+| `npm run lint` | 0 errors, 0 warnings | 0 errors, 0 warnings |
+| `npm run ludoya:check` | pass | pass |
+| `npm audit` / `--omit=dev` | 0 / 0 | 0 / 0 |
+| `npm run lighthouse` | exit 0, 22/22 | exit 0, 22/22, no orphans |
+| Packages | 522 | 522 |
 
 ---
 
