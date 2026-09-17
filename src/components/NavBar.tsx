@@ -131,6 +131,15 @@ export default function NavBar() {
     };
   }, [mobileOpen, lenis]);
 
+  const closeMobileMenu = useCallback(() => {
+    setMenuClosing(true);
+    setTimeout(() => {
+      setMobileOpen(false);
+      setMenuClosing(false);
+      requestAnimationFrame(() => hamburgerRef.current?.focus());
+    }, 500);
+  }, []);
+
   // Focus trap + Escape handler for mobile menu
   useEffect(() => {
     if (!mobileOpen) return;
@@ -182,17 +191,7 @@ export default function NavBar() {
       document.removeEventListener("keydown", handleKeyDown);
       clearTimeout(timer);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mobileOpen]);
-
-  const closeMobileMenu = useCallback(() => {
-    setMenuClosing(true);
-    setTimeout(() => {
-      setMobileOpen(false);
-      setMenuClosing(false);
-      requestAnimationFrame(() => hamburgerRef.current?.focus());
-    }, 500);
-  }, []);
+  }, [mobileOpen, closeMobileMenu]);
 
   const isActive = useCallback((href: string) => pathname === href, [pathname]);
 
