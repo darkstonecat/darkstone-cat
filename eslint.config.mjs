@@ -12,6 +12,14 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated audit output. It is gitignored, but flat config does not read
+    // .gitignore and does lint dot-directories, so running an audit would
+    // otherwise flood the next lint run with errors from bundled reports.
+    "audits/**",
+    ".lighthouse/**",
+    ".unlighthouse/**",
+    "lighthouse-*",
+    "coverage/**",
   ]),
 ]);
 
