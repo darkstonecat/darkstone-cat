@@ -37,6 +37,7 @@ next-env.d.ts
 
 # AI
 .claude
+.atl
 .agent
 .agents
 .mcp.json
@@ -57,3 +58,4 @@ audits/
 
 # Sensitive data (member PII)
 /data/
+.env*
