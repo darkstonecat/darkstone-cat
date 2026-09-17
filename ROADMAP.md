@@ -122,7 +122,7 @@ Notes:
 
 ---
 
-## Phase 2 — Low-risk majors
+## Phase 2 — Low-risk majors ✅ COMPLETED
 
 Peer ranges verified as compatible, and the API surface the project actually
 touches is tiny.
@@ -143,6 +143,36 @@ Node 24.
 Read each package's release notes before bumping, and verify the two Vercel
 integrations still report in the dashboard after deploy — a build passing does
 not prove telemetry still arrives.
+
+### Result (measured)
+
+Bumped to `@vercel/analytics@2.0.1`, `@vercel/speed-insights@2.0.0`,
+`@types/node@22.20.3`. Ranges in `package.json` moved to `^2.0.1`, `^2.0.0`,
+`^22.20.3`.
+
+| Check | Before | After |
+|---|---|---|
+| `npm run build` (clean) | exit 0, 38/38 | exit 0, 38/38 |
+| `npm run lint` | 0 errors, 0 warnings | 0 errors, 0 warnings |
+| `npm run ludoya:check` | pass | pass |
+| `npm audit` / `--omit=dev` | 0 / 0 | 0 / 0 |
+| `npm run lighthouse` | exit 0, 22/22 | exit 0, 22/22, no orphans |
+| Packages | 522 | 522 |
+
+API surface verified rather than assumed:
+
+- The `./next` subpath is still exported by both v2 packages, and both still
+  export the named `Analytics` / `SpeedInsights` components. Every prop on both
+  is optional, and `layout.tsx` passes none — so there is no surface to break.
+- **CSP checked explicitly.** v2 loads `/_vercel/insights/script.js` and
+  `/_vercel/speed-insights/script.js` (covered by `'self'`) and falls back to
+  `https://va.vercel-scripts.com`, which `next.config.ts:42` already allows in
+  `script-src`. No CSP change needed. Had v2 moved hosts, the scripts would have
+  been blocked silently with a green build.
+
+**Not verified:** that telemetry still arrives in the Vercel dashboard. That
+needs a deploy, and nothing was pushed. Confirm both integrations report after
+the next deploy.
 
 ---
 
