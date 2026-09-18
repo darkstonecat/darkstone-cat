@@ -21,9 +21,11 @@ export default function TextReveal({
   const shouldReduceMotion = useReducedMotion();
   const words = text.split(" ");
 
-  if (shouldReduceMotion) {
-    return <Tag ref={ref} className={className}>{text}</Tag>;
-  }
+  // The server cannot know the user's motion preference, so the markup must be
+  // the same either way or hydration fails (React #418). Reduced motion only
+  // changes the animation: the words go straight to their final position, and
+  // MotionConfig reducedMotion="user" makes that jump instant.
+  const revealed = isInView || shouldReduceMotion;
 
   return (
     <Tag ref={ref} className={className}>
@@ -32,7 +34,7 @@ export default function TextReveal({
           <motion.span
             className="inline-block"
             initial={{ y: "100%" }}
-            animate={isInView ? { y: 0 } : { y: "100%" }}
+            animate={revealed ? { y: 0 } : { y: "100%" }}
             transition={{
               duration: 0.5,
               delay: delay + i * 0.04,

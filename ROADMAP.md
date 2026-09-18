@@ -518,7 +518,16 @@ imported by the events page.
   runs, 5 failures listed, exit 1; 404 → reported as failures.
 - `prefers-reduced-motion` does not stop scroll-linked `useScroll`/`useTransform`
   transforms (see Phase 5). `CLAUDE.md` claims all animations are disabled.
-- React error #418 (hydration text mismatch) on `/` in the production build.
+- ✅ **Fixed (2026-09-18).** React error #418 (hydration text mismatch) on `/`
+  and `/about`. It happened **only with `prefers-reduced-motion: reduce`**
+  (2/2 loads; 0/2 in every other configuration, and never in dev because the
+  dev probe had no reduced-motion preference). `TextReveal` rendered plain text
+  for reduced motion and one span per word otherwise, and the server can't know
+  the preference, so the markup differed. It now always renders the word spans,
+  and reduced motion only sends the words straight to their final position.
+  Verified: #418 0/2 on `/`, `/about`, `/faq` in both modes. With reduced
+  motion, a heading 11,510 px below the fold is visible without scrolling and
+  never animates. Without it, the reveal animates on scroll as before.
 - ✅ **Fixed (2026-09-18).** In `CLAUDE.md`, "Animation Patterns" now says the
   hero spring is CSS `@keyframes`, lists the real Motion springs and the real
   `AnimatePresence` users, and gives the correct container heights. The
