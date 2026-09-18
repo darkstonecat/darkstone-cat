@@ -445,6 +445,60 @@ This is cosmetic. Nothing depends on it.
 
 ---
 
+## Final sweep (2026-09-18, from scratch)
+
+The sweep ran on the final tree (`5bb83b4`), starting with `npm ci` from the
+lockfile, then `rm -rf .next` and every check.
+
+| Check | Baseline (2026-09-17) | Final | |
+|---|---|---|---|
+| `npm ci` from lockfile | — | exit 0, reproduces 516 packages | ✅ |
+| `npm audit` | 0 | 0 | ✅ |
+| `npm audit --omit=dev` | 0 | 0 | ✅ |
+| Isolated prod tree (`npm ci --omit=dev --ignore-scripts` in a copy) | — | 76 packages, 0 vulnerabilities | ✅ |
+| `npm run build` (clean) | exit 0, 38/38 | exit 0, 38/38 | ✅ |
+| `npm run lint` | 0 errors, **11 warnings** | **0 errors, 0 warnings** (113 files) | ✅ |
+| `npm run ludoya:check` | pass (failed 2 of 7 runs, upstream) | pass | ✅ |
+| `npm run lighthouse` | exit 0, 22/22 | exit 0, 22/22, no orphaned `next-server` | ✅ |
+| Packages | 522 | **516** | — |
+| `npm outdated` | 8 entries | 2 entries, both with a recorded reason | ✅ |
+
+Lighthouse, baseline run `2026-09-17_172723` against final run `2026-09-18_072209`:
+Accessibility, Best Practices and SEO are **identical on all 22 audits**.
+Performance moved between −1 and +2 everywhere except `events` mobile, 94 → 89.
+That drop is a step change starting at the first post-Phase-1 run, not noise.
+The cause is data, not code: the page's LCP element changed from a text
+paragraph to a live Ludoya event photo ("Divendres de jocs!") that appeared in
+the feed, adding about 600 ms to LCP. None of Phase 1's runtime changes are
+imported by the events page.
+
+### Remaining `npm outdated` entries
+
+| Package | Pinned at | Latest | Reason |
+|---|---|---|---|
+| `typescript` | `~6.0.3` | 7.0.2 | Blocked upstream: TS 7 drops the classic compiler API, and `typescript-eslint@8.70.0` supports `<6.1.0` only. The tilde prevents drift into 6.1. |
+| `@types/node` | `^22.20.3` | 26.x | Deliberate: the types track the lowest supported runtime (`engines.node >=22.13.0`). Newer types would type-check APIs that don't exist on Node 22. |
+
+### Open items found along the way (not fixed, out of scope)
+
+- `scripts/ludoya/check.mjs:179` calls `head()` without `try/catch`. A
+  transient network error aborts the whole run with `Unexpected error: fetch
+  failed` instead of being recorded as a failed check. The OVH image host hangs
+  intermittently on `HEAD` (about 1 in 8) while `GET` succeeds.
+- `prefers-reduced-motion` does not stop scroll-linked `useScroll`/`useTransform`
+  transforms (see Phase 5). `CLAUDE.md` claims all animations are disabled.
+- React error #418 (hydration text mismatch) on `/` in the production build.
+- `CLAUDE.md` "Animation Patterns" still says the hero spring is Motion (it is
+  CSS) and that the cookie banner slides in with `AnimatePresence` (it uses no
+  Motion).
+- ESLint 10 runs `eslint-plugin-import`, `-jsx-a11y` and `-react` outside their
+  declared peer ranges. `settings.react.version` in `eslint.config.mjs` must
+  track the `react` pin.
+- Vercel Analytics / Speed Insights v2 telemetry is not verified until the next
+  deploy.
+
+---
+
 ## Definition of done
 
 - `npm audit` and `npm audit --omit=dev` both report 0
