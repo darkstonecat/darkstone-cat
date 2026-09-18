@@ -508,16 +508,23 @@ imported by the events page.
 
 ### Open items found along the way (not fixed, out of scope)
 
-- `scripts/ludoya/check.mjs:179` calls `head()` without `try/catch`. A
-  transient network error aborts the whole run with `Unexpected error: fetch
-  failed` instead of being recorded as a failed check. The OVH image host hangs
-  intermittently on `HEAD` (about 1 in 8) while `GET` succeeds.
+- ✅ **Fixed (2026-09-18).** `scripts/ludoya/check.mjs` `head()` had no
+  `try/catch`, so a transient network error aborted the whole run with
+  `Unexpected error: fetch failed`. It now never throws: a failed `HEAD` is
+  retried once as a 1-byte ranged `GET`, because the OVH image host hangs
+  intermittently on `HEAD` (about 1 in 8) while `GET` succeeds. Anything still
+  failing is recorded as a failed check. Verified by injecting faults into
+  `fetch`: HEAD hangs → pass via the GET fallback; host down → every section
+  runs, 5 failures listed, exit 1; 404 → reported as failures.
 - `prefers-reduced-motion` does not stop scroll-linked `useScroll`/`useTransform`
   transforms (see Phase 5). `CLAUDE.md` claims all animations are disabled.
 - React error #418 (hydration text mismatch) on `/` in the production build.
-- `CLAUDE.md` "Animation Patterns" still says the hero spring is Motion (it is
-  CSS) and that the cookie banner slides in with `AnimatePresence` (it uses no
-  Motion).
+- ✅ **Fixed (2026-09-18).** In `CLAUDE.md`, "Animation Patterns" now says the
+  hero spring is CSS `@keyframes`, lists the real Motion springs and the real
+  `AnimatePresence` users, and gives the correct container heights. The
+  reduced-motion line now names what is and isn't disabled, the Lenis duration
+  is 1.0 s (not 1.2 s), and mobile Activities is described as `whileInView`
+  fade/slide.
 - ESLint 10 runs `eslint-plugin-import`, `-jsx-a11y` and `-react` outside their
   declared peer ranges. Their latest releases (2.32.0, 2025-06-20; 6.10.2,
   2024-10-26; 7.37.5, 2025-04-03) predate ESLint 10.0.0 (2026-02-06), so their

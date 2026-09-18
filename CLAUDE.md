@@ -92,18 +92,19 @@ There is **no Zustand store or useThemeSection hook** — themes are handled dir
 
 ### Smooth Scrolling
 
-Lenis library provides smooth scrolling via `src/components/SmoothScroll.tsx` (React Context). Access with `useLenis()`. Respects `prefers-reduced-motion`. Duration: 1.2s with exponential easing. Touch multiplier: 2x.
+Lenis library provides smooth scrolling via `src/components/SmoothScroll.tsx` (React Context). Access with `useLenis()`. Respects `prefers-reduced-motion`. Duration: 1.0s with exponential easing. Touch multiplier: 2x.
 
 ### Animation Patterns
 
 Uses `motion/react` (Motion v13). **Never import from `framer-motion`**. Some components use `* as m from "motion/react-client"`.
 
 Common patterns:
-- **Spring physics**: Hero logo entrance (`stiffness: 200, damping: 10, mass: 1.6`)
+- **Spring physics (CSS)**: The hero entrance is **not** Motion. It is a CSS `@keyframes` (`hero-logo-spring`, `hero-text-spring` in `globals.css`) with a precomputed spring curve (`stiffness 200, damping 10, mass 1.6`)
+- **Spring physics (Motion)**: `type: "spring", stiffness: 300, damping: 20` for the Activities desktop cards (`whileInView` scale) and the social icons' hover (`useAnimate` in `SocialLinks`)
 - **Scroll transforms**: `useScroll` + `useTransform` for parallax (Activities, About)
 - **Viewport triggers**: `whileInView` with `viewport={{ once: true }}` for fade/slide
-- **Sticky scroll-pin**: Tall container (`370vh`) with `sticky` positioning and scale transforms (About cards, Activities desktop)
-- **AnimatePresence**: Direction-aware transitions, cookie banner slide-in
+- **Sticky scroll-pin**: Tall container with `sticky` positioning and scroll-driven transforms: About cards (`370vh`, scale) and Activities desktop (`400vh`, horizontal track)
+- **AnimatePresence**: FAQ accordion (`height: auto`), collaborator modal (`/about`), ludoteca game modal and mobile filter drawer, contact form success swap (`mode="wait"`). The cookie banner does not use Motion
 
 
 ### Styling
@@ -118,7 +119,7 @@ Tailwind CSS v4 with CSS-based config (no `tailwind.config.ts`). Tokens in `src/
 --color-stone-white-base: #D6D3D1   --color-stone-white-hover: #FAFAF9
 ```
 
-Use `cn()` from `src/lib/utils.ts` (clsx + tailwind-merge) for conditional class merging. All animations disable at `prefers-reduced-motion: reduce`. Focus-visible: 2px solid orange outline.
+Use `cn()` from `src/lib/utils.ts` (clsx + tailwind-merge) for conditional class merging. `prefers-reduced-motion: reduce` disables CSS animations/transitions (`globals.css`), Lenis smoothing, and Motion animations (`MotionConfig reducedMotion="user"`), but **not** the scroll-linked `useScroll`/`useTransform` transforms (hero, About cards, Activities desktop), which keep following the scroll. Focus-visible: 2px solid orange outline.
 
 ### Component Structure
 
@@ -264,6 +265,6 @@ The `public` schema is the primary working schema.
 7. **Image quality** — All `<Image>` components must have `quality={60}`. SVGs are excluded (not optimized by Next.js).
 8. **BGG mock mode** — Without `BGG_API_KEY`, ludoteca falls back to local XML files in `/public/mock/`. Event images degrade without it: planned plays not in the mock collection get Ludoya's cover and the default orange frame.
 9. **Metadata async** — `generateMetadata()` must `await params` to get locale, uses `getTranslations()` from `next-intl/server`.
-10. **Activities dual mode** — Desktop uses scroll-pinned horizontal parallax; mobile uses stacked cards with direction-aware slides. Completely separate implementations.
+10. **Activities dual mode** — Desktop uses scroll-pinned horizontal parallax; mobile uses stacked cards that fade and slide up with `whileInView`. Completely separate implementations.
 11. **Ludoya API is undocumented** — It changed in Sep 2026 (meetups → events, new group id). Run `npm run ludoya:check` first and follow `docs/ludoya-api-reference.md`.
 12. **Routes render dynamically** — `next build` marks every `[locale]` route as dynamic (ƒ), so page-level `revalidate` does not produce ISR. Caching comes from the `fetch` data cache: only 200 responses are stored, and a stale entry keeps being served while it refetches in the background, so an upstream outage shows the last good data.
