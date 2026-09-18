@@ -518,6 +518,14 @@ imported by the events page.
   pass. If a platform without a prebuilt binary ever fails, review and
   approve that package with `npm install-scripts approve <pkg>`.
 - ESLint 9 is not a fallback: it reached end of life on 2026-08-06.
+- Package count went from 516 to 522 after `npm update` (2026-09-18), with no
+  version changes in the plugins. Once the overrides resolved the peer
+  conflict, npm hoisted `eslint-plugin-import`, `-jsx-a11y` and `-react` out of
+  `eslint-config-next/node_modules/`. Each now carries its own copy of
+  `minimatch@3` / `brace-expansion@1` / `balanced-match@1`, because the top
+  level holds the v10/v5/v4 versions that ESLint 10 uses. `npm dedupe` would
+  only save 4 packages by downgrading top-level `zod`, `postcss` and
+  `@eslint-community/eslint-utils`, so it was not applied.
 - Vercel Analytics / Speed Insights v2 telemetry is not verified until the next
   deploy.
 
