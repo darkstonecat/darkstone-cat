@@ -492,8 +492,15 @@ imported by the events page.
   CSS) and that the cookie banner slides in with `AnimatePresence` (it uses no
   Motion).
 - ESLint 10 runs `eslint-plugin-import`, `-jsx-a11y` and `-react` outside their
-  declared peer ranges. `settings.react.version` in `eslint.config.mjs` must
-  track the `react` pin.
+  declared peer ranges. Their latest releases (2.32.0, 2025-06-20; 6.10.2,
+  2024-10-26; 7.37.5, 2025-04-03) predate ESLint 10.0.0 (2026-02-06), so their
+  `peerDependencies` stop at `^9`. `package.json` `overrides` pins their
+  `eslint` peer to `$eslint`, which silences the `ERESOLVE overriding peer
+  dependency` warnings `npm install` printed. The resolved tree is unchanged.
+  **Remove those overrides once the plugins declare ESLint 10 support**, or a
+  real future conflict will be silenced too. `settings.react.version` in
+  `eslint.config.mjs` must track the `react` pin.
+- ESLint 9 is not a fallback: it reached end of life on 2026-08-06.
 - Vercel Analytics / Speed Insights v2 telemetry is not verified until the next
   deploy.
 
