@@ -498,8 +498,17 @@ imported by the events page.
   `eslint` peer to `$eslint`, which silences the `ERESOLVE overriding peer
   dependency` warnings `npm install` printed. The resolved tree is unchanged.
   **Remove those overrides once the plugins declare ESLint 10 support**, or a
-  real future conflict will be silenced too. `settings.react.version` in
-  `eslint.config.mjs` must track the `react` pin.
+  real future conflict will be silenced too. At the same time, drop the
+  `settings.react` block in `eslint.config.mjs`. It now reads the installed
+  React version, so it no longer needs manual syncing with the pin.
+- `allowScripts` in `package.json` explicitly denies the install scripts of
+  `@parcel/watcher`, `@swc/core` (both via `next-intl`) and `unrs-resolver`
+  (via the ESLint import resolver). npm 11 already skipped them by default;
+  each ships a prebuilt binary for the platform, and the scripts are only
+  source-build or binding-check fallbacks. Verified with the scripts skipped:
+  all three native bindings load, and build, lint, `next dev` and lighthouse
+  pass. If a platform without a prebuilt binary ever fails, review and
+  approve that package with `npm install-scripts approve <pkg>`.
 - ESLint 9 is not a fallback: it reached end of life on 2026-08-06.
 - Vercel Analytics / Speed Insights v2 telemetry is not verified until the next
   deploy.

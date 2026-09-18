@@ -54,5 +54,10 @@
     "eslint-plugin-react": {
       "eslint": "$eslint"
     }
+  },
+  "allowScripts": {
+    "@parcel/watcher": false,
+    "@swc/core": false,
+    "unrs-resolver": false
   }
 }

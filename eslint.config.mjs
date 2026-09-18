@@ -1,6 +1,9 @@
+import { createRequire } from "node:module";
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+
+const require = createRequire(import.meta.url);
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -25,8 +28,10 @@ const eslintConfig = defineConfig([
     // 10 its version auto-detection crashes, because detectReactVersion ->
     // resolveBasedir still calls context.getFilename(), which ESLint 10
     // removed. Declaring the version explicitly skips that code path entirely.
-    // Keep this in sync with the react pin in package.json.
-    settings: { react: { version: "19.3.0" } },
+    // It is read from the installed package, so it cannot drift from the pin.
+    // Drop this block, and the eslint overrides in package.json, once
+    // eslint-plugin-react declares ESLint 10 support.
+    settings: { react: { version: require("react/package.json").version } },
   },
   {
     // This directory renders JSX through Satori (via next/og) to produce a PNG.
