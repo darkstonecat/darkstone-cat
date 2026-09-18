@@ -104,6 +104,7 @@ Common patterns:
 - **Scroll transforms**: `useScroll` + `useTransform` for parallax (Activities, About)
 - **Viewport triggers**: `whileInView` with `viewport={{ once: true }}` for fade/slide
 - **Sticky scroll-pin**: Tall container with `sticky` positioning and scroll-driven transforms: About cards (`370vh`, scale) and Activities desktop (`400vh`, horizontal track)
+- **Reduced motion in scroll effects**: Use `usePrefersReducedMotion()` from `@/hooks/usePrefersReducedMotion`, never Motion's `useReducedMotion`, to change anything that affects the first render. It is `false` during hydration (`useSyncExternalStore` server snapshot), so the markup matches the server HTML. Motion's hook returns the real value on the first client render, which caused hydration error #418 in `TextReveal`
 - **AnimatePresence**: FAQ accordion (`height: auto`), collaborator modal (`/about`), ludoteca game modal and mobile filter drawer, contact form success swap (`mode="wait"`). The cookie banner does not use Motion
 
 
@@ -119,7 +120,7 @@ Tailwind CSS v4 with CSS-based config (no `tailwind.config.ts`). Tokens in `src/
 --color-stone-white-base: #D6D3D1   --color-stone-white-hover: #FAFAF9
 ```
 
-Use `cn()` from `src/lib/utils.ts` (clsx + tailwind-merge) for conditional class merging. `prefers-reduced-motion: reduce` disables CSS animations/transitions (`globals.css`), Lenis smoothing, and Motion animations (`MotionConfig reducedMotion="user"`), but **not** the scroll-linked `useScroll`/`useTransform` transforms (hero, About cards, Activities desktop), which keep following the scroll. Focus-visible: 2px solid orange outline.
+Use `cn()` from `src/lib/utils.ts` (clsx + tailwind-merge) for conditional class merging. `prefers-reduced-motion: reduce` disables CSS animations/transitions (`globals.css`), Lenis smoothing, Motion animations (`MotionConfig reducedMotion="user"`), and the decorative scroll-linked transforms: hero zoom and shift, About card and title scale, the Activities meeple, and the section-divider wave. Those collapse their `useTransform` output range to the start value via `usePrefersReducedMotion()` (`src/hooks/`). Scroll-linked fades stay, and so do the Activities desktop track and the scroll progress bar, because they are functional. Focus-visible: 2px solid orange outline.
 
 ### Component Structure
 

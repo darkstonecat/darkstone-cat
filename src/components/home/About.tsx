@@ -10,6 +10,7 @@ import {
   type MotionValue,
 } from "motion/react";
 import TextReveal from "@/components/TextReveal";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 const ABOUT_CARDS = [
   { key: "card1", image: "/images/photos/about_01.webp", altKey: "card1_alt" },
@@ -59,14 +60,16 @@ function AboutCard({
 }) {
   // Enter: 0.8 → 1.0 as card scrolls up to stick point
   // Push:  1.0 → 0.6 as next card covers this one
+  // Reduced motion keeps every card at full size; the sticky stacking stays.
+  const reduce = usePrefersReducedMotion();
   const scale = useTransform(
     progress,
     isLast
       ? [enterAt, stickAt]
       : [enterAt, stickAt, nextStickAt],
-    isLast
-      ? [0.8, 1]
-      : [0.8, 1, 0.6]
+    reduce
+      ? isLast ? [1, 1] : [1, 1, 1]
+      : isLast ? [0.8, 1] : [0.8, 1, 0.6]
   );
 
   return (
@@ -97,6 +100,7 @@ function AboutCard({
 export default function About() {
   const t = useTranslations("about");
   const containerRef = useRef<HTMLDivElement>(null);
+  const reduce = usePrefersReducedMotion();
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -112,7 +116,7 @@ export default function About() {
   const titleScale = useTransform(
     scrollYProgress,
     [0, firstCardProgress * 0.8],
-    [1, 0.95]
+    [1, reduce ? 1 : 0.95]
   );
 
   return (

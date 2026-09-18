@@ -516,8 +516,21 @@ imported by the events page.
   failing is recorded as a failed check. Verified by injecting faults into
   `fetch`: HEAD hangs → pass via the GET fallback; host down → every section
   runs, 5 failures listed, exit 1; 404 → reported as failures.
-- `prefers-reduced-motion` does not stop scroll-linked `useScroll`/`useTransform`
-  transforms (see Phase 5). `CLAUDE.md` claims all animations are disabled.
+- ✅ **Fixed (2026-09-18).** `prefers-reduced-motion` now freezes the
+  decorative scroll-linked transforms: hero zoom and shift, About card and
+  title scale, the Activities meeple, and the section-divider wave. It does
+  this through `usePrefersReducedMotion()`, which is hydration-safe via
+  `useSyncExternalStore`. Fades, the Activities desktop track and the scroll
+  progress bar stay, because the track is how the cards are reached.
+  Verified on a production build: without reduced motion, the hero, About
+  and Activities values are **identical** to the Phase 5 baseline, so the
+  default look is unchanged. With it, the zooms, meeple and dividers stay
+  static, the track still moves (−708 → −2835 px), and the hero still fades
+  (computed opacity 0.25 at 90% of the scroll). No #418 in either mode.
+  Side finding, left as is: the hero title's scroll scale is never visible,
+  even without reduced motion, because its CSS entrance animation
+  (`animate-hero-text-spring`) holds its final keyframe and a CSS animation
+  overrides the inline style.
 - ✅ **Fixed (2026-09-18).** React error #418 (hydration text mismatch) on `/`
   and `/about`. It happened **only with `prefers-reduced-motion: reduce`**
   (2/2 loads; 0/2 in every other configuration, and never in dev because the
