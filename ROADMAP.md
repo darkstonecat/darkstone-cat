@@ -420,25 +420,44 @@ when `typescript-eslint` publishes a range that includes it.**
 
 ---
 
-## Separate track — Mobile menu focus restoration
+## Separate track — Mobile menu focus restoration ✅ NOT A BUG (measurement artifact)
 
-Not a dependency issue, and not introduced by any upgrade in this roadmap.
+The original report: after closing the mobile menu, focus was lost to `body`
+instead of returning to the hamburger.
 
-`closeMobileMenu` in `src/components/NavBar.tsx` calls
-`requestAnimationFrame(() => hamburgerRef.current?.focus())` after a 500 ms
-timeout, but focus does not end up on the hamburger. Verified in a browser at
-mobile width against both the current and the previous version of the file, so
-it predates the React Compiler fix.
+**Re-measured on 2026-09-18 and not reproducible.** The setup was a production
+build in headless Chrome at 390×844, with the cookie banner suppressed
+correctly (see below). Every `focusin`/`focusout` event and every programmatic
+`.focus()`/`.blur()` call was logged with timestamps:
 
-Escape does close the menu correctly. What fails is returning focus to the
-trigger, which is a real accessibility defect for keyboard users: after closing
-the menu, focus is lost to `body` and tab order restarts from the top.
+| Close path | Final focus |
+|---|---|
+| Escape on `/` | hamburger (~510 ms, after the 500 ms close animation) |
+| Escape on `/faq` | hamburger |
+| Close button (Enter) | hamburger |
+| Hamburger toggle (Enter) | hamburger |
+| Nav link (Enter, navigates) | `body` of the new page, which is correct |
 
-Worth noting that the browser check for this was contaminated by the cookie
-banner, and setting `darkstone_cookie_consent` in `localStorage` did not
-suppress it. Whoever picks this up should first work out how to put the app in
-a consented state for testing, or the measurement will be as noisy as it was
-here.
+On the nav-link path, `NavBar` is rendered per page, so the old instance
+unmounts on navigation (at about 67 ms) and its pending refocus has no target.
+Focus starts from the new page, which is how a normal page load behaves.
+
+**Most likely cause of the original report:** it was measured in a Claude in
+Chrome extension tab. Those tabs can sit in the background with
+`document.visibilityState === "hidden"`, which throttles
+`requestAnimationFrame` to 0 fps. That was observed directly during Phase 5.
+`closeMobileMenu` restores focus inside `requestAnimationFrame`, so in such a
+tab the refocus never runs. This is an inference: the original measurement
+could not be re-run.
+
+**Cookie banner in tests:** `useCookieConsent` does `JSON.parse` on the stored
+value and reads `.status`, so a bare `"accepted"` string throws, is swallowed,
+and the banner still shows. Store
+`JSON.stringify({ status: "rejected", date: new Date().toISOString() })`
+instead. `rejected` also keeps Google Analytics from loading during tests.
+
+**Rule for future browser checks:** measure `requestAnimationFrame` frames per
+second first. If it is 0, every animation and focus measurement is invalid.
 
 ---
 
