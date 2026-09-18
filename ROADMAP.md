@@ -119,6 +119,14 @@ Notes:
   `package-lock.json` was resynced with `npm install --package-lock-only`: it
   added the `engines` field plus the bundled wasi deps of
   `@tailwindcss/oxide-wasm32-wasi`, with **zero version changes or removals**.
+  **Superseded (2026-09-18) by `^22.19.0 || ^24.0.0`.** The floor was too low:
+  it was checked against only four packages, but `lighthouse` requires
+  `>=22.19`, and 22.19.0 is the lowest 22.x that satisfies every non-optional
+  dependency in the lockfile. The range is also capped at 24. Vercel ignores
+  `.nvmrc` and deploys the highest available major that satisfies
+  `engines.node`, overriding the dashboard, so an open `>=` range would move
+  production to Node 26 silently as soon as Vercel offered it. Moving to 26
+  is now a deliberate one-line change here and in `.nvmrc`.
 
 ---
 
@@ -477,7 +485,7 @@ imported by the events page.
 | Package | Pinned at | Latest | Reason |
 |---|---|---|---|
 | `typescript` | `~6.0.3` | 7.0.2 | Blocked upstream: TS 7 drops the classic compiler API, and `typescript-eslint@8.70.0` supports `<6.1.0` only. The tilde prevents drift into 6.1. |
-| `@types/node` | `^22.20.3` | 26.x | Deliberate: the types track the lowest supported runtime (`engines.node >=22.13.0`). Newer types would type-check APIs that don't exist on Node 22. |
+| `@types/node` | `^22.20.3` | 26.x | Deliberate: the types track the lowest supported runtime (`engines.node ^22.19.0 || ^24.0.0`). Newer types would type-check APIs that don't exist on Node 22. |
 
 ### Open items found along the way (not fixed, out of scope)
 
