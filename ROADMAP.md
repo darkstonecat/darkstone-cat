@@ -277,7 +277,7 @@ publish ESLint 10 support.
 
 ---
 
-## Phase 5 — Motion 12.43.0 → 13.4.0
+## Phase 5 — Motion 12.43.0 → 13.4.0 ✅ COMPLETED
 
 **The widest change in this roadmap.** Measured surface:
 
@@ -301,6 +301,74 @@ This phase needs visual verification, not just a green sweep:
 - `prefers-reduced-motion: reduce` still disables everything
 
 Do this phase alone, never bundled with another.
+
+### Result (measured)
+
+| Check | Before | After |
+|---|---|---|
+| `npm run build` (clean) | exit 0, 38/38 | exit 0, 38/38 |
+| `npm run lint` | 0 errors, 0 warnings | 0 errors, 0 warnings |
+| `npm run ludoya:check` | pass | pass |
+| `npm audit` / `--omit=dev` | 0 / 0 | 0 / 0 |
+| `npm run lighthouse` | exit 0, 22/22 | exit 0, 22/22, no orphans |
+| Packages | 516 | 516 |
+
+**The only breaking change in 13.0.0 does not apply here.** It drops the
+optional `@emotion/is-prop-valid` dependency. That package was never installed,
+so motion 12 was already running on its built-in prop filter. A DOM scan on `/`,
+`/about` and `/ludoteca` found zero Motion props leaked as HTML attributes, on
+both versions. 13.1–13.4 only add features (Reorder, effects, `AnimateView`) and
+make performance changes.
+
+**The visual checklist above was partly stale**, so the real Motion surfaces
+were verified instead:
+
+- The hero entrance spring is a **CSS** animation (`animate-hero-logo-spring`),
+  not Motion. Motion only drives the hero's scroll-linked scale and opacity.
+- The cookie banner uses **no Motion at all**.
+- Mobile Activities uses `whileInView`, not `AnimatePresence`. `AnimatePresence`
+  actually lives in the FAQ accordion, the collaborator modal, the ludoteca game
+  modal and mobile filter drawer, and the contact form.
+
+**Method: an A/B numeric probe in headless Chrome, not eyeballing.** The same
+script ran against a motion 12 build and a motion 13 build. It scrolls each
+section to fixed fractions, samples every inline `transform`/`opacity` Motion
+writes, and records the `AnimatePresence` curves frame by frame. It checks
+`requestAnimationFrame` first: a background browser tab ran at **0 fps**, which
+would have made every reading meaningless. Headless ran at 62 fps.
+
+| Surface | Result |
+|---|---|
+| Hero scroll scale/opacity/translate | identical at every sample |
+| About sticky cards (scroll-pinned scale) | identical |
+| Activities desktop horizontal track + meeple | identical (track to −2835px, meeple 0→360°) |
+| Activities mobile `whileInView` cards | identical (`translateY(30px)`/0 → none/1) |
+| FAQ accordion open/close (`height: auto`) | same frame count and end state |
+| Collaborator modal, game modal (open/Escape) | same curve length, same end state |
+| Mobile filter drawer (−100% → 0 → −100%) | same curve, same end state |
+| Spring solver, `stiffness 300, damping 20` | **bit-identical**: max per-frame diff 0, same 10.8% overshoot, 656 ms settle |
+| Activities desktop card spring, live on 13 | runs: peak 1.1077, matching the solver |
+| Social icon hover (`useAnimate`), live on 13 | runs: scale 1.3 + shake; unhover springs 1.3 → 0.968 → 1 |
+| Contact form `mode="wait"`, live on 13 | never both on screen; success enters 0→1, 10px→0 |
+
+The contact form was checked with `POST /api/contact` intercepted and answered
+locally, so no email was sent. The form itself has no `exit` prop, so its
+instant removal is intentional.
+
+**Only checked on 13, not A/B:** social hover and the contact form. They behave
+as the code specifies, and the spring they share is proven identical.
+
+Pre-existing findings, identical on both versions and **not caused by this
+bump**:
+
+- **Reduced motion does not stop scroll-linked transforms.** With
+  `prefers-reduced-motion: reduce` emulated, the About cards' scroll scale is
+  identical to the normal run. `MotionConfig reducedMotion="user"` only
+  suppresses *animations*, not motion values driven by `useScroll`. That
+  contradicts the `CLAUDE.md` claim that "all animations disable". What reduced
+  motion does do: the FAQ height jumps straight to its final value instead of
+  animating.
+- **React error #418** (hydration text mismatch) on `/` in the production build.
 
 ---
 

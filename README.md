@@ -24,7 +24,7 @@
 | Framework | [Next.js 16](https://nextjs.org) (App Router) |
 | Language | [TypeScript](https://www.typescriptlang.org) |
 | Styling | [Tailwind CSS v4](https://tailwindcss.com) |
-| Animations | [Motion v12](https://motion.dev) |
+| Animations | [Motion v13](https://motion.dev) |
 | Smooth Scroll | [Lenis](https://lenis.darkroom.engineering/) |
 | i18n | [next-intl](https://next-intl-docs.vercel.app/) |
 | XML Parsing | [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) |

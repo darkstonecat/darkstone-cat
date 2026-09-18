@@ -96,7 +96,7 @@ Lenis library provides smooth scrolling via `src/components/SmoothScroll.tsx` (R
 
 ### Animation Patterns
 
-Uses `motion/react` (Motion v12). **Never import from `framer-motion`**. Some components use `* as m from "motion/react-client"`.
+Uses `motion/react` (Motion v13). **Never import from `framer-motion`**. Some components use `* as m from "motion/react-client"`.
 
 Common patterns:
 - **Spring physics**: Hero logo entrance (`stiffness: 200, damping: 10, mass: 1.6`)
@@ -244,7 +244,7 @@ The `public` schema is the primary working schema.
 
 ## Key Dependencies
 
-- **motion** v12 (`motion/react`) — animations. Never import from `framer-motion`.
+- **motion** v13 (`motion/react`) — animations. Never import from `framer-motion`.
 - **lenis** — smooth scrolling
 - **next-intl** v4 — i18n routing and translations
 - **fast-xml-parser** — BGG XML response parsing
@@ -255,7 +255,7 @@ The `public` schema is the primary working schema.
 
 ## Gotchas
 
-1. **Motion v12 ≠ framer-motion** — Always `import { motion } from "motion/react"`, never from `framer-motion`.
+1. **Motion v13 ≠ framer-motion** — Always `import { motion } from "motion/react"`, never from `framer-motion`.
 2. **i18n routing** — Always use `Link`/`usePathname`/`useRouter` from `@/i18n/routing`, not Next.js primitives.
 3. **Default locale** — Catalan (`ca`) has no URL prefix. `/about` = Catalan, `/es/about` = Spanish.
 4. **Section IDs** — Home page sections must have `id` attributes matching `SECTION_THEMES` keys in NavBar for theme detection to work.
