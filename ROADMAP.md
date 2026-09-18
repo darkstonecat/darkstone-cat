@@ -372,7 +372,7 @@ bump**:
 
 ---
 
-## Phase 6 — TypeScript 5.9.3 → 7.0.2
+## Phase 6 — TypeScript 5.9.3 → 7.0.2 ✅ COMPLETED as 6.0.3 (7 blocked upstream)
 
 TypeScript 7 is the Go-based compiler rewrite. The codebase runs `strict: true`
 with `moduleResolution: "bundler"` and `target: "ES2017"`, so the whole surface
@@ -384,6 +384,31 @@ read the migration notes, run the build, and expect type errors that the old
 checker let through.
 
 Lowest urgency in this roadmap. TypeScript 5.9 is stable and supported.
+
+### Result (measured)
+
+**TypeScript 7 is blocked upstream, not just risky.** Its main entry point
+exports only `./lib/version.cjs` plus `unstable/*`; the classic compiler API that
+tools load with `require("typescript")` is gone. `typescript-eslint@8.70.0`, the
+latest release, declares `typescript >=4.8.4 <6.1.0` and parses through that
+API, so TS 7 would break linting.
+
+**Decision (user): bump to TypeScript 6.0.3**, the newest stable release inside
+the `typescript-eslint` range. It is declared as `~6.0.3`, not `^6.0.3`, so
+`npm update` cannot drift into 6.1, which that range excludes.
+
+| Check | Before | After |
+|---|---|---|
+| `npx tsc --noEmit` | — | exit 0, no errors |
+| `npm run build` (clean) | exit 0, 38/38 | exit 0, 38/38 (Next's own type-check ran on 6.0.3) |
+| `npm run lint` | 0 errors, 0 warnings | 0 errors, 0 warnings, 113 files, no unsupported-TS warning |
+| `npm run ludoya:check` | pass | pass |
+| `npm audit` / `--omit=dev` | 0 / 0 | 0 / 0 |
+| `npm run lighthouse` | exit 0, 22/22 | exit 0, 22/22, no orphans |
+| Packages | 516 | 516 |
+
+No type errors surfaced, and Next did not rewrite `tsconfig.json`. **Revisit TS 7
+when `typescript-eslint` publishes a range that includes it.**
 
 ---
 
