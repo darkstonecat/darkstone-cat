@@ -45,9 +45,28 @@ async function getJson(path) {
   return { url, status: res.status, ok: res.ok, body };
 }
 
+// Returns 200 when the image is reachable, otherwise the failing HTTP status or
+// a "network error: ..." string. Never throws, so a transient network failure
+// is recorded as a failed check instead of aborting the whole run.
+// The image host sometimes hangs on HEAD while GET on the same object succeeds,
+// so a failed HEAD is retried once as a 1-byte ranged GET.
 async function head(url) {
-  const res = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(TIMEOUT_MS) });
-  return res.status;
+  const attempts = [
+    () => fetch(url, { method: "HEAD", signal: AbortSignal.timeout(TIMEOUT_MS) }),
+    () => fetch(url, { headers: { range: "bytes=0-0" }, signal: AbortSignal.timeout(TIMEOUT_MS) }),
+  ];
+  let failure;
+  for (const attempt of attempts) {
+    try {
+      const res = await attempt();
+      await res.body?.cancel();
+      if (res.status === 200 || res.status === 206) return 200;
+      failure = res.status;
+    } catch (error) {
+      failure = `network error: ${error?.cause?.code ?? error?.name ?? error?.message}`;
+    }
+  }
+  return failure;
 }
 
 const isObject = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
