@@ -188,6 +188,7 @@ async function main() {
     console.log("  – No upcoming event has an image; skipping");
   } else {
     let reachable = 0;
+    let checked = 0;
     for (const preview of previews) {
       if (!preview.startsWith(IMAGE_BASE_URL)) {
         fail(`Event image host changed: ${preview} (expected ${IMAGE_BASE_URL}); update next.config.ts remotePatterns + CSP`);
@@ -195,12 +196,17 @@ async function main() {
       }
       const full = preview.replace(/[-_](?:preview|thumbnail)(\.[a-z0-9]+)$/i, "$1");
       for (const url of new Set([preview, full])) {
+        checked++;
         const status = await head(url);
         if (status === 200) reachable++;
         else fail(`Event image ${url} → ${status}`);
       }
     }
-    ok(`${previews.length} distinct event images, ${reachable} URLs reachable (reduced + original)`);
+    // Each failing URL is already reported above, so only claim success when
+    // every one of them was reachable; a ✓ next to "0 reachable" reads as a pass.
+    const summary = `${previews.length} distinct event images, ${reachable}/${checked} URLs reachable (reduced + original)`;
+    if (reachable === checked) ok(summary);
+    else console.log(`  – ${summary}`);
   }
 
   // Summary ----------------------------------------------------------------

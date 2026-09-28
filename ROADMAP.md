@@ -515,7 +515,10 @@ imported by the events page.
   intermittently on `HEAD` (about 1 in 8) while `GET` succeeds. Anything still
   failing is recorded as a failed check. Verified by injecting faults into
   `fetch`: HEAD hangs → pass via the GET fallback; host down → every section
-  runs, 5 failures listed, exit 1; 404 → reported as failures.
+  runs, 5 failures listed, exit 1; 404 → reported as failures. Follow-up
+  (2026-09-28): the summary line printed `✓ … 0 URLs reachable` even when every
+  image failed. It now shows `reachable/checked` and only prints the ✓ when they
+  match, otherwise a neutral `–`.
 - ✅ **Fixed (2026-09-18).** `prefers-reduced-motion` now freezes the
   decorative scroll-linked transforms: hero zoom and shift, About card and
   title scale, the Activities meeple, and the section-divider wave. It does
