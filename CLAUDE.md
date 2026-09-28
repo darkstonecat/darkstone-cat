@@ -17,12 +17,17 @@ npm run dev              # Start development server
 npm run build            # Production build
 npm run start            # Start production server
 npm run lint             # Run ESLint
+npm run analyze          # Production build with the bundle analyzer (ANALYZE=true)
 npm run lighthouse       # Lighthouse audit — local (build + start + audit + cleanup)
 npm run lighthouse:prod  # Lighthouse audit — production (darkstone.cat)
 npm run ludoya:check     # Verify Ludoya API endpoints and response shapes (live)
 ```
 
 No test runner is configured.
+
+`engines` requires Node `^22.19.0 || ^24.0.0`, and `.nvmrc` pins 24 for local work and CI. The floor is 22.19 because `lighthouse` needs it; the range is capped at 24 because Vercel deploys the highest major that satisfies `engines`, so an open range would silently move production to the next major. Bumping Node means editing both `engines` and `.nvmrc`.
+
+`lighthouse:local` is an alias of `lighthouse`; both run the same script.
 
 ### Lighthouse Audits
 

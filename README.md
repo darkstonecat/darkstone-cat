@@ -31,7 +31,7 @@
 | Email | [Resend](https://resend.com) |
 | Icons | [React Icons](https://react-icons.github.io/react-icons/) (Material Design) |
 | Database | [Supabase](https://supabase.com) (PostgreSQL) |
-| Monitoring | [Vercel Analytics](https://vercel.com/analytics) + [Speed Insights](https://vercel.com/docs/speed-insights) |
+| Monitoring | [Vercel Analytics](https://vercel.com/analytics) + [Speed Insights](https://vercel.com/docs/speed-insights) (Speed Insights needs a paid plan, so it currently reports nothing) |
 | Deployment | [Vercel](https://vercel.com) |
 
 ## Pages
@@ -84,10 +84,17 @@ src/
 
 ## Getting Started
 
+**Requires Node.js 22.19+ or 24.x** (`engines` in `package.json`). The repo ships
+an `.nvmrc`, so `nvm use` picks the right one, and CI reads that same file. Older
+versions fail the install on purpose instead of breaking later.
+
 ```bash
 # Clone
 git clone git@github.com:darkstonecat/darkstone-cat.git
 cd darkstone-cat
+
+# Use the project's Node version
+nvm use
 
 # Install
 npm install
@@ -109,6 +116,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the site.
 | `npm run build` | Production build |
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint |
+| `npm run analyze` | Production build with the bundle analyzer |
 | `npm run lighthouse` | Lighthouse audit (local build) |
 | `npm run lighthouse:prod` | Lighthouse audit (production) |
 | `npm run ludoya:check` | Verify the Ludoya API still matches what the events page expects |
