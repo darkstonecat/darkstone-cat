@@ -71,7 +71,7 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/cookies` | `cookies/page.tsx` | Cookie policy (`revalidate = false`) |
 
 API routes:
-- `src/app/api/contact/route.ts` — POST endpoint using Resend to send emails
+- `src/app/api/contact/route.ts` — POST endpoint using Resend to send emails. **CSRF guard: the `Origin` header must be in `ALLOWED_ORIGINS`** (`darkstone.cat`, `www.darkstone.cat`, `localhost:3000`), otherwise it returns `403 {"error":"forbidden"}` before doing anything. So the form **never works on `*.vercel.app` previews**; test it against a local build on port 3000. **Update that list if the production domain changes**, or the form starts failing silently
 - `src/app/api/events/[eventId]/image/route.ts` — GET 1080×1080 PNG for an event (Satori via `next/og`, `src/lib/event-image/`)
 - `src/app/api/test-image/[count]/route.ts` — GET test image with 1–8 hardcoded games, for layout checks
 
@@ -253,7 +253,7 @@ The `public` schema is the primary working schema.
 - **resend** — email delivery for contact form
 - **react-icons** — icon library (Material Design `react-icons/md` + brand icons `react-icons/fa`)
 - **clsx** + **tailwind-merge** — class utilities (via `cn()`)
-- **@vercel/analytics** + **@vercel/speed-insights** — Vercel monitoring
+- **@vercel/analytics** + **@vercel/speed-insights** — Vercel monitoring. Web Analytics reports normally; **Speed Insights needs a paid Vercel plan, which the project does not have**, so its `POST /<hash>/vitals` answers `503` and no metric is ever stored. The component stays mounted so it starts working if the plan changes — the 503s are expected, not a bug. Both scripts load from obfuscated paths (`/<16-hex>/script.js`), not `/_vercel/insights/…`, and both ignore automated browsers, so they can only be verified in a real one
 
 ## Gotchas
 

@@ -566,6 +566,9 @@ imported by the events page.
   pass. If a platform without a prebuilt binary ever fails, review and
   approve that package with `npm install-scripts approve <pkg>`.
 - ESLint 9 is not a fallback: it reached end of life on 2026-08-06.
+- Package count went from 522 to 528 after the 2026-09-28 update: ESLint 10.11.0
+  reintroduced `ajv` and its four transitive deps (`ajv-formats`, `fast-uri`,
+  `json-schema-traverse`, `require-from-string`). All dev-only.
 - Package count went from 516 to 522 after `npm update` (2026-09-18), with no
   version changes in the plugins. Once the overrides resolved the peer
   conflict, npm hoisted `eslint-plugin-import`, `-jsx-a11y` and `-react` out of
@@ -574,8 +577,30 @@ imported by the events page.
   level holds the v10/v5/v4 versions that ESLint 10 uses. `npm dedupe` would
   only save 4 packages by downgrading top-level `zod`, `postcss` and
   `@eslint-community/eslint-utils`, so it was not applied.
-- Vercel Analytics / Speed Insights v2 telemetry is not verified until the next
-  deploy.
+- ✅ **Verified on the `develop` preview (2026-09-28)**, in real Chrome
+  (`navigator.webdriver === false`; both scripts ignore automated browsers, so
+  headless cannot verify them).
+  - **Web Analytics v2 works.** `POST /<hash>/view` → 200 on `/about`,
+    `/ludoteca` and `/contact`. `window.vai === true`.
+  - **Speed Insights v2 does not report.** Its script loads (200) and
+    initializes (`window.sil === true`), but every real `POST /<hash>/vitals`
+    returns **503**, on separate page loads. The collector is alive: an empty
+    body returns `400 body must have required property 'metrics'`. **Cause: it
+    needs a paid Vercel plan. Decision: not subscribing**, so these 503s are
+    expected and are not a defect to chase.
+  - v2 serves both scripts from obfuscated paths (`/<16-hex>/script.js`, from
+    `NEXT_PUBLIC_VERCEL_OBSERVABILITY_BASEPATH`), not `/_vercel/insights/…`.
+  - Unrelated: the CSP blocks `vercel.live` (Vercel's comment toolbar). It only
+    loads on previews, never in production.
+- ✅ **Contact form verified (2026-09-28).** It **cannot** be tested on a
+  preview: `src/app/api/contact/route.ts` only accepts the origins
+  `darkstone.cat`, `www.darkstone.cat` and `localhost:3000`, so `*.vercel.app`
+  gets `403 {"error":"forbidden"}` from the app itself and no mail is sent.
+  Verified instead against a local production build on the allowed origin
+  `localhost:3000`: `POST /api/contact` → 200, success panel rendered, real
+  email delivered, no server-side errors. This clears `resend` (the one package
+  that had never been exercised end to end). **If the production domain ever
+  changes, update that allowlist or the form silently starts returning 403.**
 
 ---
 
