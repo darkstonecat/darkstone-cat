@@ -21,6 +21,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./tests/setup.ts'],
     env: loadEnv('test', process.cwd(), ''),
+    // next-intl's ESM imports `next/navigation` without an extension, which
+    // Node cannot resolve; inlining lets Vite resolve it.
+    server: { deps: { inline: ['next-intl'] } },
     projects: [
       {
         extends: true,

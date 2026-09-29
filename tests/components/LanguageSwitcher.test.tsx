@@ -1,26 +1,22 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-
-const mockReplace = vi.fn()
+import { useLocale } from 'next-intl'
+import { usePathname } from '@/i18n/routing'
 
 vi.mock('next-intl', () => ({
   useLocale: vi.fn(() => 'ca'),
 }))
 
-vi.mock('@/i18n/routing', () => ({
-  useRouter: vi.fn(() => ({ replace: mockReplace })),
+// Keep the real getPathname so the hrefs follow the actual routing config
+vi.mock('@/i18n/routing', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/i18n/routing')>()),
   usePathname: vi.fn(() => '/about'),
 }))
 
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 describe('LanguageSwitcher', () => {
-  beforeEach(() => {
-    mockReplace.mockReset()
-  })
-
-  it('renders all three locale buttons', () => {
+  it('renders all three locale links', () => {
     render(<LanguageSwitcher />)
     expect(screen.getByText('CAT')).toBeInTheDocument()
     expect(screen.getByText('ESP')).toBeInTheDocument()
@@ -34,23 +30,24 @@ describe('LanguageSwitcher', () => {
     expect(screen.getByText('ENG')).not.toHaveAttribute('aria-current')
   })
 
-  it('calls router.replace with new locale on click', async () => {
-    const user = userEvent.setup()
+  it('links to the canonical URL of each locale (no /ca prefix)', () => {
     render(<LanguageSwitcher />)
-    await user.click(screen.getByText('ESP'))
-    expect(mockReplace).toHaveBeenCalledWith('/about', { locale: 'es' })
+    expect(screen.getByRole('link', { name: /Switch to CAT/i })).toHaveAttribute('href', '/about')
+    expect(screen.getByRole('link', { name: /Switch to ESP/i })).toHaveAttribute('href', '/es/about')
+    expect(screen.getByRole('link', { name: /Switch to ENG/i })).toHaveAttribute('href', '/en/about')
   })
 
-  it('has accessible aria-label on each button', () => {
+  it('keeps the same hrefs when rendered from another locale', () => {
+    vi.mocked(useLocale).mockReturnValueOnce('es')
+    vi.mocked(usePathname).mockReturnValueOnce('/')
     render(<LanguageSwitcher />)
-    expect(
-      screen.getByRole('button', { name: /Switch to CAT/i })
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /Switch to ESP/i })
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /Switch to ENG/i })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Switch to CAT/i })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: /Switch to ESP/i })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', { name: /Switch to ENG/i })).toHaveAttribute('href', '/en')
+  })
+
+  it('sets hrefLang on each link', () => {
+    render(<LanguageSwitcher />)
+    expect(screen.getByRole('link', { name: /Switch to ESP/i })).toHaveAttribute('hreflang', 'es')
   })
 })
