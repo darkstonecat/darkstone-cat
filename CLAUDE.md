@@ -41,7 +41,7 @@ npm run db:stop          # Stop local Supabase
 npm run db:reset         # Reset local DB (re-applies migrations + seed)
 ```
 
-Test structure: `tests/` (Vitest — unit, hooks, components, server, integration) and `e2e/` (Playwright — 14 specs). Config: `vitest.config.ts`, `playwright.config.ts`. Env: `.env.test.local`. CI: `.github/workflows/ci.yml` (5 parallel jobs).
+Test structure: `tests/` (Vitest — unit, hooks, components, server, integration) and `e2e/` (Playwright — 14 specs). Config: `vitest.config.mts` (two projects: `dom` runs under jsdom, `node` runs `tests/server`, `tests/lib` and `tests/integration` under Node), `playwright.config.ts`. Env: `.env.test.local`. CI: `.github/workflows/ci.yml` (5 parallel jobs).
 
 **After code changes**: run the relevant test suite (`npm test` for logic, `npm run test:e2e` for UI/flows). When adding new features, write corresponding tests before merging.
 
