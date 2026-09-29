@@ -1,6 +1,10 @@
 "use client";
 
-import { usePathname, useRouter } from "@/i18n/routing";
+// next/link on purpose: next-intl's <Link locale="ca"> forces a /ca prefix,
+// which 308-redirects to the unprefixed URL. getPathname() applies the
+// 'as-needed' rule, so every href is the canonical URL of that locale.
+import Link from "next/link";
+import { getPathname, usePathname } from "@/i18n/routing";
 import { useLocale } from "next-intl";
 
 interface LanguageSwitcherProps {
@@ -9,7 +13,6 @@ interface LanguageSwitcherProps {
 
 export default function LanguageSwitcher({ colorOverride }: LanguageSwitcherProps) {
   const locale = useLocale();
-  const router = useRouter();
   const pathname = usePathname();
   const color = colorOverride ?? "currentColor";
 
@@ -19,16 +22,16 @@ export default function LanguageSwitcher({ colorOverride }: LanguageSwitcherProp
     { code: "en", label: "ENG" },
   ] as const;
 
-  const handleLanguageChange = (newLocale: typeof languages[number]["code"]) => {
-    router.replace(pathname, { locale: newLocale });
-  };
-
+  // Real <a href> links (not buttons) so crawlers can discover the /es and
+  // /en versions of every page from the server-rendered HTML.
   return (
     <div className="flex gap-2 text-sm font-medium" role="group" aria-label="Language">
       {languages.map((lang) => (
-        <button
+        <Link
           key={lang.code}
-          onClick={() => handleLanguageChange(lang.code)}
+          href={getPathname({ href: pathname, locale: lang.code })}
+          replace
+          hrefLang={lang.code}
           style={{ color }}
           aria-current={locale === lang.code ? "page" : undefined}
           aria-label={`Switch to ${lang.label}`}
@@ -39,7 +42,7 @@ export default function LanguageSwitcher({ colorOverride }: LanguageSwitcherProp
           }`}
         >
           {lang.label}
-        </button>
+        </Link>
       ))}
     </div>
   );
