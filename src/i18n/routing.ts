@@ -18,5 +18,5 @@ export const routing = defineRouting({
  
 // Lightweight wrappers around Next.js' navigation APIs
 // that will consider the routing configuration
-export const {Link, redirect, usePathname, useRouter} =
+export const {Link, getPathname, redirect, usePathname, useRouter} =
   createNavigation(routing);

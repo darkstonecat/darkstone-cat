@@ -188,7 +188,7 @@ When adding a new page, update **all** of the following:
 1. `src/app/[locale]/<page>/page.tsx` — Page with `generateMetadata()`, JSON-LD (BreadcrumbList + WebPage + any page-specific schema), revalidate
 2. `src/components/<page>/` — Page component(s)
 3. `src/messages/{ca,es,en}.json` — Add keys in `metadata` namespace (`<page>_title`, `<page>_description`), `nav` namespace (breadcrumb name), `footer` namespace (if linked from footer), and page-specific namespace
-4. `src/app/sitemap.ts` — Add entry to `pages` array with path, changeFrequency, priority, lastModified (**skip if the page is `noindex`**)
+4. `src/app/sitemap.ts` — Add entry to `pages` array with path, changeFrequency, priority — no `lastModified` (**skip if the page is `noindex`**)
 5. `src/components/NavBar.tsx` — Add `"/<page>"` to `SUBPAGE_THEMES` map (required for theme detection)
 6. `src/components/Footer.tsx` — Optionally add link to `NAV_LINKS` (main pages) or `LEGAL_LINKS` (support/legal pages)
 7. `scripts/lighthouse/config.mjs` — Add entry to `PAGES` array
@@ -263,7 +263,7 @@ The `public` schema is the primary working schema.
 ## Gotchas
 
 1. **Motion v13 ≠ framer-motion** — Always `import { motion } from "motion/react"`, never from `framer-motion`.
-2. **i18n routing** — Always use `Link`/`usePathname`/`useRouter` from `@/i18n/routing`, not Next.js primitives.
+2. **i18n routing** — Always use `Link`/`usePathname`/`useRouter` from `@/i18n/routing`, not Next.js primitives. Exception: `LanguageSwitcher` uses `next/link` with `getPathname()`, because next-intl's `<Link locale="ca">` forces a `/ca` prefix that 308-redirects. Its links must stay real `<a href>` (not buttons) so crawlers find the `/es` and `/en` pages.
 3. **Default locale** — Catalan (`ca`) has no URL prefix. `/about` = Catalan, `/es/about` = Spanish.
 4. **Section IDs** — Home page sections must have `id` attributes matching `SECTION_THEMES` keys in NavBar for theme detection to work.
 5. **No Zustand** — Theme state lives entirely in NavBar scroll detection logic. Zustand is not installed as a dependency.
