@@ -1,9 +1,19 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Google Workspace SMTP. SMTP_PASSWORD is an app password of SMTP_USER.
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
 
-const CONTACT_EMAIL = "darkstone.cat@gmail.com";
+const SENDER_EMAIL = "no-reply@darkstone.cat";
+const CONTACT_EMAIL = "hola@darkstone.cat";
 
 // --- Rate limiting (in-memory, resets on cold start) ---
 const WINDOW_MS = 3_600_000; // 1 hour
@@ -83,8 +93,8 @@ export async function POST(request: Request) {
     }
 
     // Send email with timeout
-    const sendPromise = resend.emails.send({
-      from: "Web [darkstone.cat] <onboarding@resend.dev>",
+    const sendPromise = transporter.sendMail({
+      from: `"Web [darkstone.cat]" <${SENDER_EMAIL}>`,
       to: CONTACT_EMAIL,
       replyTo: email,
       subject: `[Formulari Web] ${subject.trim()}`,
@@ -99,15 +109,15 @@ export async function POST(request: Request) {
     });
 
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Resend timeout")), 15_000)
+      setTimeout(() => reject(new Error("SMTP timeout")), 15_000)
     );
 
-    const { error: resendError } = await Promise.race([sendPromise, timeoutPromise]);
-
-    if (resendError) {
-      console.error("Resend error:", resendError);
+    try {
+      await Promise.race([sendPromise, timeoutPromise]);
+    } catch (smtpError) {
+      console.error("SMTP error:", smtpError);
       return NextResponse.json(
-        { error: "send_failed", details: resendError.message },
+        { error: "send_failed" },
         { status: 500, headers: NO_CACHE_HEADERS }
       );
     }
