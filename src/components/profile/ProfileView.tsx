@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { motion } from "motion/react";
 import { exportProfileData } from "@/lib/profile/actions";
+import { formatCalendarDate } from "@/lib/format-date";
 import DeleteAccountDialog from "./DeleteAccountDialog";
 
 type ProfileViewProps = {
@@ -48,6 +49,7 @@ export default function ProfileView({
   membershipStartDate,
 }: ProfileViewProps) {
   const t = useTranslations("profile");
+  const locale = useLocale();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
 
@@ -117,7 +119,7 @@ export default function ProfileView({
             />
             <Field
               label={t("label_member_since")}
-              value={membershipStartDate ? new Date(membershipStartDate).toLocaleDateString() : null}
+              value={membershipStartDate ? formatCalendarDate(membershipStartDate, locale) : null}
               placeholder={notProvided}
             />
           </dl>
