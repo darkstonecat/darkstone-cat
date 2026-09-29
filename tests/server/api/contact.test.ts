@@ -2,10 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockSend = vi.hoisted(() => vi.fn())
 
-vi.mock('resend', () => ({
-  Resend: class MockResend {
-    emails = { send: mockSend }
-  },
+vi.mock('nodemailer', () => ({
+  default: { createTransport: () => ({ sendMail: mockSend }) },
 }))
 
 import { POST } from '@/app/api/contact/route'
@@ -40,7 +38,7 @@ function makeRequest(
 describe('POST /api/contact', () => {
   beforeEach(() => {
     mockSend.mockReset()
-    mockSend.mockResolvedValue({ data: { id: 'msg-1' }, error: null })
+    mockSend.mockResolvedValue({ messageId: 'msg-1' })
   })
 
   describe('CSRF protection', () => {
@@ -119,23 +117,25 @@ describe('POST /api/contact', () => {
   })
 
   describe('email sending', () => {
-    it('sends email via Resend and returns success', async () => {
+    it('sends email via SMTP and returns success', async () => {
       const res = await POST(makeRequest(validBody))
       expect(res.status).toBe(200)
       expect(await res.json()).toEqual({ success: true })
       expect(mockSend).toHaveBeenCalledOnce()
+      expect(mockSend.mock.calls[0][0]).toMatchObject({
+        from: '"Web [darkstone.cat]" <no-reply@darkstone.cat>',
+        to: 'hola@darkstone.cat',
+        replyTo: validBody.email,
+        subject: `[Formulari Web] ${validBody.subject}`,
+      })
     })
 
-    it('returns 500 when Resend fails', async () => {
-      mockSend.mockResolvedValueOnce({
-        error: { message: 'send error' },
-      })
+    it('returns 500 without SMTP details when sending fails', async () => {
+      vi.spyOn(console, 'error').mockImplementationOnce(() => {})
+      mockSend.mockRejectedValueOnce(new Error('535 bad credentials'))
       const res = await POST(makeRequest(validBody))
       expect(res.status).toBe(500)
-      expect(await res.json()).toEqual({
-        error: 'send_failed',
-        details: 'send error',
-      })
+      expect(await res.json()).toEqual({ error: 'send_failed' })
     })
 
     it('escapes HTML in email body (XSS prevention)', async () => {

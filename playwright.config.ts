@@ -63,7 +63,8 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
       SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY!,
       ENCRYPTION_KEY: process.env.ENCRYPTION_KEY!,
-      RESEND_API_KEY: process.env.RESEND_API_KEY!,
+      SMTP_USER: process.env.SMTP_USER!,
+      SMTP_PASSWORD: process.env.SMTP_PASSWORD!,
     },
   },
 })

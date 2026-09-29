@@ -54,7 +54,7 @@ on develop-users.
 - [x] T1b (main, inline: mechanical replace) — Public contact address ->
   `hola@darkstone.cat` in 4 components + 3 locale files. Checks: eslint src,
   tsc, JSON parse, build.
-- [ ] T2 (develop-users) — Merge main, rewrite contact test mocks for
+- [x] T2 (develop-users) — Merge main, rewrite contact test mocks for
   nodemailer, update Playwright env. Checks: test:unit, lint.
 
 ## Acceptance criteria
@@ -79,9 +79,14 @@ on develop-users.
 - Real send verified: local production build on :3000, POST /api/contact ->
   200 {"success":true} with the user's SMTP credentials (app password rotated
   after being echoed once in the session). Inbox delivery to hola@ pending user
-  confirmation.
+  confirmation. User confirmed delivery; main pushed at f27d0ab.
+- T2 done (inline): main merged into develop-users (lockfile conflict resolved
+  by keeping develop-users and re-running npm install). contact.test.ts mocks
+  nodemailer and asserts from/to/replyTo/subject and the details-free 500;
+  Playwright and CI env use SMTP_USER/SMTP_PASSWORD (E2E intercepts
+  /api/contact). Observed: test:unit 131/131, lint clean, tsc clean.
+  Integration/E2E not run (need local Supabase; unaffected by this change).
 
 ## Next step
 
-User adds SMTP_USER/SMTP_PASSWORD to `.env.local` and Vercel, creates
-`hola@darkstone.cat`, verifies a real send locally; then T2.
+Done. User pushes develop-users when ready.
