@@ -75,7 +75,11 @@ on develop-users.
   Removed `details` from the `send_failed` response (the form never read it;
   avoids exposing SMTP error text to clients). Commit f5b1149.
 - T1b done: no occurrence of the old address left in `src`; eslint src, tsc,
-  locale JSON parse and build OK. No develop-users test references it.
+  locale JSON parse and build OK. No develop-users test references it. Commit 2bcde82.
+- Real send verified: local production build on :3000, POST /api/contact ->
+  200 {"success":true} with the user's SMTP credentials (app password rotated
+  after being echoed once in the session). Inbox delivery to hola@ pending user
+  confirmation.
 
 ## Next step
 
