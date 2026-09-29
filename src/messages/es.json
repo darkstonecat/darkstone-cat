@@ -50,9 +50,9 @@
   },
   "location": {
     "title": "¿Dónde estamos?",
-    "centre_name": "Centre Cívic Ca N'Aurell",
+    "centre_name": "Casal Cívic Ca N'Aurell",
     "centre_description": "Nave industrial rehabilitada · Plaça del Tint, 4",
-    "photo_alt": "Interior del Centre Cívic Ca N'Aurell — nave industrial rehabilitada",
+    "photo_alt": "Interior del Casal Cívic Ca N'Aurell — nave industrial rehabilitada",
     "address": "Plaça del Tint, 4 · 08224 Terrassa",
     "hours_title": "Horario",
     "transport_title": "Cómo llegar",
@@ -67,7 +67,7 @@
     "title": "¿Cuándo quedamos?",
     "friday": "Viernes",
     "saturday": "Sábados",
-    "general_info": "Nos reunimos cada viernes por la tarde y cada sábado por la mañana en el Centre Cívic Ca N'Aurell."
+    "general_info": "Nos reunimos cada viernes por la tarde y cada sábado por la mañana en el Casal Cívic Ca N'Aurell."
   },
   "footer": {
     "tagline": "Asociación de Juegos de Mesa y Rol de Terrassa",
@@ -184,7 +184,7 @@
     "why_join_cta": "Hazte socio",
 
     "cta_title": "¿Quieres formar parte?",
-    "cta_subtitle": "La asociación es gratuita. Ven cualquier viernes o sábado al Centre Cívic Ca N'Aurell y únete a nosotros.",
+    "cta_subtitle": "La asociación es gratuita. Ven cualquier viernes o sábado al Casal Cívic Ca N'Aurell y únete a nosotros.",
     "cta_primary_button": "Formulario de alta",
     "cta_secondary_button": "Contáctanos",
 
@@ -239,7 +239,7 @@
     "email_us": "O escríbenos directamente a",
     "social_title": "Encuéntranos en redes",
     "location_title": "Dónde estamos",
-    "location_name": "Centre Cívic Ca N'Aurell",
+    "location_name": "Casal Cívic Ca N'Aurell",
     "address_street": "Plaça del Tint, 4",
     "address_city": "08224 Terrassa",
     "maps_link": "Ver en Google Maps"
@@ -494,7 +494,7 @@
     "age_q": "¿A qué edad se puede venir?",
     "age_a": "¡Todo el mundo es bienvenido! Los menores de edad deben venir acompañados de un adulto responsable. Tenemos juegos para todas las edades y niveles de experiencia.",
     "location_q": "¿Dónde nos encontramos?",
-    "location_a": "Nos reunimos en el Centre Cívic Ca N'Aurell, en la Plaça del Tint, 4 de Terrassa (08224). El espacio es accesible y está bien comunicado con transporte público.",
+    "location_a": "Nos reunimos en el Casal Cívic Ca N'Aurell, en la Plaça del Tint, 4 de Terrassa (08224). El espacio es accesible y está bien comunicado con transporte público.",
     "schedule_q": "¿Qué horario tenéis?",
     "schedule_a": "Abrimos cada viernes de {fridayOpens} a {fridayCloses} y cada sábado de {saturdayOpens} a {saturdayCloses}. Puedes venir cuando quieras dentro de este horario, no hace falta reservar ni avisar.",
     "non_member_q": "¿Se puede venir sin ser socio?",

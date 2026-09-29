@@ -11,16 +11,16 @@ main element of the page.
 
 - The page is almost only the form (~1,500 chars incl. JSON-LD).
 - Session hours and venue name disagree across the site:
-  - Truth (confirmed by the user, shown on the site today): **Centre Cívic Ca N'Aurell**,
+  - Truth: **Casal Cívic Ca N'Aurell** (official name on the Ajuntament de Terrassa website and the building sign; Google Maps says "Centre", which caused the confusion; corrected by the user),
     Friday 16:00–20:30, Saturday 10:00–13:30.
   - Wrong: `faq.schedule_a` (17:00–21:00 / 10:00–14:00), Organization JSON-LD
     `openingHoursSpecification` in `src/app/[locale]/layout.tsx` (same wrong hours),
-    "Casal Cívic" in several message strings.
+    "Centre Cívic" in several message strings.
 
 ## Scope
 
 - Single source of truth for venue name, address and session hours, used by JSON-LD and UI.
-- Fix wrong hours and "Casal" → "Centre" in all 3 locales.
+- Fix wrong hours and use "Casal Cívic" everywhere in all 3 locales.
 - `/contact`: short intro, form stays first; below it a "come and play" block
   (hours, address, how to get there, Maps link, no iframe) and a 3–4 item
   contact FAQ with internal links (`/register`, `/faq`, `/events`).
@@ -37,13 +37,13 @@ main element of the page.
 
 ## Tasks
 
-- [x] T1 — Venue single source + fix hours/name inconsistencies (JSON-LD, FAQ, Casal→Centre). Route: delegated (writer trigger: 2+ non-trivial files).
+- [x] T1 — Venue single source + fix hours/name inconsistencies (JSON-LD, FAQ, venue name; first unified to "Centre", then corrected to the official "Casal"). Route: delegated (writer trigger: 2+ non-trivial files).
 - [-] T2 — Contact page content + ContactPage JSON-LD, 3 locales. **Dropped**: the user reviewed it and rejected it ("too much useless content"); the contact page stays as it was. Commits removed from the branch before push.
 
 ## Acceptance criteria
 
 - One place defines the hours; layout JSON-LD, events JSON-LD and visible UI all show Fri 16:00–20:30, Sat 10:00–13:30.
-- No "Casal Cívic" left in `src/messages/*.json`.
+- No "Centre Cívic" left in `src/` (the Ludoya mock fixtures keep Ludoya's own name).
 - `/contact` in ca/es/en: form above the fold as today; new sections render server-side; internal links present.
 - `lint` on changed files, `next build`, HTML check of the 3 contact URLs.
 
