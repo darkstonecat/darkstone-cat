@@ -29,8 +29,9 @@ Send contact form messages through the association's Google Workspace
 - develop-users: update `tests/server/api/contact.test.ts` mocks and
   `playwright.config.ts` env after merging main.
 
-Out of scope: the public address `darkstone.cat@gmail.com` shown in the footer,
-contact info, legal texts and JSON-LD (pending user decision).
+Public contact address: the user approved replacing the old Gmail address with
+`hola@darkstone.cat` everywhere it is shown (footer, contact info, collaborators,
+legal texts, JSON-LD).
 
 ## Constraints
 
@@ -50,6 +51,9 @@ on develop-users.
 
 - [x] T1 (main, inline: one non-trivial file + mechanical docs/deps) — Switch
   route to nodemailer SMTP, swap deps, update docs. Checks: lint, tsc, build.
+- [x] T1b (main, inline: mechanical replace) — Public contact address ->
+  `hola@darkstone.cat` in 4 components + 3 locale files. Checks: eslint src,
+  tsc, JSON parse, build.
 - [ ] T2 (develop-users) — Merge main, rewrite contact test mocks for
   nodemailer, update Playwright env. Checks: test:unit, lint.
 
@@ -69,7 +73,9 @@ on develop-users.
   ignores; pre-existing). Real send not verified: needs SMTP_USER/SMTP_PASSWORD
   in `.env.local` and a local production build on port 3000.
   Removed `details` from the `send_failed` response (the form never read it;
-  avoids exposing SMTP error text to clients).
+  avoids exposing SMTP error text to clients). Commit f5b1149.
+- T1b done: no occurrence of the old address left in `src`; eslint src, tsc,
+  locale JSON parse and build OK. No develop-users test references it.
 
 ## Next step
 

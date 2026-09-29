@@ -189,10 +189,10 @@ export default function Footer() {
 
             <div className="mt-2 border-t border-stone-800 pt-2">
               <a
-                href="mailto:darkstone.cat@gmail.com"
+                href="mailto:hola@darkstone.cat"
                 className="text-sm text-stone-300 transition-colors hover:text-brand-orange"
               >
-                darkstone.cat@gmail.com
+                hola@darkstone.cat
               </a>
             </div>
           </motion.div>

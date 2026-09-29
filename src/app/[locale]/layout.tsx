@@ -95,7 +95,7 @@ export default async function LocaleLayout({
         image: "https://www.darkstone.cat/images/darkstone_logo_768px.webp",
         description: t("home_description"),
         foundingDate: "2024-09-14",
-        email: "darkstone.cat@gmail.com",
+        email: "hola@darkstone.cat",
         address,
         location: { "@id": placeId },
         areaServed: {

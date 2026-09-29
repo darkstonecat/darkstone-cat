@@ -118,7 +118,7 @@ export default function AboutCollaborators() {
             ),
             emailLink: (chunks) => (
               <a
-                href="mailto:darkstone.cat@gmail.com"
+                href="mailto:hola@darkstone.cat"
                 className="font-medium text-brand-orange underline underline-offset-2 transition-colors hover:text-brand-orange/80"
               >
                 {chunks}
