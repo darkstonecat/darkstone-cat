@@ -155,6 +155,10 @@ npm run test:e2e        # E2E tests (auto-starts dev server on port 3100)
 npm run db:stop         # When done
 ```
 
+Integration and E2E tests read `.env.test.local` (gitignored), which must point at the local Supabase. Create it with the same values as the `env:` block of `.github/workflows/ci.yml` (local URL `http://127.0.0.1:54321`, the Supabase CLI demo keys and a dummy `ENCRYPTION_KEY`).
+
+E2E tests that modify data must use the dedicated `editorPage` fixture, never the shared `memberPage`/`adminPage` users, because tests run fully in parallel.
+
 CI runs all tests automatically via GitHub Actions on push/PR to `main`.
 
 ### Environment Variables

@@ -41,7 +41,15 @@ npm run db:stop          # Stop local Supabase
 npm run db:reset         # Reset local DB (re-applies migrations + seed)
 ```
 
-Test structure: `tests/` (Vitest — unit, hooks, components, server, integration) and `e2e/` (Playwright — 14 specs). Config: `vitest.config.mts` (two projects: `dom` runs under jsdom, `node` runs `tests/server`, `tests/lib` and `tests/integration` under Node), `playwright.config.ts`. Env: `.env.test.local`. CI: `.github/workflows/ci.yml` (5 parallel jobs).
+Test structure: `tests/` (Vitest — unit, hooks, components, server, integration) and `e2e/` (Playwright — 15 specs). Config: `vitest.config.mts` (two projects: `dom` runs under jsdom, `node` runs `tests/server`, `tests/lib` and `tests/integration` under Node), `playwright.config.ts`. CI: `.github/workflows/ci.yml` (5 parallel jobs; Node from `.nvmrc`, Supabase CLI via `npx` from the lockfile).
+
+**Test env (`.env.test.local`, gitignored)**: Vitest (`loadEnv('test')`) and Playwright read it with higher priority than `.env.local`. It must point at the local Supabase, with the same values as the `env:` block of `.github/workflows/ci.yml`: `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321`, the Supabase CLI demo `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` and `SUPABASE_SERVICE_ROLE_KEY`, and a dummy 64-hex `ENCRYPTION_KEY`. Without it, integration and E2E tests hit whatever `.env.local` points to and fail with `fetch failed`.
+
+**E2E users**: `e2e/global-setup.ts` creates three users and saves their sessions under `.auth/`; `e2e/global-teardown.ts` deletes them. Use the matching fixture from `e2e/fixtures.ts`:
+- `memberPage` (`e2e-member`) and `adminPage` (`e2e-admin`) — **read-only**. Many tests assert their data in parallel (`fullyParallel: true`).
+- `editorPage` (`e2e-editor`) — for any test that **writes** profile data. Writing to the shared member caused a flaky race with tests that read it.
+
+Scope text assertions to a region (e.g. the "Dades personals" `section`): the navbar user button also shows the member's first name, so an unscoped `getByText(name)` can match twice.
 
 **After code changes**: run the relevant test suite (`npm test` for logic, `npm run test:e2e` for UI/flows). When adding new features, write corresponding tests before merging.
 
