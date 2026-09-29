@@ -9,9 +9,17 @@ export const ADMIN_PASSWORD = 'Admin1234!'
 export const ADMIN_FIRST_NAME = 'E2E'
 export const ADMIN_LAST_NAME = 'Admin'
 
+// Dedicated user for tests that mutate profile data. Tests run fully parallel,
+// so writing to the shared member would race with tests that read it.
+export const EDITOR_EMAIL = 'e2e-editor@test.local'
+export const EDITOR_PASSWORD = 'Editor1234!'
+export const EDITOR_FIRST_NAME = 'E2E'
+export const EDITOR_LAST_NAME = 'Editor'
+
 // ─── Storage state paths ─────────────────────────────────────────
 export const MEMBER_STATE_PATH = '.auth/member.json'
 export const ADMIN_STATE_PATH = '.auth/admin.json'
+export const EDITOR_STATE_PATH = '.auth/editor.json'
 
 // ─── Common paths ────────────────────────────────────────────────
 export const PAGES = {

@@ -28,7 +28,9 @@ test.describe('Profile edit', () => {
     await expect(cancelLink).toBeVisible()
   })
 
-  test('can update name and save', async ({ memberPage: page }) => {
+  // Uses the dedicated editor user: writing to the shared member would race
+  // with profile tests that read its name in parallel.
+  test('can update name and save', async ({ editorPage: page }) => {
     test.slow()
     await page.goto(PAGES.profileEdit)
 
@@ -42,16 +44,10 @@ test.describe('Profile edit', () => {
     await page.waitForURL('**/profile', { timeout: 10_000 })
     await expect(page).toHaveURL(/\/profile$/)
 
-    // Verify updated name is shown
-    await expect(page.getByText('E2E-Updated')).toBeVisible()
-
-    // Restore original name
-    await page.goto(PAGES.profileEdit)
-    const input = page.locator('#first_name')
-    await input.clear()
-    await input.fill('E2E')
-    await page.locator('button[type="submit"]').click()
-    await page.waitForURL('**/profile', { timeout: 10_000 })
+    // Verify updated name is shown in the profile data (the navbar user button
+    // may also show it, so an unscoped getByText would match twice)
+    const section = page.locator('section').filter({ hasText: TEXT.profile_section_personal })
+    await expect(section.getByText('E2E-Updated', { exact: true })).toBeVisible()
   })
 
   test('shows section headers', async ({ memberPage: page }) => {

@@ -1,10 +1,28 @@
-import { test as setup } from '@playwright/test'
+import { test as setup, type Browser } from '@playwright/test'
 import { createTestUser } from './helpers/supabase-admin'
 import {
   MEMBER_EMAIL, MEMBER_PASSWORD, MEMBER_FIRST_NAME, MEMBER_LAST_NAME,
   ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_FIRST_NAME, ADMIN_LAST_NAME,
-  MEMBER_STATE_PATH, ADMIN_STATE_PATH,
+  EDITOR_EMAIL, EDITOR_PASSWORD, EDITOR_FIRST_NAME, EDITOR_LAST_NAME,
+  MEMBER_STATE_PATH, ADMIN_STATE_PATH, EDITOR_STATE_PATH,
 } from './helpers/constants'
+
+async function loginAndSaveState(
+  browser: Browser,
+  email: string,
+  password: string,
+  statePath: string
+) {
+  const ctx = await browser.newContext()
+  const page = await ctx.newPage()
+  await page.goto('/login')
+  await page.locator('#email').fill(email)
+  await page.locator('#password').fill(password)
+  await page.locator('button[type="submit"]').click()
+  await page.waitForURL('**/profile', { timeout: 30_000 })
+  await ctx.storageState({ path: statePath })
+  await ctx.close()
+}
 
 setup('create test users and save auth state', async ({ browser }) => {
   // Create test users in Supabase (admin API, no browser needed)
@@ -24,25 +42,15 @@ setup('create test users and save auth state', async ({ browser }) => {
     role: 'admin',
   })
 
-  // Login member and save state
-  const memberCtx = await browser.newContext()
-  const memberPage = await memberCtx.newPage()
-  await memberPage.goto('/login')
-  await memberPage.locator('#email').fill(MEMBER_EMAIL)
-  await memberPage.locator('#password').fill(MEMBER_PASSWORD)
-  await memberPage.locator('button[type="submit"]').click()
-  await memberPage.waitForURL('**/profile', { timeout: 30_000 })
-  await memberCtx.storageState({ path: MEMBER_STATE_PATH })
-  await memberCtx.close()
+  await createTestUser({
+    email: EDITOR_EMAIL,
+    password: EDITOR_PASSWORD,
+    firstName: EDITOR_FIRST_NAME,
+    lastName: EDITOR_LAST_NAME,
+    role: 'member',
+  })
 
-  // Login admin and save state
-  const adminCtx = await browser.newContext()
-  const adminPage = await adminCtx.newPage()
-  await adminPage.goto('/login')
-  await adminPage.locator('#email').fill(ADMIN_EMAIL)
-  await adminPage.locator('#password').fill(ADMIN_PASSWORD)
-  await adminPage.locator('button[type="submit"]').click()
-  await adminPage.waitForURL('**/profile', { timeout: 30_000 })
-  await adminCtx.storageState({ path: ADMIN_STATE_PATH })
-  await adminCtx.close()
+  await loginAndSaveState(browser, MEMBER_EMAIL, MEMBER_PASSWORD, MEMBER_STATE_PATH)
+  await loginAndSaveState(browser, ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_STATE_PATH)
+  await loginAndSaveState(browser, EDITOR_EMAIL, EDITOR_PASSWORD, EDITOR_STATE_PATH)
 })
