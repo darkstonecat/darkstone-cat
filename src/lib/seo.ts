@@ -1,5 +1,8 @@
 const BASE_URL = "https://www.darkstone.cat";
 
+/** `@id` of the Organization node emitted in the root layout JSON-LD. */
+export const ORG_ID = `${BASE_URL}/#organization`;
+
 /**
  * Absolute URL for a page in a given locale. The default locale (ca) has no
  * prefix. Trailing slashes are never emitted on prefixed paths (`/es`, not
@@ -62,10 +65,14 @@ export function getWebPageJsonLd(
   path: string,
   name: string,
   description: string,
+  options: {
+    type?: "WebPage" | "ContactPage" | "AboutPage";
+    extra?: Record<string, unknown>;
+  } = {},
 ) {
   return {
     "@context": "https://schema.org",
-    "@type": "WebPage",
+    "@type": options.type ?? "WebPage",
     name,
     description,
     url: getLocalizedUrl(locale, path),
@@ -75,5 +82,6 @@ export function getWebPageJsonLd(
       url: BASE_URL,
     },
     inLanguage: locale === "ca" ? "ca" : locale === "es" ? "es" : "en",
+    ...options.extra,
   };
 }

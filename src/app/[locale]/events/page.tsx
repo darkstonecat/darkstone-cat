@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import EventsHero from "@/components/events/EventsHero";
 import EventsContent from "@/components/events/EventsContent";
+import { VENUE, VENUE_POSTAL_ADDRESS } from "@/lib/venue";
 
 export const revalidate = 86400;
 
@@ -93,14 +94,8 @@ export default async function EventsPage({
       },
       location: {
         "@type": "Place",
-        name: "Centre Cívic Ca N'Aurell",
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: "Plaça del Tint, 4",
-          addressLocality: "Terrassa",
-          postalCode: "08224",
-          addressCountry: "ES",
-        },
+        name: VENUE.name,
+        address: VENUE_POSTAL_ADDRESS,
       },
     };
   });

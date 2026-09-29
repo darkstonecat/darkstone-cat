@@ -5,7 +5,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import { getOgImageUrl } from '@/lib/seo';
+import { getOgImageUrl, ORG_ID } from '@/lib/seo';
+import { SESSIONS, getSession, VENUE_POSTAL_ADDRESS } from '@/lib/venue';
 import '@/styles/globals.css';
 import SmoothScroll from "@/components/SmoothScroll";
 import CookieConsentProvider from "@/components/CookieConsentProvider";
@@ -67,17 +68,10 @@ export default async function LocaleLayout({
     getTranslations({ locale, namespace: "metadata" }),
   ]);
 
-  const orgId = "https://www.darkstone.cat/#organization";
+  const orgId = ORG_ID;
   const placeId = "https://www.darkstone.cat/#place";
 
-  const address = {
-    "@type": "PostalAddress",
-    streetAddress: "Plaça del Tint, 4",
-    addressLocality: "Terrassa",
-    addressRegion: "Barcelona",
-    postalCode: "08224",
-    addressCountry: "ES",
-  };
+  const address = VENUE_POSTAL_ADDRESS;
 
   const sameAs = [
     "https://instagram.com/darkstone.cat",
@@ -114,20 +108,12 @@ export default async function LocaleLayout({
         },
         knowsLanguage: ["ca", "es", "en"],
         sameAs,
-        openingHoursSpecification: [
-          {
-            "@type": "OpeningHoursSpecification",
-            dayOfWeek: "Friday",
-            opens: "17:00",
-            closes: "21:00",
-          },
-          {
-            "@type": "OpeningHoursSpecification",
-            dayOfWeek: "Saturday",
-            opens: "10:00",
-            closes: "14:00",
-          },
-        ],
+        openingHoursSpecification: SESSIONS.map((session) => ({
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: session.schemaDay,
+          opens: session.opens,
+          closes: session.closes,
+        })),
       },
       {
         "@type": "WebSite",
@@ -163,8 +149,8 @@ export default async function LocaleLayout({
           "@type": "Schedule",
           repeatFrequency: "P1W",
           byDay: "https://schema.org/Friday",
-          startTime: "17:00",
-          endTime: "21:00",
+          startTime: getSession("friday").opens,
+          endTime: getSession("friday").closes,
         },
         location: { "@id": placeId },
         organizer: { "@id": orgId },
@@ -193,8 +179,8 @@ export default async function LocaleLayout({
           "@type": "Schedule",
           repeatFrequency: "P1W",
           byDay: "https://schema.org/Saturday",
-          startTime: "10:00",
-          endTime: "14:00",
+          startTime: getSession("saturday").opens,
+          endTime: getSession("saturday").closes,
         },
         location: { "@id": placeId },
         organizer: { "@id": orgId },

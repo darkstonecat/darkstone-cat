@@ -5,11 +5,10 @@ import { useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import TextReveal from "@/components/TextReveal";
+import { TRANSPORT, VENUE, getSession } from "@/lib/venue";
 
-
-const FGC_COLOR = "#009A44";
-const RODALIES_COLOR = "#E3000F";
-const BUS_COLOR = "#003DA5";
+const FRIDAY = getSession("friday");
+const SATURDAY = getSession("saturday");
 
 function TransportItem({
   badges,
@@ -93,7 +92,7 @@ export default function Location() {
                 {t_sched("friday")}
               </span>
               <span className="font-mono text-sm text-white">
-                {t_sched("friday_start")} — {t_sched("friday_end")}
+                {FRIDAY.opens} — {FRIDAY.closes}
               </span>
             </div>
             <div className="flex items-baseline justify-between">
@@ -101,7 +100,7 @@ export default function Location() {
                 {t_sched("saturday")}
               </span>
               <span className="font-mono text-sm text-white">
-                {t_sched("saturday_start")} — {t_sched("saturday_end")}
+                {SATURDAY.opens} — {SATURDAY.closes}
               </span>
             </div>
           </div>
@@ -113,53 +112,30 @@ export default function Location() {
             {t("transport_title")}
           </h3>
 
-          {/* FGC */}
-          <div className="mb-2">
-            <TransportItem
-              badges={["S1"]}
-              color={FGC_COLOR}
-              station="Terrassa Rambla"
-              walkTime={t("walk_time", { min: String(7).padStart(2, '\u2007') })}
-            />
-            <TransportItem
-              badges={["S1"]}
-              color={FGC_COLOR}
-              station="Estació del Nord"
-              walkTime={t("walk_time", { min: String(10).padStart(2, '\u2007') })}
-              note={t("rodalies_connection")}
-            />
-          </div>
-
-          <div className="my-1 border-t border-zinc-800" />
-
-          {/* Rodalies Renfe */}
-          <div className="mb-2">
-            <TransportItem
-              badges={["R4"]}
-              color={RODALIES_COLOR}
-              station="Terrassa"
-              walkTime={t("walk_time", { min: String(10).padStart(2, '\u2007') })}
-            />
-          </div>
-
-          <div className="my-1 border-t border-zinc-800" />
-
-          {/* Bus TMESA */}
-          <div>
-            <TransportItem
-              badges={["Bus"]}
-              color={BUS_COLOR}
-              station={`${t("bus_nearest_stop")}: Ricard Camí`}
-              walkTime={t("walk_time", { min: String(3).padStart(2, '\u2007') })}
-              note={t("bus_multiple_lines")}
-            />
-          </div>
+          {TRANSPORT.map((stop, i) => (
+            <div key={stop.id}>
+              {i > 0 && TRANSPORT[i - 1].badges[0] !== stop.badges[0] && (
+                <div className="mb-1 mt-3 border-t border-zinc-800" />
+              )}
+              <TransportItem
+                badges={[...stop.badges]}
+                color={stop.color}
+                station={
+                  stop.stationLabelKey
+                    ? `${t(stop.stationLabelKey)}: ${stop.station}`
+                    : stop.station
+                }
+                walkTime={t("walk_time", { min: String(stop.walkMinutes).padStart(2, "\u2007") })}
+                note={stop.noteKey ? t(stop.noteKey) : undefined}
+              />
+            </div>
+          ))}
         </div>
 
         {/* CTA */}
         <div className="mt-2 border-t border-zinc-800 pt-5 text-center">
           <a
-            href="https://maps.google.com/?q=Plaça+del+Tint,4,Terrassa"
+            href={VENUE.mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="group inline-flex items-center mt-5 gap-2 rounded-full border border-zinc-600 px-5 py-2.5 text-sm text-white transition-colors hover:bg-zinc-800 active:scale-[0.97]"
@@ -203,7 +179,7 @@ export default function Location() {
           <div className="relative w-1/2 overflow-hidden">
             <Image
               src="/images/house/casal_civic_exterior.webp"
-              alt="Casal Cívic Ca N'Aurell — Plaça del Tint, Terrassa"
+              alt={`${VENUE.name} — ${VENUE.streetAddress.split(",")[0]}, ${VENUE.locality}`}
               fill
               sizes="(min-width: 1024px) 29vw, 50vw"
               className="object-cover object-center"
@@ -212,7 +188,7 @@ export default function Location() {
             <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4">
               <p className="mt-0.5 text-xs text-white/60">
-                Plaça del Tint, 4
+                {VENUE.streetAddress}
               </p>
             </div>
           </div>

@@ -50,9 +50,9 @@
   },
   "location": {
     "title": "On som?",
-    "centre_name": "Casal Cívic Ca N'Aurell",
+    "centre_name": "Centre Cívic Ca N'Aurell",
     "centre_description": "Nau industrial rehabilitada · Plaça del Tint, 4",
-    "photo_alt": "Interior del Casal Cívic Ca N'Aurell — nau industrial rehabilitada",
+    "photo_alt": "Interior del Centre Cívic Ca N'Aurell — nau industrial rehabilitada",
     "address": "Plaça del Tint, 4 · 08224 Terrassa",
     "hours_title": "Horari",
     "transport_title": "Com arribar-hi",
@@ -67,10 +67,6 @@
     "title": "Quan quedem?",
     "friday": "Divendres",
     "saturday": "Dissabtes",
-    "friday_start": "16:00",
-    "friday_end": "20:30",
-    "saturday_start": "10:00",
-    "saturday_end": "13:30",
     "general_info": "Ens trobem cada divendres a la tarda i cada dissabte al matí al Centre Cívic Ca N'Aurell."
   },
   "footer": {
@@ -188,7 +184,7 @@
     "why_join_cta": "Fes-te soci",
 
     "cta_title": "Vols formar-ne part?",
-    "cta_subtitle": "L'associació és gratuïta. Vine qualsevol divendres o dissabte al Casal Cívic Ca N'Aurell i uneix-te a nosaltres.",
+    "cta_subtitle": "L'associació és gratuïta. Vine qualsevol divendres o dissabte al Centre Cívic Ca N'Aurell i uneix-te a nosaltres.",
     "cta_primary_button": "Formulari d'alta",
     "cta_secondary_button": "Contacta'ns",
 
@@ -498,9 +494,9 @@
     "age_q": "A quina edat es pot venir?",
     "age_a": "Tothom és benvingut! Els menors d'edat han de venir acompanyats d'un adult responsable. Tenim jocs per a totes les edats i nivells d'experiència.",
     "location_q": "On ens trobem?",
-    "location_a": "Ens reunim al Casal Cívic de la Plaça del Tint, 4 a Terrassa (08224). L'espai és accessible i està ben comunicat amb transport públic.",
+    "location_a": "Ens reunim al Centre Cívic Ca N'Aurell, a la Plaça del Tint, 4 de Terrassa (08224). L'espai és accessible i està ben comunicat amb transport públic.",
     "schedule_q": "Quin horari teniu?",
-    "schedule_a": "Obrim cada divendres de 17:00 a 21:00 i cada dissabte de 10:00 a 14:00. Pots venir quan vulguis dins d'aquest horari, no cal reservar ni avisar.",
+    "schedule_a": "Obrim cada divendres de {fridayOpens} a {fridayCloses} i cada dissabte de {saturdayOpens} a {saturdayCloses}. Pots venir quan vulguis dins d'aquest horari, no cal reservar ni avisar.",
     "non_member_q": "Es pot venir sense ser soci?",
     "non_member_a": "Sí! No cal ser soci per venir a jugar, tothom és benvingut a qualsevol sessió. Fer-te soci no és obligatori, però ens ajuda molt a mantenir l'associació i les activitats.",
     "game_types_q": "Quins tipus de jocs teniu?",

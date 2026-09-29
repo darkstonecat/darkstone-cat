@@ -3,6 +3,10 @@
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import TextReveal from "@/components/TextReveal";
+import { getSession } from "@/lib/venue";
+
+const FRIDAY = getSession("friday");
+const SATURDAY = getSession("saturday");
 
 export default function Schedule() {
   const t = useTranslations("schedule");
@@ -35,11 +39,11 @@ export default function Schedule() {
               {t("friday")}
             </h3>
             <p className="text-center font-black leading-none text-[clamp(3rem,12vw,8rem)]">
-              {t("friday_start")}
+              {FRIDAY.opens}
             </p>
             <div className="my-1 h-px w-12 opacity-20 bg-current" />
             <p className="text-center font-black leading-none text-[clamp(3rem,12vw,8rem)]">
-              {t("friday_end")}
+              {FRIDAY.closes}
             </p>
           </motion.div>
 
@@ -64,11 +68,11 @@ export default function Schedule() {
               {t("saturday")}
             </h3>
             <p className="text-center font-black leading-none text-[clamp(3rem,12vw,8rem)]">
-              {t("saturday_start")}
+              {SATURDAY.opens}
             </p>
             <div className="my-1 h-px w-12 opacity-20 bg-current" />
             <p className="text-center font-black leading-none text-[clamp(3rem,12vw,8rem)]">
-              {t("saturday_end")}
+              {SATURDAY.closes}
             </p>
           </motion.div>
         </div>

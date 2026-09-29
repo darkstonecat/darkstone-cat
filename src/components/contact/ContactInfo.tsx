@@ -5,6 +5,10 @@ import { motion } from "motion/react";
 import { FaFacebook, FaInstagram, FaTelegram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { MdSchedule, MdEmail, MdLocationOn } from "react-icons/md";
+import { VENUE, getSession } from "@/lib/venue";
+
+const FRIDAY = getSession("friday");
+const SATURDAY = getSession("saturday");
 
 const SOCIALS = [
   { href: "https://instagram.com/darkstone.cat", label: "Instagram", icon: FaInstagram },
@@ -55,13 +59,13 @@ export default function ContactInfo() {
           <MdSchedule className="mt-0.5 h-4 w-4 shrink-0 text-stone-custom/80" />
           <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
             <span className="font-medium text-stone-custom">{tSchedule("friday")}</span>
-            <span className="text-stone-custom/80">{tSchedule("friday_start")} – {tSchedule("friday_end")}</span>
+            <span className="text-stone-custom/80">{FRIDAY.opens} – {FRIDAY.closes}</span>
             <span className="font-medium text-stone-custom">{tSchedule("saturday")}</span>
-            <span className="text-stone-custom/80">{tSchedule("saturday_start")} – {tSchedule("saturday_end")}</span>
+            <span className="text-stone-custom/80">{SATURDAY.opens} – {SATURDAY.closes}</span>
           </div>
         </div>
         <a
-          href="https://maps.google.com/?q=Plaça+del+Tint,4,Terrassa"
+          href={VENUE.mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-3 inline-block text-sm font-medium text-brand-orange-text transition-opacity hover:opacity-80"

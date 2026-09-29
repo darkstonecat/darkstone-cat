@@ -5,6 +5,7 @@ import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import FaqContent from "@/components/faq/FaqContent";
+import { SESSION_TIME_VALUES } from "@/lib/venue";
 
 export const revalidate = false;
 
@@ -75,7 +76,7 @@ export default async function FaqPage({
       name: tFaq(`${key}_q`),
       acceptedAnswer: {
         "@type": "Answer",
-        text: tFaq(`${key}_a`),
+        text: tFaq(`${key}_a`, SESSION_TIME_VALUES),
       },
     })),
   };
