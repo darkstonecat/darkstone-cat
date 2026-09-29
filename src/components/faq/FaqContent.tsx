@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { SESSION_TIME_VALUES } from "@/lib/venue";
 
 const FAQ_KEYS = [
   "what_is",
@@ -56,7 +57,7 @@ function AccordionItem({
             className="overflow-hidden"
           >
             <p className="pb-5 text-base text-stone-custom/70 leading-relaxed">
-              {t(`${questionKey}_a`)}
+              {t(`${questionKey}_a`, SESSION_TIME_VALUES)}
             </p>
           </motion.div>
         )}

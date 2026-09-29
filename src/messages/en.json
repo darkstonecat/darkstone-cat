@@ -77,11 +77,7 @@
     "title": "When do we meet?",
     "friday": "Fridays",
     "saturday": "Saturdays",
-    "friday_start": "16:00",
-    "friday_end": "20:30",
-    "saturday_start": "10:00",
-    "saturday_end": "13:30",
-    "general_info": "We meet every Friday afternoon and Saturday morning at Centre Cívic Ca N'Aurell."
+    "general_info": "We meet every Friday afternoon and Saturday morning at Casal Cívic Ca N'Aurell."
   },
   "footer": {
     "tagline": "Board Game & RPG Association in Terrassa",
@@ -254,7 +250,7 @@
     "email_us": "Or write to us directly at",
     "social_title": "Find us on social media",
     "location_title": "Where we are",
-    "location_name": "Centre Cívic Ca N'Aurell",
+    "location_name": "Casal Cívic Ca N'Aurell",
     "address_street": "Plaça del Tint, 4",
     "address_city": "08224 Terrassa",
     "maps_link": "View on Google Maps"
@@ -574,9 +570,9 @@
     "age_q": "What age can you come?",
     "age_a": "Everyone is welcome! Minors must be accompanied by a responsible adult. We have games for all ages and experience levels.",
     "location_q": "Where do you meet?",
-    "location_a": "We meet at the Casal Cívic at Plaça del Tint, 4 in Terrassa (08224). The space is accessible and well connected by public transport.",
+    "location_a": "We meet at Casal Cívic Ca N'Aurell, Plaça del Tint, 4 in Terrassa (08224). The space is accessible and well connected by public transport.",
     "schedule_q": "What are your opening hours?",
-    "schedule_a": "We are open every Friday from 17:00 to 21:00 and every Saturday from 10:00 to 14:00. You can come whenever you like during these hours — no booking or notice required.",
+    "schedule_a": "We are open every Friday from {fridayOpens} to {fridayCloses} and every Saturday from {saturdayOpens} to {saturdayCloses}. You can come whenever you like during these hours — no booking or notice required.",
     "non_member_q": "Can I come without being a member?",
     "non_member_a": "Yes! You don't need to be a member to come and play — everyone is welcome at any session. Becoming a member is not mandatory, but it helps us a lot to keep the association and activities running.",
     "game_types_q": "What types of games do you have?",

@@ -6,6 +6,11 @@ import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { FaFacebook, FaInstagram, FaTelegram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
+import { VENUE, getSession } from "@/lib/venue";
+
+const MAPS_URL = VENUE.mapsUrl;
+const FRIDAY = getSession("friday");
+const SATURDAY = getSession("saturday");
 
 const NAV_LINKS = [
   { href: "/", key: "home" },
@@ -47,7 +52,6 @@ const LEGAL_LINKS = [
   { href: "/cookies", key: "cookies" },
 ] as const;
 
-const MAPS_URL = "https://maps.google.com/?q=Plaça+del+Tint,4,08224+Terrassa";
 
 const columnAnimation = (delay: number) => ({
   initial: { opacity: 0, y: 20 } as const,
@@ -177,10 +181,10 @@ export default function Footer() {
             </span>
             <div className="space-y-1">
               <p className="text-sm text-stone-300">
-                {tSch("friday")}: {tSch("friday_start")} — {tSch("friday_end")}
+                {tSch("friday")}: {FRIDAY.opens} — {FRIDAY.closes}
               </p>
               <p className="text-sm text-stone-300">
-                {tSch("saturday")}: {tSch("saturday_start")} — {tSch("saturday_end")}
+                {tSch("saturday")}: {SATURDAY.opens} — {SATURDAY.closes}
               </p>
             </div>
 

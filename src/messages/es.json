@@ -77,11 +77,7 @@
     "title": "¿Cuándo quedamos?",
     "friday": "Viernes",
     "saturday": "Sábados",
-    "friday_start": "16:00",
-    "friday_end": "20:30",
-    "saturday_start": "10:00",
-    "saturday_end": "13:30",
-    "general_info": "Nos reunimos cada viernes por la tarde y cada sábado por la mañana en el Centre Cívic Ca N'Aurell."
+    "general_info": "Nos reunimos cada viernes por la tarde y cada sábado por la mañana en el Casal Cívic Ca N'Aurell."
   },
   "footer": {
     "tagline": "Asociación de Juegos de Mesa y Rol de Terrassa",
@@ -254,7 +250,7 @@
     "email_us": "O escríbenos directamente a",
     "social_title": "Encuéntranos en redes",
     "location_title": "Dónde estamos",
-    "location_name": "Centre Cívic Ca N'Aurell",
+    "location_name": "Casal Cívic Ca N'Aurell",
     "address_street": "Plaça del Tint, 4",
     "address_city": "08224 Terrassa",
     "maps_link": "Ver en Google Maps"
@@ -574,9 +570,9 @@
     "age_q": "¿A qué edad se puede venir?",
     "age_a": "¡Todo el mundo es bienvenido! Los menores de edad deben venir acompañados de un adulto responsable. Tenemos juegos para todas las edades y niveles de experiencia.",
     "location_q": "¿Dónde nos encontramos?",
-    "location_a": "Nos reunimos en el Casal Cívic de la Plaça del Tint, 4 en Terrassa (08224). El espacio es accesible y está bien comunicado con transporte público.",
+    "location_a": "Nos reunimos en el Casal Cívic Ca N'Aurell, en la Plaça del Tint, 4 de Terrassa (08224). El espacio es accesible y está bien comunicado con transporte público.",
     "schedule_q": "¿Qué horario tenéis?",
-    "schedule_a": "Abrimos cada viernes de 17:00 a 21:00 y cada sábado de 10:00 a 14:00. Puedes venir cuando quieras dentro de este horario, no hace falta reservar ni avisar.",
+    "schedule_a": "Abrimos cada viernes de {fridayOpens} a {fridayCloses} y cada sábado de {saturdayOpens} a {saturdayCloses}. Puedes venir cuando quieras dentro de este horario, no hace falta reservar ni avisar.",
     "non_member_q": "¿Se puede venir sin ser socio?",
     "non_member_a": "¡Sí! No hace falta ser socio para venir a jugar, todo el mundo es bienvenido en cualquier sesión. Hacerte socio no es obligatorio, pero nos ayuda mucho a mantener la asociación y las actividades.",
     "game_types_q": "¿Qué tipos de juegos tenéis?",
