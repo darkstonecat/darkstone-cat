@@ -20,7 +20,7 @@ export async function generateMetadata({
     title: t("conduct_title"),
     description: t("conduct_description"),
     alternates,
-    robots: { index: false, follow: true },
+    robots: { index: true, follow: true },
     openGraph: {
       title: t("conduct_title"),
       description: t("conduct_description"),

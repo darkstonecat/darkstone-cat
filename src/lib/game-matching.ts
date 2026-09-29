@@ -4,7 +4,7 @@
 
 import type { BggGame, BggSearchResult, BggThingBasic } from "./bgg";
 import { searchBggGames, fetchBggThings } from "./bgg";
-import type { LudoyaPlannedPlay } from "./ludoya";
+import { resolveBggIds, type LudoyaPlannedPlay } from "./ludoya";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -25,7 +25,8 @@ export interface ResolvedGame {
 // ---------------------------------------------------------------------------
 // Manual overrides: Ludoya game name → BGG game ID
 // ---------------------------------------------------------------------------
-// Add entries here when fuzzy matching fails for specific games.
+// Most games resolve through the BGG id Ludoya links to. Add an entry here
+// only when that link is missing or points to the wrong BGG item.
 // Key = exact game name as it appears in Ludoya (case-sensitive).
 
 const GAME_NAME_OVERRIDES: Record<string, string> = {
@@ -273,12 +274,14 @@ function hasAccessoryCategory(categories: string[]): boolean {
  *   1. Manual RPG name list (forced, skips all other checks)
  *   2. Accessory detection (BGG type or category → unknown)
  *   3. RPG detection (BGG item type rpgitem/rpgissue → rpg)
- *   4. Default → boardgame
+ *   4. RPG detection (Ludoya classifies the game as an RPG book → rpg)
+ *   5. Default → boardgame
  */
 export function getGameType(
   categories: string[],
   ludoyaName: string,
-  thingType?: string
+  thingType?: string,
+  isLudoyaRpg = false
 ): GameType {
   // 1. Manual name lists — forced classification, no further checks needed
   if (isRpgByName(ludoyaName)) return "rpg";
@@ -290,7 +293,10 @@ export function getGameType(
   // 3. RPG — BGG item type
   if (thingType && RPG_BGG_TYPES.has(thingType)) return "rpg";
 
-  // 4. Default: boardgame
+  // 4. RPG — Ludoya game type (the club collection only has board game subtypes)
+  if (isLudoyaRpg) return "rpg";
+
+  // 5. Default: boardgame
   return "boardgame";
 }
 
@@ -310,16 +316,29 @@ export function getDifficultyFrame(weight: number, type: GameType): FrameColor {
 // Build ResolvedGame helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Which cover to use. With an exact BGG id the BGG cover is reliable. With a
+ * name-based match the BGG item may be the wrong game, so Ludoya's cover
+ * (always the right game) wins.
+ */
+type CoverPreference = "bgg" | "ludoya";
+
+function pickCover(bggImage: string, play: LudoyaPlannedPlay, prefer: CoverPreference): string {
+  if (prefer === "ludoya") return play.imageUrl || bggImage;
+  return bggImage || play.imageUrl || "";
+}
+
 function buildFromBggGame(
-  ludoyaName: string,
-  game: BggGame
+  play: LudoyaPlannedPlay,
+  game: BggGame,
+  prefer: CoverPreference
 ): ResolvedGame {
   // Club collection games have subtype "boardgame"/"boardgameexpansion"
-  const type = getGameType(game.categories, ludoyaName, game.subtype);
+  const type = getGameType(game.categories, play.gameName, game.subtype, play.isRpg);
   return {
-    name: ludoyaName,
+    name: play.gameName,
     bggId: game.id,
-    imageUrl: game.image,
+    imageUrl: pickCover(game.image, play, prefer),
     weight: game.weight,
     type,
     frame: getDifficultyFrame(game.weight, type),
@@ -327,47 +346,46 @@ function buildFromBggGame(
 }
 
 function buildFromThingData(
-  ludoyaName: string,
-  thing: BggThingBasic
+  play: LudoyaPlannedPlay,
+  thing: BggThingBasic,
+  prefer: CoverPreference
 ): ResolvedGame {
-  // External games from BGG search — use thingType for classification
-  const type = getGameType(thing.categories, ludoyaName, thing.thingType);
+  // Games outside the club collection — use thingType for classification
+  const type = getGameType(thing.categories, play.gameName, thing.thingType, play.isRpg);
   return {
-    name: ludoyaName,
+    name: play.gameName,
     bggId: thing.id,
-    imageUrl: thing.image,
+    imageUrl: pickCover(thing.image, play, prefer),
     weight: thing.weight,
     type,
     frame: getDifficultyFrame(thing.weight, type),
   };
 }
 
+/** Last resort: no BGG data at all. Ludoya cover and the default frame. */
+function buildFromLudoyaOnly(play: LudoyaPlannedPlay): ResolvedGame | null {
+  if (!play.imageUrl) return null;
+  const type = getGameType([], play.gameName, undefined, play.isRpg);
+  return {
+    name: play.gameName,
+    bggId: "",
+    imageUrl: play.imageUrl,
+    weight: 0,
+    type,
+    frame: getDifficultyFrame(0, type),
+  };
+}
+
 // ---------------------------------------------------------------------------
-// Resolution pipeline (steps 1–3: synchronous, against club collection)
+// Name matching against the club collection (fallback)
 // ---------------------------------------------------------------------------
 
-function resolveFromCollection(
-  ludoyaName: string,
-  bggGames: BggGame[]
-): ResolvedGame | null {
+function findInCollectionByName(ludoyaName: string, bggGames: BggGame[]): BggGame | null {
   const normalizedLudoya = normalizeName(ludoyaName);
-
-  // Step 1: Check manual overrides
-  const overrideId = GAME_NAME_OVERRIDES[ludoyaName];
-  if (overrideId) {
-    const game = findById(bggGames, overrideId);
-    if (game) return buildFromBggGame(ludoyaName, game);
-  }
-
-  // Step 2: Exact normalized match
-  const exactMatch = findExactMatch(bggGames, normalizedLudoya);
-  if (exactMatch) return buildFromBggGame(ludoyaName, exactMatch);
-
-  // Step 3: Fuzzy matching
-  const fuzzyMatch = findFuzzyMatch(bggGames, normalizedLudoya);
-  if (fuzzyMatch) return buildFromBggGame(ludoyaName, fuzzyMatch);
-
-  return null;
+  return (
+    findExactMatch(bggGames, normalizedLudoya) ??
+    findFuzzyMatch(bggGames, normalizedLudoya)
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -404,112 +422,140 @@ function prioritizeGames(games: ResolvedGame[]): ResolvedGame[] {
     ...rpgs.slice(0, rpgSlots),
   ];
 
-  return selected.sort(
-    (a, b) =>
-      games.findIndex((g) => g.bggId === a.bggId) -
-      games.findIndex((g) => g.bggId === b.bggId)
-  );
+  return selected.sort((a, b) => games.indexOf(a) - games.indexOf(b));
 }
 
 // ---------------------------------------------------------------------------
 // Main entry point
 // ---------------------------------------------------------------------------
 
+type ResolutionSource =
+  | "collection-id"
+  | "bgg-id"
+  | "collection-name"
+  | "bgg-search"
+  | "ludoya-only";
+
+interface PendingPlay {
+  index: number;
+  play: LudoyaPlannedPlay;
+}
+
+function gameKey(game: ResolvedGame): string {
+  return game.bggId || `ludoya:${normalizeName(game.name)}`;
+}
+
 /**
  * Resolve event planned plays to enriched game data for image generation.
  *
- * Pipeline per game:
- *   1. Manual override (GAME_NAME_OVERRIDES)
- *   2. Exact match against club BGG collection
- *   3. Fuzzy match against club BGG collection
- *   4. BGG search API → thing endpoint (for external games not in collection)
- *   5. No match → game is excluded from the image
+ * BGG is the source of truth for cover, weight and type. Ludoya only provides
+ * the bridge: each game's BGG id. Pipeline per game:
  *
- * After resolution: dedup, balance boardgame/RPG ratio, cap at 8.
+ *   1. BGG id — manual override (GAME_NAME_OVERRIDES) or Ludoya's BGG link
+ *   2. Club collection lookup by id (no BGG request)
+ *   3. BGG thing endpoint by id (one batched request)
+ *   4. Fallback when there is no id or BGG did not answer:
+ *      name match in the club collection, then BGG search + thing
+ *   5. Last resort — Ludoya cover with the default frame
+ *
+ * After resolution: keep Ludoya order, dedup, balance boardgame/RPG ratio, cap at 8.
  */
 export async function resolveEventGames(
   plannedPlays: LudoyaPlannedPlay[],
   bggGames: BggGame[]
 ): Promise<ResolvedGame[]> {
-  const resolved: ResolvedGame[] = [];
-  const unresolved: { index: number; play: LudoyaPlannedPlay }[] = [];
+  const resolved = new Map<number, { game: ResolvedGame; source: ResolutionSource }>();
+  const accept = (index: number, game: ResolvedGame, source: ResolutionSource) => {
+    if (game.imageUrl) resolved.set(index, { game, source });
+  };
 
-  // Steps 1–3: try to resolve from the club collection (fast, sync)
-  for (let i = 0; i < plannedPlays.length; i++) {
-    const play = plannedPlays[i];
-    const match = resolveFromCollection(play.gameName, bggGames);
-    if (match) {
-      // Prefer Ludoya image over BGG image when available
-      if (play.imageUrl) match.imageUrl = play.imageUrl;
-      resolved.push(match);
-    } else {
-      unresolved.push({ index: i, play });
+  // Step 1: BGG id for each game
+  const bridge = await resolveBggIds(
+    plannedPlays.flatMap((p) => (p.slug && !GAME_NAME_OVERRIDES[p.gameName] ? [p.slug] : []))
+  );
+  const byId: (PendingPlay & { bggId: string })[] = [];
+  const byName: PendingPlay[] = [];
+  plannedPlays.forEach((play, index) => {
+    const bggId =
+      GAME_NAME_OVERRIDES[play.gameName] ?? (play.slug ? bridge.get(play.slug) : undefined);
+    if (bggId) byId.push({ index, play, bggId });
+    else byName.push({ index, play });
+  });
+
+  // Step 2: club collection by id
+  const needThing: typeof byId = [];
+  for (const pending of byId) {
+    const game = findById(bggGames, pending.bggId);
+    if (game) accept(pending.index, buildFromBggGame(pending.play, game, "bgg"), "collection-id");
+    else needThing.push(pending);
+  }
+
+  // Step 3: BGG thing endpoint by id
+  if (needThing.length > 0) {
+    const things = await fetchBggThings(Array.from(new Set(needThing.map((p) => p.bggId))));
+    for (const pending of needThing) {
+      const thing = things.get(pending.bggId);
+      if (thing) accept(pending.index, buildFromThingData(pending.play, thing, "bgg"), "bgg-id");
+      if (!resolved.has(pending.index)) byName.push(pending);
     }
   }
 
-  // Step 4: search BGG API for unresolved games (external games)
-  if (unresolved.length > 0) {
-    // Search BGG in parallel for all unresolved games
+  // Step 4a: name match in the club collection
+  const searchable: PendingPlay[] = [];
+  for (const pending of byName) {
+    const game = findInCollectionByName(pending.play.gameName, bggGames);
+    if (game) accept(pending.index, buildFromBggGame(pending.play, game, "ludoya"), "collection-name");
+    if (!resolved.has(pending.index)) searchable.push(pending);
+  }
+
+  // Step 4b: BGG search + thing for games outside the collection
+  if (searchable.length > 0) {
     const searchResults = await Promise.all(
-      unresolved.map((u) => searchBggGames(u.play.gameName, 5))
+      searchable.map((p) => searchBggGames(p.play.gameName, 5))
     );
-
-    // Pick best candidate from search results for each game
-    const thingIdsToFetch: string[] = [];
-    // bggId → { ludoyaName, ludoyaImageUrl }
-    const candidateMap = new Map<
-      string,
-      { ludoyaName: string; ludoyaImageUrl: string | null }
-    >();
-
-    for (let i = 0; i < unresolved.length; i++) {
-      const { play } = unresolved[i];
-      const normalizedName = normalizeName(play.gameName);
+    const candidates = new Map<number, string>(); // play index → BGG id
+    searchable.forEach((pending, i) => {
       const best = pickBestSearchResult(
         searchResults[i],
-        normalizedName,
-        play.yearPublished
+        normalizeName(pending.play.gameName),
+        pending.play.yearPublished
       );
-      if (best) {
-        thingIdsToFetch.push(best.id);
-        candidateMap.set(best.id, {
-          ludoyaName: play.gameName,
-          ludoyaImageUrl: play.imageUrl,
-        });
-      }
-    }
+      if (best) candidates.set(pending.index, best.id);
+    });
 
-    // Batch fetch thing data for all candidates
-    if (thingIdsToFetch.length > 0) {
-      const thingMap = await fetchBggThings(thingIdsToFetch);
-
-      const candidateEntries = Array.from(candidateMap.entries());
-      for (let i = 0; i < candidateEntries.length; i++) {
-        const [bggId, { ludoyaName, ludoyaImageUrl }] = candidateEntries[i];
-        const thing = thingMap.get(bggId);
-        if (thing && (thing.image || ludoyaImageUrl)) {
-          const game = buildFromThingData(ludoyaName, thing);
-          // Prefer Ludoya image over BGG image when available
-          if (ludoyaImageUrl) game.imageUrl = ludoyaImageUrl;
-          resolved.push(game);
-        }
+    if (candidates.size > 0) {
+      const things = await fetchBggThings(Array.from(new Set(candidates.values())));
+      for (const pending of searchable) {
+        const thing = things.get(candidates.get(pending.index) ?? "");
+        if (thing) accept(pending.index, buildFromThingData(pending.play, thing, "ludoya"), "bgg-search");
       }
     }
   }
 
-  // Maintain original Ludoya order
-  const nameOrder = plannedPlays.map((pp) => pp.gameName);
-  resolved.sort(
-    (a, b) => nameOrder.indexOf(a.name) - nameOrder.indexOf(b.name)
+  // Step 5: Ludoya cover with the default frame
+  plannedPlays.forEach((play, index) => {
+    if (resolved.has(index)) return;
+    const game = buildFromLudoyaOnly(play);
+    if (game) accept(index, game, "ludoya-only");
+  });
+
+  // Keep Ludoya order
+  const ordered = Array.from(resolved.entries()).sort((a, b) => a[0] - b[0]);
+  console.info(
+    `[EventImage] Resolved ${ordered.length}/${plannedPlays.length} games: ` +
+      ordered.map(([, r]) => `${r.game.name} (${r.source}${r.game.bggId ? ` #${r.game.bggId}` : ""})`).join(", ")
   );
 
-  // Deduplicate by BGG ID
+  // Deduplicate (same BGG item planned twice, or same Ludoya-only game)
   const seen = new Set<string>();
-  const deduped = resolved.filter((g) => {
-    if (seen.has(g.bggId)) return false;
-    seen.add(g.bggId);
-    return true;
-  });
+  const deduped = ordered
+    .map(([, r]) => r.game)
+    .filter((game) => {
+      const key = gameKey(game);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 
   return prioritizeGames(deduped);
 }

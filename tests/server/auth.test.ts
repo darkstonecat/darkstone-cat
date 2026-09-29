@@ -22,7 +22,7 @@ const mockMember = {
   first_name: 'Test',
   last_name: 'User',
   member_number: 'DS-001',
-  role: 'member' as const,
+  role: 'member' as 'member' | 'admin',
   phone_encrypted: null,
   dni_nie_encrypted: null,
   postal_code: null,

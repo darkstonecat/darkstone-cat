@@ -5,22 +5,25 @@ import { useTranslations } from "next-intl";
 import * as m from "motion/react-client";
 import { useRef } from "react";
 import { useScroll, useTransform } from "motion/react";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 
 
 export default function Hero() {
   const t = useTranslations("hero");
   const containerRef = useRef<HTMLDivElement>(null);
+  // Reduced motion freezes the scroll zoom and shift; the fades stay.
+  const reduce = usePrefersReducedMotion();
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
   });
 
-  const scaleLogo = useTransform(scrollYProgress, [0, 1], [1, 1.4]);
-  const scaleTitle = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
+  const scaleLogo = useTransform(scrollYProgress, [0, 1], [1, reduce ? 1 : 1.4]);
+  const scaleTitle = useTransform(scrollYProgress, [0, 1], [1, reduce ? 1 : 0.8]);
   const opacityText = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const yText = useTransform(scrollYProgress, [0, 0.5], [0, -20]);
+  const yText = useTransform(scrollYProgress, [0, 0.5], [0, reduce ? 0 : -20]);
   const opacityHero = useTransform(scrollYProgress, [0.6, 1], [1, 0]);
 
 

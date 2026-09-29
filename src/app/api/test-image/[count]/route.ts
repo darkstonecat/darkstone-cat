@@ -97,6 +97,8 @@ function buildMockEvent(count: number): LudoyaEvent {
       gameName: g.name,
       imageUrl: null,
       yearPublished: 0,
+      slug: null,
+      isRpg: g.type === "rpg",
     })),
   };
 }

@@ -28,6 +28,7 @@ export async function composeMemberCard(
       {/* Background */}
       <img
         src={bg}
+        alt=""
         width={CARD_W}
         height={CARD_H}
         style={{ position: "absolute", top: 0, left: 0 }}

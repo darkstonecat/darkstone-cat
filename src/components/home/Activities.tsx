@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import TextReveal from "@/components/TextReveal";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 const CARDS = [
   { id: "board_games", image: "/images/photos/activities_boardgames.webp" },
@@ -53,10 +54,13 @@ function DesktopActivities({ t }: { t: ReturnType<typeof useTranslations<"activi
     offset: ["start end", "end end"],
   });
 
+  // The horizontal track is how the cards are reached, so it always follows
+  // the scroll. Reduced motion only freezes the decorative flying meeple.
+  const reduce = usePrefersReducedMotion();
   const x = useTransform(scrollYProgress, [0, 1], [0, -scrollRange]);
-  const meepleX = useTransform(meepleProgress, [0, 1], [0, viewportWidth * 1.2]);
-  const meepleRotate = useTransform(meepleProgress, [0, 1], [-45, 360]);
-  const meepleScale = useTransform(meepleProgress, [0, 1], [1, 0.2]);
+  const meepleX = useTransform(meepleProgress, [0, 1], [0, reduce ? 0 : viewportWidth * 1.2]);
+  const meepleRotate = useTransform(meepleProgress, [0, 1], [-45, reduce ? -45 : 360]);
+  const meepleScale = useTransform(meepleProgress, [0, 1], [1, reduce ? 1 : 0.2]);
 
   return (
     <div ref={containerRef} className="hidden md:block relative h-[400vh]">

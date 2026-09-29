@@ -10,7 +10,7 @@ vi.mock('next-intl', () => ({
 vi.mock('next/image', () => ({
   default: (props: Record<string, unknown>) => {
     const { fill, priority, fetchPriority, quality, sizes, ...rest } = props
-    return <img data-fill={fill} data-priority={priority} {...rest} />
+    return <img alt="" data-fill={fill} data-priority={priority} {...rest} />
   },
 }))
 

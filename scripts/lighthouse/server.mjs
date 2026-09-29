@@ -3,7 +3,7 @@
  */
 
 import { spawn } from 'child_process';
-import { findFreePort, log, logError, ROOT } from './utils.mjs';
+import { findFreePort, log, ROOT } from './utils.mjs';
 
 /**
  * Run `npm run build` and wait for completion.
@@ -40,6 +40,9 @@ export async function startServer() {
     cwd: ROOT,
     stdio: 'pipe',
     shell: true,
+    // Own process group, so kill() can signal the whole tree. Without this,
+    // shell: true makes proc.pid the PID of /bin/sh and next-server survives.
+    detached: process.platform !== 'win32',
   });
 
   let stderr = '';
@@ -53,9 +56,26 @@ export async function startServer() {
           stdio: 'ignore',
           shell: true,
         });
-      } else {
-        proc.kill('SIGTERM');
+        return;
       }
+
+      // Signal the whole process group (negative PID). proc.kill() would only
+      // reach the shell, orphaning next-server: it keeps the inherited stderr
+      // pipe open, so the event loop never drains and the script never exits.
+      process.kill(-proc.pid, 'SIGTERM');
+
+      // next-server does not always honour SIGTERM. This timer is unref'd, so
+      // it cannot delay a clean exit: if the group died, the loop drains and
+      // the process leaves before it fires. It only runs when something is
+      // still holding the loop open, which is exactly the case worth forcing.
+      const force = setTimeout(() => {
+        try {
+          process.kill(-proc.pid, 'SIGKILL');
+        } catch {
+          // Already dead
+        }
+      }, 5_000);
+      force.unref();
     } catch {
       // Already dead
     }

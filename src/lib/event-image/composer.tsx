@@ -133,6 +133,7 @@ export async function composeEventImage(
     >
       {/* Layer 1: Placeholder background */}
       <img
+        alt=""
         src={assets.placeholder}
         width={CANVAS_SIZE}
         height={CANVAS_SIZE}
@@ -193,6 +194,7 @@ export async function composeEventImage(
           >
             {/* Frame PNG (behind — black opaque center) */}
             <img
+              alt=""
               src={frameSrc}
               width={scaledW}
               height={scaledH}
@@ -213,6 +215,7 @@ export async function composeEventImage(
                 }}
               >
                 <img
+                  alt=""
                   src={gameImage}
                   style={{
                     width: "100%",
@@ -245,6 +248,7 @@ export async function composeEventImage(
 
         return (
           <img
+            alt=""
             key={`icon-${i}`}
             src={iconSrc}
             width={iconSize.w}

@@ -41,6 +41,7 @@ next-env.d.ts
 
 # AI
 .claude
+.atl
 .agent
 .agents
 .mcp.json
@@ -57,10 +58,10 @@ lighthouse-*
 # Audit
 audits/
 .lighthouse/
-.unlighthouse/
 
 # Sensitive data (member PII)
 /data/
+.env*
 
 # Docs not included by default
 /docs/

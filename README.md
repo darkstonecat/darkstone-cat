@@ -24,14 +24,14 @@
 | Framework | [Next.js 16](https://nextjs.org) (App Router) |
 | Language | [TypeScript](https://www.typescriptlang.org) |
 | Styling | [Tailwind CSS v4](https://tailwindcss.com) |
-| Animations | [Motion v12](https://motion.dev) |
+| Animations | [Motion v13](https://motion.dev) |
 | Smooth Scroll | [Lenis](https://lenis.darkroom.engineering/) |
 | i18n | [next-intl](https://next-intl-docs.vercel.app/) |
 | XML Parsing | [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) |
 | Email | [Resend](https://resend.com) |
 | Icons | [React Icons](https://react-icons.github.io/react-icons/) (Material Design) |
 | Database | [Supabase](https://supabase.com) (PostgreSQL) |
-| Monitoring | [Vercel Analytics](https://vercel.com/analytics) + [Speed Insights](https://vercel.com/docs/speed-insights) |
+| Monitoring | [Vercel Analytics](https://vercel.com/analytics) + [Speed Insights](https://vercel.com/docs/speed-insights) (Speed Insights needs a paid plan, so it currently reports nothing) |
 | Deployment | [Vercel](https://vercel.com) |
 
 ## Pages
@@ -43,6 +43,7 @@
 | `/ludoteca` | Game library with filters, search, and BGG data |
 | `/contact` | Contact form |
 | `/events` | Upcoming events from Ludoya |
+| `/events/images` | Internal tool to generate shareable event images (not indexed) |
 | `/faq` | Frequently asked questions |
 | `/conduct` | Code of conduct |
 | `/legal` | Terms & conditions |
@@ -69,6 +70,7 @@ src/
 ├── app/
 │   ├── [locale]/           # Localized pages (home, about, ludoteca, contact, etc.)
 │   ├── api/contact/        # Contact form API endpoint
+│   ├── api/events/         # Shareable event image generation
 │   ├── sitemap.ts          # Dynamic sitemap generation
 │   └── robots.ts           # Robots.txt configuration
 ├── components/
@@ -76,6 +78,7 @@ src/
 │   ├── about/              # About page sections
 │   ├── ludoteca/           # Game library (grid, cards, filters, modal, pagination)
 │   ├── contact/            # Contact form and info
+│   ├── events/             # Events carousel and event images tool
 │   ├── conduct/            # Code of conduct content
 │   ├── legal/              # Legal, privacy, and cookies pages
 │   ├── NavBar.tsx          # Navigation with language switcher
@@ -92,10 +95,17 @@ src/
 
 ## Getting Started
 
+**Requires Node.js 22.19+ or 24.x** (`engines` in `package.json`). The repo ships
+an `.nvmrc`, so `nvm use` picks the right one, and CI reads that same file. Older
+versions fail the install on purpose instead of breaking later.
+
 ```bash
 # Clone
 git clone git@github.com:darkstonecat/darkstone-cat.git
 cd darkstone-cat
+
+# Use the project's Node version
+nvm use
 
 # Install
 npm install
@@ -117,6 +127,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the site.
 | `npm run build` | Production build |
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint |
+| `npm run analyze` | Production build with the bundle analyzer |
 | `npm run lighthouse` | Lighthouse audit (local build) |
 | `npm run lighthouse:prod` | Lighthouse audit (production) |
 | `npm test` | Run all Vitest tests (unit + integration) |
@@ -125,6 +136,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the site.
 | `npm run test:e2e` | Playwright E2E tests (starts dev server on port 3100) |
 | `npm run db:start` | Start local Supabase (requires Docker) |
 | `npm run db:stop` | Stop local Supabase |
+| `npm run ludoya:check` | Verify the Ludoya API still matches what the events page expects |
 
 ### Testing
 
@@ -153,10 +165,13 @@ CI runs all tests automatically via GitHub Actions on push/PR to `main`.
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID |
 | `BGG_USERNAME` | BoardGameGeek username for the ludoteca collection |
 | `BGG_API_KEY` | BoardGameGeek XML API key |
+| `LUDOYA_*` | Optional Ludoya overrides, see `docs/ludoya-api-reference.md` |
 
 ### Development without API keys
 
 The ludoteca works in **mock mode** when `BGG_API_KEY` is not set — it reads local XML fixtures from `/public/mock/` so you can develop the UI without hitting the BoardGameGeek API.
+
+The events page can run offline with `LUDOYA_MOCK=1`, which reads JSON fixtures from `/public/mock/ludoya/`.
 
 ## Architecture Highlights
 
@@ -172,7 +187,7 @@ The ludoteca works in **mock mode** when `BGG_API_KEY` is not set — it reads l
 
 ## Lighthouse Audit
 
-The project maintains near-perfect Lighthouse scores across all 8 pages (100/100/100/100 on desktop, 91–100 Performance on mobile with 100 Accessibility/Best Practices/SEO).
+The project maintains near-perfect Lighthouse scores across all 11 pages (100/100/100/100 on desktop, 91–100 Performance on mobile with 100 Accessibility/Best Practices/SEO).
 
 Known audit limitations caused by Next.js framework constraints and expected page complexity are documented in [`docs/AUDIT.md`](docs/AUDIT.md).
 

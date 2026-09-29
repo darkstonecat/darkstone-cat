@@ -1,44 +1,40 @@
 import type { MetadataRoute } from "next";
+import { getLocalizedUrl } from "@/lib/seo";
 
-const BASE_URL = "https://www.darkstone.cat";
 const locales = ["ca", "es", "en"] as const;
 
+/**
+ * Only indexable pages belong here. Pages served with `robots: noindex`
+ * (/legal, /privacy, /cookies, /data-protection, /events/images and the
+ * auth/profile/admin pages) are intentionally excluded:
+ * listing a noindex URL in the sitemap is a contradictory signal that Search
+ * Console reports as "Excluded by 'noindex' tag".
+ */
 const pages = [
   { path: "", changeFrequency: "monthly" as const, priority: 1.0, lastModified: "2026-03-04" },
   { path: "/about", changeFrequency: "monthly" as const, priority: 0.8, lastModified: "2026-03-04" },
   { path: "/ludoteca", changeFrequency: "monthly" as const, priority: 0.8, lastModified: "2026-03-04" },
   { path: "/contact", changeFrequency: "yearly" as const, priority: 0.7, lastModified: "2026-03-04" },
   { path: "/events", changeFrequency: "weekly" as const, priority: 0.8, lastModified: "2026-03-06" },
-  { path: "/events/images", changeFrequency: "weekly" as const, priority: 0.3, lastModified: "2026-03-09" },
   { path: "/faq", changeFrequency: "yearly" as const, priority: 0.6, lastModified: "2026-03-06" },
-  { path: "/conduct", changeFrequency: "yearly" as const, priority: 0.5, lastModified: "2026-03-04" },
-  { path: "/legal", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-02-01" },
-  { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-02-01" },
-  { path: "/cookies", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-02-01" },
-  { path: "/data-protection", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-03-16" },
-  { path: "/login", changeFrequency: "yearly" as const, priority: 0.4, lastModified: "2026-03-13" },
-  { path: "/register", changeFrequency: "yearly" as const, priority: 0.4, lastModified: "2026-03-13" },
-  { path: "/forgot-password", changeFrequency: "yearly" as const, priority: 0.3, lastModified: "2026-03-13" },
+  { path: "/conduct", changeFrequency: "yearly" as const, priority: 0.5, lastModified: "2026-09-14" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return pages.map((page) => ({
-    url: `${BASE_URL}${page.path}`,
-    lastModified: new Date(page.lastModified),
-    changeFrequency: page.changeFrequency,
-    priority: page.priority,
-    alternates: {
-      languages: {
-        ...Object.fromEntries(
-          locales.map((l) => [
-            l,
-            l === "ca"
-              ? `${BASE_URL}${page.path}`
-              : `${BASE_URL}/${l}${page.path}`,
-          ])
-        ),
-        "x-default": `${BASE_URL}${page.path}`,
-      },
-    },
-  }));
+  // One <url> entry per locale, each carrying the full hreflang cluster, so
+  // that /es/* and /en/* are explicitly submitted rather than only discoverable
+  // through the alternates of the Catalan entry.
+  return pages.flatMap((page) => {
+    const languages = {
+      ...Object.fromEntries(locales.map((l) => [l, getLocalizedUrl(l, page.path)])),
+      "x-default": getLocalizedUrl("ca", page.path),
+    };
+    return locales.map((locale) => ({
+      url: getLocalizedUrl(locale, page.path),
+      lastModified: new Date(page.lastModified),
+      changeFrequency: page.changeFrequency,
+      priority: locale === "ca" ? page.priority : Math.round(page.priority * 0.9 * 10) / 10,
+      alternates: { languages },
+    }));
+  });
 }

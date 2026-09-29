@@ -145,6 +145,15 @@ export default function NavBar() {
     };
   }, [mobileOpen, lenis]);
 
+  const closeMobileMenu = useCallback(() => {
+    setMenuClosing(true);
+    setTimeout(() => {
+      setMobileOpen(false);
+      setMenuClosing(false);
+      requestAnimationFrame(() => hamburgerRef.current?.focus());
+    }, 500);
+  }, []);
+
   // Focus trap + Escape handler for mobile menu
   useEffect(() => {
     if (!mobileOpen) return;
@@ -196,17 +205,7 @@ export default function NavBar() {
       document.removeEventListener("keydown", handleKeyDown);
       clearTimeout(timer);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mobileOpen]);
-
-  const closeMobileMenu = useCallback(() => {
-    setMenuClosing(true);
-    setTimeout(() => {
-      setMobileOpen(false);
-      setMenuClosing(false);
-      requestAnimationFrame(() => hamburgerRef.current?.focus());
-    }, 500);
-  }, []);
+  }, [mobileOpen, closeMobileMenu]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -237,6 +236,8 @@ export default function NavBar() {
       }
     }
 
+    // A full reload is intentional: it drops all client auth state at once.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.href = "/";
   }, []);
 

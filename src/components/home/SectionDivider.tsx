@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 interface SectionDividerProps {
   topColor: string;
@@ -37,7 +38,9 @@ export default function SectionDivider({
     target: ref,
     offset: ["start end", "end start"],
   });
-  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-50%"]);
+  // Reduced motion freezes the wave's scroll parallax.
+  const reduce = usePrefersReducedMotion();
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", reduce ? "0%" : "-50%"]);
 
   const isAnimatedWave = animated && variant === "wave";
 

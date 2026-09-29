@@ -61,7 +61,6 @@ export default async function OgImage({ params }: { params: Promise<{ locale: st
         />
 
         {/* Logo */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://www.darkstone.cat/images/darkstone_logo_768px.webp"
           alt=""

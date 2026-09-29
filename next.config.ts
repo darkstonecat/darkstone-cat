@@ -43,7 +43,7 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://cf.geekdo-images.com https://img.ludoya.com https://www.googletagmanager.com",
+      "img-src 'self' data: blob: https://cf.geekdo-images.com https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net https://www.googletagmanager.com",
       "font-src 'self'",
       `connect-src 'self' https://*.google-analytics.com https://www.googletagmanager.com https://va.vercel-scripts.com https://vitals.vercel-insights.com ${supabaseUrl}`,
       "frame-src 'self' https://www.google.com",
@@ -74,7 +74,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "img.ludoya.com",
+        hostname: "ludoya-images.s3.eu-west-par.io.cloud.ovh.net",
       },
     ],
   },
@@ -84,6 +84,19 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
+    ];
+  },
+  async redirects() {
+    return [
+      // Legacy route renamed in ecd08af (/pautes-de-conducta → /conduct)
+      { source: "/pautes-de-conducta", destination: "/conduct", permanent: true },
+      { source: "/:locale(es|en)/pautes-de-conducta", destination: "/:locale/conduct", permanent: true },
+      // Default locale (ca) has no URL prefix. next-intl's middleware already
+      // redirects /ca/* → /* but with a temporary 307; these run before the
+      // middleware and make the redirect permanent (308) so search engines
+      // consolidate signals on the unprefixed URL.
+      { source: "/ca", destination: "/", permanent: true },
+      { source: "/ca/:path*", destination: "/:path*", permanent: true },
     ];
   },
 };

@@ -480,7 +480,7 @@ async function executeSQL(supabase, sql) {
   // Try using supabase.rpc first — but the function may not exist
   // Fallback: use the SQL endpoint directly
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/`,
+    url,
     {
       method: "POST",
       headers: {

@@ -4,8 +4,6 @@ import {
   parseCollectionItems,
   rawToGame,
   extractRankTypes,
-  normalizeForMatch,
-  linkExpansionsByName,
   enrichWithThingData,
   linkExpansionsByThing,
   type BggGame,
@@ -85,22 +83,6 @@ describe('extractRankTypes', () => {
       '@_value': '10',
     }
     expect(extractRankTypes(rank)).toEqual(['partygames'])
-  })
-})
-
-describe('normalizeForMatch', () => {
-  it('lowercases and trims', () => {
-    expect(normalizeForMatch('  Catan  ')).toBe('catan')
-  })
-
-  it('removes parentheses and brackets', () => {
-    expect(normalizeForMatch('Catan (5th Edition) [Revised]')).toBe(
-      'catan 5th edition revised'
-    )
-  })
-
-  it('collapses whitespace', () => {
-    expect(normalizeForMatch('a  b   c')).toBe('a b c')
   })
 })
 
@@ -185,41 +167,6 @@ describe('rawToGame', () => {
     expect(game.minPlayers).toBe(0)
     expect(game.rating).toBe(0)
     expect(game.weight).toBe(0)
-  })
-})
-
-describe('linkExpansionsByName', () => {
-  it('links expansion with colon separator', () => {
-    const bases = [makeGame('1', 'Catan')]
-    const exps = [makeGame('2', 'Catan: Seafarers', 'boardgameexpansion')]
-    linkExpansionsByName(bases, exps)
-    expect(bases[0].expansions).toHaveLength(1)
-    expect(bases[0].expansions[0].name).toBe('Catan: Seafarers')
-  })
-
-  it('links expansion with dash separator', () => {
-    const bases = [makeGame('1', 'Catan')]
-    const exps = [
-      makeGame('3', 'Catan - Cities & Knights', 'boardgameexpansion'),
-    ]
-    linkExpansionsByName(bases, exps)
-    expect(bases[0].expansions).toHaveLength(1)
-  })
-
-  it('does not link unrelated expansions', () => {
-    const bases = [makeGame('1', 'Catan')]
-    const exps = [
-      makeGame('2', 'Ticket to Ride: Europe', 'boardgameexpansion'),
-    ]
-    linkExpansionsByName(bases, exps)
-    expect(bases[0].expansions).toHaveLength(0)
-  })
-
-  it('skips base games with name shorter than 3 chars', () => {
-    const bases = [makeGame('1', 'Go')]
-    const exps = [makeGame('2', 'Go: Extended', 'boardgameexpansion')]
-    linkExpansionsByName(bases, exps)
-    expect(bases[0].expansions).toHaveLength(0)
   })
 })
 
