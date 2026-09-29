@@ -38,7 +38,7 @@ main element of the page.
 ## Tasks
 
 - [x] T1 — Venue single source + fix hours/name inconsistencies (JSON-LD, FAQ, Casal→Centre). Route: delegated (writer trigger: 2+ non-trivial files).
-- [ ] T2 — Contact page content + ContactPage JSON-LD, 3 locales. Route: delegated (same writer).
+- [-] T2 — Contact page content + ContactPage JSON-LD, 3 locales. **Dropped**: the user reviewed it and rejected it ("too much useless content"); the contact page stays as it was. Commits removed from the branch before push.
 
 ## Acceptance criteria
 
