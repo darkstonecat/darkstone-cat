@@ -21,10 +21,10 @@ Bring the dependencies and tooling that only exist on `develop-users` (Supabase,
 
 ## Tasks
 
-- [ ] T1 — Trivial bumps: `@supabase/ssr` 0.12, `csv-parse` 7, `dotenv` 18, `@testing-library/jest-dom` 7 + `@testing-library/dom` 10, in-range patches. Route: inline (mechanical, package files only).
-- [ ] T2 — `vitest` 5 + `jsdom` 30; replace dead `environmentMatchGlobs` with `test.projects` so server tests run under Node; rename config to `vitest.config.mts`. Route: inline unless test fixes spread over 2+ non-trivial files (then delegate one writer).
-- [ ] T3 — CI: actions to latest majors, `node-version-file: .nvmrc`. Route: inline (one file).
-- [ ] T4 — `supabase/config.toml`: `[inbucket]` → `[local_smtp]`. Route: inline (one file).
+- [x] T1 (ea295ce) — Trivial bumps: `@supabase/ssr` 0.12, `csv-parse` 7, `dotenv` 18, `@testing-library/jest-dom` 7 + `@testing-library/dom` 10, in-range patches. Route: inline (mechanical, package files only).
+- [x] T2 (13b96cd) — `vitest` 5 + `jsdom` 30; replace dead `environmentMatchGlobs` with `test.projects` so server tests run under Node; rename config to `vitest.config.mts`. Route: inline unless test fixes spread over 2+ non-trivial files (then delegate one writer).
+- [x] T3 (59d630e) — CI: actions to latest majors, `node-version-file: .nvmrc`. Route: inline (one file).
+- [x] T4 (4f4ed83) — `supabase/config.toml`: `[inbucket]` → `[local_smtp]`. Route: inline (one file).
 
 ## Acceptance criteria
 
@@ -35,8 +35,15 @@ Bring the dependencies and tooling that only exist on `develop-users` (Supabase,
 
 ## Progress / evidence
 
-_(updated per task)_
+- Extra fix found during T1: ESLint linted `.next-e2e/` after E2E runs (~11k problems). Ignored in `9ef37a5`.
+- T1: route inline. `npm audit` 0 (csv-parse advisory fixed).
+- T2: route inline (only config + references changed, no test fixes needed). Server/lib/integration tests verified under Node (`typeof window` is undefined).
+- T3: route inline. Also found `-x storage` was not a valid container name (the CLI calls it `storage-api`), so storage was started anyway; fixed and verified locally.
+- T4: route inline. No deprecation warning; Mailpit answers on 54324.
+- Final checks after T4: tsc 0, lint 0/0, build ok, vitest 161/161, playwright 164 passed + 1 flaky (`profile › displays member name`, first test on /profile; passes on retry, flaky before this work too), npm audit 0.
+- Remaining outdated, on purpose: `typescript` 7 and `@types/node` 26 (aligned with main).
+- RDD: off (global), no review ran.
 
 ## Next step
 
-T1.
+Done. Optional follow-up: investigate the flaky profile E2E test. Push is the user's decision.
