@@ -36,10 +36,10 @@ export default function ContactInfo() {
           <span className="text-sm font-medium">{t("email_us")}</span>
         </div>
         <a
-          href="mailto:darkstone.cat@gmail.com"
+          href="mailto:hola@darkstone.cat"
           className="text-lg font-semibold text-brand-orange-text transition-opacity hover:opacity-80"
         >
-          darkstone.cat@gmail.com
+          hola@darkstone.cat
         </a>
       </div>
 

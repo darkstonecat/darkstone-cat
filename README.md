@@ -11,7 +11,7 @@
 - **Animated Landing Page** — Scroll-driven theme transitions, parallax galleries, and spring-based entrance animations
 - **Ludoteca (Game Library)** — Browse the association's collection with filters, search, and BGG integration via the [BoardGameGeek API](https://boardgamegeek.com/)
 - **Multilingual** — Fully localized in **Catalan** (default), **Spanish**, and **English**
-- **Contact Form** — Server-side email delivery via [Resend](https://resend.com)
+- **Contact Form** — Server-side email delivery via Google Workspace SMTP (nodemailer)
 - **Cookie Consent & Analytics** — GDPR-compliant banner with Google Analytics integration
 - **SEO Optimized** — Dynamic OG images, JSON-LD structured data, sitemap, and robots.txt
 - **Security Headers** — HSTS, CSP, X-Frame-Options, Referrer-Policy, Permissions-Policy
@@ -28,7 +28,7 @@
 | Smooth Scroll | [Lenis](https://lenis.darkroom.engineering/) |
 | i18n | [next-intl](https://next-intl-docs.vercel.app/) |
 | XML Parsing | [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) |
-| Email | [Resend](https://resend.com) |
+| Email | Google Workspace SMTP ([nodemailer](https://nodemailer.com)) |
 | Icons | [React Icons](https://react-icons.github.io/react-icons/) (Material Design) |
 | Database | [Supabase](https://supabase.com) (PostgreSQL) |
 | Monitoring | [Vercel Analytics](https://vercel.com/analytics) + [Speed Insights](https://vercel.com/docs/speed-insights) (Speed Insights needs a paid plan, so it currently reports nothing) |
@@ -165,7 +165,8 @@ CI runs all tests automatically via GitHub Actions on push/PR to `main`.
 
 | Variable | Description |
 |---|---|
-| `RESEND_API_KEY` | [Resend](https://resend.com) API key for the contact form |
+| `SMTP_USER` | Google Workspace account that sends contact form email (`no-reply@darkstone.cat`) |
+| `SMTP_PASSWORD` | App password of `SMTP_USER` (requires 2-Step Verification on that account) |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID |
 | `BGG_USERNAME` | BoardGameGeek username for the ludoteca collection |
 | `BGG_API_KEY` | BoardGameGeek XML API key |

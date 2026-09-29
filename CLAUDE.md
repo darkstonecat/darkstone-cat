@@ -94,7 +94,7 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/` | `page.tsx` | Landing: Hero → About → Activities → Schedule → JoinUs → Location → Footer |
 | `/about` | `about/page.tsx` | Origin story, mission, values |
 | `/ludoteca` | `ludoteca/page.tsx` | Game library with BGG integration (ISR, revalidate: 86400) |
-| `/contact` | `contact/page.tsx` | Contact form (Resend email) |
+| `/contact` | `contact/page.tsx` | Contact form (Workspace SMTP email) |
 | `/events` | `events/page.tsx` | Upcoming events from Ludoya API (`revalidate: 86400`) |
 | `/events/images` | `events/images/page.tsx` | Internal tool: preview/download shareable event images — admin route (`noindex`, not in sitemap) |
 | `/faq` | `faq/page.tsx` | FAQ with accordion UI, FAQPage schema (`revalidate = false`) |
@@ -114,7 +114,7 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/data-protection` | `data-protection/page.tsx` | Data protection policy, RGPD compliance (`revalidate = false`) |
 
 API routes:
-- `src/app/api/contact/route.ts` — POST endpoint using Resend to send emails. **CSRF guard: the `Origin` header must be in `ALLOWED_ORIGINS`** (`darkstone.cat`, `www.darkstone.cat`, `localhost:3000`), otherwise it returns `403 {"error":"forbidden"}` before doing anything. So the form **never works on `*.vercel.app` previews**; test it against a local build on port 3000. **Update that list if the production domain changes**, or the form starts failing silently
+- `src/app/api/contact/route.ts` — POST endpoint that sends email through Google Workspace SMTP (nodemailer, `smtp.gmail.com:465`) from `no-reply@darkstone.cat` to `hola@darkstone.cat`, with `replyTo` set to the sender. **CSRF guard: the `Origin` header must be in `ALLOWED_ORIGINS`** (`darkstone.cat`, `www.darkstone.cat`, `localhost:3000`), otherwise it returns `403 {"error":"forbidden"}` before doing anything. So the form **never works on `*.vercel.app` previews**; test it against a local build on port 3000. **Update that list if the production domain changes**, or the form starts failing silently
 - `src/app/api/events/[eventId]/image/route.ts` — GET 1080×1080 PNG for an event (Satori via `next/og`, `src/lib/event-image/`)
 - `src/app/api/test-image/[count]/route.ts` — GET test image with 1–8 hardcoded games, for layout checks
 - `src/app/api/members/card/route.ts` — GET endpoint for member card image (auth required). `?preview=1` for inline display, without for download.
@@ -287,7 +287,8 @@ The `public` schema is the primary working schema.
 
 | Variable | Description |
 |---|---|
-| `RESEND_API_KEY` | Resend API key for contact form email delivery |
+| `SMTP_USER` | Google Workspace account that sends contact form email (`no-reply@darkstone.cat`) |
+| `SMTP_PASSWORD` | App password of `SMTP_USER` (requires 2-Step Verification on that account) |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID |
 | `BGG_USERNAME` | BoardGameGeek username for ludoteca collection |
 | `BGG_API_KEY` | BoardGameGeek XML API key |
@@ -315,7 +316,7 @@ The `public` schema is the primary working schema.
 - **lenis** — smooth scrolling
 - **next-intl** v4 — i18n routing and translations
 - **fast-xml-parser** — BGG XML response parsing
-- **resend** — email delivery for contact form
+- **nodemailer** — contact form email via Google Workspace SMTP
 - **react-icons** — icon library (Material Design `react-icons/md` + brand icons `react-icons/fa`)
 - **clsx** + **tailwind-merge** — class utilities (via `cn()`)
 - **@vercel/analytics** + **@vercel/speed-insights** — Vercel monitoring. Web Analytics reports normally; **Speed Insights needs a paid Vercel plan, which the project does not have**, so its `POST /<hash>/vitals` answers `503` and no metric is ever stored. The component stays mounted so it starts working if the plan changes — the 503s are expected, not a bug. Both scripts load from obfuscated paths (`/<16-hex>/script.js`), not `/_vercel/insights/…`, and both ignore automated browsers, so they can only be verified in a real one
