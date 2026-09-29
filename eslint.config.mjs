@@ -22,6 +22,10 @@ const eslintConfig = defineConfig([
     ".lighthouse/**",
     "lighthouse-*",
     "coverage/**",
+    // Playwright output: the E2E dev server build and its reports.
+    ".next-e2e/**",
+    "test-results/**",
+    "playwright-report/**",
   ]),
   // Relax rules for test files — mocks require `any` casts
   {
