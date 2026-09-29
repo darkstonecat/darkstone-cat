@@ -8,15 +8,18 @@ const locales = ["ca", "es", "en"] as const;
  * (/legal, /privacy, /cookies, /events/images) are intentionally excluded:
  * listing a noindex URL in the sitemap is a contradictory signal that Search
  * Console reports as "Excluded by 'noindex' tag".
+ *
+ * No `lastModified`: hand-maintained dates went stale, and Google ignores
+ * lastmod values it cannot trust. Omitting it is better than a wrong date.
  */
 const pages = [
-  { path: "", changeFrequency: "monthly" as const, priority: 1.0, lastModified: "2026-03-04" },
-  { path: "/about", changeFrequency: "monthly" as const, priority: 0.8, lastModified: "2026-03-04" },
-  { path: "/ludoteca", changeFrequency: "monthly" as const, priority: 0.8, lastModified: "2026-03-04" },
-  { path: "/contact", changeFrequency: "yearly" as const, priority: 0.7, lastModified: "2026-03-04" },
-  { path: "/events", changeFrequency: "weekly" as const, priority: 0.8, lastModified: "2026-03-06" },
-  { path: "/faq", changeFrequency: "yearly" as const, priority: 0.6, lastModified: "2026-03-06" },
-  { path: "/conduct", changeFrequency: "yearly" as const, priority: 0.5, lastModified: "2026-09-14" },
+  { path: "", changeFrequency: "monthly" as const, priority: 1.0 },
+  { path: "/about", changeFrequency: "monthly" as const, priority: 0.8 },
+  { path: "/ludoteca", changeFrequency: "monthly" as const, priority: 0.8 },
+  { path: "/contact", changeFrequency: "yearly" as const, priority: 0.7 },
+  { path: "/events", changeFrequency: "weekly" as const, priority: 0.8 },
+  { path: "/faq", changeFrequency: "yearly" as const, priority: 0.6 },
+  { path: "/conduct", changeFrequency: "yearly" as const, priority: 0.5 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -30,7 +33,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     };
     return locales.map((locale) => ({
       url: getLocalizedUrl(locale, page.path),
-      lastModified: new Date(page.lastModified),
       changeFrequency: page.changeFrequency,
       priority: locale === "ca" ? page.priority : Math.round(page.priority * 0.9 * 10) / 10,
       alternates: { languages },
