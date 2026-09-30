@@ -68,9 +68,9 @@ describe('ProfileChecklist', () => {
 
 describe('BadgesSection', () => {
   const items: BadgeItem[] = [
-    { key: 'member_year', earned: true, year: 2024, since: '2024-03-02' },
-    { key: 'volunteer_egara_joga', earned: false, year: null, since: null },
-    { key: 'ludoteca_donor', earned: false, year: null, since: null },
+    { key: 'member_year', earned: true, year: 2024, sinceLabel: '2/3/2024' },
+    { key: 'volunteer_egara_joga', earned: false, year: null, sinceLabel: null },
+    { key: 'ludoteca_donor', earned: false, year: null, sinceLabel: null },
   ]
 
   it('counts earned badges and tells locked ones apart in text', () => {
@@ -82,7 +82,7 @@ describe('BadgesSection', () => {
   })
 
   it('is empty-safe and renders locked badges when nothing is earned', () => {
-    render(<BadgesSection items={items.map((i) => ({ ...i, earned: false, year: null, since: null }))} />)
+    render(<BadgesSection items={items.map((i) => ({ ...i, earned: false, year: null, sinceLabel: null }))} />)
     expect(screen.getByText('badges_count(0,3)')).toBeInTheDocument()
     expect(screen.getAllByText('badge_member_year_no_year').length).toBeGreaterThan(0)
   })
@@ -120,5 +120,32 @@ describe('BadgesSection', () => {
     expect(within(region).getByText('badge_position(1,3)')).toHaveAttribute('aria-live', 'polite')
     fireEvent.click(within(region).getByRole('button', { name: 'next_badge' }))
     expect(within(region).getByText('badge_position(2,3)')).toBeInTheDocument()
+  })
+
+  it('announces a dot jump once: scroll events during the programmatic scroll are ignored until it ends', () => {
+    render(<BadgesSection items={items} />)
+    const region = screen.getByRole('region', { name: 'badges_carousel_label' })
+    const live = region.querySelector('[aria-live="polite"]')!
+    const track = region.querySelector('ul')!
+    const announced: string[] = []
+    new MutationObserver(() => announced.push(live.textContent ?? '')).observe(live, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    })
+
+    fireEvent.click(within(region).getByRole('button', { name: /dot_label\(3,/ }))
+    // jsdom has no layout (every slide sits at 0), so an unguarded sync would snap back to slide 1.
+    fireEvent.scroll(track)
+    fireEvent.scroll(track)
+    expect(live).toHaveTextContent('badge_position(3,3)')
+
+    return Promise.resolve().then(() => {
+      expect(announced).toEqual(['badge_position(3,3)'])
+      // Once the scroll ends, syncing resumes (here it reads jsdom's zero offsets).
+      fireEvent(track, new Event('scrollend'))
+      fireEvent.scroll(track)
+      expect(live).toHaveTextContent('badge_position(1,3)')
+    })
   })
 })

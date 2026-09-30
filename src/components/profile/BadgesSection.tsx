@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   MdChevronLeft,
   MdChevronRight,
@@ -10,10 +10,12 @@ import {
   MdOutlineStarBorder,
 } from "react-icons/md";
 import type { IconType } from "react-icons";
-import { formatCalendarDate } from "@/lib/format-date";
 import type { BadgeItem, BadgeKey } from "@/lib/member-home/badge-items";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { cn } from "@/lib/utils";
+
+/** Longest a smooth scroll between slides is expected to take before scroll syncing resumes. */
+const SCROLL_SETTLE_MS = 900;
 
 const ICONS: Record<BadgeKey, IconType> = {
   member_year: MdOutlineStarBorder,
@@ -23,7 +25,6 @@ const ICONS: Record<BadgeKey, IconType> = {
 
 function useBadgeText() {
   const t = useTranslations("profile.home");
-  const locale = useLocale();
   return (item: BadgeItem) => {
     const title =
       item.key === "member_year"
@@ -32,8 +33,8 @@ function useBadgeText() {
           : t("badge_member_year_no_year")
         : t(`badge_${item.key}`);
     let description: string;
-    if (item.key === "member_year" && item.earned && item.since) {
-      description = t("badge_member_year_earned", { date: formatCalendarDate(item.since, locale) });
+    if (item.key === "member_year" && item.earned && item.sinceLabel) {
+      description = t("badge_member_year_earned", { date: item.sinceLabel });
     } else {
       description = t(`badge_${item.key}_${item.earned ? "earned" : "locked"}`);
     }
@@ -78,11 +79,15 @@ export default function BadgesSection({ items, className }: { items: BadgeItem[]
   const reduced = usePrefersReducedMotion();
   const trackRef = useRef<HTMLUListElement>(null);
   const [index, setIndex] = useState(0);
+  // True while a dot / arrow scroll is animating: its intermediate scroll events
+  // must not move the index (and the live region) through every slide on the way.
+  const programmatic = useRef(false);
+  const settleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const earnedCount = items.filter((i) => i.earned).length;
 
   const syncIndex = useCallback(() => {
     const track = trackRef.current;
-    if (!track) return;
+    if (!track || programmatic.current) return;
     const center = track.scrollLeft + track.clientWidth / 2;
     let best = 0;
     let bestDistance = Infinity;
@@ -97,10 +102,30 @@ export default function BadgesSection({ items, className }: { items: BadgeItem[]
     setIndex(best);
   }, []);
 
+  // `scrollend` ends a programmatic scroll; the timeout covers browsers without
+  // it and scrolls that never move (already in place, or reduced motion).
+  useEffect(() => {
+    const track = trackRef.current;
+    const settle = () => {
+      clearTimeout(settleTimer.current);
+      programmatic.current = false;
+    };
+    track?.addEventListener("scrollend", settle);
+    return () => {
+      track?.removeEventListener("scrollend", settle);
+      clearTimeout(settleTimer.current);
+    };
+  }, []);
+
   const goTo = (target: number) => {
     const track = trackRef.current;
     const slide = track?.children[target] as HTMLElement | undefined;
     if (!track || !slide) return;
+    programmatic.current = true;
+    clearTimeout(settleTimer.current);
+    settleTimer.current = setTimeout(() => {
+      programmatic.current = false;
+    }, SCROLL_SETTLE_MS);
     track.scrollTo({
       left: slide.offsetLeft - (track.clientWidth - slide.offsetWidth) / 2,
       behavior: reduced ? "auto" : "smooth",

@@ -90,7 +90,7 @@ export default async function ProfilePage({
               <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
                 {checklistVisible && <ProfileChecklist steps={checklist} />}
                 <BadgesSection
-                  items={buildBadgeItems(badges)}
+                  items={buildBadgeItems(badges, locale)}
                   className={checklistVisible ? "md:col-span-2" : "md:col-span-3"}
                 />
               </div>
