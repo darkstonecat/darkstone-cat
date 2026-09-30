@@ -191,8 +191,9 @@ current data sheet off `/profile`.)
 
 ### B5 — Card, QR and verify (screen 05 + `/verify/<token>`)
 
-- [ ] B5.1 — Add a QR library (server-side SVG/PNG generation, small, maintained); QR encodes
+- [x] B5.1 — Add a QR library (server-side SVG/PNG generation, small, maintained); QR encodes
   `https://www.darkstone.cat/verify/<card_token>`. Unit test.
+  - Evidence: `uqr` 0.1.3 (unjs, pure JS, zero deps, 79 kB unpacked, released 2026-04; chosen over `qrcode` 1.5.4 (Node/canvas oriented, 135 kB) and `qrcode-generator` (555 kB)) returns a boolean module matrix, so the same data feeds an HTML/SVG card and the Satori PNG; no `optimizePackageImports` entry needed (`sideEffects: false`, tiny). `src/lib/member-card/verify-url.ts` (`buildCardVerifyUrl` via `getLocalizedUrl("ca", ...)`, token pattern) and `qr.ts` (`buildQrMatrix` ECC M, `qrToPath`). `tests/lib/member-card-qr.test.ts` 6/6 incl. a real decode with `jsqr` (dev dependency); lint and tsc clean.
 - [ ] B5.2 — `composer.tsx` landscape layout matching 5b (logo, SOCI, name, number, member
   since, QR on the right); `/api/members/card` unchanged contract. Tests for the route.
 - [ ] B5.3 — `/profile/card` page: mobile portrait page with centred QR and pinned download,

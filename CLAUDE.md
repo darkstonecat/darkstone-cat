@@ -325,6 +325,7 @@ The `public` schema is the primary working schema.
 - **react-icons** — icon library (Material Design `react-icons/md` + brand icons `react-icons/fa`)
 - **clsx** + **tailwind-merge** — class utilities (via `cn()`)
 - **@vercel/analytics** + **@vercel/speed-insights** — Vercel monitoring. Web Analytics reports normally; **Speed Insights needs a paid Vercel plan, which the project does not have**, so its `POST /<hash>/vitals` answers `503` and no metric is ever stored. The component stays mounted so it starts working if the plan changes — the 503s are expected, not a bug. Both scripts load from obfuscated paths (`/<16-hex>/script.js`), not `/_vercel/insights/…`, and both ignore automated browsers, so they can only be verified in a real one
+- **uqr** — QR code matrix generator (pure JS, zero deps, `src/lib/member-card/qr.ts`); **jsqr** (dev) decodes a rasterised QR in unit tests
 - **csv-parse** (dev) — CSV parsing for member migration script
 
 ## Gotchas
