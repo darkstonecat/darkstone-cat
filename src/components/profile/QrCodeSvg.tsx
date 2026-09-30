@@ -10,7 +10,7 @@ type QrCodeSvgProps = {
   className?: string;
 };
 
-/** Real QR as inline SVG: dark `#1C1917` modules on a transparent background, sized by `className`. */
+/** Real QR as inline SVG: dark modules (`stone-custom`) on a transparent background, sized by `className`. */
 export default function QrCodeSvg({ matrix, quiet = 2, label, className }: QrCodeSvgProps) {
   const dim = matrix.size + quiet * 2;
   return (
@@ -21,7 +21,7 @@ export default function QrCodeSvg({ matrix, quiet = 2, label, className }: QrCod
       shapeRendering="crispEdges"
       className={className}
     >
-      <path fill="#1C1917" d={qrToPath(matrix, quiet)} />
+      <path className="fill-stone-custom" d={qrToPath(matrix, quiet)} />
     </svg>
   );
 }

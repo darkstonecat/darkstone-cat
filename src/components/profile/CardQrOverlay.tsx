@@ -16,11 +16,16 @@ type CardQrOverlayProps = {
 /**
  * QR tile of the mobile card. Tapping it opens a full-screen dialog with a large QR on white so it
  * scans at the door. No screen-brightness API is used. Focus is trapped in the dialog, Escape and
- * the close button dismiss it, body scroll is locked and focus returns to the tile.
+ * the close button dismiss it, the page behind is made inert, body scroll is locked and focus returns to the tile.
  */
 export default function CardQrOverlay({ matrix, memberNumber }: CardQrOverlayProps) {
   const t = useTranslations("profile.card");
   const lenis = useLenis();
+  // Kept in a ref so a new Lenis identity never re-runs the effect (and its cleanup) while open.
+  const lenisRef = useRef(lenis);
+  useEffect(() => {
+    lenisRef.current = lenis;
+  }, [lenis]);
   const titleId = useId();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -34,7 +39,14 @@ export default function CardQrOverlay({ matrix, memberNumber }: CardQrOverlayPro
     const trigger = triggerRef.current;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    lenis?.stop();
+    // Only restart Lenis on close if this overlay is the one that stopped it.
+    const current = lenisRef.current;
+    const stoppedLenis = current && !current.isStopped ? current : null;
+    stoppedLenis?.stop();
+    // Everything behind the dialog becomes inert (no focus, no clicks, hidden from assistive tech).
+    const main = document.getElementById("main-content");
+    const wasInert = main?.hasAttribute("inert") ?? false;
+    main?.setAttribute("inert", "");
     closeRef.current?.focus();
 
     function onKeyDown(event: KeyboardEvent) {
@@ -52,10 +64,11 @@ export default function CardQrOverlay({ matrix, memberNumber }: CardQrOverlayPro
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
-      lenis?.start();
+      stoppedLenis?.start();
+      if (!wasInert) main?.removeAttribute("inert");
       trigger?.focus();
     };
-  }, [open, lenis]);
+  }, [open]);
 
   return (
     <>
@@ -65,9 +78,9 @@ export default function CardQrOverlay({ matrix, memberNumber }: CardQrOverlayPro
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-label={t("qr_open")}
-        className="block rounded-2xl bg-brand-white p-3 focus-visible:outline-offset-2"
+        className="block rounded-2xl bg-brand-white p-2 focus-visible:outline-offset-2"
       >
-        <QrCodeSvg matrix={matrix} quiet={2} label={label} className="size-[200px]" />
+        <QrCodeSvg matrix={matrix} quiet={4} label={label} className="size-[200px]" />
       </button>
 
       {open &&

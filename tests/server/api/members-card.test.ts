@@ -5,6 +5,15 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
 }))
 
+vi.mock('@/lib/member-card/composer', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/lib/member-card/composer')>()
+  return { ...original, composeMemberCard: vi.fn(original.composeMemberCard) }
+})
+
+import { PNG } from 'pngjs'
+import jsQR from 'jsqr'
+import { composeMemberCard } from '@/lib/member-card/composer'
+import { buildCardVerifyUrl } from '@/lib/member-card/verify-url'
 import { GET } from '@/app/api/members/card/route'
 
 const TOKEN_A = '0123456789abcdef0123456789abcdef'
@@ -88,5 +97,35 @@ describe('GET /api/members/card', () => {
     setupMock({ user: { id: 'u1' }, member: member(TOKEN_B) })
     const b = await pngSize(await GET(new Request('http://localhost/api/members/card')))
     expect(Buffer.from(a.bytes).equals(Buffer.from(b.bytes))).toBe(false)
+  })
+
+  it('decodes the QR of the actual PNG back to the verify URL', async () => {
+    setupMock({ user: { id: 'u1' }, member: member(TOKEN_A) })
+    const res = await GET(new Request('http://localhost/api/members/card'))
+    const png = PNG.sync.read(Buffer.from(await res.arrayBuffer()))
+    const decoded = jsQR(new Uint8ClampedArray(png.data), png.width, png.height)
+    expect(decoded?.data).toBe(buildCardVerifyUrl(TOKEN_A))
+  })
+
+  it.each([
+    ['es', 'SOCIO', 'Miembro desde el'],
+    ['en', 'MEMBER', 'Member since'],
+    ['ca', 'SOCI', 'Membre des del'],
+  ])('renders the %s texts when ?locale=%s is given', async (locale, badge, since) => {
+    setupMock({ user: { id: 'u1' }, member: member(TOKEN_A) })
+    const res = await GET(new Request(`http://localhost/api/members/card?locale=${locale}`))
+    expect(res.status).toBe(200)
+    const args = vi.mocked(composeMemberCard).mock.calls.at(-1)![0]
+    expect(args.locale).toBe(locale)
+    expect(args.labels.badge).toBe(badge)
+    expect(args.labels.since).toBe(since)
+  })
+
+  it('falls back to Catalan for a missing or unknown locale', async () => {
+    for (const q of ['', '?locale=fr', '?locale=../../etc']) {
+      setupMock({ user: { id: 'u1' }, member: member(TOKEN_A) })
+      await GET(new Request(`http://localhost/api/members/card${q}`))
+      expect(vi.mocked(composeMemberCard).mock.calls.at(-1)![0].locale).toBe('ca')
+    }
   })
 })

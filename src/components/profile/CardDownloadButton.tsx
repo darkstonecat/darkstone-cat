@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { MdOutlineFileDownload } from "react-icons/md";
 import { cn } from "@/lib/utils";
 
 /** Downloads the PNG from `/api/members/card`; disabled while it is generated, inline alert on failure. */
 export default function CardDownloadButton({ className }: { className?: string }) {
   const t = useTranslations("profile.card");
+  const locale = useLocale();
   const [downloading, setDownloading] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -15,7 +16,7 @@ export default function CardDownloadButton({ className }: { className?: string }
     setDownloading(true);
     setFailed(false);
     try {
-      const res = await fetch("/api/members/card");
+      const res = await fetch(`/api/members/card?locale=${encodeURIComponent(locale)}`);
       if (!res.ok) throw new Error("Failed to generate card");
 
       const blob = await res.blob();

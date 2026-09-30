@@ -18,12 +18,27 @@ const INK_MUTED = "rgba(28, 25, 23, 0.65)";
 const ORANGE = "#A04500";
 const BEIGE = "#EEE8DC";
 
+// The QR is drawn with a 4-module quiet zone inside its own SVG (QR spec minimum); 6px per module.
+const QR_QUIET = 4;
+const QR_MODULE_PX = 6;
+
 export type MemberCardData = {
   fullName: string;
   memberNumber: string;
   /** `YYYY-MM-DD` (members.membership_start_date). */
   membershipStartDate: string | null;
   cardToken: string;
+  /** Locale of the texts and the date (`ca` | `es` | `en`). */
+  locale: string;
+  labels: MemberCardLabels;
+};
+
+export type MemberCardLabels = {
+  brand: string;
+  tagline: string;
+  badge: string;
+  /** e.g. "Membre des del" — the formatted date is appended. */
+  since: string;
 };
 
 function nameFontSize(name: string): number {
@@ -37,13 +52,16 @@ export async function composeMemberCard({
   memberNumber,
   membershipStartDate,
   cardToken,
+  locale,
+  labels,
 }: MemberCardData): Promise<ImageResponse> {
   const bellezaData = getFontBelleza();
   const introData = getFontIntroBlackAlt();
 
   const qr = buildQrMatrix(buildCardVerifyUrl(cardToken));
-  const qrSrc = `data:image/svg+xml;utf8,${encodeURIComponent(qrToSvg(qr, 0))}`;
-  const since = membershipStartDate ? formatCalendarDate(membershipStartDate, "ca") : null;
+  const qrPx = (qr.size + QR_QUIET * 2) * QR_MODULE_PX;
+  const qrSrc = `data:image/svg+xml;utf8,${encodeURIComponent(qrToSvg(qr, QR_QUIET))}`;
+  const since = membershipStartDate ? formatCalendarDate(membershipStartDate, locale) : null;
 
   const element = (
     <div
@@ -64,14 +82,14 @@ export async function composeMemberCard({
         <div style={{ display: "flex", alignItems: "center" }}>          <img src={LOGO_DATA_URI} alt="" width={90} height={90} style={{ marginRight: 20 }} />
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontFamily: "IntroBlackAlt", fontSize: 36, lineHeight: 1.1 }}>
-              Darkstone Catalunya
+              {labels.brand}
             </div>
             <div style={{ fontSize: 24, color: INK_MUTED, marginTop: 6 }}>
-              Jocs de taula i rol · Terrassa
+              {labels.tagline}
             </div>
           </div>
         </div>
-        <div style={{ fontSize: 26, color: ORANGE, letterSpacing: "0.2em" }}>SOCI</div>
+        <div style={{ fontSize: 26, color: ORANGE, letterSpacing: "0.2em" }}>{labels.badge}</div>
       </div>
 
       {/* Identity + QR */}
@@ -90,17 +108,17 @@ export async function composeMemberCard({
             {memberNumber}
           </div>
           {since && (
-            <div style={{ fontSize: 24, color: INK_MUTED, marginTop: 10 }}>{`Membre des del ${since}`}</div>
+            <div style={{ fontSize: 24, color: INK_MUTED, marginTop: 10 }}>{`${labels.since} ${since}`}</div>
           )}
         </div>
         <div
           style={{
             display: "flex",
-            padding: 18,
             borderRadius: 22,
             backgroundColor: "#FFFFFF",
           }}
-        >          <img src={qrSrc} alt="" width={236} height={236} />
+        >
+          <img src={qrSrc} alt="" width={qrPx} height={qrPx} />
         </div>
       </div>
     </div>

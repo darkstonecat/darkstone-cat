@@ -1,5 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { composeMemberCard } from "@/lib/member-card/composer";
+import { routing } from "@/i18n/routing";
+
+type Locale = (typeof routing.locales)[number];
+
+function parseLocale(value: string | null): Locale {
+  return routing.locales.find((l) => l === value) ?? routing.defaultLocale;
+}
+
+async function loadLabels(locale: Locale) {
+  const messages = (await import(`@/messages/${locale}.json`)).default;
+  const { brand, tagline, badge } = messages.profile.card;
+  return { brand, tagline, badge, since: messages.profile.hero_since } as const;
+}
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -21,6 +34,9 @@ export async function GET(request: Request) {
     return new Response("Member not found", { status: 404 });
   }
 
+  const { searchParams } = new URL(request.url);
+  const locale = parseLocale(searchParams.get("locale"));
+
   const fullName = `${member.first_name} ${member.last_name}`;
 
   const imageResponse = await composeMemberCard({
@@ -28,9 +44,10 @@ export async function GET(request: Request) {
     memberNumber: member.member_number,
     membershipStartDate: member.membership_start_date,
     cardToken: member.card_token,
+    locale,
+    labels: await loadLabels(locale),
   });
 
-  const { searchParams } = new URL(request.url);
   const isPreview = searchParams.get("preview") === "1";
 
   const headers = new Headers(imageResponse.headers);

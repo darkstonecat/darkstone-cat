@@ -127,12 +127,12 @@ export default async function ProfileCardPage({
                   memberNumber={member.member_number}
                   membershipStartDate={member.membership_start_date}
                   qr={
-                    <div className="shrink-0 rounded-xl bg-brand-white p-2">
+                    <div className="shrink-0 rounded-xl bg-brand-white">
                       <QrCodeSvg
                         matrix={matrix}
-                        quiet={1}
+                        quiet={4}
                         label={t("qr_alt", { number: member.member_number })}
-                        className="size-[150px]"
+                        className="size-[164px]"
                       />
                     </div>
                   }
