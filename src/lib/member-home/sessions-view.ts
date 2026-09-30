@@ -19,19 +19,18 @@ const TIME_ZONE = "Europe/Madrid";
 const INTL_LOCALES: Record<string, string> = { ca: "ca-ES", es: "es-ES", en: "en-GB" };
 const intlLocale = (locale: string) => INTL_LOCALES[locale] ?? locale;
 
-const MEMBER_VISIBILITIES = new Set(["PUBLIC", "ONLY_GROUP"]);
-
 /**
- * The organisation's key returns events of every visibility. Members are the
- * group and this page is auth-only, so they see `PUBLIC` and `ONLY_GROUP`
- * sessions and plays. The public `/events` page and share images keep `PUBLIC` only.
+ * The organisation's key returns events of every visibility. Web sign-up is open
+ * and every account gets `role = 'member'`, so the member home shows `PUBLIC`
+ * sessions and plays only, like `/events`. `ONLY_GROUP` stays hidden until a
+ * board-approved (paid) member state exists.
  */
-export function toMemberSessions<T extends { visibility: string; plannedPlays: { visibility: string }[] }>(
+export function toPublicSessions<T extends { visibility: string; plannedPlays: { visibility: string }[] }>(
   sessions: T[]
 ): T[] {
   return sessions
-    .filter((s) => MEMBER_VISIBILITIES.has(s.visibility))
-    .map((s) => ({ ...s, plannedPlays: s.plannedPlays.filter((p) => MEMBER_VISIBILITIES.has(p.visibility)) }));
+    .filter((s) => s.visibility === "PUBLIC")
+    .map((s) => ({ ...s, plannedPlays: s.plannedPlays.filter((p) => p.visibility === "PUBLIC") }));
 }
 
 export type SeatKind = "unlimited" | "free" | "last" | "full";

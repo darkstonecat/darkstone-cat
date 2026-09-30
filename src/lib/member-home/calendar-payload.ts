@@ -1,6 +1,6 @@
 import "server-only";
 import { fetchMonthEvents } from "@/lib/member-sessions";
-import { toMemberSessions } from "./sessions-view";
+import { toPublicSessions } from "./sessions-view";
 import {
   buildCalendarView,
   formatMonthKey,
@@ -30,7 +30,7 @@ export async function buildCalendarPayload(month: YearMonth, locale: string, now
   const { events, error } = await fetchMonthEvents(month.year, month.month);
   if (error) return { ...header, view: null, error };
 
-  const items: CalendarEvent[] = toMemberSessions(events).map((s) => ({
+  const items: CalendarEvent[] = toPublicSessions(events).map((s) => ({
     id: s.id,
     title: s.title,
     startsAt: s.startsAt,

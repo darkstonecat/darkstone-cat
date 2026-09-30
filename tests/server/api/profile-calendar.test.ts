@@ -63,7 +63,7 @@ describe('GET /api/profile/calendar', () => {
     }
   )
 
-  it('returns the pre-formatted month with group-only events included and no-store', async () => {
+  it('returns the pre-formatted month without group-only events and no-store', async () => {
     setupAuth({ user: { id: 'u' }, member: { id: 'u' } })
     member.fetchMonthEvents.mockResolvedValue({
       events: [
@@ -80,7 +80,7 @@ describe('GET /api/profile/calendar', () => {
     expect(member.fetchMonthEvents).toHaveBeenCalledWith(2026, 10)
     expect(body).toMatchObject({ monthKey: '2026-10', title: 'Octubre 2026', prev: { key: '2026-09' }, next: { key: '2026-11' } })
     const ids = body.view!.weeks.flat().flatMap((d) => d.events.map((e) => e.id))
-    expect(ids).toEqual(['pub', 'grp'])
+    expect(ids).toEqual(['pub'])
   })
 
   it('drops neighbours at the range limits', async () => {

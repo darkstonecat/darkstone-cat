@@ -4,7 +4,7 @@ import {
   formatTile,
   playSeats,
   summarizeSession,
-  toMemberSessions,
+  toPublicSessions,
 } from '@/lib/member-home/sessions-view'
 import type { MemberSession, MemberSessionPlay } from '@/lib/member-sessions'
 
@@ -91,19 +91,19 @@ describe('summarizeSession', () => {
   })
 })
 
-describe('toMemberSessions', () => {
-  it('keeps public and group-only sessions and plays', () => {
-    const result = toMemberSessions([
+describe('toPublicSessions', () => {
+  it('keeps public sessions and plays only (group-only stays hidden)', () => {
+    const result = toPublicSessions([
       session({ id: 'a', plannedPlays: [play({ id: 'x' }), play({ id: 'y', visibility: 'ONLY_GROUP' })] }),
       session({ id: 'b', visibility: 'ONLY_GROUP' }),
     ])
-    expect(result.map((s) => s.id)).toEqual(['a', 'b'])
-    expect(result[0].plannedPlays.map((p) => p.id)).toEqual(['x', 'y'])
+    expect(result.map((s) => s.id)).toEqual(['a'])
+    expect(result[0].plannedPlays.map((p) => p.id)).toEqual(['x'])
   })
 
   it('drops any other visibility defensively', () => {
     const odd = { ...session({ id: 'c' }), visibility: 'PRIVATE' } as unknown as ReturnType<typeof session>
-    expect(toMemberSessions([odd])).toEqual([])
+    expect(toPublicSessions([odd])).toEqual([])
   })
 })
 

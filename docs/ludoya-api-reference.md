@@ -157,7 +157,7 @@ Many `ludoya-only` entries in production mean BGG is failing or names diverge; a
 
 ## Known behaviour
 
-- **Visibility.** The organisation key returns every visibility, and each play has its own (independent of its session's). `/events` and event images list `PUBLIC` sessions and plays only; the member area also keeps `ONLY_GROUP`. A missing or unrecognised visibility is skipped with a warning, never assumed public.
+- **Visibility.** The organisation key returns every visibility, and each play has its own (independent of its session's). `/events` and event images list `PUBLIC` sessions and plays only; the member home (La meva zona) is `PUBLIC` only too until a board-approved member state exists (`ONLY_GROUP` stays hidden). A missing or unrecognised visibility is skipped with a warning, never assumed public.
 - **Nullable dates.** `startsAt`/`endsAt` are nullable in the OpenAPI; an item with a null date is skipped with a warning instead of failing the feed.
 - **DST.** Classification of regular sessions converts with `timeZone` (Fri 16:00–20:30, Sat 10:00–13:30 local).
 - **Zero-length events.** Some special events have `startsAt === endsAt`.
