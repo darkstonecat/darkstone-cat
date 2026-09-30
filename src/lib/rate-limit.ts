@@ -9,24 +9,29 @@
 import "server-only";
 
 const hits = new Map<string, number[]>();
-const MAX_KEYS = 5_000;
+export const MAX_KEYS = 5_000;
 
-/** Returns true when the call is allowed, and records it. */
+/**
+ * Returns true when the call is allowed, and records it.
+ *
+ * The map is bounded: a key is re-inserted on every hit, so iteration order is
+ * least-recently-used first, and going over MAX_KEYS evicts from the front.
+ * That costs O(evicted), not a scan of every key.
+ */
 export function allowRequest(key: string, limit: number, windowMs: number, now = Date.now()): boolean {
   const recent = (hits.get(key) ?? []).filter((t) => now - t < windowMs);
-  if (recent.length >= limit) {
-    hits.set(key, recent);
-    return false;
-  }
-  recent.push(now);
+  const allowed = recent.length < limit;
+  if (allowed) recent.push(now);
+
+  hits.delete(key);
   hits.set(key, recent);
 
-  if (hits.size > MAX_KEYS) {
-    for (const [k, times] of hits) {
-      if (times.every((t) => now - t >= windowMs)) hits.delete(k);
-    }
+  while (hits.size > MAX_KEYS) {
+    const oldest = hits.keys().next().value;
+    if (oldest === undefined) break;
+    hits.delete(oldest);
   }
-  return true;
+  return allowed;
 }
 
 /** Test helper. */
