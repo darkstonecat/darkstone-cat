@@ -4,7 +4,7 @@
 
 import type { BggGame, BggSearchResult, BggThingBasic } from "./bgg";
 import { searchBggGames, fetchBggThings } from "./bgg";
-import { resolveBggIds, type LudoyaPlannedPlay } from "./ludoya";
+import type { LudoyaPlannedPlay } from "./ludoya";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -25,8 +25,8 @@ export interface ResolvedGame {
 // ---------------------------------------------------------------------------
 // Manual overrides: Ludoya game name → BGG game ID
 // ---------------------------------------------------------------------------
-// Most games resolve through the BGG id Ludoya links to. Add an entry here
-// only when that link is missing or points to the wrong BGG item.
+// The Ludoya public API carries no BGG id, so games resolve by name and year.
+// Add an entry here when that match is missing or points to the wrong BGG item.
 // Key = exact game name as it appears in Ludoya (case-sensitive).
 
 const GAME_NAME_OVERRIDES: Record<string, string> = {
@@ -274,14 +274,12 @@ function hasAccessoryCategory(categories: string[]): boolean {
  *   1. Manual RPG name list (forced, skips all other checks)
  *   2. Accessory detection (BGG type or category → unknown)
  *   3. RPG detection (BGG item type rpgitem/rpgissue → rpg)
- *   4. RPG detection (Ludoya classifies the game as an RPG book → rpg)
- *   5. Default → boardgame
+ *   4. Default → boardgame
  */
 export function getGameType(
   categories: string[],
   ludoyaName: string,
-  thingType?: string,
-  isLudoyaRpg = false
+  thingType?: string
 ): GameType {
   // 1. Manual name lists — forced classification, no further checks needed
   if (isRpgByName(ludoyaName)) return "rpg";
@@ -293,10 +291,7 @@ export function getGameType(
   // 3. RPG — BGG item type
   if (thingType && RPG_BGG_TYPES.has(thingType)) return "rpg";
 
-  // 4. RPG — Ludoya game type (the club collection only has board game subtypes)
-  if (isLudoyaRpg) return "rpg";
-
-  // 5. Default: boardgame
+  // 4. Default: boardgame
   return "boardgame";
 }
 
@@ -340,7 +335,7 @@ function buildFromBggGame(
   prefer: CoverPreference
 ): ResolvedGame {
   // Club collection games have subtype "boardgame"/"boardgameexpansion"
-  const type = getGameType(game.categories, play.gameName, game.subtype, play.isRpg);
+  const type = getGameType(game.categories, play.gameName, game.subtype);
   return {
     name: play.gameName,
     bggId: game.id,
@@ -357,7 +352,7 @@ function buildFromThingData(
   prefer: CoverPreference
 ): ResolvedGame {
   // Games outside the club collection — use thingType for classification
-  const type = getGameType(thing.categories, play.gameName, thing.thingType, play.isRpg);
+  const type = getGameType(thing.categories, play.gameName, thing.thingType);
   return {
     name: play.gameName,
     bggId: thing.id,
@@ -371,7 +366,7 @@ function buildFromThingData(
 /** Last resort: no BGG data at all. Ludoya cover and the default frame. */
 function buildFromLudoyaOnly(play: LudoyaPlannedPlay): ResolvedGame | null {
   if (!play.imageUrl) return null;
-  const type = getGameType([], play.gameName, undefined, play.isRpg);
+  const type = getGameType([], play.gameName, undefined);
   return {
     name: play.gameName,
     bggId: "",
@@ -508,17 +503,19 @@ async function resolveByName(
 /**
  * Resolve event planned plays to enriched game data for image generation.
  *
- * BGG is the source of truth for cover, weight and type. Ludoya only provides
- * the bridge: each game's BGG id. Pipeline per game:
+ * BGG is the source of truth for cover, weight and type. The Ludoya public API
+ * has no BGG id, so games are matched by name and publication year. Pipeline
+ * per game:
  *
- *   1. BGG id — manual override (GAME_NAME_OVERRIDES) or Ludoya's BGG link
- *   2. Club collection lookup by id (no BGG request)
- *   3. BGG thing endpoint by id (one batched request)
- *   4. Fallback when there is no id or BGG did not answer:
- *      name match in the club collection, then BGG search + thing
- *   5. Last resort — Ludoya cover with the default frame
+ *   1. Manual override (GAME_NAME_OVERRIDES): club collection by id, then BGG
+ *      thing by id
+ *   2. Name match in the club collection (exact, then fuzzy)
+ *   3. BGG search by name (year as tiebreaker) + thing data
+ *   4. Last resort — Ludoya cover with the default frame
  *
- * After resolution: keep Ludoya order, dedup, balance boardgame/RPG ratio, cap at 8.
+ * The BGG cover is used when name and year both match; a name-only match keeps
+ * Ludoya's cover, since the BGG item may be another edition. After
+ * resolution: keep Ludoya order, dedup, balance boardgame/RPG ratio, cap at 8.
  */
 export async function resolveEventGames(
   plannedPlays: LudoyaPlannedPlay[],
@@ -529,28 +526,21 @@ export async function resolveEventGames(
     if (game.imageUrl) resolved.set(index, { game, source });
   };
 
-  // Step 1: BGG id for each game
-  const bridge = await resolveBggIds(
-    plannedPlays.flatMap((p) => (p.slug && !GAME_NAME_OVERRIDES[p.gameName] ? [p.slug] : []))
-  );
+  // Step 1: manual overrides resolve by BGG id
   const byId: (PendingPlay & { bggId: string })[] = [];
   const byName: PendingPlay[] = [];
   plannedPlays.forEach((play, index) => {
-    const bggId =
-      GAME_NAME_OVERRIDES[play.gameName] ?? (play.slug ? bridge.get(play.slug) : undefined);
+    const bggId = GAME_NAME_OVERRIDES[play.gameName];
     if (bggId) byId.push({ index, play, bggId });
     else byName.push({ index, play });
   });
 
-  // Step 2: club collection by id
   const needThing: typeof byId = [];
   for (const pending of byId) {
     const game = findById(bggGames, pending.bggId);
     if (game) accept(pending.index, buildFromBggGame(pending.play, game, "bgg"), "collection-id");
     else needThing.push(pending);
   }
-
-  // Step 3: BGG thing endpoint by id
   if (needThing.length > 0) {
     const things = await fetchBggThings(Array.from(new Set(needThing.map((p) => p.bggId))));
     for (const pending of needThing) {
@@ -560,10 +550,10 @@ export async function resolveEventGames(
     }
   }
 
-  // Step 4: name (+ year) match in the club collection, then BGG search
+  // Steps 2–3: name (+ year) match in the club collection, then BGG search
   await resolveByName(byName, bggGames, accept);
 
-  // Step 5: Ludoya cover with the default frame
+  // Step 4: Ludoya cover with the default frame
   plannedPlays.forEach((play, index) => {
     if (resolved.has(index)) return;
     const game = buildFromLudoyaOnly(play);

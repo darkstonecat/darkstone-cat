@@ -136,7 +136,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the site.
 | `npm run test:e2e` | Playwright E2E tests (starts dev server on port 3100) |
 | `npm run db:start` | Start local Supabase (requires Docker) |
 | `npm run db:stop` | Stop local Supabase |
-| `npm run ludoya:check` | Verify the Ludoya API still matches what the events page expects |
+| `npm run ludoya:check` | Verify the Ludoya public API still matches what the site expects (needs `LUDOYA_API_KEY`) |
 
 ### Testing
 
@@ -170,13 +170,13 @@ CI runs all tests automatically via GitHub Actions on push/PR to `main`.
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID |
 | `BGG_USERNAME` | BoardGameGeek username for the ludoteca collection |
 | `BGG_API_KEY` | BoardGameGeek XML API key |
-| `LUDOYA_*` | Optional Ludoya overrides, see `docs/ludoya-api-reference.md` |
+| `LUDOYA_API_KEY` | Ludoya public API key (server-side only), see `docs/ludoya-api-reference.md` |
 
 ### Development without API keys
 
 The ludoteca works in **mock mode** when `BGG_API_KEY` is not set — it reads local XML fixtures from `/public/mock/` so you can develop the UI without hitting the BoardGameGeek API.
 
-The events page can run offline with `LUDOYA_MOCK=1`, which reads JSON fixtures from `/public/mock/ludoya/`.
+The events page can run offline with `LUDOYA_MOCK=1`, which reads JSON fixtures from `/public/mock/ludoya/v1/` (no API key needed).
 
 ## Architecture Highlights
 

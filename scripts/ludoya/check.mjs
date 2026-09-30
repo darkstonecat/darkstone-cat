@@ -1,24 +1,40 @@
 #!/usr/bin/env node
 // ---------------------------------------------------------------------------
-// Ludoya API health check
+// Ludoya public API health check
 // ---------------------------------------------------------------------------
-// Verifies, against the live API, every assumption the events page makes:
-// the group id resolves, the events feed has the expected shape, planned
-// plays can be read from child events, and images are reachable.
+// Verifies, against the live public API (v1), every assumption the site makes:
+// the key works, locations and the events feed have the expected shape,
+// planned plays come as sub-events, user search answers, and images are
+// reachable.
 //
-//   npm run ludoya:check
+//   npm run ludoya:check        (reads LUDOYA_API_KEY from .env.local or the environment)
 //
 // Exit code 1 on any failure so it can run in CI (.github/workflows/ludoya-check.yml).
-// No dependencies: runs with Node 18+ built-in fetch.
+// No dependencies: runs with Node 18+ built-in fetch. Uses GET requests only and
+// about six calls per run, far below the 100 requests/minute Business limit.
 //
 // Defaults mirror src/lib/ludoya/config.ts; override with the same env vars.
 
+import fs from "node:fs";
+
+function loadLocalEnv() {
+  // Convenience for local runs; CI provides the variable directly.
+  for (const file of [".env.local", ".env"]) {
+    try {
+      for (const line of fs.readFileSync(file, "utf8").split("\n")) {
+        const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
+        if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+      }
+    } catch {
+      // No such file: fine.
+    }
+  }
+}
+loadLocalEnv();
+
 const API_URL = (process.env.LUDOYA_API_URL || "https://api.ludoya.com").replace(/\/$/, "");
-const GROUP_ID = process.env.LUDOYA_GROUP_ID || "b28a80d31be24cffa35d9176c3f1ac50";
-const GROUP_USERNAME = process.env.LUDOYA_GROUP_USERNAME || "darkstonecat";
-const GROUP_SEARCH_QUERY = process.env.LUDOYA_GROUP_SEARCH_QUERY || "darkstone";
-const IMAGE_BASE_URL =
-  process.env.LUDOYA_IMAGE_BASE_URL || "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net";
+const API_KEY = process.env.LUDOYA_API_KEY;
+const IMAGE_HOST = "ludoya-images.s3.eu-west-par.io.cloud.ovh.net";
 const TIMEOUT_MS = 20_000;
 
 const failures = [];
@@ -30,9 +46,9 @@ const fail = (msg) => {
 const section = (title) => console.log(`\n${title}`);
 
 async function getJson(path) {
-  const url = `${API_URL}${path}`;
+  const url = `${API_URL}/public/v1${path}`;
   const res = await fetch(url, {
-    headers: { accept: "application/json" },
+    headers: { accept: "application/json", "X-Api-Key": API_KEY },
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   const text = await res.text();
@@ -42,7 +58,8 @@ async function getJson(path) {
   } catch {
     body = null;
   }
-  return { url, status: res.status, ok: res.ok, body };
+  // Never print the key; only the path is reported.
+  return { url: `/public/v1${path}`, status: res.status, ok: res.ok, body, headers: res.headers };
 }
 
 // Returns 200 when the image is reachable, otherwise the failing HTTP status or
@@ -88,128 +105,144 @@ function expectField(obj, key, type, ctx, { optional = false } = {}) {
 }
 
 async function main() {
-  console.log(`Ludoya API check — ${API_URL} — group ${GROUP_USERNAME} (${GROUP_ID})`);
+  console.log(`Ludoya public API check — ${API_URL}`);
 
-  // 1. Group id still resolves and matches the username -------------------
-  section("1. Group");
-  let groupId = GROUP_ID;
-  const search = await getJson(`/groups/search?nameFilter=${encodeURIComponent(GROUP_SEARCH_QUERY)}`);
-  if (!search.ok || !Array.isArray(search.body?.elements)) {
-    fail(`GET ${search.url} → ${search.status} ${keysOf(search.body)}`);
-  } else {
-    const match = search.body.elements.find((g) => g?.username === GROUP_USERNAME);
-    if (!match) fail(`No group with username "${GROUP_USERNAME}" among results for nameFilter="${GROUP_SEARCH_QUERY}"`);
-    else if (match.id !== GROUP_ID) {
-      fail(`Group id changed: configured ${GROUP_ID}, API says ${match.id}. Set LUDOYA_GROUP_ID=${match.id}`);
-      groupId = match.id;
-    } else ok(`Group id ${GROUP_ID} matches username "${GROUP_USERNAME}"`);
+  if (!API_KEY) {
+    fail("LUDOYA_API_KEY is not set (add it to .env.local, or as the LUDOYA_API_KEY secret in GitHub)");
+    return finish();
   }
 
-  // 2. Events feed ---------------------------------------------------------
+  // 1. Key + locations -------------------------------------------------------
+  section("1. Key and locations");
+  const locations = await getJson("/locations");
+  if (locations.status === 401 || locations.status === 403) {
+    fail(`GET ${locations.url} → ${locations.status} ${body(locations)} — the API key was rejected or expired`);
+    return finish();
+  }
+  if (!locations.ok || !Array.isArray(locations.body?.locations)) {
+    fail(`GET ${locations.url} → ${locations.status} ${keysOf(locations.body)}`);
+  } else {
+    const list = locations.body.locations;
+    ok(`GET /locations → ${list.length} locations (rate limit remaining: ${locations.headers.get("x-ratelimit-remaining") ?? "n/a"})`);
+    const defaults = list.filter((l) => l?.isDefault === true);
+    if (defaults.length === 1) ok(`Usual venue: "${defaults[0].name}"`);
+    else fail(`Expected exactly one default location, found ${defaults.length}`);
+    for (const [key, type] of [["id", "string"], ["name", "string"]]) expectField(list[0], key, type, "locations[0]");
+    expectField(list[0], "address", "string", "locations[0]", { optional: true });
+    expectField(list[0], "isDefault", "boolean", "locations[0]");
+  }
+
+  // 2. Events feed (with sub-events) ----------------------------------------
   section("2. Events feed");
-  const events = await getJson(`/users/${groupId}/events?displayAllRecurring=true`);
+  const events = await getJson("/events?includeSubEvents=true");
   let elements = [];
   if (!events.ok) {
-    fail(`GET ${events.url} → ${events.status} ${JSON.stringify(events.body ?? "").slice(0, 200)}`);
+    fail(`GET ${events.url} → ${events.status} ${body(events)}`);
   } else if (!Array.isArray(events.body?.futureEvents?.elements)) {
     fail(`futureEvents.elements missing — top-level keys ${keysOf(events.body)}`);
   } else {
     elements = events.body.futureEvents.elements;
-    ok(`GET /users/{groupId}/events → ${elements.length} future events`);
+    ok(`GET /events?includeSubEvents=true → ${elements.length} future events and sub-events`);
     if (elements.length === 0) fail("Feed returned zero future events (expected weekly sessions)");
+    if (!Array.isArray(events.body?.pastEvents?.elements)) fail("pastEvents.elements missing");
     const first = elements[0];
     const ctx = "futureEvents.elements[0]";
     for (const [key, type] of [
       ["id", "string"],
+      ["type", "string"],
       ["title", "string"],
       ["startsAt", "string"],
       ["endsAt", "string"],
       ["timeZone", "string"],
+      ["participantCount", "number"],
+      ["visibility", "string"],
     ]) {
       expectField(first, key, type, ctx);
     }
-    expectField(first, "canceled", "boolean", ctx, { optional: true });
+    for (const key of ["canceled", "draft"]) expectField(first, key, "boolean", ctx, { optional: true });
+    for (const key of ["capacity", "minParticipants"]) expectField(first, key, "number", ctx, { optional: true });
     expectField(first, "imageUrl", "string", ctx, { optional: true });
-    if (expectField(first, "childEventCounts", "object", ctx, { optional: true }) && first.childEventCounts) {
-      expectField(first.childEventCounts, "games", "number", `${ctx}.childEventCounts`, { optional: true });
+    if (expectField(first, "location", "object", ctx, { optional: true }) && first.location) {
+      expectField(first.location, "id", "string", `${ctx}.location`);
+      expectField(first.location, "name", "string", `${ctx}.location`);
     }
     if (first?.startsAt && Number.isNaN(Date.parse(first.startsAt))) fail(`${ctx}.startsAt is not an ISO date`);
-    const notCanceled = elements.filter((e) => !e.canceled).length;
-    ok(`${notCanceled} active, ${elements.length - notCanceled} cancelled`);
+    const sessions = elements.filter((e) => !e.parentId && e.type === "MEETUP");
+    if (sessions.length === 0) fail("No top-level MEETUP among the future events");
+    else ok(`${sessions.length} sessions (top-level MEETUP), ${elements.length - sessions.length} other events`);
   }
 
-  // 3. Planned plays via child events ------------------------------------
-  section("3. Planned plays (child events)");
-  const withGames = elements.find((e) => (e.childEventCounts?.games ?? 0) > 0);
-  if (!withGames) {
-    console.log("  – No upcoming event has planned games yet; skipping children check");
+  // 3. Planned plays as sub-events ------------------------------------------
+  section("3. Planned plays (sub-events)");
+  const plays = elements.filter((e) => e.parentId && isObject(e.game));
+  if (plays.length === 0) {
+    console.log("  – No upcoming session has planned games yet; skipping play checks");
   } else {
-    const children = await getJson(`/events/${withGames.id}/children`);
-    if (!children.ok || !Array.isArray(children.body?.list)) {
+    ok(`${plays.length} planned plays come inline with parentId`);
+    const play = plays[0];
+    expectField(play, "startsAt", "string", "play");
+    expectField(play.game, "name", "string", "play.game");
+    expectField(play.game, "slug", "string", "play.game");
+    expectField(play.game, "imageUrl", "string", "play.game", { optional: true });
+    expectField(play.game, "yearPublished", "number", "play.game", { optional: true });
+    const sessionIds = new Set(elements.filter((e) => !e.parentId).map((e) => e.id));
+    if (!plays.some((p) => sessionIds.has(p.parentId))) fail("No play's parentId matches a listed session");
+
+    const children = await getJson(`/events/${play.parentId}/children`);
+    if (!children.ok || !Array.isArray(children.body?.children)) {
       fail(`GET ${children.url} → ${children.status} ${keysOf(children.body)}`);
     } else {
-      const plays = children.body.list.filter((c) => isObject(c?.game));
-      ok(`GET /events/{id}/children → ${children.body.list.length} children, ${plays.length} with a game`);
-      if (plays.length === 0) fail("childEventCounts.games > 0 but no child carries a game object");
-      const game = plays[0]?.game;
-      if (game) {
-        expectField(game, "name", "string", "children.list[0].game");
-        expectField(game, "yearPublished", "number", "children.list[0].game", { optional: true });
-        expectField(game, "type", "string", "children.list[0].game", { optional: true });
-        if (expectField(game, "slug", "string", "children.list[0].game")) {
-          // Event images resolve games on BGG through the link in Ludoya's game detail.
-          const detail = await getJson(`/boardgames/${encodeURIComponent(game.slug)}`);
-          if (!detail.ok) {
-            fail(`GET ${detail.url} → ${detail.status} ${keysOf(detail.body)}`);
-          } else if (typeof detail.body?.bggUrl !== "string") {
-            fail(`boardgames/${game.slug}.bggUrl missing — got ${keysOf(detail.body)}`);
-          } else if (!/^https?:\/\/(?:www\.)?boardgamegeek\.com\/[a-z]+\/\d+/i.test(detail.body.bggUrl)) {
-            fail(`boardgames/${game.slug}.bggUrl has an unexpected format: ${detail.body.bggUrl}`);
-          } else {
-            ok(`GET /boardgames/{slug} → BGG link ${detail.body.bggUrl}`);
-          }
-        }
-        if (expectField(game, "imageId", "string", "children.list[0].game", { optional: true }) && game.imageId) {
-          const url = `${IMAGE_BASE_URL}/${game.imageId}.jpg`;
-          const status = await head(url);
-          if (status === 200) ok(`Game image reachable: ${url}`);
-          else fail(`Game image ${url} → ${status}`);
-        }
-      }
+      ok(`GET /events/{id}/children → ${children.body.children.length} children`);
     }
   }
 
-  // 4. Event images ----------------------------------------------------------
-  // The feed only carries reduced images; the site derives the original by
-  // stripping the size suffix. Check every distinct image in the feed.
-  section("4. Event images");
-  const previews = [...new Set(elements.map((e) => e.imageUrl).filter((u) => typeof u === "string"))];
-  if (previews.length === 0) {
-    console.log("  – No upcoming event has an image; skipping");
+  // 4. User search ------------------------------------------------------------
+  section("4. User search");
+  const users = await getJson("/search/users?query=a&intent=PLAY&pagination=1,0");
+  if (!users.ok || !Array.isArray(users.body?.users?.elements)) {
+    fail(`GET ${users.url} → ${users.status} ${keysOf(users.body)}`);
+  } else {
+    ok("GET /search/users?intent=PLAY → users.elements is an array");
+    const user = users.body.users.elements[0];
+    if (user) {
+      expectField(user, "id", "string", "users.elements[0]");
+      expectField(user, "username", "string", "users.elements[0]");
+    }
+  }
+
+  // 5. Images -----------------------------------------------------------------
+  section("5. Images");
+  const urls = [
+    ...new Set(
+      elements.flatMap((e) => [e.imageUrl, e.game?.imageUrl]).filter((u) => typeof u === "string")
+    ),
+  ].slice(0, 12);
+  if (urls.length === 0) {
+    console.log("  – No event or game has an image; skipping");
   } else {
     let reachable = 0;
-    let checked = 0;
-    for (const preview of previews) {
-      if (!preview.startsWith(IMAGE_BASE_URL)) {
-        fail(`Event image host changed: ${preview} (expected ${IMAGE_BASE_URL}); update next.config.ts remotePatterns + CSP`);
+    for (const url of urls) {
+      if (new URL(url).host !== IMAGE_HOST) {
+        fail(`Image host changed: ${url} (expected ${IMAGE_HOST}); update next.config.ts remotePatterns + CSP`);
         continue;
       }
-      const full = preview.replace(/[-_](?:preview|thumbnail)(\.[a-z0-9]+)$/i, "$1");
-      for (const url of new Set([preview, full])) {
-        checked++;
-        const status = await head(url);
-        if (status === 200) reachable++;
-        else fail(`Event image ${url} → ${status}`);
-      }
+      const status = await head(url);
+      if (status === 200) reachable++;
+      else fail(`Image ${url} → ${status}`);
     }
-    // Each failing URL is already reported above, so only claim success when
-    // every one of them was reachable; a ✓ next to "0 reachable" reads as a pass.
-    const summary = `${previews.length} distinct event images, ${reachable}/${checked} URLs reachable (reduced + original)`;
-    if (reachable === checked) ok(summary);
+    const summary = `${reachable}/${urls.length} sampled image URLs reachable`;
+    if (reachable === urls.length) ok(summary);
     else console.log(`  – ${summary}`);
   }
 
-  // Summary ----------------------------------------------------------------
+  finish();
+}
+
+function body(res) {
+  return JSON.stringify(res.body ?? "").slice(0, 200);
+}
+
+function finish() {
   console.log("");
   if (failures.length === 0) {
     console.log("All Ludoya checks passed.");
@@ -217,7 +250,7 @@ async function main() {
   }
   console.log(`${failures.length} check(s) failed:`);
   for (const f of failures) console.log(`  - ${f}`);
-  console.log("\nSee docs/ludoya-api-reference.md for how to rediscover endpoints.");
+  console.log("\nSee docs/ludoya-api-reference.md for how to investigate.");
   process.exitCode = 1;
 }
 

@@ -65,6 +65,8 @@ export default defineConfig({
       ENCRYPTION_KEY: process.env.ENCRYPTION_KEY!,
       SMTP_USER: process.env.SMTP_USER!,
       SMTP_PASSWORD: process.env.SMTP_PASSWORD!,
+      // Ludoya events come from fixtures: no API key in CI, and no live calls locally.
+      LUDOYA_MOCK: '1',
     },
   },
 })

@@ -1,8 +1,9 @@
 name: Ludoya API check
 
-# Detect changes in Ludoya's public API before the events page breaks.
+# Detect changes in Ludoya's public API (v1) before the site breaks.
 # Runs every Monday morning and on demand. A failing run means Ludoya
-# changed something: see docs/ludoya-api-reference.md.
+# changed something or the key was revoked: see docs/ludoya-api-reference.md.
+# Needs the LUDOYA_API_KEY repository secret.
 
 on:
   schedule:
@@ -23,6 +24,4 @@ jobs:
       - name: Check Ludoya endpoints and response shapes
         run: node scripts/ludoya/check.mjs
         env:
-          LUDOYA_GROUP_ID: ${{ vars.LUDOYA_GROUP_ID }}
-          LUDOYA_GROUP_USERNAME: ${{ vars.LUDOYA_GROUP_USERNAME }}
-          LUDOYA_GROUP_SEARCH_QUERY: ${{ vars.LUDOYA_GROUP_SEARCH_QUERY }}
+          LUDOYA_API_KEY: ${{ secrets.LUDOYA_API_KEY }}

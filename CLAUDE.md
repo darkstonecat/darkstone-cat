@@ -95,7 +95,7 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/about` | `about/page.tsx` | Origin story, mission, values |
 | `/ludoteca` | `ludoteca/page.tsx` | Game library with BGG integration (ISR, revalidate: 86400) |
 | `/contact` | `contact/page.tsx` | Contact form (Workspace SMTP email) |
-| `/events` | `events/page.tsx` | Upcoming events from Ludoya API (`revalidate: 86400`) |
+| `/events` | `events/page.tsx` | Upcoming events from the Ludoya public API (`revalidate: 86400`) |
 | `/events/images` | `events/images/page.tsx` | Internal tool: preview/download shareable event images — admin route (`noindex`, not in sitemap) |
 | `/faq` | `faq/page.tsx` | FAQ with accordion UI, FAQPage schema (`revalidate = false`) |
 | `/conduct` | `conduct/page.tsx` | Code of conduct (`revalidate = false`) |
@@ -213,13 +213,16 @@ Client state in `LudotecaClient.tsx`:
 
 ### Events (Ludoya)
 
-Undocumented Ludoya API, adapter in `src/lib/ludoya/`. Full reference and recovery steps in `docs/ludoya-api-reference.md`.
-- `config.ts` — hosts, group id/username, endpoint paths (env-overridable). `client.ts` — fetch with retry, typed errors, mock mode, group-id rediscovery on 404. `normalize.ts` — the **only** file that knows raw shapes; guards throw `LudoyaShapeError` with the exact field path. `index.ts` — `fetchUpcomingEvents()`.
-- Components only use `LudoyaEvent` from `types.ts`. When Ludoya changes, touch `config.ts`/`normalize.ts`, not components.
-- Flow: `GET /users/{groupId}/events?displayAllRecurring=true` → for events with `childEventCounts.games > 0`, `GET /events/{id}/children` (children with a `game` are planned plays)
-- Event images (`/events/images`, `src/lib/game-matching.ts`): BGG is the source of truth for cover/weight/type. Ludoya only bridges to the BGG id via `GET /boardgames/{slug}` (`resolveBggIds`, cached 30 days). Order: BGG id → club collection by id → BGG thing by id → name match (collection, then BGG search) → Ludoya cover with default frame. Logs `[EventImage] Resolved N/M games: …` with the path each game took
-- Mock mode: `LUDOYA_MOCK=1` reads fixtures from `/public/mock/ludoya/`
-- Monitoring: `.github/workflows/ludoya-check.yml` runs `scripts/ludoya/check.mjs` weekly
+Ludoya **public v1 API** (`https://api.ludoya.com/public/v1`, header `X-Api-Key`, Business plan, 100 req/min), adapter in `src/lib/ludoya/`. The organisation is implied by the key, so there is no group id. The key is **server-only** (modules import `server-only`; never send it from the browser, never log it). Reference and troubleshooting in `docs/ludoya-api-reference.md`; the vendor's own docs are `docs/ludoya-api-reference-official.md`.
+- `config.ts` — hosts, endpoint paths, cache lifetimes (env-overridable host). `client.ts` — `ludoyaGet()`: `X-Api-Key`, timeout, retry, `Retry-After` handling, typed `LudoyaApiError` codes (`rate_limited`, `unauthorized`, `missing_api_key`, `timeout`, …), mock mode. `shape.ts` — guards that throw `LudoyaShapeError` with the exact field path. `normalize.ts` — the **only** file that knows raw shapes. `sessions.ts` — `fetchSessions()` (events + locations → usual venue) and Madrid-day windows. `username.ts` — Ludoya username lookup. `index.ts` — `fetchUpcomingEvents()`.
+- Components only use the normalized types in `types.ts` (`LudoyaEvent` for `/events`, `LudoyaSession` for the member area). When Ludoya changes, touch `config.ts`/`normalize.ts`, not components.
+- Flow: one `GET /events?includeSubEvents=true` returns sessions and their planned plays (`parentId`); `GET /locations` marks the usual venue (`isDefault`, shown as received). Drafts, cancelled, friends-only and private events are skipped; the public site lists `PUBLIC` only.
+- Cache: `/events` and event images keep 86400 s; the member home (`src/lib/member-sessions.ts`: `fetchMemberWeekSessions`, `fetchMonthEvents`) uses 60 s because seat counts change.
+- Not in the public API: BGG id, game type (RPG flag), waiting-list count. `queuedParticipantCount` stays null.
+- Event images (`/events/images`, `src/lib/game-matching.ts`): BGG is the source of truth for cover/weight/type, matched by **name + year**: club collection, then BGG search + thing, then Ludoya cover with the default frame (`GAME_NAME_OVERRIDES` can force a BGG id). The BGG cover is used only when the year also matches. Logs `[EventImage] Resolved N/M games: …` with the path each game took
+- Username checks (sign-up and profile, `src/lib/profile/username-checks.ts`): server actions returning found / not_found / failed, never blocking; throttled per IP (`src/lib/rate-limit.ts`)
+- Mock mode: `LUDOYA_MOCK=1` reads sanitized fixtures from `/public/mock/ludoya/v1/` (no key needed; the E2E server sets it)
+- Monitoring: `.github/workflows/ludoya-check.yml` runs `scripts/ludoya/check.mjs` weekly and needs the `LUDOYA_API_KEY` repository secret
 - Ludoya images are served as `application/octet-stream`; image host must be in `next.config.ts` `remotePatterns` and CSP `img-src`
 
 ### Cookie Consent
@@ -297,10 +300,8 @@ The `public` schema is the primary working schema.
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase publishable key for client-side auth |
 | `LUDOYA_API_KEY` | Ludoya public API key (Business plan, 100 req/min). Server-side only; never expose to the browser. Used by `src/lib/ludoya/client.ts` |
-| `LUDOYA_GROUP_ID` | Optional. Ludoya group id override (default in `src/lib/ludoya/config.ts`) |
-| `LUDOYA_GROUP_USERNAME` / `LUDOYA_GROUP_SEARCH_QUERY` | Optional. Used to rediscover the group id |
-| `LUDOYA_API_URL` / `LUDOYA_APP_URL` / `LUDOYA_IMAGE_BASE_URL` | Optional. Ludoya host overrides |
-| `LUDOYA_MOCK` | Optional. `1` serves Ludoya fixtures from `/public/mock/ludoya/` |
+| `LUDOYA_API_URL` / `LUDOYA_APP_URL` | Optional. Ludoya API host (e.g. the sandbox `https://api.dev.ludoya.com`, which needs a sandbox key) and web app host used for event links |
+| `LUDOYA_MOCK` | Optional. `1` serves Ludoya fixtures from `/public/mock/ludoya/v1/` |
 
 ## Translation Key Namespaces
 
@@ -335,7 +336,7 @@ The `public` schema is the primary working schema.
 8. **BGG mock mode** — Without `BGG_API_KEY`, ludoteca falls back to local XML files in `/public/mock/`. Event images degrade without it: planned plays not in the mock collection get Ludoya's cover and the default orange frame.
 9. **Metadata async** — `generateMetadata()` must `await params` to get locale, uses `getTranslations()` from `next-intl/server`.
 10. **Activities dual mode** — Desktop uses scroll-pinned horizontal parallax; mobile uses stacked cards that fade and slide up with `whileInView`. Completely separate implementations.
-11. **Ludoya API is undocumented** — It changed in Sep 2026 (meetups → events, new group id). Run `npm run ludoya:check` first and follow `docs/ludoya-api-reference.md`.
+11. **Ludoya public API** — Versioned and documented, but Ludoya can still add or rename fields. Run `npm run ludoya:check` first (needs `LUDOYA_API_KEY`) and follow `docs/ludoya-api-reference.md`. The key is a server-side credential: never expose it to the client.
 12. **Routes render dynamically** — `next build` marks every `[locale]` route as dynamic (ƒ), so page-level `revalidate` does not produce ISR. Caching comes from the `fetch` data cache: only 200 responses are stored, and a stale entry keeps being served while it refetches in the background, so an upstream outage shows the last good data.
 13. **`/reset-password` in PROTECTED_ROUTES** — Not in AUTH_ROUTES. User arrives with a session established by `/auth/callback`, so the middleware must allow access (PROTECTED_ROUTES), not redirect to profile (AUTH_ROUTES).
 14. **Auth callback routes outside `[locale]`** — `/auth/confirm` and `/auth/callback` live at `src/app/auth/` because Supabase sends fixed redirect URLs with token params. The middleware has an explicit early return for `/auth/*` paths to prevent `next-intl` from intercepting them.

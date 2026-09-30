@@ -1,75 +1,71 @@
 // ---------------------------------------------------------------------------
-// Ludoya API — fetch upcoming events for Darkstone Catalunya
+// Ludoya public API — entry point for the rest of the site
 // ---------------------------------------------------------------------------
-// Public entry point. Consumers import from "@/lib/ludoya" and only see the
-// types in ./types; endpoint paths live in ./config, HTTP concerns in
-// ./client and raw-shape knowledge in ./normalize.
+// Consumers import from "@/lib/ludoya" and only see the types in ./types.
+// Endpoint paths live in ./config, HTTP concerns in ./client and raw-shape
+// knowledge in ./normalize. Member-area data (seats, places, covers) lives in
+// `@/lib/member-sessions`.
 
-import { ludoyaConfig, ludoyaEndpoints } from "./legacy-config";
-import { describeError, fetchGroupEventsRaw, isTimeoutError, ludoyaGet } from "./legacy-client";
-import { parseBoardgameResponse, parseChildrenResponse, parseEventsResponse } from "./legacy-normalize";
-import type { LudoyaEvent, LudoyaEventsResult } from "./types";
+import "server-only";
+import { describeError, isTimeoutError } from "./client";
+import { ludoyaConfig } from "./config";
+import { fetchSessions } from "./sessions";
+import type { LudoyaEvent, LudoyaEventsResult, LudoyaSession } from "./types";
 
-export type { LudoyaEvent, LudoyaEventsResult, LudoyaFetchError, LudoyaPlannedPlay } from "./types";
-export { LudoyaApiError } from "./legacy-client";
-export { LudoyaShapeError } from "./legacy-normalize";
+export type {
+  LudoyaEvent,
+  LudoyaEventsResult,
+  LudoyaFetchError,
+  LudoyaLocation,
+  LudoyaPlace,
+  LudoyaPlannedPlay,
+  LudoyaSession,
+  LudoyaSessionPlay,
+  LudoyaUser,
+} from "./types";
+export { LudoyaApiError } from "./client";
+export { LudoyaShapeError } from "./normalize";
 export { ludoyaConfig };
 
 /**
- * Look up the BoardGameGeek id of each game slug through Ludoya's game detail.
- * Slugs that fail or have no BGG link are absent from the result, so callers
- * can fall back to name matching. Results are cached for 30 days.
+ * The public pages only need what the old feed carried. Seat counts, places
+ * and organizer names stay out of props that are serialised to the browser.
  */
-export async function resolveBggIds(slugs: string[]): Promise<Map<string, string>> {
-  const unique = Array.from(new Set(slugs.filter(Boolean)));
-  const result = new Map<string, string>();
-
-  for (let i = 0; i < unique.length; i += ludoyaConfig.gameLookupConcurrency) {
-    const batch = unique.slice(i, i + ludoyaConfig.gameLookupConcurrency);
-    await Promise.all(
-      batch.map(async (slug) => {
-        try {
-          const raw = await ludoyaGet(ludoyaEndpoints.boardgame(slug), {
-            revalidate: ludoyaConfig.gameRevalidateSeconds,
-          });
-          const bggId = parseBoardgameResponse(raw, slug);
-          if (bggId) result.set(slug, bggId);
-        } catch (error) {
-          console.warn(`[Ludoya] BGG id unavailable for "${slug}": ${describeError(error)}`);
-        }
-      })
-    );
-  }
-  return result;
+function toPublicEvent(session: LudoyaSession): LudoyaEvent {
+  return {
+    id: session.id,
+    title: session.title,
+    description: session.description,
+    startsAt: session.startsAt,
+    endsAt: session.endsAt,
+    timeZone: session.timeZone,
+    imageUrl: session.imageUrl,
+    thumbnailUrl: session.thumbnailUrl,
+    plannedPlayCount: session.plannedPlayCount,
+    ludoyaUrl: session.ludoyaUrl,
+    type: session.type,
+    plannedPlays: session.plannedPlays.map((play) => ({
+      gameName: play.gameName,
+      imageUrl: play.imageUrl,
+      yearPublished: play.yearPublished,
+      slug: play.slug,
+    })),
+  };
 }
 
+/**
+ * Upcoming public events (regular sessions and special events) for `/events`
+ * and the event images. Keeps the long cache: those pages do not show seat
+ * counts, so 24 hours is fine.
+ */
 export async function fetchUpcomingEvents(): Promise<LudoyaEventsResult> {
   try {
-    const events = parseEventsResponse(await fetchGroupEventsRaw());
-
-    // Planned plays live in child events; fetch them only where the count says so.
-    const withPlays = events.filter((e) => e.plannedPlayCount > 0);
-    const plays = await Promise.all(
-      withPlays.map((event) =>
-        ludoyaGet(ludoyaEndpoints.eventChildren(event.id))
-          .then((raw) => parseChildrenResponse(raw, event.id))
-          .catch((error: unknown) => {
-            // A single event's games failing should not take the page down.
-            console.warn(`[Ludoya] Planned plays unavailable for ${event.id}: ${describeError(error)}`);
-            return [];
-          })
-      )
-    );
-    withPlays.forEach((event, i) => {
-      event.plannedPlays = plays[i];
-    });
-
-    const byDate = (a: LudoyaEvent, b: LudoyaEvent) =>
-      new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime();
+    const sessions = await fetchSessions({ revalidate: ludoyaConfig.eventsRevalidateSeconds });
+    const events = sessions.filter((s) => s.visibility === "PUBLIC").map(toPublicEvent);
 
     return {
-      regularEvents: events.filter((e) => e.type === "regular").sort(byDate),
-      specialEvents: events.filter((e) => e.type === "special").sort(byDate),
+      regularEvents: events.filter((e) => e.type === "regular"),
+      specialEvents: events.filter((e) => e.type === "special"),
     };
   } catch (error) {
     console.error(`[Ludoya] Failed to fetch events: ${describeError(error)}`);
@@ -80,4 +76,3 @@ export async function fetchUpcomingEvents(): Promise<LudoyaEventsResult> {
     };
   }
 }
-

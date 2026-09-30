@@ -98,7 +98,6 @@ function buildMockEvent(count: number): LudoyaEvent {
       imageUrl: null,
       yearPublished: 0,
       slug: null,
-      isRpg: g.type === "rpg",
     })),
   };
 }

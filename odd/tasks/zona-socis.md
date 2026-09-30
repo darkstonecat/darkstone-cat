@@ -125,12 +125,13 @@ current data sheet off `/profile`.)
   `xmlapi2/user?name=` (existing Bearer token). Result states found / not found / failed; never
   blocking. Unit tests with mocked fetch.
   - Evidence: server actions `checkLudoyaUsername` / `checkBggUsername` in `src/lib/profile/username-checks.ts` (found / not_found / failed, never throw, 20 checks/min per client IP and service); `tests/lib/username-lookup.test.ts`, `tests/lib/rate-limit.test.ts`, `tests/server/actions/username-checks.test.ts` pass. Real BGG shape (probed 2026-09-30): known user = 200 XML `<user id=… name=…>`; unknown name = **404 HTML page** (not a 200 with empty id); both handled, other outcomes = failed. Ludoya search returns partial matches, so found requires an exact case-insensitive username match.
-- [ ] B2.6 — Migrate existing consumers to the public API: `fetchUpcomingEvents` (`/events`,
+- [x] B2.6 — Migrate existing consumers to the public API: `fetchUpcomingEvents` (`/events`,
   keeps its long cache), `resolveBggIds` + `/events/images`, `scripts/ludoya/check.mjs` and the
   weekly workflow (needs `LUDOYA_API_KEY` as a GitHub secret — user action). Remove the old
   endpoints, old fixtures and group-id env vars (`LUDOYA_GROUP_*`, `LUDOYA_APP_URL` if unused).
   Rewrite `docs/ludoya-api-reference.md` and the CLAUDE.md Ludoya section. Checks: events and
   event-images E2E, `npm run ludoya:check`, visual check of `/events`.
+  - Evidence: `npm run ludoya:check` live: all 5 sections pass (key, 9 locations with one default, 33 events with 6 inline plays, children, user search, 12/12 images); lint/tsc clean, `npm run test:unit` 208/208, `npm run build` ok, Playwright `navigation` + `seo` specs (the only ones touching `/events`) 72/72 pass; `next start` with the live key serves `/events` (200, real sessions) and `/api/events/{id}/image` (200 PNG, `Resolved 4/4 games … bgg-search`). Legacy client/config/normalizer, old fixtures and `LUDOYA_GROUP_*` / `LUDOYA_IMAGE_BASE_URL` removed; `docs/ludoya-api-reference.md` rewritten (gitignored, local only). Pending user action: add the `LUDOYA_API_KEY` GitHub secret for the weekly workflow.
 
 ### B3 — Login + magic link (screen 01)
 

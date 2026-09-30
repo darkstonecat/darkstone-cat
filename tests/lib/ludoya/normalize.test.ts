@@ -195,3 +195,37 @@ describe("parseUserSearchResponse", () => {
     expect(() => parseUserSearchResponse({ users: [] })).toThrow(/users\.elements/);
   });
 });
+
+describe("parseSessionsResponse visibility", () => {
+  const event = (id: string, visibility?: string) => ({
+    id,
+    type: "MEETUP",
+    title: id,
+    startsAt: "2026-11-01T10:00:00Z",
+    endsAt: "2026-11-01T12:00:00Z",
+    ...(visibility ? { visibility } : {}),
+  });
+
+  it("keeps public and group-only events and drops friends-only and private ones", () => {
+    const sessions = parseSessionsResponse({
+      futureEvents: {
+        elements: [event("a", "PUBLIC"), event("b", "ONLY_GROUP"), event("c", "ONLY_FRIENDS"), event("d", "PRIVATE"), event("e")],
+      },
+    });
+    expect(sessions.map((s) => [s.id, s.visibility])).toEqual([
+      ["a", "PUBLIC"],
+      ["b", "ONLY_GROUP"],
+      ["e", "PUBLIC"],
+    ]);
+  });
+
+  it("includes past events only when asked", () => {
+    const raw = {
+      futureEvents: { elements: [event("future")] },
+      pastEvents: { elements: [{ ...event("past"), startsAt: "2026-05-01T10:00:00Z", endsAt: "2026-05-01T12:00:00Z" }] },
+    };
+    expect(parseSessionsResponse(raw).map((s) => s.id)).toEqual(["future"]);
+    expect(parseSessionsResponse(raw, { includePast: true }).map((s) => s.id)).toEqual(["future", "past"]);
+    expect(() => parseSessionsResponse({ futureEvents: { elements: [] } }, { includePast: true })).toThrow(/pastEvents\.elements/);
+  });
+});

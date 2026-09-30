@@ -9,14 +9,8 @@ export interface LudoyaPlannedPlay {
   gameName: string;
   imageUrl: string | null;
   yearPublished: number;
-  /** Ludoya game slug, used to look up the game's BGG id. */
+  /** Ludoya game slug. The public API has no BGG id, so games are matched by name and year. */
   slug: string | null;
-  /**
-   * The legacy API classified games as roleplaying books. The public API
-   * carries no game type, so it is absent there and RPGs are detected by name
-   * and by BGG type in `game-matching`.
-   */
-  isRpg?: boolean;
 }
 
 export interface LudoyaEvent {
@@ -64,7 +58,7 @@ export interface LudoyaLocation {
 }
 
 /** A planned play inside a session, with the seat data the member home shows. */
-export interface LudoyaSessionPlay extends Omit<LudoyaPlannedPlay, "isRpg"> {
+export interface LudoyaSessionPlay extends LudoyaPlannedPlay {
   id: string;
   startsAt: string;
   endsAt: string | null;
@@ -77,6 +71,11 @@ export interface LudoyaSessionPlay extends Omit<LudoyaPlannedPlay, "isRpg"> {
 
 /** A regular session or special event with its seat data and plays. */
 export interface LudoyaSession extends Omit<LudoyaEvent, "plannedPlays"> {
+  /**
+   * Who can see the event on Ludoya. The organisation's key also returns
+   * group-only events; the public site must show `PUBLIC` ones only.
+   */
+  visibility: "PUBLIC" | "ONLY_GROUP";
   place: LudoyaPlace | null;
   participantCount: number;
   capacity: number | null;

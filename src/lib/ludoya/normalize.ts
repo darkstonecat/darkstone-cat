@@ -123,7 +123,7 @@ const byStart = (a: { startsAt: string }, b: { startsAt: string }) =>
  * plays, classified as regular or special. With `includePast`, the events
  * requested through `pastLimit` are included too.
  *
- * Drafts and cancelled events are skipped; special events further than 12
+ * Drafts, cancelled events and friends-only or private ones are skipped; special events further than 12
  * months away are dropped. Plays are the `PLANNED_PLAY` children that carry a
  * game; a play with no parent session (a standalone table) has no session to
  * show under and is ignored.
@@ -156,6 +156,9 @@ export function parseSessionsResponse(
       return;
     }
     if (!SESSION_TYPES.has(type)) return;
+    // Friends-only and private events are not the club's programme.
+    const visibility = optionalString(item, "visibility", ctx) ?? "PUBLIC";
+    if (visibility !== "PUBLIC" && visibility !== "ONLY_GROUP") return;
 
     const id = requireString(item, "id", ctx);
     const startsAt = requireIsoDate(item, "startsAt", ctx);
@@ -180,6 +183,7 @@ export function parseSessionsResponse(
       plannedPlayCount: 0,
       ludoyaUrl: ludoyaUrls.eventPage(id),
       type: regular ? "regular" : "special",
+      visibility,
       place: parsePlace(item, ctx),
       participantCount: optionalNumber(item, "participantCount", ctx) ?? 0,
       capacity: optionalNumber(item, "capacity", ctx),
