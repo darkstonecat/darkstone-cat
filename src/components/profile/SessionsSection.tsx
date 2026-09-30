@@ -4,7 +4,7 @@ import { MdGridView } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { ludoyaConfig } from "@/lib/ludoya/config";
 import { fetchMemberWeekSessions } from "@/lib/member-sessions";
-import { toPublicSessions } from "@/lib/member-home/sessions-view";
+import { toMemberSessions } from "@/lib/member-home/sessions-view";
 import SessionsList from "./SessionsList";
 
 function SessionsSkeleton() {
@@ -33,7 +33,7 @@ function SessionsSkeleton() {
 /** Fetches this week's sessions from Ludoya; runs inside the Suspense boundary so a slow API never blocks the page. */
 async function SessionsData() {
   const { sessions, error } = await fetchMemberWeekSessions();
-  return <SessionsList sessions={toPublicSessions(sessions)} error={error} ludoyaUrl={ludoyaConfig.appUrl} />;
+  return <SessionsList sessions={toMemberSessions(sessions)} error={error} ludoyaUrl={ludoyaConfig.appUrl} />;
 }
 
 /**
