@@ -1,11 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 
 const mockSignInWithOtp = vi.fn()
 const mockSignInWithPassword = vi.fn()
 let searchString = ''
+let locale = 'ca'
 
 vi.mock('next-intl', () => ({
+  useLocale: () => locale,
   useTranslations: vi.fn(() => (key: string, values?: Record<string, string>) =>
     values?.email ? `${key}:${values.email}` : key
   ),
@@ -43,6 +45,7 @@ describe('LoginForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     searchString = ''
+    locale = 'ca'
     mockSignInWithOtp.mockResolvedValue({ error: null })
   })
 
@@ -79,15 +82,15 @@ describe('LoginForm', () => {
     )
   })
 
-  it('shows the rate-limit message and stays on the form', async () => {
+  it('shows the neutral sent state on a 429 (no membership enumeration)', async () => {
     mockSignInWithOtp.mockResolvedValue({ error: { code: 'over_email_send_rate_limit', status: 429 } })
     render(<LoginForm />)
     typeEmail('laia@example.cat')
     fireEvent.click(magicButton())
     await waitFor(() =>
-      expect(screen.getByRole('alert')).toHaveTextContent('login_magic_error_rate_limit')
+      expect(screen.getByRole('heading', { name: 'login_magic_sent_title' })).toBeInTheDocument()
     )
-    expect(magicButton()).toBeEnabled()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('shows a generic error for other failures', async () => {
@@ -106,6 +109,88 @@ describe('LoginForm', () => {
     fireEvent.click(magicButton())
     fireEvent.click(await screen.findByRole('button', { name: 'login_magic_sent_back' }))
     expect(screen.getByLabelText('login_email_label')).toHaveValue('laia@example.cat')
+    await waitFor(() => expect(screen.getByLabelText('login_email_label')).toHaveFocus())
+  })
+
+  describe('password login redirect', () => {
+    const originalLocation = window.location
+    let assigned = ''
+    beforeEach(() => {
+      assigned = ''
+      Object.defineProperty(window, 'location', {
+        configurable: true,
+        value: {
+          origin: 'http://localhost:3000',
+          protocol: 'http:',
+          set href(v: string) {
+            assigned = v
+          },
+        },
+      })
+      mockSignInWithPassword.mockResolvedValue({ error: null })
+    })
+    afterEach(() => {
+      Object.defineProperty(window, 'location', { configurable: true, value: originalLocation })
+    })
+
+    async function login() {
+      render(<LoginForm />)
+      typeEmail('laia@example.cat')
+      fireEvent.change(screen.getByLabelText('login_password_label'), { target: { value: 'secret' } })
+      fireEvent.click(screen.getByRole('button', { name: 'login_submit' }))
+      await waitFor(() => expect(assigned).not.toBe(''))
+    }
+
+    it('goes to /profile by default', async () => {
+      await login()
+      expect(assigned).toBe('/profile')
+    })
+
+    it('honours a safe redirect', async () => {
+      searchString = 'redirect=%2Fes%2Fprofile%2Fcard'
+      await login()
+      expect(assigned).toBe('/es/profile/card')
+    })
+
+    it.each(['//evil.com', '/.//evil.com', '/..//evil.com', '/a/..//evil.com', 'https://evil.com'])(
+      'never navigates off-site for redirect=%s',
+      async (value) => {
+        searchString = `redirect=${encodeURIComponent(value)}`
+        await login()
+        expect(assigned).toBe('/profile')
+      }
+    )
+  })
+
+  describe('magic link destination cookie', () => {
+    // jsdom hides Path=/auth cookies from document.cookie on "/", so spy on writes.
+    let written: string[] = []
+    beforeEach(() => {
+      written = []
+      vi.spyOn(document, 'cookie', 'set').mockImplementation((v) => {
+        written.push(v)
+      })
+    })
+    afterEach(() => vi.restoreAllMocks())
+    it('stores the sanitized redirect', async () => {
+      searchString = 'redirect=%2Fprofile%2Fcard'
+      render(<LoginForm />)
+      typeEmail('laia@example.cat')
+      fireEvent.click(magicButton())
+      await screen.findByRole('heading', { name: 'login_magic_sent_title' })
+      expect(decodeURIComponent(written.join('\n'))).toContain('magic_redirect=/profile/card')
+      expect(written[0]).toMatch(/Path=\/auth.*Max-Age=3600.*SameSite=Lax/)
+    })
+
+    it('falls back to the locale profile', async () => {
+      locale = 'es'
+      searchString = 'redirect=%2F%2Fevil.com'
+      render(<LoginForm />)
+      typeEmail('laia@example.cat')
+      fireEvent.click(magicButton())
+      await screen.findByRole('heading', { name: 'login_magic_sent_title' })
+      expect(decodeURIComponent(written.join('\n'))).toContain('magic_redirect=/es/profile')
+    })
   })
 
   it('disables both buttons while the password login runs', async () => {

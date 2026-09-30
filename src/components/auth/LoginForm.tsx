@@ -1,13 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { MdOutlineMail, MdMarkEmailRead } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { motion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
-import { safeRedirectPath } from "@/lib/safe-redirect";
+import {
+  MAGIC_REDIRECT_COOKIE,
+  MAGIC_REDIRECT_MAX_AGE,
+  MAGIC_REDIRECT_PATH,
+  safeRedirectPath,
+} from "@/lib/safe-redirect";
 
 type FormStatus = "idle" | "submitting" | "sending-link" | "link-sent" | "error";
 
@@ -28,12 +33,15 @@ const errorBanner = `${bannerBase} border-red-200 bg-red-50 text-red-700`;
 
 export default function LoginForm() {
   const t = useTranslations("auth");
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [email, setEmail] = useState("");
   const sentHeadingRef = useRef<HTMLHeadingElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const returnedToForm = useRef(false);
 
   const confirmed = searchParams.get("confirmed");
   const recovery = searchParams.get("recovery");
@@ -45,6 +53,10 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (status === "link-sent") sentHeadingRef.current?.focus();
+    else if (status === "idle" && returnedToForm.current) {
+      returnedToForm.current = false;
+      emailRef.current?.focus();
+    }
   }, [status]);
 
   function validate(data: { email: string; password: string }): FieldErrors {
@@ -107,21 +119,35 @@ export default function LoginForm() {
     setErrorMessage("");
     setErrors({});
 
+    // The email template cannot carry the destination, so remember it briefly.
+    try {
+      const prefix = locale === "ca" ? "" : `/${locale}`;
+      const dest = safeRedirectPath(
+        redirect,
+        window.location.origin,
+        `${prefix}/profile`
+      );
+      const secure = window.location.protocol === "https:" ? "; Secure" : "";
+      document.cookie = `${MAGIC_REDIRECT_COOKIE}=${encodeURIComponent(dest)}; Path=${MAGIC_REDIRECT_PATH}; Max-Age=${MAGIC_REDIRECT_MAX_AGE}; SameSite=Lax${secure}`;
+    } catch {
+      // Cookies blocked: the link still works and lands on the default page.
+    }
+
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: { shouldCreateUser: false },
     });
 
-    // "otp_disabled" means no account for that email. Show the same neutral
-    // confirmation as a real send so the form does not reveal who is a member.
-    if (error && error.code !== "otp_disabled") {
+    // "otp_disabled" (no account) and 429 (rate limit) show the same neutral
+    // confirmation as a real send, so the form never reveals who is a member.
+    const neutral =
+      error?.code === "otp_disabled" ||
+      error?.status === 429 ||
+      error?.code === "over_email_send_rate_limit";
+    if (error && !neutral) {
       setStatus("error");
-      setErrorMessage(
-        error.status === 429 || error.code === "over_email_send_rate_limit"
-          ? t("login_magic_error_rate_limit")
-          : t("login_error_generic")
-      );
+      setErrorMessage(t("login_error_generic"));
       return;
     }
 
@@ -153,7 +179,10 @@ export default function LoginForm() {
         </div>
         <button
           type="button"
-          onClick={() => setStatus("idle")}
+          onClick={() => {
+            returnedToForm.current = true;
+            setStatus("idle");
+          }}
           className="inline-flex min-h-11 items-center justify-center rounded-xl border border-stone-custom/15 bg-brand-white px-6 text-sm font-semibold text-stone-custom transition-colors hover:bg-stone-custom/5"
         >
           {t("login_magic_sent_back")}
@@ -209,6 +238,7 @@ export default function LoginForm() {
         <input
           type="email"
           id="email"
+          ref={emailRef}
           name="email"
           required
           autoComplete="email"

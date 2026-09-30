@@ -210,6 +210,7 @@ Client state in `LudotecaClient.tsx`:
 - Server Action `src/lib/supabase/actions.ts`: `updateMemberAfterSignup()` — encrypts DNI/phone via `@/lib/encryption`
 - Hook `src/hooks/useAuthUser.ts`: reactive `{ user, role, loading }` via `onAuthStateChange`
 - Auth callback routes at `src/app/auth/` (outside `[locale]`): `/auth/confirm` (email — discards session cookies), `/auth/callback` (recovery — keeps session for password reset), `/auth/magic-link` (passwordless login — keeps session; open-redirect-safe `redirect` param)
+- **Known limitation**: email scanners that prefetch GET links can consume the one-time token of `/auth/confirm`, `/auth/callback` and `/auth/magic-link`; the member must then request a new link.
 - Middleware: explicit early return for `/auth/*` paths (prevents `next-intl` interference), PROTECTED_ROUTES require auth, AUTH_ROUTES redirect to `/profile` when logged in, `/reset-password` is in PROTECTED_ROUTES (not AUTH_ROUTES)
 
 ### Events (Ludoya)

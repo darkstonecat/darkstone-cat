@@ -15,9 +15,17 @@ import { GET } from '@/app/auth/magic-link/route'
 
 const ORIGIN = 'https://www.darkstone.cat'
 
-function call(query: string) {
-  return GET(new NextRequest(`${ORIGIN}/auth/magic-link${query}`))
+function call(query: string, cookie?: string) {
+  return GET(
+    new NextRequest(`${ORIGIN}/auth/magic-link${query}`, {
+      headers: cookie ? { cookie } : undefined,
+    })
+  )
 }
+
+const cookieFor = (path: string) => `magic_redirect=${encodeURIComponent(path)}`
+const isCleared = (res: Response) =>
+  (res.headers.get('set-cookie') ?? '').match(/magic_redirect=;[^,]*(Max-Age=0|Expires=Thu, 01 Jan 1970)/i) !== null
 
 describe('GET /auth/magic-link', () => {
   beforeEach(() => {
@@ -50,6 +58,9 @@ describe('GET /auth/magic-link', () => {
     ['no leading slash', 'evil.com'],
     ['control character', '/\t/evil.com'],
     ['empty', ''],
+    ['dot segment //', '/.//evil.com'],
+    ['double dot //', '/..//evil.com'],
+    ['nested dot //', '/a/..//evil.com'],
   ])('falls back to /profile for %s', async (_name, value) => {
     const res = await call(`?token_hash=abc&type=email&redirect=${encodeURIComponent(value)}`)
     expect(res.headers.get('location')).toBe(`${ORIGIN}/profile`)
@@ -74,5 +85,39 @@ describe('GET /auth/magic-link', () => {
     const res = await call('?token_hash=bad&type=email&redirect=/about')
     expect(res.headers.get('location')).toBe(`${ORIGIN}/login?magic=error`)
     expect(res.cookies.get('sb-session')).toBeUndefined()
+  })
+
+  describe('magic_redirect cookie', () => {
+    it('uses the cookie destination (with locale) and clears it', async () => {
+      const res = await call('?token_hash=abc&type=email', cookieFor('/es/profile/card'))
+      expect(res.headers.get('location')).toBe(`${ORIGIN}/es/profile/card`)
+      expect(isCleared(res)).toBe(true)
+      expect(res.cookies.get('sb-session')?.value).toBe('tok')
+    })
+
+    it('lets an explicit redirect param win over the cookie', async () => {
+      const res = await call('?token_hash=abc&type=email&redirect=/about', cookieFor('/es/profile'))
+      expect(res.headers.get('location')).toBe(`${ORIGIN}/about`)
+    })
+
+    it.each(['//evil.com', '/.//evil.com', 'https://evil.com', '/\\evil.com'])(
+      'ignores a malicious cookie value %s',
+      async (value) => {
+        const res = await call('?token_hash=abc&type=email', cookieFor(value))
+        expect(res.headers.get('location')).toBe(`${ORIGIN}/profile`)
+      }
+    )
+
+    it('sends errors to the localized login and clears the cookie', async () => {
+      mockVerifyOtp.mockResolvedValue({ error: { message: 'expired' } })
+      const res = await call('?token_hash=bad&type=email', cookieFor('/es/profile'))
+      expect(res.headers.get('location')).toBe(`${ORIGIN}/es/login?magic=error`)
+      expect(isCleared(res)).toBe(true)
+    })
+
+    it('keeps the default login on error for the Catalan default', async () => {
+      const res = await call('?type=email', cookieFor('/profile'))
+      expect(res.headers.get('location')).toBe(`${ORIGIN}/login?magic=error`)
+    })
   })
 })
