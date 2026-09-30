@@ -182,11 +182,12 @@ current data sheet off `/profile`.)
   still renders the old view until B6. NavBar `SUBPAGE_THEMES` + menu link. E2E `profile.spec.ts`
   adjusted.
   - Evidence: `MemberHero` (avatar, h1 name, number, "Membre des del" via `formatCalendarDate`) + `MemberTabs` (`nav` with `aria-current="page"`, active tab passed by the page so B5/B6 reuse it) + `MemberAvatar` (initials, `aria-hidden`); `/profile/details` (noindex, `revalidate = false`, breadcrumb JSON-LD) shows the old data sheet under the hero for now; added to `SUBPAGE_THEMES` and `PROTECTED_ROUTES`; the NavBar menu lists no profile sub-pages, so no menu link (the old `/profile` view links to details). `tests/unit/initials.test.ts` + `tests/components/MemberHero.test.tsx` 9/9; `npx playwright test e2e/profile` 24/24 (new `profile-details.spec.ts`, `profile.spec.ts` link test). Route: delegated writer (B7.1 + B7.2 one session).
-- [ ] B7.2 — Profile details cards: "On jugues" (link/unlink Ludoya and BGG with soft checks
+- [x] B7.2 — Profile details cards: "On jugues" (link/unlink Ludoya and BGG with soft checks
   from B2.5), "Dades de soci" (server-side masked DNI/phone, "Edita" → `/profile/edit`),
   "Comunicacions" (`role=switch`, optimistic toggle with rollback, 44 px hit area),
   "Compte" (change password, download data, existing delete dialog). Server actions + tests.
   Visual comparison.
+  - Evidence: `/profile/details` now renders the four cards. Server actions `linkGamingAccount` / `unlinkGamingAccount` / `setNewsletterAccepted` (`src/lib/profile/details-actions.ts`; own row only, same username charset via new `username-pattern.ts`, 0-row RLS result = error, revalidate). DNI/phone decrypted and masked in the server page (`mask.ts`), only masked strings and the tail reach the client; E2E asserts the raw values are absent from the HTML. Change password reuses `resetPasswordForEmail` -> `/auth/callback` -> `/reset-password`. Tests: `tests/lib/profile-mask.test.ts`, `tests/server/actions/details-actions.test.ts`, `tests/components/ProfileDetailsCards.test.tsx` (`npm run test:unit` 361/361, `test:integration` 52/52), lint + tsc clean; `npx playwright test e2e/profile e2e/navigation` 64/65 (only `locale-routing` "language switcher is visible" fails, pre-existing); writes use `editorPage`. Visual comparison 1280 DSF1 vs `04-perfil.png`: avatar, tabs, cards, dl grid, switch (52x44 hit area) match; tiles 175 vs 172 px, page 1870 vs 1835 px (real footer), hero name row 2 px lower; mobile 390 DSF2 single column, no horizontal scroll. Deviations: Ludoya "Veure" link is `app.ludoya.com/<username>` (profile URL not in the public API, unverified); the hero omits the `@ludoya` handle drawn in the screenshot.
 
 ### B5 — Card, QR and verify (screen 05 + `/verify/<token>`)
 

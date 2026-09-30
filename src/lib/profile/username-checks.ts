@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { lookupBggUsername } from "@/lib/bgg-user";
 import { lookupLudoyaUsername } from "@/lib/ludoya/username";
 import { allowRequest } from "@/lib/rate-limit";
+import { USERNAME_PATTERN } from "./username-pattern";
 
 /**
  * Result of a username check. Checks are advisory: `not_found` and `failed`
@@ -11,13 +12,11 @@ import { allowRequest } from "@/lib/rate-limit";
  */
 export type UsernameCheckResult = { status: "found" | "not_found" | "failed" };
 
-/**
- * Letters (any script), digits, `_`, `.`, `-` and inner spaces, 1 to 64 long.
- * Broad enough for Ludoya handles and BGG usernames; nothing outside it is sent
- * upstream, and such input reports `failed` ("could not check"), never
- * `not_found`, because we cannot vouch that the service rejects those characters.
+/*
+ * Input outside USERNAME_PATTERN is never sent upstream and reports `failed`
+ * ("could not check"), never `not_found`, because we cannot vouch that the
+ * service rejects those characters.
  */
-const USERNAME_PATTERN = /^[\p{L}\p{N}_.\- ]{1,64}$/u;
 const CHECKS_PER_MINUTE = 20;
 /** Per server instance, across all clients, for lookups that spend the shared Ludoya quota (100/min). */
 const LUDOYA_GLOBAL_PER_MINUTE = 30;

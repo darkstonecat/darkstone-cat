@@ -27,8 +27,8 @@ export default function MemberHero({
       <div className="mx-auto flex max-w-[960px] flex-col gap-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-7">
           <MemberAvatar firstName={firstName} lastName={lastName} />
-          <div className="flex min-w-0 flex-col gap-2">
-            <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+          <div className="flex min-w-0 flex-col gap-1">
+            <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-5xl md:leading-[1.2]">
               {firstName} {lastName}
             </h1>
             <p className="flex flex-wrap gap-x-4 gap-y-1 text-[15px] text-brand-white/65">
