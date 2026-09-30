@@ -188,14 +188,21 @@ function findExactMatch(
   );
 }
 
+/**
+ * Fuzzy matching only considers items published in `year`: a similar name on
+ * its own is not enough to trust BGG's weight, type or frame.
+ */
 function findFuzzyMatch(
   bggGames: BggGame[],
-  normalizedName: string
+  normalizedName: string,
+  year: number
 ): BggGame | null {
   let bestGame: BggGame | null = null;
   let bestScore = 0;
+  if (year <= 0) return null;
 
   for (const game of bggGames) {
+    if (game.year !== year) continue;
     const nameScore = similarity(normalizeName(game.name), normalizedName);
     let score = nameScore;
 
@@ -245,7 +252,10 @@ function pickBestSearchResult(
     }
   }
 
-  return bestScore >= FUZZY_THRESHOLD ? best : null;
+  if (bestScore < FUZZY_THRESHOLD || !best) return null;
+  // Exact normalized name: trusted without a year. Otherwise the year must agree.
+  if (bestScore === 1) return best;
+  return yearHint > 0 && best.year === yearHint ? best : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -253,10 +263,11 @@ function pickBestSearchResult(
 // ---------------------------------------------------------------------------
 
 function isRpgByName(ludoyaName: string): boolean {
-  const normalized = normalizeName(ludoyaName);
+  // Whole words only: "fate" must not match "Fateful Journey" or "d&d" a longer token.
+  const padded = ` ${normalizeName(ludoyaName)} `;
   const rpgNames = Array.from(RPG_GAME_NAMES);
   for (let i = 0; i < rpgNames.length; i++) {
-    if (normalized.includes(normalizeName(rpgNames[i]))) return true;
+    if (padded.includes(` ${normalizeName(rpgNames[i])} `)) return true;
   }
   return false;
 }
@@ -381,11 +392,11 @@ function buildFromLudoyaOnly(play: LudoyaPlannedPlay): ResolvedGame | null {
 // Name matching against the club collection (fallback)
 // ---------------------------------------------------------------------------
 
-function findInCollectionByName(ludoyaName: string, bggGames: BggGame[]): BggGame | null {
+function findInCollectionByName(ludoyaName: string, yearPublished: number, bggGames: BggGame[]): BggGame | null {
   const normalizedLudoya = normalizeName(ludoyaName);
   return (
     findExactMatch(bggGames, normalizedLudoya) ??
-    findFuzzyMatch(bggGames, normalizedLudoya)
+    findFuzzyMatch(bggGames, normalizedLudoya, yearPublished)
   );
 }
 
@@ -466,7 +477,7 @@ async function resolveByName(
   // Name match in the club collection
   const searchable: PendingPlay[] = [];
   for (const pending of pendingPlays) {
-    const game = findInCollectionByName(pending.play.gameName, bggGames);
+    const game = findInCollectionByName(pending.play.gameName, pending.play.yearPublished, bggGames);
     if (game) acceptTracked(pending.index, buildFromBggGame(pending.play, game, coverPreferenceFor(pending.play, game.year)), "collection-name");
     if (!resolvedIndexes.has(pending.index)) searchable.push(pending);
   }
@@ -509,8 +520,9 @@ async function resolveByName(
  *
  *   1. Manual override (GAME_NAME_OVERRIDES): club collection by id, then BGG
  *      thing by id
- *   2. Name match in the club collection (exact, then fuzzy)
- *   3. BGG search by name (year as tiebreaker) + thing data
+ *   2. Name match in the club collection (exact, then fuzzy only when the
+ *      publication year agrees)
+ *   3. BGG search by name + thing data (a non-exact name needs the year too)
  *   4. Last resort — Ludoya cover with the default frame
  *
  * The BGG cover is used when name and year both match; a name-only match keeps

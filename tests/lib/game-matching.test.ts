@@ -114,6 +114,47 @@ describe("resolveEventGames", () => {
     expect(game).toMatchObject({ type: "rpg", frame: "rpg" });
   });
 
+  it("matches the RPG name list on whole words only", async () => {
+    const games = await resolveEventGames(
+      [
+        play({ gameName: "Fateful Journey", slug: "a", imageUrl: "https://l.example/a.jpg" }),
+        play({ gameName: "Fate Core", slug: "b", imageUrl: "https://l.example/b.jpg" }),
+        play({ gameName: "Warhammer Fantasy Roleplay: Rough Nights", slug: "c", imageUrl: "https://l.example/c.jpg" }),
+      ],
+      []
+    );
+    expect(games.map((g) => [g.name, g.type])).toEqual([
+      ["Fateful Journey", "boardgame"],
+      ["Fate Core", "rpg"],
+      ["Warhammer Fantasy Roleplay: Rough Nights", "rpg"],
+    ]);
+  });
+
+  it("does not trust a fuzzy collection match unless the year agrees", async () => {
+    const collection = [collectionGame({ id: "9", name: "Terraforming Marsh", year: 2010, weight: 4.5 })];
+    const [wrongYear] = await resolveEventGames([play({ gameName: "Terraforming Mars", yearPublished: 2016 })], collection);
+    expect(wrongYear).toMatchObject({ bggId: "", weight: 0, frame: "orange" });
+
+    const [noYear] = await resolveEventGames([play({ gameName: "Terraforming Mars", yearPublished: 0 })], collection);
+    expect(noYear).toMatchObject({ bggId: "", weight: 0 });
+
+    const [sameYear] = await resolveEventGames([play({ gameName: "Terraforming Mars", yearPublished: 2010 })], collection);
+    expect(sameYear).toMatchObject({ bggId: "9", weight: 4.5, frame: "red" });
+  });
+
+  it("does not trust a fuzzy BGG search result unless the year agrees, but trusts an exact name", async () => {
+    bgg.searchBggGames.mockResolvedValue([{ id: "20", name: "Terraforming Marsh", year: 2010 }]);
+    bgg.fetchBggThings.mockResolvedValue(
+      new Map([["20", { id: "20", name: "x", image: "https://bgg.example/x.jpg", thumbnail: "", weight: 4.5, categories: [], thingType: "boardgame" }]])
+    );
+    const [fuzzy] = await resolveEventGames([play({ gameName: "Terraforming Mars", yearPublished: 2016 })], []);
+    expect(fuzzy).toMatchObject({ bggId: "", weight: 0 });
+
+    bgg.searchBggGames.mockResolvedValue([{ id: "20", name: "Terraforming Mars", year: 2016 }]);
+    const [exact] = await resolveEventGames([play({ gameName: "Terraforming Mars", yearPublished: 0 })], []);
+    expect(exact).toMatchObject({ bggId: "20", weight: 4.5 });
+  });
+
   it("makes no Ludoya request: there is no BGG id bridge any more", async () => {
     await resolveEventGames([play({ gameName: "Ostia", slug: "ostia" })], []);
     expect(fetchSpy).not.toHaveBeenCalled();
