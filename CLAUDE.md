@@ -120,7 +120,7 @@ API routes:
 - `src/app/api/members/card/route.ts` — GET endpoint for member card image (auth required). `?preview=1` for inline display, without for download.
 - `src/app/api/admin/members/export/route.ts` — GET endpoint for CSV export of all members (admin required). Full decrypted data with UTF-8 BOM.
 
-Auth callback routes: `src/app/auth/confirm/route.ts` (email confirmation), `src/app/auth/callback/route.ts` (password recovery). These live outside `[locale]` because Supabase sends fixed URLs.
+Auth callback routes: `src/app/auth/confirm/route.ts` (email confirmation), `src/app/auth/callback/route.ts` (password recovery), `src/app/auth/magic-link/route.ts` (passwordless login: `verifyOtp({ token_hash, type: 'email' })`, keeps the session, redirects to a same-origin relative `redirect` param or `/profile`, errors go to `/login?magic=error`; the Supabase "Magic link" template must point to `{{ .SiteURL }}/auth/magic-link?token_hash={{ .TokenHash }}&type=email`, locally in `supabase/templates/magic_link.html` via `supabase/config.toml`). These live outside `[locale]` because Supabase sends fixed URLs.
 
 ### Provider Stack (layout.tsx)
 
@@ -208,7 +208,7 @@ Client state in `LudotecaClient.tsx`:
 - Server-side helpers in `src/lib/supabase/auth.ts`: `getCurrentUser()`, `getCurrentMember()`, `isAdmin()`
 - Server Action `src/lib/supabase/actions.ts`: `updateMemberAfterSignup()` — encrypts DNI/phone via `@/lib/encryption`
 - Hook `src/hooks/useAuthUser.ts`: reactive `{ user, role, loading }` via `onAuthStateChange`
-- Auth callback routes at `src/app/auth/` (outside `[locale]`): `/auth/confirm` (email — discards session cookies), `/auth/callback` (recovery — keeps session for password reset)
+- Auth callback routes at `src/app/auth/` (outside `[locale]`): `/auth/confirm` (email — discards session cookies), `/auth/callback` (recovery — keeps session for password reset), `/auth/magic-link` (passwordless login — keeps session; open-redirect-safe `redirect` param)
 - Middleware: explicit early return for `/auth/*` paths (prevents `next-intl` interference), PROTECTED_ROUTES require auth, AUTH_ROUTES redirect to `/profile` when logged in, `/reset-password` is in PROTECTED_ROUTES (not AUTH_ROUTES)
 
 ### Events (Ludoya)
@@ -339,7 +339,7 @@ The `public` schema is the primary working schema.
 11. **Ludoya public API** — Versioned and documented, but Ludoya can still add or rename fields. Run `npm run ludoya:check` first (needs `LUDOYA_API_KEY`) and follow `docs/ludoya-api-reference.md`. The key is a server-side credential: never expose it to the client.
 12. **Routes render dynamically** — `next build` marks every `[locale]` route as dynamic (ƒ), so page-level `revalidate` does not produce ISR. Caching comes from the `fetch` data cache: only 200 responses are stored, and a stale entry keeps being served while it refetches in the background, so an upstream outage shows the last good data.
 13. **`/reset-password` in PROTECTED_ROUTES** — Not in AUTH_ROUTES. User arrives with a session established by `/auth/callback`, so the middleware must allow access (PROTECTED_ROUTES), not redirect to profile (AUTH_ROUTES).
-14. **Auth callback routes outside `[locale]`** — `/auth/confirm` and `/auth/callback` live at `src/app/auth/` because Supabase sends fixed redirect URLs with token params. The middleware has an explicit early return for `/auth/*` paths to prevent `next-intl` from intercepting them.
+14. **Auth callback routes outside `[locale]`** — `/auth/confirm`, `/auth/callback` and `/auth/magic-link` live at `src/app/auth/` because Supabase sends fixed redirect URLs with token params. The middleware has an explicit early return for `/auth/*` paths to prevent `next-intl` from intercepting them.
 15. **Email confirm discards session** — `/auth/confirm` uses a temporary response for `verifyOtp` and returns a clean redirect without session cookies. This prevents the middleware from redirecting `/login` → home (because user would appear authenticated).
 16. **Profile redirect** — Login and AUTH_ROUTES redirect to `/profile`. Login form uses `redirect` query param when available, otherwise defaults to `/profile`.
 

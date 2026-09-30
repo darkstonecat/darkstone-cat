@@ -136,10 +136,11 @@ current data sheet off `/profile`.)
 
 ### B3 — Login + magic link (screen 01)
 
-- [ ] B3.1 — Route `src/app/auth/magic-link/route.ts`: `verifyOtp({ token_hash, type: 'email' })`,
+- [x] B3.1 — Route `src/app/auth/magic-link/route.ts`: `verifyOtp({ token_hash, type: 'email' })`,
   keeps session cookies, redirects to a safe same-origin `redirect` or `/profile`; error →
   `/login?magic=error`. Local Supabase magic-link template in `supabase/config.toml` if needed.
   Tests: route unit tests (success, bad token, open-redirect rejected).
+  - Evidence: `tests/server/api/magic-link.test.ts` 13/13 (success + cookies kept, safe redirect, 8 open-redirect variants fall back to `/profile`, missing/wrong type, verify error); live against local Supabase + dev server: OTP email arrives in Mailpit in Catalan with `http://127.0.0.1:3000/auth/magic-link?token_hash=...&type=email`, the route answers 307 to the `redirect` with the `sb-127-auth-token` cookie, a replay of the same link answers 307 to `/login?magic=error`; lint/tsc clean, `npm run test:unit` 221/221. Local Supabase restarted for the new template (`supabase/templates/magic_link.html`, `additional_redirect_urls`). Note: `signInWithOtp({ shouldCreateUser:false })` for an unknown email returns 422 `otp_disabled` (the UI must treat it as neutral, B3.2). The magic-link email does not carry `redirect` (prod template has no `{{ .RedirectTo }}`): after a magic link the member lands on `/profile`.
 - [ ] B3.2 — Login redesign: two cards, "Envia'm un enllaç d'accés"
   (`signInWithOtp({ shouldCreateUser: false })`), sent state, aria-live errors, mobile single
   column, `AuthHero` copy. Keep `?confirmed=`/`?recovery=` handling. Tests: component + update
