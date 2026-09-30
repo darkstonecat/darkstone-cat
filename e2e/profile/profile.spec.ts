@@ -111,3 +111,62 @@ test.describe('Member home on mobile', () => {
     expect(overflow).toBeLessThanOrEqual(0)
   })
 })
+
+// Month calendar. Fixture events sit in October and November 2026, so the tests
+// open `?month=2026-10` and accept a fallback to the current month once the
+// browsable range (3 months back, 6 forward) no longer reaches it.
+test.describe('Member home calendar', () => {
+
+  test('shows the current month with accessible navigation', async ({ memberPage: page }) => {
+    await page.goto(PAGES.profile)
+    const nav = page.getByRole('navigation', { name: 'Navegació del calendari' })
+    await expect(nav).toBeVisible()
+    await expect(nav.getByRole('link', { name: /^Mes anterior: / })).toBeVisible()
+    await expect(nav.getByRole('link', { name: /^Mes següent: / })).toBeVisible()
+    await expect(page.getByRole('table', { name: /^Calendari de / })).toHaveCount(1)
+  })
+
+  test('navigates to another month through the URL and back', async ({ memberPage: page }) => {
+    await page.goto(`${PAGES.profile}?month=2026-10`)
+    const heading = page.getByRole('heading', { name: /Calendari/ })
+    if (!(await heading.textContent())?.includes('Octubre 2026')) return // out of range: fell back to today's month
+    const table = page.getByRole('table', { name: 'Calendari de Octubre 2026' })
+    await expect(table).toBeVisible()
+    await expect(table.getByRole('columnheader')).toHaveText(['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg'])
+    const pills = table.getByRole('link', { name: /Obre a Ludoya/ })
+    expect(await pills.count()).toBeGreaterThan(0)
+    await expect(pills.first()).toHaveAttribute('target', '_blank')
+    await expect(pills.first()).toHaveAttribute('rel', 'noopener noreferrer')
+
+    await page.getByRole('link', { name: /^Mes següent: Novembre 2026/ }).click()
+    await expect(page).toHaveURL(/month=2026-11/)
+    await expect(page.getByRole('table', { name: 'Calendari de Novembre 2026' })).toBeVisible()
+  })
+
+  test('an invalid month falls back to the current one', async ({ memberPage: page }) => {
+    await page.goto(`${PAGES.profile}?month=abc`)
+    await expect(page.getByRole('table', { name: /^Calendari de / })).toBeVisible()
+    await page.goto(`${PAGES.profile}?month=1999-01`)
+    await expect(page.getByRole('table', { name: /^Calendari de / })).toBeVisible()
+  })
+})
+
+test.describe('Member home calendar on mobile', () => {
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  test('day buttons are 44 px and select a day into the detail panel', async ({ memberPage: page }) => {
+    await page.goto(`${PAGES.profile}?month=2026-10`)
+    const heading = page.getByRole('heading', { name: /Calendari/ })
+    if (!(await heading.textContent())?.includes('Octubre 2026')) return
+    const days = page.getByRole('button', { name: /esdeveniment/ })
+    await expect(days.first()).toBeVisible()
+    const box = await days.first().boundingBox()
+    expect(box!.height).toBeGreaterThanOrEqual(44)
+    await days.first().click()
+    await expect(days.first()).toHaveAttribute('aria-pressed', 'true')
+    const panel = page.getByRole('status', { name: 'Esdeveniments del dia seleccionat' })
+    await expect(panel.getByRole('link', { name: /Obre a Ludoya/ })).toHaveAttribute('target', '_blank')
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+    expect(overflow).toBeLessThanOrEqual(0)
+  })
+})

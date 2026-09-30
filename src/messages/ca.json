@@ -860,6 +860,33 @@
         "error_title": "No hem pogut carregar les sessions",
         "error_text": "Ludoya no respon ara mateix. La resta de la pàgina funciona amb normalitat; torna-ho a provar d'aquí una estona o consulta-les directament a Ludoya.",
         "loading": "Carregant les sessions..."
+      },
+      "calendar": {
+        "title": "Calendari",
+        "month_nav": "Navegació del calendari",
+        "prev": "Mes anterior: {month}",
+        "next": "Mes següent: {month}",
+        "legend_session": "Sessió",
+        "legend_special": "Especial",
+        "hint_desktop": "Clica un esdeveniment per obrir-lo a Ludoya",
+        "hint_mobile": "Toca un dia marcat",
+        "session": "Sessió",
+        "today": "Avui",
+        "grid_label": "Calendari de {month}",
+        "event_link": "{date}: {time} {title}. Obre a Ludoya",
+        "event_link_special": "{date}: {time} {title} (especial). Obre a Ludoya",
+        "day_events": "{date}: {count, plural, one {# esdeveniment} other {# esdeveniments}}",
+        "day_events_special": "{date}: {count, plural, one {# esdeveniment} other {# esdeveniments}}, amb un esdeveniment especial",
+        "special": "Especial",
+        "open_ludoya": "Obre a Ludoya",
+        "new_tab": "(s'obre en una pestanya nova)",
+        "panel_label": "Esdeveniments del dia seleccionat",
+        "panel_empty": "Toca un dia marcat per veure'n els detalls.",
+        "empty_month": "Aquest mes no hi ha cap esdeveniment programat.",
+        "error_title": "No hem pogut carregar el calendari",
+        "error_text": "Ludoya no respon ara mateix. La resta de la pàgina funciona amb normalitat; torna-ho a provar d'aquí una estona.",
+        "open_ludoya_home": "Obre Ludoya",
+        "loading": "Carregant el calendari..."
       }
     },
     "details": {

@@ -860,6 +860,33 @@
         "error_title": "We could not load the sessions",
         "error_text": "Ludoya is not responding right now. The rest of the page works as usual; try again in a while or check them directly on Ludoya.",
         "loading": "Loading sessions..."
+      },
+      "calendar": {
+        "title": "Calendar",
+        "month_nav": "Calendar navigation",
+        "prev": "Previous month: {month}",
+        "next": "Next month: {month}",
+        "legend_session": "Session",
+        "legend_special": "Special",
+        "hint_desktop": "Click an event to open it on Ludoya",
+        "hint_mobile": "Tap a marked day",
+        "session": "Session",
+        "today": "Today",
+        "grid_label": "Calendar for {month}",
+        "event_link": "{date}: {time} {title}. Open on Ludoya",
+        "event_link_special": "{date}: {time} {title} (special). Open on Ludoya",
+        "day_events": "{date}: {count, plural, one {# event} other {# events}}",
+        "day_events_special": "{date}: {count, plural, one {# event} other {# events}}, including a special event",
+        "special": "Special",
+        "open_ludoya": "Open on Ludoya",
+        "new_tab": "(opens in a new tab)",
+        "panel_label": "Events of the selected day",
+        "panel_empty": "Tap a marked day to see its details.",
+        "empty_month": "There are no events scheduled this month.",
+        "error_title": "We could not load the calendar",
+        "error_text": "Ludoya is not responding right now. The rest of the page works normally; try again in a little while.",
+        "open_ludoya_home": "Open Ludoya",
+        "loading": "Loading the calendar..."
       }
     },
     "details": {

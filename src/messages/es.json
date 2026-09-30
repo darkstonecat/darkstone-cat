@@ -860,6 +860,33 @@
         "error_title": "No hemos podido cargar las sesiones",
         "error_text": "Ludoya no responde ahora mismo. El resto de la página funciona con normalidad; inténtalo de nuevo dentro de un rato o consúltalas directamente en Ludoya.",
         "loading": "Cargando las sesiones..."
+      },
+      "calendar": {
+        "title": "Calendario",
+        "month_nav": "Navegación del calendario",
+        "prev": "Mes anterior: {month}",
+        "next": "Mes siguiente: {month}",
+        "legend_session": "Sesión",
+        "legend_special": "Especial",
+        "hint_desktop": "Haz clic en un evento para abrirlo en Ludoya",
+        "hint_mobile": "Toca un día marcado",
+        "session": "Sesión",
+        "today": "Hoy",
+        "grid_label": "Calendario de {month}",
+        "event_link": "{date}: {time} {title}. Abre en Ludoya",
+        "event_link_special": "{date}: {time} {title} (especial). Abre en Ludoya",
+        "day_events": "{date}: {count, plural, one {# evento} other {# eventos}}",
+        "day_events_special": "{date}: {count, plural, one {# evento} other {# eventos}}, con un evento especial",
+        "special": "Especial",
+        "open_ludoya": "Abre en Ludoya",
+        "new_tab": "(se abre en una pestaña nueva)",
+        "panel_label": "Eventos del día seleccionado",
+        "panel_empty": "Toca un día marcado para ver sus detalles.",
+        "empty_month": "Este mes no hay ningún evento programado.",
+        "error_title": "No hemos podido cargar el calendario",
+        "error_text": "Ludoya no responde ahora mismo. El resto de la página funciona con normalidad; vuelve a intentarlo dentro de un rato.",
+        "open_ludoya_home": "Abre Ludoya",
+        "loading": "Cargando el calendario..."
       }
     },
     "details": {
