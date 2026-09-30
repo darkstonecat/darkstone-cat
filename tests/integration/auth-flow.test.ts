@@ -36,7 +36,14 @@ describe('signup → member creation', () => {
 
 describe('updateMemberAfterSignup with real DB', () => {
   it('encrypts phone/DNI and sets acceptance flags', async () => {
-    const user = await createTestUser('auth-after@test.local', 'password123')
+    // The action only completes a fresh, unconfirmed sign-up
+    const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email: 'auth-after@test.local',
+      password: 'password123',
+      email_confirm: false,
+    })
+    if (createError) throw createError
+    const user = created.user
     userIds.push(user.id)
 
     const { updateMemberAfterSignup } = await import(
