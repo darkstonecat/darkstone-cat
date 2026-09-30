@@ -261,7 +261,21 @@ current data sheet off `/profile`.)
   - B4 done: 52181c2, 71b10e2, 22bc816 (writer). Orchestrator decision: the username check
     shows the username only, never the Ludoya/BGG display name (public form, avoids exposing
     third-party names). Local Supabase has `enable_confirmations = false`, so the resend E2E
-    stubs `/auth/v1/resend`. Assess high → verifier running.
+    stubs `/auth/v1/resend`. Assess high → verifier: 1 major (privacy consent linked to the
+    website policy instead of `/data-protection`, which governs member data; the mockup spec was
+    wrong) + pre-existing major IDOR (`updateMemberAfterSignup` trusted a client `userId` with
+    the admin client) + minor (hidden live regions, Ludoya focus ring, first sign-up left behind
+    on "back", DNI error text, stuck submitting). Fixed in 707016b (guard: unconfirmed user
+    < 10 min with blank row, server-side field validation, `discardUnconfirmedSignup`) and
+    e527489. Checks: unit 388/388, integration 55/55, `e2e/auth` 26/26.
+  - B7 done: 21b52d9, 196745d (writer). Assess high → verifier: no blockers, 6 minor (a11y live
+    regions, focus after link/unlink, disabled focused buttons, input focus ring, decrypt
+    failure shown as "No indicat", invalid username message). "Veure a Ludoya" link pattern
+    `app.ludoya.com/<username>` unverified (SPA returns 200 for any path) → check in a browser
+    in B8.
+  - Pre-existing bug found: `members.id` FK to `auth.users` has no `ON DELETE CASCADE`, so
+    `deleteAccount` likely fails. Correction round running: B7 minors + FK cascade migration +
+    local `enable_confirmations = true` to mirror production.
 - Pending user actions: `LUDOYA_API_KEY` GitHub secret; B3.3 production Supabase checks.
 
 ## Notes
