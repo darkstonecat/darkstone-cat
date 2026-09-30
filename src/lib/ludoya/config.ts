@@ -1,10 +1,9 @@
 // ---------------------------------------------------------------------------
-// Ludoya integration — configuration
+// Ludoya integration — configuration (public v1 API)
 // ---------------------------------------------------------------------------
-// Everything Ludoya may change on their side lives here: hosts, group
-// identity and endpoint paths. Hosts and group identity can be overridden
-// through environment variables so a change can be absorbed from the Vercel
-// dashboard without a code change. See docs/ludoya-api-reference.md.
+// Everything Ludoya may change on their side lives here: hosts and endpoint
+// paths. The organisation is implied by the API key, so there is no group id.
+// See docs/ludoya-api-reference.md.
 
 function env(key: string, fallback: string): string {
   const value = process.env[key]?.trim();
@@ -12,52 +11,69 @@ function env(key: string, fallback: string): string {
 }
 
 export const ludoyaConfig = {
-  /** REST API base URL (no trailing slash). */
-  apiUrl: env("LUDOYA_API_URL", "https://api.ludoya.com"),
+  /**
+   * API host (no trailing slash). Override with LUDOYA_API_URL to point at the
+   * sandbox (https://api.dev.ludoya.com), which needs a sandbox key.
+   */
+  get apiUrl(): string {
+    return env("LUDOYA_API_URL", "https://api.ludoya.com").replace(/\/+$/, "");
+  },
   /** Public web app base URL, used to build links to events. */
-  appUrl: env("LUDOYA_APP_URL", "https://app.ludoya.com"),
-  /** Object storage that serves game and event images. */
-  imageBaseUrl: env(
-    "LUDOYA_IMAGE_BASE_URL",
-    "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net"
-  ),
-  /** Darkstone Catalunya group id. Rediscovered by username if it stops resolving. */
-  groupId: env("LUDOYA_GROUP_ID", "b28a80d31be24cffa35d9176c3f1ac50"),
-  /** Group username, the stable handle used to recognise the group in search results. */
-  groupUsername: env("LUDOYA_GROUP_USERNAME", "darkstonecat"),
-  /** Search text for the public group search (matches the group name, not the username). */
-  groupSearchQuery: env("LUDOYA_GROUP_SEARCH_QUERY", "darkstone"),
-  /** Serve fixtures from public/mock/ludoya instead of calling the API. */
-  mock: process.env.LUDOYA_MOCK === "1",
-  requestTimeoutMs: 15_000,
+  get appUrl(): string {
+    return env("LUDOYA_APP_URL", "https://app.ludoya.com").replace(/\/+$/, "");
+  },
+  /** Server-side credential. Never log it and never send it from a browser. */
+  get apiKey(): string | null {
+    return process.env.LUDOYA_API_KEY?.trim() || null;
+  },
+  /** Serve fixtures from public/mock/ludoya/v1 instead of calling the API. */
+  get mock(): boolean {
+    return process.env.LUDOYA_MOCK === "1";
+  },
+  requestTimeoutMs: 10_000,
   retryAttempts: 3,
   retryBaseDelayMs: 1_000,
-  /** Next.js data-cache lifetime for Ludoya requests (matches the page ISR). */
-  revalidateSeconds: 86_400,
-  /** Game → BGG id links never change; cache them for 30 days. */
-  gameRevalidateSeconds: 2_592_000,
-  /** Parallel requests when looking up game details. */
-  gameLookupConcurrency: 6,
+  /** Longest `Retry-After` the client waits for; a longer one is surfaced as `rate_limited`. */
+  maxRetryAfterSeconds: 5,
+  /** Cache lifetime for the public /events pages (matches their page-level revalidate). */
+  eventsRevalidateSeconds: 86_400,
+  /** Cache lifetime for member-area data (upcoming sessions, month calendar). */
+  memberAreaRevalidateSeconds: 60,
+  /** Locations change rarely and only feed the "usual venue" flag. */
+  locationsRevalidateSeconds: 3_600,
 } as const;
 
-/** API paths, relative to `ludoyaConfig.apiUrl`. */
+/** API version prefix, shared by every endpoint. */
+export const LUDOYA_API_PREFIX = "/public/v1";
+
+/** API paths, relative to `${apiUrl}${LUDOYA_API_PREFIX}`. */
 export const ludoyaEndpoints = {
-  /** Future + past events organised by a group. Groups share the users namespace. */
-  groupEvents: (groupId: string) =>
-    `/users/${groupId}/events?displayAllRecurring=true`,
-  /** Child events of an event: planned plays and, for multi-day events, days. */
-  eventChildren: (eventId: string) => `/events/${eventId}/children`,
-  /** Game detail by slug; carries the BoardGameGeek URL. */
-  boardgame: (slug: string) => `/boardgames/${encodeURIComponent(slug)}`,
-  /** Public group search; used to rediscover the group id by username. */
-  groupSearch: (name: string) =>
-    `/groups/search?nameFilter=${encodeURIComponent(name)}`,
+  /**
+   * Future events. With sub-events the planned plays of every meetup come in
+   * the same list (`parentId`), so no per-event request is needed.
+   */
+  events: ({ includeSubEvents = true, pastLimit }: { includeSubEvents?: boolean; pastLimit?: number } = {}) => {
+    const params = new URLSearchParams({ includeSubEvents: String(includeSubEvents) });
+    if (pastLimit !== undefined) params.set("pastLimit", String(pastLimit));
+    return `/events?${params}`;
+  },
+  /** Sub-events of one event (planned plays, days of a multi-day event). */
+  eventChildren: (eventId: string) => `/events/${encodeURIComponent(eventId)}/children`,
+  locations: () => "/locations",
+  /** `intent=PLAY` narrows to people who can be put on an event. */
+  searchUsers: (query: string, { size = 5 }: { size?: number } = {}) => {
+    const params = new URLSearchParams({ query, intent: "PLAY", pagination: `${size},0` });
+    return `/search/users?${params}`;
+  },
+  searchBoardgames: (query: string, { size = 5 }: { size?: number } = {}) => {
+    const params = new URLSearchParams({ query, pagination: `${size},0` });
+    return `/search/boardgames?${params}`;
+  },
 } as const;
 
 /** Public URLs derived from Ludoya identifiers. */
 export const ludoyaUrls = {
   eventPage: (eventId: string) => `${ludoyaConfig.appUrl}/events/${eventId}`,
-  gameImage: (imageId: string) => `${ludoyaConfig.imageBaseUrl}/${imageId}.jpg`,
 } as const;
 
 /** Regular session schedules (Europe/Madrid local time). */

@@ -107,10 +107,11 @@ current data sheet off `/profile`.)
   fixtures. **Gate for B2.6**: find the public-API replacement for the BGG-id bridge
   (`GET /boardgames/{slug}` in `resolveBggIds`); if none exists, stop and ask before B2.6.
   - Evidence: 9 GET probes against production (all 200, `Cache-Control: private, max-age=30`); sanitized fixtures in `public/mock/ludoya/v1/` (events with sub-events, 2 children, locations, users found/empty, boardgame search; organizer replaced by "Organizer A", user by "Member A"). Gate result: no BGG id in any public game shape, so the bridge is dropped; event images resolve by name + year (user decision 2026-09-30).
-- [ ] B2.2 — Public client in `src/lib/ludoya/client.ts`: `LUDOYA_API_KEY` env, `X-Api-Key`
+- [x] B2.2 — Public client in `src/lib/ludoya/client.ts`: `LUDOYA_API_KEY` env, `X-Api-Key`
   header, typed error codes (`rate_limited` → honour `Retry-After`), mock mode `LUDOYA_MOCK`,
   per-call `revalidate`. Server-only module guard. The organisation is implied by the key, so
   group-id config and rediscovery go away. Unit tests with fixtures.
+  - Evidence: `tests/lib/ludoya/client.test.ts` 13/13 pass (URL + `X-Api-Key` + revalidate, missing key, 401 no retry, 5xx retry, 429 `Retry-After` honoured / over cap surfaced, timeout/network codes, key never in errors or logs, mock fixtures). Old client kept as `legacy-*` files until B2.6; `server-only` added as a dependency with a Vitest alias stub.
 - [ ] B2.3 — Normalize + types for member-area data: session place (`location.name/address`,
   usual venue by `isDefault`/id, shown as received), `participantCount`, `capacity`,
   `queuedParticipantCount`, `minParticipants`, `organizer.name`, special flag (reuse the existing

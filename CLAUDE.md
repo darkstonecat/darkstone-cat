@@ -296,6 +296,7 @@ The `public` schema is the primary working schema.
 | `ENCRYPTION_KEY` | 64-character hex string (32 bytes) for AES-256-GCM encryption of member DNI and phone |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase publishable key for client-side auth |
+| `LUDOYA_API_KEY` | Ludoya public API key (Business plan, 100 req/min). Server-side only; never expose to the browser. Used by `src/lib/ludoya/client.ts` |
 | `LUDOYA_GROUP_ID` | Optional. Ludoya group id override (default in `src/lib/ludoya/config.ts`) |
 | `LUDOYA_GROUP_USERNAME` / `LUDOYA_GROUP_SEARCH_QUERY` | Optional. Used to rediscover the group id |
 | `LUDOYA_API_URL` / `LUDOYA_APP_URL` / `LUDOYA_IMAGE_BASE_URL` | Optional. Ludoya host overrides |

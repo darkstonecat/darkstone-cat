@@ -5,14 +5,14 @@
 // types in ./types; endpoint paths live in ./config, HTTP concerns in
 // ./client and raw-shape knowledge in ./normalize.
 
-import { ludoyaConfig, ludoyaEndpoints } from "./config";
-import { describeError, fetchGroupEventsRaw, isTimeoutError, ludoyaGet } from "./client";
-import { parseBoardgameResponse, parseChildrenResponse, parseEventsResponse } from "./normalize";
+import { ludoyaConfig, ludoyaEndpoints } from "./legacy-config";
+import { describeError, fetchGroupEventsRaw, isTimeoutError, ludoyaGet } from "./legacy-client";
+import { parseBoardgameResponse, parseChildrenResponse, parseEventsResponse } from "./legacy-normalize";
 import type { LudoyaEvent, LudoyaEventsResult } from "./types";
 
 export type { LudoyaEvent, LudoyaEventsResult, LudoyaFetchError, LudoyaPlannedPlay } from "./types";
-export { LudoyaApiError } from "./client";
-export { LudoyaShapeError } from "./normalize";
+export { LudoyaApiError } from "./legacy-client";
+export { LudoyaShapeError } from "./legacy-normalize";
 export { ludoyaConfig };
 
 /**

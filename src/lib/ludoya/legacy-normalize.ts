@@ -6,7 +6,7 @@
 // ("shape changed at futureEvents.elements[0].startsAt: expected string,
 // received undefined") instead of silently producing undefined.
 
-import { ludoyaUrls, REGULAR_SCHEDULES } from "./config";
+import { ludoyaUrls, REGULAR_SCHEDULES } from "./legacy-config";
 import type { LudoyaEvent, LudoyaPlannedPlay } from "./types";
 
 export class LudoyaShapeError extends Error {

@@ -15,6 +15,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
+      // The real package throws outside a React Server Components bundle.
+      'server-only': path.resolve(import.meta.dirname, './tests/helpers/server-only.ts'),
     },
   },
   test: {
