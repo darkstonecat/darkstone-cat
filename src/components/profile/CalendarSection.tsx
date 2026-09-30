@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
-import { MdChevronLeft, MdChevronRight, MdOutlineErrorOutline, MdOutlineStarBorder } from "react-icons/md";
+import { MdChevronLeft, MdChevronRight, MdOutlineErrorOutline, MdStar } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { ludoyaConfig } from "@/lib/ludoya/config";
 import { fetchMonthEvents } from "@/lib/member-sessions";
@@ -108,7 +108,7 @@ export default async function CalendarSection({ month, className }: { month: Yea
   return (
     <section aria-labelledby="calendar-title" className={className}>
       <div className="flex flex-col gap-3.5 rounded-2xl bg-brand-white px-4 py-5 md:p-7">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="flex items-center justify-between gap-x-4 md:justify-start">
           <h2 id="calendar-title" className="text-[22px] font-bold tracking-tight text-stone-custom">
             <span className="sr-only">{t("title")}: </span>
             {formatMonthTitle(month, locale)}
@@ -117,19 +117,18 @@ export default async function CalendarSection({ month, className }: { month: Yea
             {renderNav(prev, "prev")}
             {renderNav(next, "next")}
           </nav>
-          <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-stone-custom/65 md:ml-auto">
+          <ul className="ml-auto hidden flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-stone-custom/65 md:flex">
             <li className="flex items-center gap-1.5">
-              <span aria-hidden="true" className="size-3 rounded-[3px] bg-stone-custom" />
+              <span aria-hidden="true" className="size-3.5 rounded-[4px] bg-stone-custom" />
               {t("legend_session")}
             </li>
             <li className="flex items-center gap-1.5">
-              <span aria-hidden="true" className="flex size-3.5 items-center justify-center rounded-[3px] bg-brand-orange text-brand-white">
-                <MdOutlineStarBorder size={11} />
+              <span aria-hidden="true" className="flex size-3.5 items-center justify-center rounded-[4px] bg-brand-orange text-brand-white">
+                <MdStar size={10} />
               </span>
               {t("legend_special")}
             </li>
-            <li className="hidden md:block">{t("hint_desktop")}</li>
-            <li className="md:hidden">{t("hint_mobile")}</li>
+            <li>{t("hint_desktop")}</li>
           </ul>
         </div>
         <Suspense key={formatMonthKey(month)} fallback={<CalendarSkeleton label={t("loading")} />}>

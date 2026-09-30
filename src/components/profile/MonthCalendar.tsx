@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { MdOutlinePlace, MdOutlineStarBorder } from "react-icons/md";
+import { MdOutlinePlace, MdStar } from "react-icons/md";
 import type { CalendarDayView, CalendarView } from "@/lib/member-home/month-grid";
 import { cn } from "@/lib/utils";
 
@@ -79,7 +79,7 @@ function SheetCell({ day }: { day: CalendarDayView }) {
             >
               {event.special ? (
                 <>
-                  <MdOutlineStarBorder aria-hidden="true" size={13} className="shrink-0" />
+                  <MdStar aria-hidden="true" size={12} className="shrink-0" />
                   <span className="line-clamp-2">{event.title}</span>
                 </>
               ) : (
@@ -139,7 +139,7 @@ function GridCell({
           )}
         >
           <span className={numberClass}>{day.day}</span>
-          {special && <MdOutlineStarBorder aria-hidden="true" size={12} className="absolute top-0.5 right-0.5" />}
+          {special && <MdStar aria-hidden="true" size={10} className="absolute top-1 right-1" />}
         </button>
       ) : (
         <span className="flex h-11 items-center justify-center text-sm text-stone-custom">
@@ -170,7 +170,7 @@ function DayPanel({ day }: { day: CalendarDayView | undefined }) {
               <p className="text-[17px] font-bold text-stone-custom">{event.title}</p>
               {event.special && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-brand-orange/12 px-2 py-0.5 text-[11px] font-bold tracking-[0.08em] text-brand-orange-text uppercase">
-                  <MdOutlineStarBorder aria-hidden="true" size={12} />
+                  <MdStar aria-hidden="true" size={11} />
                   {t("special")}
                 </span>
               )}
@@ -246,6 +246,19 @@ export default function MonthCalendar({ view }: MonthCalendarProps) {
       </table>
 
       {!hasEvents && <p className="text-sm text-stone-custom/65">{t("empty_month")}</p>}
+      <ul className="flex items-center gap-x-4 text-[13px] text-stone-custom/65 md:hidden">
+        <li className="flex items-center gap-1.5">
+          <span aria-hidden="true" className="size-3.5 rounded-[4px] bg-stone-custom" />
+          {t("legend_session")}
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span aria-hidden="true" className="flex size-3.5 items-center justify-center rounded-[4px] bg-brand-orange text-brand-white">
+            <MdStar size={10} />
+          </span>
+          {t("legend_special")}
+        </li>
+        <li className="ml-auto">{t("hint_mobile")}</li>
+      </ul>
       <DayPanel day={selectedDay} />
     </div>
   );

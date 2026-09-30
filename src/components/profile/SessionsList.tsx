@@ -155,18 +155,18 @@ function SessionItem({ session, openOnMobile }: { session: SessionRow; openOnMob
             </span>
             <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
               <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                <h3 className="text-base font-bold text-stone-custom md:text-lg">{session.title}</h3>
+                <h3 className="text-base leading-[1.36] font-bold text-stone-custom md:text-lg">{session.title}</h3>
                 {special && (
                   <span className="rounded-full bg-brand-orange/12 px-2 py-0.5 text-[11px] font-bold tracking-[0.08em] text-brand-orange-text uppercase">
                     {t("special")}
                   </span>
                 )}
               </div>
-              <p className="text-sm text-stone-custom/65">{session.when}</p>
+              <p className="text-sm leading-[1.36] text-stone-custom/65">{session.when}</p>
               {session.place && (
                 <p
                   className={cn(
-                    "flex items-center gap-1 text-[13px]",
+                    "flex items-center gap-1 text-[13px] leading-[1.36]",
                     session.place.isUsual ? "text-stone-custom/65" : "font-semibold text-brand-orange-text"
                   )}
                 >
