@@ -54,10 +54,39 @@ function isRegularSession(startsAt: string, endsAt: string, timeZone: string): b
   );
 }
 
-function isWithin12Months(dateStr: string): boolean {
-  const limit = new Date();
+function isWithin12Months(dateStr: string, now: Date): boolean {
+  const limit = new Date(now);
   limit.setMonth(limit.getMonth() + 12);
   return new Date(dateStr) <= limit;
+}
+
+/**
+ * Events the site may show. `ONLY_FRIENDS` and `PRIVATE` are known and skipped
+ * silently; a missing or unrecognised value is skipped too, with a warning,
+ * because guessing "public" could leak a private event.
+ */
+type Visibility = "PUBLIC" | "ONLY_GROUP";
+
+function readVisibility(item: unknown, ctx: string): Visibility | null {
+  const value = optionalString(item, "visibility", ctx);
+  if (value === "PUBLIC" || value === "ONLY_GROUP") return value;
+  if (value !== "ONLY_FRIENDS" && value !== "PRIVATE") {
+    console.warn(`[Ludoya] Skipping ${ctx}: visibility is ${value === null ? "missing" : `unknown (${value})`}`);
+  }
+  return null;
+}
+
+/**
+ * Start and end are nullable in the API. `null` means "this item has no usable
+ * date" (skip it); a missing key or a wrong type is a real shape change and
+ * still throws.
+ */
+function readDates(item: unknown, ctx: string): { startsAt: string; endsAt: string } | null {
+  if (getPath(item, "startsAt") === null || getPath(item, "endsAt") === null) {
+    console.warn(`[Ludoya] Skipping ${ctx}: no start or end date`);
+    return null;
+  }
+  return { startsAt: requireIsoDate(item, "startsAt", ctx), endsAt: requireIsoDate(item, "endsAt", ctx) };
 }
 
 // ---------------------------------------------------------------------------
@@ -92,6 +121,13 @@ function parsePlay(item: unknown, ctx: string): LudoyaSessionPlay | null {
 
   const gameName = optionalString(game, "name", `${ctx}.game`) ?? optionalString(item, "title", ctx);
   if (!gameName) return null;
+  // A play carries its own visibility; a private play must not ride in under a public session.
+  const visibility = readVisibility(item, ctx);
+  if (!visibility) return null;
+  if (getPath(item, "startsAt") === null) {
+    console.warn(`[Ludoya] Skipping ${ctx}: no start date`);
+    return null;
+  }
   const id = requireString(item, "id", ctx);
 
   return {
@@ -107,6 +143,7 @@ function parsePlay(item: unknown, ctx: string): LudoyaSessionPlay | null {
     capacity: optionalNumber(item, "capacity", ctx),
     minParticipants: optionalNumber(item, "minParticipants", ctx),
     ludoyaUrl: ludoyaUrls.eventPage(id),
+    visibility,
   };
 }
 
@@ -123,14 +160,15 @@ const byStart = (a: { startsAt: string }, b: { startsAt: string }) =>
  * plays, classified as regular or special. With `includePast`, the events
  * requested through `pastLimit` are included too.
  *
- * Drafts, cancelled events and friends-only or private ones are skipped; special events further than 12
- * months away are dropped. Plays are the `PLANNED_PLAY` children that carry a
+ * Drafts, cancelled events and friends-only or private ones are skipped, as
+ * are items with a null start or end date (a warning is logged); special
+ * events further than 12 months away are dropped. Plays are the `PLANNED_PLAY` children that carry a
  * game; a play with no parent session (a standalone table) has no session to
  * show under and is ignored.
  */
 export function parseSessionsResponse(
   raw: unknown,
-  { includePast = false }: { includePast?: boolean } = {}
+  { includePast = false, now = new Date() }: { includePast?: boolean; now?: Date } = {}
 ): LudoyaSession[] {
   const future = requireArray(raw, "futureEvents.elements", "events");
   const past = includePast ? requireArray(raw, "pastEvents.elements", "events") : [];
@@ -140,7 +178,6 @@ export function parseSessionsResponse(
   ];
   const sessions: LudoyaSession[] = [];
   const playsByParent = new Map<string, LudoyaSessionPlay[]>();
-  const sessionIds = new Set<string>();
 
   elements.forEach(({ item, ctx }) => {
     if (!isObject(item)) throw new LudoyaShapeError(ctx, "object", item);
@@ -157,18 +194,18 @@ export function parseSessionsResponse(
     }
     if (!SESSION_TYPES.has(type)) return;
     // Friends-only and private events are not the club's programme.
-    const visibility = optionalString(item, "visibility", ctx) ?? "PUBLIC";
-    if (visibility !== "PUBLIC" && visibility !== "ONLY_GROUP") return;
+    const visibility = readVisibility(item, ctx);
+    if (!visibility) return;
 
     const id = requireString(item, "id", ctx);
-    const startsAt = requireIsoDate(item, "startsAt", ctx);
-    const endsAt = requireIsoDate(item, "endsAt", ctx);
+    const dates = readDates(item, ctx);
+    if (!dates) return;
+    const { startsAt, endsAt } = dates;
     const timeZone = optionalString(item, "timeZone", ctx) ?? "Europe/Madrid";
     const regular = isRegularSession(startsAt, endsAt, timeZone);
-    if (!regular && !isWithin12Months(startsAt)) return;
+    if (!regular && !isWithin12Months(startsAt, now)) return;
 
     const imageUrl = optionalString(item, "imageUrl", ctx);
-    sessionIds.add(id);
     sessions.push({
       id,
       title: requireString(item, "title", ctx),
@@ -200,21 +237,6 @@ export function parseSessionsResponse(
     session.plannedPlayCount = session.plannedPlays.length;
   }
   return sessions;
-}
-
-/**
- * `GET /events/{eventId}/children` → planned plays of one event. Children
- * without a game (days of a multi-day event), drafts and cancelled plays are
- * ignored.
- */
-export function parseChildrenResponse(raw: unknown, eventId: string): LudoyaSessionPlay[] {
-  const base = `children(${eventId})`;
-  const list = requireArray(raw, "children", base);
-  const plays = list.flatMap((item, index) => {
-    const play = parsePlay(item, `${base}.children[${index}]`);
-    return play ? [play] : [];
-  });
-  return plays.sort(byStart);
 }
 
 /** `GET /locations` → the organisation's locations. */

@@ -70,6 +70,34 @@ describe("fetchUpcomingEvents", () => {
     expect((eventsCall[1] as { next?: unknown }).next).toEqual({ revalidate: 86_400 });
   });
 
+  it("keeps ONLY_GROUP plays out of the public projection and its count", async () => {
+    vi.stubEnv("LUDOYA_MOCK", "");
+    vi.stubEnv("LUDOYA_API_KEY", "ldy_test");
+    const play = (id: string, visibility: string) => ({
+      id, type: "PLANNED_PLAY", parentId: "s", title: id, visibility, game: { name: `Game ${id}` },
+      startsAt: "2026-11-01T10:00:00Z", endsAt: "2026-11-01T11:00:00Z",
+    });
+    const body = {
+      futureEvents: {
+        elements: [
+          { id: "s", type: "MEETUP", title: "S", visibility: "PUBLIC", startsAt: "2026-11-01T10:00:00Z", endsAt: "2026-11-01T12:00:00Z" },
+          play("open", "PUBLIC"),
+          play("club", "ONLY_GROUP"),
+          play("secret", "PRIVATE"),
+        ],
+      },
+      pastEvents: { elements: [] },
+    };
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) =>
+      new Response(JSON.stringify(String(input).includes("/locations") ? { locations: [] } : body), { status: 200 })
+    ));
+
+    const { specialEvents } = await fetchUpcomingEvents();
+
+    expect(specialEvents[0].plannedPlays.map((p) => p.gameName)).toEqual(["Game open"]);
+    expect(specialEvents[0].plannedPlayCount).toBe(1);
+  });
+
   it("returns an error state instead of throwing", async () => {
     vi.stubEnv("LUDOYA_MOCK", "");
     vi.stubEnv("LUDOYA_API_KEY", "ldy_test");

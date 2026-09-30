@@ -3,7 +3,6 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   LudoyaShapeError,
-  parseChildrenResponse,
   parseLocationsResponse,
   parseSessionsResponse,
   parseUserSearchResponse,
@@ -95,6 +94,7 @@ describe("parseSessionsResponse", () => {
           {
             id: "s1",
             type: "MEETUP",
+            visibility: "PUBLIC",
             title: "Special day",
             startsAt: "2026-11-01T10:00:00Z",
             endsAt: "2026-11-01T12:00:00Z",
@@ -116,7 +116,7 @@ describe("parseSessionsResponse", () => {
     const raw = {
       futureEvents: {
         elements: [
-          { id: "far", type: "MEETUP", title: "Far", startsAt: "2028-11-01T10:00:00Z", endsAt: "2028-11-01T12:00:00Z" },
+          { id: "far", type: "MEETUP", visibility: "PUBLIC", title: "Far", startsAt: "2028-11-01T10:00:00Z", endsAt: "2028-11-01T12:00:00Z" },
           { id: "off", type: "MEETUP", title: "Off", canceled: true, startsAt: "2026-11-01T10:00:00Z", endsAt: "2026-11-01T12:00:00Z" },
         ],
       },
@@ -126,7 +126,7 @@ describe("parseSessionsResponse", () => {
 
   it("names the exact field path when the shape changes", () => {
     const missingDate = {
-      futureEvents: { elements: [{ id: "x", type: "MEETUP", title: "T", endsAt: "2026-11-01T12:00:00Z" }] },
+      futureEvents: { elements: [{ id: "x", type: "MEETUP", visibility: "PUBLIC", title: "T", endsAt: "2026-11-01T12:00:00Z" }] },
     };
     expect(() => parseSessionsResponse(missingDate)).toThrow(LudoyaShapeError);
     expect(() => parseSessionsResponse(missingDate)).toThrow(/events\.futureEvents\.elements\[0\]\.startsAt/);
@@ -152,20 +152,6 @@ describe("withUsualVenue", () => {
   it("returns sessions untouched when no default location exists", () => {
     const sessions = parseSessionsResponse(fixture("events.json"));
     expect(withUsualVenue(sessions, [{ id: "a", name: "A", address: null, isDefault: false }])).toBe(sessions);
-  });
-});
-
-describe("parseChildrenResponse", () => {
-  it("returns sorted plays and ignores children without a game", () => {
-    const plays = parseChildrenResponse(fixture(`children-${SATURDAY_ID}.json`), SATURDAY_ID);
-    expect(plays.map((p) => p.gameName)).toContain("Ostia");
-    const raw = { children: [{ id: "day1", type: "MEETUP", title: "Day 1", startsAt: "2026-11-01T10:00:00Z" }] };
-    expect(parseChildrenResponse(raw, "e")).toEqual([]);
-    expect(parseChildrenResponse({ children: [] }, "e")).toEqual([]);
-  });
-
-  it("reports the event id in shape errors", () => {
-    expect(() => parseChildrenResponse({}, "abc")).toThrow(/children\(abc\)\.children/);
   });
 });
 
@@ -197,7 +183,7 @@ describe("parseUserSearchResponse", () => {
 });
 
 describe("parseSessionsResponse visibility", () => {
-  const event = (id: string, visibility?: string) => ({
+  const event = (id: string, visibility: string | null = "PUBLIC") => ({
     id,
     type: "MEETUP",
     title: id,
@@ -209,14 +195,84 @@ describe("parseSessionsResponse visibility", () => {
   it("keeps public and group-only events and drops friends-only and private ones", () => {
     const sessions = parseSessionsResponse({
       futureEvents: {
-        elements: [event("a", "PUBLIC"), event("b", "ONLY_GROUP"), event("c", "ONLY_FRIENDS"), event("d", "PRIVATE"), event("e")],
+        elements: [event("a", "PUBLIC"), event("b", "ONLY_GROUP"), event("c", "ONLY_FRIENDS"), event("d", "PRIVATE")],
       },
     });
     expect(sessions.map((s) => [s.id, s.visibility])).toEqual([
       ["a", "PUBLIC"],
       ["b", "ONLY_GROUP"],
-      ["e", "PUBLIC"],
     ]);
+  });
+
+  it("skips, with a warning, events whose visibility is missing or unknown", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const sessions = parseSessionsResponse({
+      futureEvents: { elements: [event("missing", null), event("odd", "SOMETHING_NEW"), event("ok", "PUBLIC")] },
+    });
+    expect(sessions.map((s) => s.id)).toEqual(["ok"]);
+    expect(warn).toHaveBeenCalledTimes(2);
+    warn.mockRestore();
+  });
+
+  it("skips an item with a null start or end date and keeps the rest of the feed", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const sessions = parseSessionsResponse({
+      futureEvents: {
+        elements: [
+          { ...event("nostart", "PUBLIC"), startsAt: null },
+          { ...event("noend", "PUBLIC"), endsAt: null },
+          event("ok", "PUBLIC"),
+        ],
+      },
+    });
+    expect(sessions.map((s) => s.id)).toEqual(["ok"]);
+    expect(warn).toHaveBeenCalledTimes(2);
+    expect(warn.mock.calls.flat().join(" ")).not.toMatch(/nostart|noend/);
+    warn.mockRestore();
+  });
+
+  it("still throws on a wrong type in a date, which is a structural change", () => {
+    expect(() =>
+      parseSessionsResponse({ futureEvents: { elements: [{ ...event("x", "PUBLIC"), startsAt: 12345 }] } })
+    ).toThrow(/startsAt/);
+  });
+
+  it("uses the given now for the 12-month horizon", () => {
+    const raw = { futureEvents: { elements: [{ ...event("later", "PUBLIC"), startsAt: "2028-03-01T10:00:00Z", endsAt: "2028-03-01T12:00:00Z" }] } };
+    expect(parseSessionsResponse(raw)).toEqual([]);
+    expect(parseSessionsResponse(raw, { now: new Date("2027-06-01T00:00:00Z") }).map((s) => s.id)).toEqual(["later"]);
+  });
+
+  it("keeps a play only when its own visibility is PUBLIC or ONLY_GROUP", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const playOf = (id: string, visibility?: string) => ({
+      id,
+      type: "PLANNED_PLAY",
+      parentId: "a",
+      title: id,
+      game: { name: `Game ${id}` },
+      startsAt: "2026-11-01T10:00:00Z",
+      endsAt: "2026-11-01T11:00:00Z",
+      ...(visibility ? { visibility } : {}),
+    });
+    const [session] = parseSessionsResponse({
+      futureEvents: {
+        elements: [
+          event("a", "PUBLIC"),
+          playOf("p1", "PUBLIC"),
+          playOf("p2", "ONLY_GROUP"),
+          playOf("p3", "PRIVATE"),
+          playOf("p4", "ONLY_FRIENDS"),
+          playOf("p5"),
+        ],
+      },
+    });
+    expect(session.plannedPlays.map((p) => [p.id, p.visibility])).toEqual([
+      ["p1", "PUBLIC"],
+      ["p2", "ONLY_GROUP"],
+    ]);
+    expect(session.plannedPlayCount).toBe(2);
+    warn.mockRestore();
   });
 
   it("includes past events only when asked", () => {

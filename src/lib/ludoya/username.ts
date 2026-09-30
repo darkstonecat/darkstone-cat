@@ -4,7 +4,7 @@
 
 import "server-only";
 import { describeError, ludoyaGet } from "./client";
-import { ludoyaEndpoints } from "./config";
+import { ludoyaEndpoints, USERNAME_CHECK_LIMITS } from "./config";
 import { parseUserSearchResponse } from "./normalize";
 
 export type UsernameCheckStatus = "found" | "not_found" | "failed";
@@ -17,7 +17,7 @@ export type UsernameCheckStatus = "found" | "not_found" | "failed";
  */
 export async function lookupLudoyaUsername(username: string): Promise<UsernameCheckStatus> {
   try {
-    const raw = await ludoyaGet(ludoyaEndpoints.searchUsers(username, { size: 10 }), { revalidate: 0 });
+    const raw = await ludoyaGet(ludoyaEndpoints.searchUsers(username, { size: 10 }), { revalidate: 0, ...USERNAME_CHECK_LIMITS });
     const wanted = username.toLowerCase();
     return parseUserSearchResponse(raw).some((u) => u.username.toLowerCase() === wanted)
       ? "found"

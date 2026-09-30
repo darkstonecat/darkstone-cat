@@ -43,6 +43,13 @@ export const ludoyaConfig = {
   locationsRevalidateSeconds: 3_600,
 } as const;
 
+/**
+ * Time limits for calls made while a person waits (member area, sign-up
+ * checks), tighter than the defaults the cached public pages can afford.
+ */
+export const MEMBER_AREA_LIMITS = { timeoutMs: 4_000, attempts: 2, budgetMs: 8_000 } as const;
+export const USERNAME_CHECK_LIMITS = { timeoutMs: 3_000, attempts: 2, budgetMs: 5_000 } as const;
+
 /** API version prefix, shared by every endpoint. */
 export const LUDOYA_API_PREFIX = "/public/v1";
 
@@ -57,17 +64,11 @@ export const ludoyaEndpoints = {
     if (pastLimit !== undefined) params.set("pastLimit", String(pastLimit));
     return `/events?${params}`;
   },
-  /** Sub-events of one event (planned plays, days of a multi-day event). */
-  eventChildren: (eventId: string) => `/events/${encodeURIComponent(eventId)}/children`,
   locations: () => "/locations",
   /** `intent=PLAY` narrows to people who can be put on an event. */
   searchUsers: (query: string, { size = 5 }: { size?: number } = {}) => {
     const params = new URLSearchParams({ query, intent: "PLAY", pagination: `${size},0` });
     return `/search/users?${params}`;
-  },
-  searchBoardgames: (query: string, { size = 5 }: { size?: number } = {}) => {
-    const params = new URLSearchParams({ query, pagination: `${size},0` });
-    return `/search/boardgames?${params}`;
   },
 } as const;
 

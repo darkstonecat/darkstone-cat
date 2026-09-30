@@ -9,7 +9,7 @@
 import "server-only";
 import { fetchBggCollection, type BggGame } from "./bgg";
 import { resolvePlayCovers } from "./game-matching";
-import { ludoyaConfig } from "./ludoya/config";
+import { ludoyaConfig, MEMBER_AREA_LIMITS } from "./ludoya/config";
 import { describeError, isTimeoutError } from "./ludoya/client";
 import {
   fetchSessions,
@@ -71,7 +71,7 @@ async function withCovers(sessions: LudoyaSession[]): Promise<MemberSession[]> {
  */
 export async function fetchMemberWeekSessions(now: Date = new Date()): Promise<MemberSessionsResult> {
   try {
-    const sessions = await fetchSessions({ revalidate: ludoyaConfig.memberAreaRevalidateSeconds });
+    const sessions = await fetchSessions({ revalidate: ludoyaConfig.memberAreaRevalidateSeconds, limits: MEMBER_AREA_LIMITS });
     return { sessions: await withCovers(sessionsInNextDays(sessions, now)) };
   } catch (error) {
     console.error(`[Ludoya] Failed to fetch member sessions: ${describeError(error)}`);
@@ -90,6 +90,7 @@ export async function fetchMonthEvents(year: number, month: number, now: Date = 
     const sessions = await fetchSessions({
       revalidate: ludoyaConfig.memberAreaRevalidateSeconds,
       includePast: needsPast,
+      limits: MEMBER_AREA_LIMITS,
     });
     return { events: sessionsInMonth(sessions, year, month) };
   } catch (error) {

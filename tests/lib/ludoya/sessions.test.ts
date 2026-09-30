@@ -41,6 +41,21 @@ describe("time windows", () => {
     expect(week.map((s) => madridDay(s.startsAt))).toEqual(["2026-10-03"]);
   });
 
+  it("keeps a multi-day event that started earlier and is still running", () => {
+    const multiDay = parseSessionsResponse({
+      futureEvents: {
+        elements: [
+          {
+            id: "fair", type: "MEETUP", title: "Fair", visibility: "PUBLIC",
+            startsAt: "2026-10-01T08:00:00Z", endsAt: "2026-10-04T18:00:00Z", timeZone: "Europe/Madrid",
+          },
+        ],
+      },
+    });
+    expect(sessionsInNextDays(multiDay, new Date("2026-10-02T10:00:00Z")).map((s) => s.id)).toEqual(["fair"]);
+    expect(sessionsInNextDays(multiDay, new Date("2026-10-05T10:00:00Z"))).toEqual([]);
+  });
+
   it("includes the seventh day and excludes the eighth", () => {
     const seventh = sessionsInNextDays(sessions, new Date("2026-09-26T08:00:00Z")); // window to Oct 2
     expect(seventh.map((s) => madridDay(s.startsAt))).toEqual(["2026-10-02"]);
@@ -84,7 +99,7 @@ describe("fetchSessions", () => {
     const eventCalls = fetchMock.mock.calls.filter(([u]) => String(u).includes("/events"));
     expect(String(eventCalls[0][0])).toBe("https://api.ludoya.com/public/v1/events?includeSubEvents=true");
     expect((eventCalls[0][1] as { next?: unknown }).next).toEqual({ revalidate: 60 });
-    expect(String(eventCalls[1][0])).toContain("pastLimit=60");
+    expect(String(eventCalls[1][0])).toContain("pastLimit=200");
   });
 
   it("still returns sessions when locations fail", async () => {

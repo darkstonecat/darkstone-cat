@@ -67,6 +67,8 @@ export interface LudoyaSessionPlay extends LudoyaPlannedPlay {
   capacity: number | null;
   minParticipants: number | null;
   ludoyaUrl: string;
+  /** A play has its own visibility, independent of its session's. */
+  visibility: "PUBLIC" | "ONLY_GROUP";
 }
 
 /** A regular session or special event with its seat data and plays. */

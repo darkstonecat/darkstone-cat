@@ -32,6 +32,7 @@ export { ludoyaConfig };
  * and organizer names stay out of props that are serialised to the browser.
  */
 function toPublicEvent(session: LudoyaSession): LudoyaEvent {
+  const publicPlays = session.plannedPlays.filter((play) => play.visibility === "PUBLIC");
   return {
     id: session.id,
     title: session.title,
@@ -41,10 +42,11 @@ function toPublicEvent(session: LudoyaSession): LudoyaEvent {
     timeZone: session.timeZone,
     imageUrl: session.imageUrl,
     thumbnailUrl: session.thumbnailUrl,
-    plannedPlayCount: session.plannedPlayCount,
+    plannedPlayCount: publicPlays.length,
     ludoyaUrl: session.ludoyaUrl,
     type: session.type,
-    plannedPlays: session.plannedPlays.map((play) => ({
+    // Group-only plays never reach the public pages or the shareable images.
+    plannedPlays: publicPlays.map((play) => ({
       gameName: play.gameName,
       imageUrl: play.imageUrl,
       yearPublished: play.yearPublished,

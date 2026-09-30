@@ -6,13 +6,19 @@
 // lifetime: seat counts need a short one, the public /events page a long one.
 
 import "server-only";
-import { describeError, ludoyaGet } from "./client";
+import { describeError, ludoyaGet, type LudoyaGetOptions } from "./client";
 import { ludoyaConfig, ludoyaEndpoints } from "./config";
 import { parseLocationsResponse, parseSessionsResponse, withUsualVenue } from "./normalize";
 import type { LudoyaLocation, LudoyaSession } from "./types";
 
-/** How many past events to request when a caller needs earlier days. */
-const PAST_EVENTS_LIMIT = 60;
+/**
+ * How many past events to request when a caller needs earlier days. Verified
+ * live (Sep 2026): `pastLimit` counts sub-events (plays) as well as sessions,
+ * so 60 held only ~19 sessions and 200 ~48. Because 200 still spans several
+ * months of a club with weekly sessions, it is the cap: a calendar month further
+ * back than that may be incomplete.
+ */
+const PAST_EVENTS_LIMIT = 200;
 
 export const SESSIONS_TIME_ZONE = "Europe/Madrid";
 
@@ -21,12 +27,15 @@ export interface FetchSessionsOptions {
   revalidate: number;
   /** Also fetch recent past events (calendar months that already happened). */
   includePast?: boolean;
+  /** Timeout, attempts and total budget for the calls (see `LudoyaGetOptions`). */
+  limits?: Pick<LudoyaGetOptions, "timeoutMs" | "attempts" | "budgetMs">;
 }
 
-async function fetchLocations(): Promise<LudoyaLocation[]> {
+async function fetchLocations(limits: FetchSessionsOptions["limits"]): Promise<LudoyaLocation[]> {
   try {
     const raw = await ludoyaGet(ludoyaEndpoints.locations(), {
       revalidate: ludoyaConfig.locationsRevalidateSeconds,
+      ...limits,
     });
     return parseLocationsResponse(raw);
   } catch (error) {
@@ -37,13 +46,13 @@ async function fetchLocations(): Promise<LudoyaLocation[]> {
 }
 
 /** All upcoming (and optionally recent past) sessions with plays and the usual-venue flag. */
-export async function fetchSessions({ revalidate, includePast = false }: FetchSessionsOptions): Promise<LudoyaSession[]> {
+export async function fetchSessions({ revalidate, includePast = false, limits }: FetchSessionsOptions): Promise<LudoyaSession[]> {
   const [raw, locations] = await Promise.all([
     ludoyaGet(
       ludoyaEndpoints.events({ includeSubEvents: true, pastLimit: includePast ? PAST_EVENTS_LIMIT : undefined }),
-      { revalidate }
+      { revalidate, ...limits }
     ),
-    fetchLocations(),
+    fetchLocations(limits),
   ]);
   const sessions = parseSessionsResponse(raw, { includePast });
   return withUsualVenue(sessions, locations).sort(
@@ -71,15 +80,14 @@ function addDays(day: string, days: number): string {
 }
 
 /**
- * Sessions still to come (or in progress) within the next `days` Madrid
- * calendar days, today included.
+ * Sessions still to come (or in progress, even if they started on an earlier
+ * day) that begin within the next `days` Madrid calendar days, today included.
  */
 export function sessionsInNextDays(sessions: LudoyaSession[], now: Date, days = 7): LudoyaSession[] {
-  const first = madridDay(now);
-  const last = addDays(first, days - 1);
+  const last = addDays(madridDay(now), days - 1);
   return sessions.filter((s) => {
-    const day = madridDay(s.startsAt);
-    return new Date(s.endsAt) > now && day >= first && day <= last;
+    // Multi-day events that started earlier stay while they are still running.
+    return new Date(s.endsAt) > now && madridDay(s.startsAt) <= last;
   });
 }
 

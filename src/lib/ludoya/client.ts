@@ -81,12 +81,27 @@ function parseRetryAfter(header: string | null): number | null {
   return Number.isNaN(date) ? null : Math.max(0, Math.ceil((date - Date.now()) / 1000));
 }
 
+/** Shortest attempt worth starting when a total budget is set. */
+const MIN_ATTEMPT_MS = 500;
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export interface LudoyaGetOptions {
   /** Next.js data-cache lifetime in seconds for this request. */
   revalidate?: number;
+  /** Per-attempt timeout. Defaults to `ludoyaConfig.requestTimeoutMs`. */
+  timeoutMs?: number;
+  /** Maximum attempts, first one included. Defaults to `ludoyaConfig.retryAttempts`. */
+  attempts?: number;
+  /**
+   * Total time this call may take across attempts and backoff. No attempt starts
+   * without time left, and its timeout is clipped to what remains. Unset means
+   * no overall cap (attempts x timeout plus backoff).
+   */
+  budgetMs?: number;
 }
+
+const isAbort = (e: unknown) => e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
 
 /**
  * GET a public-API path (e.g. `/locations`) and return the parsed JSON body.
@@ -99,7 +114,12 @@ export interface LudoyaGetOptions {
  */
 export async function ludoyaGet<T = unknown>(
   endpointPath: string,
-  { revalidate = ludoyaConfig.eventsRevalidateSeconds }: LudoyaGetOptions = {}
+  {
+    revalidate = ludoyaConfig.eventsRevalidateSeconds,
+    timeoutMs = ludoyaConfig.requestTimeoutMs,
+    attempts = ludoyaConfig.retryAttempts,
+    budgetMs,
+  }: LudoyaGetOptions = {}
 ): Promise<T> {
   if (ludoyaConfig.mock) return readMock<T>(endpointPath);
 
@@ -110,16 +130,27 @@ export async function ludoyaGet<T = unknown>(
 
   const url = `${ludoyaConfig.apiUrl}${LUDOYA_API_PREFIX}${endpointPath}`;
   let lastError: unknown;
+  const startedAt = Date.now();
+  const remaining = () => (budgetMs === undefined ? Infinity : budgetMs - (Date.now() - startedAt));
 
-  for (let attempt = 1; attempt <= ludoyaConfig.retryAttempts; attempt++) {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
     let retryAfterMs: number | null = null;
     try {
       const res = await fetch(url, {
         headers: { accept: "application/json", "X-Api-Key": apiKey },
-        signal: AbortSignal.timeout(ludoyaConfig.requestTimeoutMs),
+        signal: AbortSignal.timeout(Math.max(1, Math.min(timeoutMs, remaining()))),
         next: { revalidate },
       });
-      if (res.ok) return (await res.json()) as T;
+      if (res.ok) {
+        try {
+          return (await res.json()) as T;
+        } catch (bodyError) {
+          // A timeout while reading the body stays a timeout; anything else is a
+          // 200 that is not JSON, which a retry will not fix.
+          if (isAbort(bodyError)) throw bodyError;
+          throw asFinal(new LudoyaApiError(res.status, "unknown", endpointPath, "response body is not valid JSON"));
+        }
+      }
 
       const { code, message } = await readErrorBody(res);
       const retryAfter = res.status === 429 ? parseRetryAfter(res.headers.get("retry-after")) : null;
@@ -129,13 +160,13 @@ export async function ludoyaGet<T = unknown>(
       if (retryAfter !== null) retryAfterMs = retryAfter * 1000;
       throw error;
     } catch (raw) {
-      const error = toApiError(raw, endpointPath);
+      const error = toApiError(raw, endpointPath, timeoutMs);
       lastError = error;
-      if (!isRetryable(error) || isFinal(error) || attempt === ludoyaConfig.retryAttempts) break;
+      if (!isRetryable(error) || isFinal(error) || attempt === attempts) break;
       const delay = retryAfterMs ?? ludoyaConfig.retryBaseDelayMs * 2 ** (attempt - 1);
-      console.warn(
-        `[Ludoya] ${error.message} — retrying in ${delay}ms (attempt ${attempt}/${ludoyaConfig.retryAttempts})`
-      );
+      // Not enough budget left for the wait plus a meaningful next attempt.
+      if (remaining() - delay < MIN_ATTEMPT_MS) break;
+      console.warn(`[Ludoya] ${error.message} — retrying in ${delay}ms (attempt ${attempt}/${attempts})`);
       await sleep(delay);
     }
   }
@@ -147,15 +178,10 @@ const finalErrors = new WeakSet<LudoyaApiError>();
 const asFinal = (e: LudoyaApiError) => (finalErrors.add(e), e);
 const isFinal = (e: LudoyaApiError) => finalErrors.has(e);
 
-function toApiError(error: unknown, endpointPath: string): LudoyaApiError {
+function toApiError(error: unknown, endpointPath: string, timeoutMs: number): LudoyaApiError {
   if (error instanceof LudoyaApiError) return error;
-  if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
-    return new LudoyaApiError(
-      null,
-      "timeout",
-      endpointPath,
-      `request timed out after ${ludoyaConfig.requestTimeoutMs}ms`
-    );
+  if (isAbort(error)) {
+    return new LudoyaApiError(null, "timeout", endpointPath, `request timed out after ${timeoutMs}ms`);
   }
   // Never echo error.message from fetch: it can carry the request URL.
   return new LudoyaApiError(null, "network", endpointPath, error instanceof Error ? error.name : "request failed");
@@ -182,13 +208,10 @@ function mockFileFor(endpointPath: string): string | null {
   const pathname = url.pathname;
   if (pathname === "/events") return "events.json";
   if (pathname === "/locations") return "locations.json";
-  if (pathname === "/search/boardgames") return "search-boardgames.json";
   if (pathname === "/search/users") {
     const query = (url.searchParams.get("query") ?? "").trim().toLowerCase();
     return query === MOCK_LUDOYA_USERNAME ? "search-users-found.json" : "search-users-empty.json";
   }
-  const children = pathname.match(/^\/events\/([^/]+)\/children$/);
-  if (children) return `children-${decodeURIComponent(children[1])}.json`;
   return null;
 }
 
@@ -201,8 +224,6 @@ async function readMock<T>(endpointPath: string): Promise<T> {
   try {
     return JSON.parse(await fs.readFile(fullPath, "utf-8")) as T;
   } catch {
-    // Not every event has a captured children fixture; treat as "no children".
-    if (file.startsWith("children-")) return { children: [] } as T;
     throw new LudoyaApiError(404, "mock_missing", endpointPath, `Fixture not found: ${fullPath}`);
   }
 }

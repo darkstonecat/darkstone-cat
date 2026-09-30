@@ -141,7 +141,7 @@ describe("fetchMonthEvents", () => {
     await fetchMonthEvents(2026, 11); // future month
 
     const urls = fetchMock.mock.calls.map(([u]) => String(u)).filter((u) => u.includes("/events"));
-    expect(urls[0]).toContain("pastLimit=60");
+    expect(urls[0]).toContain("pastLimit=200");
     expect(urls[1]).not.toContain("pastLimit");
   });
 });

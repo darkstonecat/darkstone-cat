@@ -133,6 +133,46 @@ describe("ludoyaGet", () => {
     expect(network).toMatchObject({ status: "rejected", reason: { code: "network" } });
   });
 
+  it("does not retry a 200 whose body is not JSON", async () => {
+    fetchMock.mockImplementation(async () => new Response("<html>oops</html>", { status: 200 }));
+
+    const result = await settle(ludoyaGet("/locations"));
+
+    expect(result).toMatchObject({ status: "rejected", reason: { code: "unknown", status: 200 } });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("honours per-call attempts", async () => {
+    fetchMock.mockImplementation(async () => jsonResponse({}, { status: 503 }));
+
+    await settle(ludoyaGet("/locations", { attempts: 2 }));
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("skips a retry that cannot fit inside the total budget", async () => {
+    fetchMock.mockImplementation(async () => {
+      throw Object.assign(new Error("timed out"), { name: "TimeoutError" });
+    });
+
+    const result = await settle(ludoyaGet("/locations", { timeoutMs: 4_000, attempts: 3, budgetMs: 1_200 }));
+
+    expect(result).toMatchObject({ status: "rejected", reason: { code: "timeout" } });
+    // The 1 s backoff would leave under 500 ms, so there is no second attempt.
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries while the budget allows it", async () => {
+    fetchMock
+      .mockImplementationOnce(async () => jsonResponse({}, { status: 503 }))
+      .mockImplementationOnce(async () => jsonResponse({ ok: true }));
+
+    const result = await settle(ludoyaGet("/locations", { attempts: 3, budgetMs: 8_000 }));
+
+    expect(result).toMatchObject({ status: "fulfilled", value: { ok: true } });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("never leaks the API key in errors or logs", async () => {
     fetchMock.mockImplementation(async () => {
       throw new TypeError(`fetch failed for header ${KEY}`);
@@ -156,16 +196,6 @@ describe("ludoyaGet", () => {
       const events = await ludoyaGet<{ futureEvents: { elements: unknown[] } }>("/events?includeSubEvents=true");
       expect(events.futureEvents.elements.length).toBeGreaterThan(0);
       expect(fetchMock).not.toHaveBeenCalled();
-    });
-
-    it("returns the captured children of an event and an empty list for others", async () => {
-      const withKids = await ludoyaGet<{ children: unknown[] }>(
-        "/events/da653bb7f37f4af1911a962a61630b6d/children"
-      );
-      expect(withKids.children.length).toBeGreaterThan(0);
-
-      const none = await ludoyaGet<{ children: unknown[] }>("/events/unknown/children");
-      expect(none.children).toEqual([]);
     });
 
     it("finds only the fixture username in user search", async () => {
