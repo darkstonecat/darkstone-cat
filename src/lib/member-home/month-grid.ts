@@ -227,3 +227,24 @@ export function buildCalendarView(
     ),
   };
 }
+
+/** A month reachable from the current one (its key and formatted title), or null at the range limit. */
+export interface CalendarNeighbour {
+  key: string;
+  title: string;
+}
+
+/**
+ * One month of the member calendar as plain data: header, neighbours for the
+ * navigation and either the grid or the reason Ludoya could not be read. The
+ * server builds it (for the first render and for `/api/profile/calendar`) so the
+ * client never formats dates.
+ */
+export interface CalendarPayload {
+  monthKey: string;
+  title: string;
+  prev: CalendarNeighbour | null;
+  next: CalendarNeighbour | null;
+  view: CalendarView | null;
+  error?: "api_error" | "timeout";
+}

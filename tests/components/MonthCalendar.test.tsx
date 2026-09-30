@@ -89,6 +89,14 @@ describe('MonthCalendar', () => {
     expect(buttons[2].querySelector('svg')).not.toBeNull()
   })
 
+  it('mobile: announces today on a day with events', () => {
+    render(<MonthCalendar view={view(OCT, EVENTS, '2026-10-02')} />)
+    const { grid } = tables()
+    const [today, other] = within(grid).getAllByRole('button', { hidden: true })
+    expect(today.getAttribute('aria-label')).toMatch(/, today$/)
+    expect(other.getAttribute('aria-label')).not.toContain('today')
+  })
+
   it('mobile: selecting a day fills the detail panel with title, time, place and an Ludoya button', () => {
     render(<MonthCalendar view={view(OCT, EVENTS, '2026-10-10')} />)
     const { grid } = tables()

@@ -121,8 +121,8 @@ test.describe('Member home calendar', () => {
     await page.goto(PAGES.profile)
     const nav = page.getByRole('navigation', { name: 'Navegació del calendari' })
     await expect(nav).toBeVisible()
-    await expect(nav.getByRole('link', { name: /^Mes anterior: / })).toBeVisible()
-    await expect(nav.getByRole('link', { name: /^Mes següent: / })).toBeVisible()
+    await expect(nav.getByRole('button', { name: /^Mes anterior: / })).toBeVisible()
+    await expect(nav.getByRole('button', { name: /^Mes següent: / })).toBeVisible()
     await expect(page.getByRole('table', { name: /^Calendari de / })).toHaveCount(1)
   })
 
@@ -138,9 +138,27 @@ test.describe('Member home calendar', () => {
     await expect(pills.first()).toHaveAttribute('target', '_blank')
     await expect(pills.first()).toHaveAttribute('rel', 'noopener noreferrer')
 
-    await page.getByRole('link', { name: /^Mes següent: Novembre 2026/ }).click()
+    // Months load from the calendar route, not through a page navigation.
+    const monthResponse = page.waitForResponse((r) => r.url().includes('/api/profile/calendar?month=2026-11'))
+    await page.getByRole('button', { name: /^Mes següent: Novembre 2026/ }).click()
+    expect((await monthResponse).status()).toBe(200)
     await expect(page).toHaveURL(/month=2026-11/)
     await expect(page.getByRole('table', { name: 'Calendari de Novembre 2026' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Calendari/ })).toContainText('Novembre 2026')
+  })
+
+  test('keeps the arrows focusable at the end of the range', async ({ memberPage: page }) => {
+    await page.goto(PAGES.profile)
+    const prev = page.getByRole('navigation', { name: 'Navegació del calendari' }).getByRole('button').first()
+    // 3 months back at most: go there, then the arrow becomes aria-disabled but keeps focus.
+    for (let i = 0; i < 3; i++) {
+      const loaded = page.waitForResponse((r) => r.url().includes('/api/profile/calendar'))
+      await prev.click()
+      await loaded
+      await expect(prev).toHaveAttribute('aria-label', i < 2 ? /^Mes anterior: / : /^Mes anterior no disponible$/)
+    }
+    await expect(prev).toHaveAttribute('aria-disabled', 'true')
+    await expect(prev).toBeFocused()
   })
 
   test('an invalid month falls back to the current one', async ({ memberPage: page }) => {
@@ -152,7 +170,7 @@ test.describe('Member home calendar', () => {
 })
 
 test.describe('Member home calendar on mobile', () => {
-  test.use({ viewport: { width: 390, height: 844 } })
+  test.use({ viewport: { width: 375, height: 812 } })
 
   test('day buttons are 44 px and select a day into the detail panel', async ({ memberPage: page }) => {
     await page.goto(`${PAGES.profile}?month=2026-10`)
@@ -162,6 +180,7 @@ test.describe('Member home calendar on mobile', () => {
     await expect(days.first()).toBeVisible()
     const box = await days.first().boundingBox()
     expect(box!.height).toBeGreaterThanOrEqual(44)
+    expect(box!.width).toBeGreaterThanOrEqual(44)
     await days.first().click()
     await expect(days.first()).toHaveAttribute('aria-pressed', 'true')
     const panel = page.getByRole('status', { name: 'Esdeveniments del dia seleccionat' })

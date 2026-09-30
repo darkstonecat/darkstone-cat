@@ -109,7 +109,7 @@ function GridCell({
 
   if (!day.inMonth) {
     return (
-      <td className="p-0.5 text-center">
+      <td className="p-px text-center">
         <span aria-hidden="true" className="flex h-11 items-center justify-center text-sm text-stone-custom/30">
           {day.day}
         </span>
@@ -122,15 +122,15 @@ function GridCell({
   const numberClass = cn(day.isToday && "underline decoration-2 underline-offset-4");
 
   return (
-    <td aria-current={day.isToday ? "date" : undefined} className="p-0.5 text-center">
+    <td aria-current={day.isToday ? "date" : undefined} className="p-px text-center">
       {hasEvents ? (
         <button
           type="button"
           aria-pressed={selected}
-          aria-label={t(special ? "day_events_special" : "day_events", {
+          aria-label={`${t(special ? "day_events_special" : "day_events", {
             date: day.label,
             count: day.events.length,
-          })}
+          })}${day.isToday ? `, ${t("today")}` : ""}`}
           onClick={() => onSelect(day.date)}
           className={cn(
             "relative flex h-11 w-full items-center justify-center rounded-[10px] text-sm font-bold text-brand-white",
@@ -231,19 +231,22 @@ export default function MonthCalendar({ view }: MonthCalendarProps) {
         </tbody>
       </table>
 
-      <table className="w-full table-fixed border-separate border-spacing-0 md:hidden">
-        <caption className="sr-only">{t("grid_label", { month: title })}</caption>
-        <WeekdayHeader weekdays={weekdays} compact />
-        <tbody>
-          {weeks.map((week) => (
-            <tr key={week[0].date}>
-              {week.map((day) => (
-                <GridCell key={day.date} day={day} selected={day.date === selected} onSelect={setChosen} />
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Bleeds into the card padding so each day stays 44 px wide from 360 px up. */}
+      <div className="-mx-3.5 md:hidden">
+        <table className="w-full table-fixed border-separate border-spacing-0">
+          <caption className="sr-only">{t("grid_label", { month: title })}</caption>
+          <WeekdayHeader weekdays={weekdays} compact />
+          <tbody>
+            {weeks.map((week) => (
+              <tr key={week[0].date}>
+                {week.map((day) => (
+                  <GridCell key={day.date} day={day} selected={day.date === selected} onSelect={setChosen} />
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {!hasEvents && <p className="text-sm text-stone-custom/65">{t("empty_month")}</p>}
       <ul className="flex items-center gap-x-4 text-[13px] text-stone-custom/65 md:hidden">
