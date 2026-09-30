@@ -330,8 +330,10 @@ current data sheet off `/profile`.)
   - Apply the new migrations to production when merging: `supabase/migrations/20260930100000_add_members_card_token.sql`,
     `20260930100100_create_member_badges.sql`, `20260930100200_harden_member_card_and_badges.sql`,
     `20260930110000_members_fk_on_delete_cascade.sql`, `20260930120000_verify_card_token.sql`.
-  - Browser check that "Veure a Ludoya" (`https://app.ludoya.com/<username>`) opens a personal
-    profile (unverified: the SPA returns 200 for any path).
+  - Done 2026-09-30: the user confirmed in a browser that "Veure a Ludoya"
+    (`https://app.ludoya.com/<username>`) opens the personal profile.
+  - Merging to `main` (production) is deferred by the user: work continues on `develop-users`.
+    The migrations above are applied to production only when that merge happens.
   - Future: a member approval state to show `ONLY_GROUP` sessions; optional cleanup job for
     unconfirmed sign-ups.
 
