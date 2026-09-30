@@ -91,6 +91,7 @@ current data sheet off `/profile`.)
   another's token, member cannot change own token). Route: inline candidate (one migration +
   types), delegate if RLS work grows.
   - Evidence: `db:reset` applied; integration rls+triggers 20/20 pass (token on new member, distinct tokens, own read, other unreadable, own update rejected, admin regenerate, non-admin rejected); lint and tsc clean. Token = 32 hex from `gen_random_uuid()` (no extension). Commit: see git log.
+  - Evidence (correction): migration `20260930100200` pins `membership_start_date` and `created_at` in `members_update_own` WITH CHECK, adds `CHECK (card_token ~ '^[0-9a-f]{32}$')` and revokes INSERT/UPDATE/DELETE/TRUNCATE on `member_badges` from anon/authenticated. Profile edit and signup actions never send those columns. New rls tests (own start date/created_at unchanged, malformed admin token rejected, anon rpc rejected, unknown member raises); `db:reset` and lint/tsc/unit/integration results in the commit report.
 - [x] B1.2 — Migration: `member_badges` (member id, badge key, awarded_at, unique pair), RLS
   select-own + admin all, no member writes; badge keys as a check constraint
   (`volunteer_egara_joga`, `ludoteca_donor`). "Membre {year}" is derived, not stored

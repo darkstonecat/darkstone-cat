@@ -174,6 +174,53 @@ describe('UPDATE policies', () => {
     expect(error).not.toBeNull()
   })
 
+  it('member cannot change their own membership_start_date', async () => {
+    const client = await createAuthenticatedClient(
+      'rls-a@test.local',
+      'password123'
+    )
+    const { data } = await client
+      .from('members')
+      .update({ membership_start_date: '2000-01-01' })
+      .eq('id', userA.id)
+      .select()
+
+    expect(data ?? []).toHaveLength(0)
+    const { data: row } = await supabaseAdmin
+      .from('members')
+      .select('membership_start_date')
+      .eq('id', userA.id)
+      .single()
+    expect(row!.membership_start_date).not.toBe('2000-01-01')
+  })
+
+  it('member cannot change their own created_at', async () => {
+    const client = await createAuthenticatedClient(
+      'rls-a@test.local',
+      'password123'
+    )
+    const { data } = await client
+      .from('members')
+      .update({ created_at: '2000-01-01T00:00:00Z' })
+      .eq('id', userA.id)
+      .select()
+
+    expect(data ?? []).toHaveLength(0)
+  })
+
+  it('admin cannot set a malformed card_token directly', async () => {
+    const client = await createAuthenticatedClient(
+      'rls-admin@test.local',
+      'password123'
+    )
+    const { error } = await client
+      .from('members')
+      .update({ card_token: 'guessable' })
+      .eq('id', userB.id)
+
+    expect(error).not.toBeNull()
+  })
+
   it('admin can update any member profile', async () => {
     const client = await createAuthenticatedClient(
       'rls-admin@test.local',
@@ -214,6 +261,32 @@ describe('regenerate_card_token()', () => {
       .eq('id', userB.id)
       .single()
     expect(after!.card_token).toBe(newToken)
+  })
+
+  it('anonymous client cannot execute regenerate_card_token', async () => {
+    const anon = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
+      { auth: { persistSession: false } }
+    )
+    const { error } = await anon.rpc('regenerate_card_token', {
+      target_member_id: userB.id,
+    })
+
+    expect(error).not.toBeNull()
+  })
+
+  it('raises for an unknown member id', async () => {
+    const client = await createAuthenticatedClient(
+      'rls-admin@test.local',
+      'password123'
+    )
+    const { error } = await client.rpc('regenerate_card_token', {
+      target_member_id: '00000000-0000-0000-0000-000000000000',
+    })
+
+    expect(error).not.toBeNull()
+    expect(error!.message).toContain('Member not found')
   })
 
   it('non-admin cannot regenerate a token', async () => {
