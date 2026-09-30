@@ -132,6 +132,13 @@ current data sheet off `/profile`.)
   endpoints, old fixtures and group-id env vars (`LUDOYA_GROUP_*`, `LUDOYA_APP_URL` if unused).
   Rewrite `docs/ludoya-api-reference.md` and the CLAUDE.md Ludoya section. Checks: events and
   event-images E2E, `npm run ludoya:check`, visual check of `/events`.
+  - Commits: f7da5e5, fa409c2, 0312fdd, e8ac780, 8266bd2, af86956 (B2.1–B2.6). Route: delegated
+    (writer trigger). Assess: high → independent verifier: 2 major (private plays leaked into
+    `/events`; one null date broke the whole feed) + 10 minor. Correction d8f3145, 45fb678,
+    21f2055, 3457d12: per-play visibility, skip null dates/unknown visibility, username input
+    guard, global Ludoya cap (30/min/instance), non-retryable bad JSON, time budgets, multi-day
+    sessions, `pastLimit` 200 (it counts sub-events, probed), year-gated fuzzy game matches,
+    dead code removed. Parent spot check: `npm run test:unit` 249/249, `npx tsc --noEmit` clean.
   - Evidence: `npm run ludoya:check` live: all 5 sections pass (key, 9 locations with one default, 33 events with 6 inline plays, children, user search, 12/12 images); lint/tsc clean, `npm run test:unit` 208/208, `npm run build` ok, Playwright `navigation` + `seo` specs (the only ones touching `/events`) 72/72 pass; `next start` with the live key serves `/events` (200, real sessions) and `/api/events/{id}/image` (200 PNG, `Resolved 4/4 games … bgg-search`). Legacy client/config/normalizer, old fixtures and `LUDOYA_GROUP_*` / `LUDOYA_IMAGE_BASE_URL` removed; `docs/ludoya-api-reference.md` rewritten (gitignored, local only). Pending user action: add the `LUDOYA_API_KEY` GitHub secret for the weekly workflow.
 
 ### B3 — Login + magic link (screen 01)
@@ -140,11 +147,13 @@ current data sheet off `/profile`.)
   keeps session cookies, redirects to a safe same-origin `redirect` or `/profile`; error →
   `/login?magic=error`. Local Supabase magic-link template in `supabase/config.toml` if needed.
   Tests: route unit tests (success, bad token, open-redirect rejected).
+  - Commit: 1adc2c4. Route: delegated (writer trigger).
   - Evidence: `tests/server/api/magic-link.test.ts` 13/13 (success + cookies kept, safe redirect, 8 open-redirect variants fall back to `/profile`, missing/wrong type, verify error); live against local Supabase + dev server: OTP email arrives in Mailpit in Catalan with `http://127.0.0.1:3000/auth/magic-link?token_hash=...&type=email`, the route answers 307 to the `redirect` with the `sb-127-auth-token` cookie, a replay of the same link answers 307 to `/login?magic=error`; lint/tsc clean, `npm run test:unit` 221/221. Local Supabase restarted for the new template (`supabase/templates/magic_link.html`, `additional_redirect_urls`). Note: `signInWithOtp({ shouldCreateUser:false })` for an unknown email returns 422 `otp_disabled` (the UI must treat it as neutral, B3.2). The magic-link email does not carry `redirect` (prod template has no `{{ .RedirectTo }}`): after a magic link the member lands on `/profile`.
 - [x] B3.2 — Login redesign: two cards, "Envia'm un enllaç d'accés"
   (`signInWithOtp({ shouldCreateUser: false })`), sent state, aria-live errors, mobile single
   column, `AuthHero` copy. Keep `?confirmed=`/`?recovery=` handling. Tests: component + update
   `e2e/auth/login.spec.ts`. Visual comparison.
+  - Commit: d81e96a. Route: delegated (writer trigger).
   - Evidence: `tests/components/LoginForm.test.tsx` 11/11; `npx playwright test e2e/auth` 25/25 (incl. new magic-link E2E through local Mailpit: neutral sent state for unknown email, real link signs in and lands on `/profile`, replay goes to `/login?magic=error`, unsafe `redirect` falls back to `/profile`, both buttons disabled while submitting); `e2e/navigation`+`admin`+`seo` 85/86 (the only failure, `locale-routing` "language switcher is visible", fails identically on the base without my changes). lint clean, `npm run test:unit` 249/249, `npm run test:integration` 52/52, `npx tsc --noEmit` only errors in `tests/lib/ludoya/normalize.test.ts` (other writer). Visual comparison at 1280 px (DSF 1) and 390 px (DSF 2): after fixing hero padding, grid width (944 px incl. gutters), input height (48), forgot link hit area and card B line-heights, the only differences left are the real NavBar/Footer render (logo x 28 vs 52, footer lazy animation) and sample data; page height 1340 vs 1347 px. Mobile follows the spec proposal (single column, photo 140 px). Also: new token `brand-orange-light` (#E07A2E), shared `src/lib/safe-redirect.ts` now also guards the password-login `redirect` param (was an open redirect), `AuthHero` paddings enlarged (all auth pages).
 - [ ] B3.3 — External check (user): Supabase prod Site URL, redirect allow-list includes
   `/auth/magic-link`, OTP expiry, email rate limits. Recorded, not code.
@@ -198,6 +207,9 @@ current data sheet off `/profile`.)
 - [ ] B6.2 — "Properes sessions": expandable per-session list (place per session, covers,
   counts, seat dots only desktop and capacity ≤ 8, max 5 plays, "Especial" chip, join/queue
   links to Ludoya), loading skeleton, empty, and Ludoya-down states. Mobile cards. Tests.
+  Carry-over from the B2 correction: `fetchMemberWeekSessions` requests no past events, so a
+  multi-day event that started before today may be missing if Ludoya moves it to `pastEvents`;
+  probe once and add a small `pastLimit` if needed.
 - [ ] B6.3 — Month calendar: desktop sheet with pills, mobile 44 px grid + selected-day panel,
   Monday-first, prev/next month, out-of-month days `aria-hidden`. Tests.
 - [ ] B6.4 — Visual comparison of the four home screenshots; E2E for the home.
@@ -230,6 +242,13 @@ current data sheet off `/profile`.)
 ## Progress
 
 - 2026-09-30: plan created, no code written. Open questions Q1–Q4 decided. Next: B1.1.
+- 2026-09-30: autonomous run (orchestrator + delegated writers, RDD globally off → `review assess`
+  per block, independent verifier on high risk).
+  - B1 done: f42cf94, 8dfd8b6, 216b455; verifier (high) → 1 major (member could backdate
+    `membership_start_date`) + 3 minor, fixed in 081c0b2, 055cd9a. Spot check: integration 52/52.
+  - B2 done (see B2.6). Decision: event images match BGG by name + year (public API has no bggId).
+  - B3.1/B3.2 done: 1adc2c4, d81e96a; assess high → verifier pending. B3.3 is a user action.
+- Pending user actions: `LUDOYA_API_KEY` GitHub secret; B3.3 production Supabase checks.
 
 ## Notes
 
