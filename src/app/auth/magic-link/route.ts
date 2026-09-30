@@ -1,24 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-
-const DEFAULT_TARGET = "/profile";
-
-/**
- * Accepts only same-origin relative paths ("/profile", "/es/about?x=1").
- * Rejects absolute URLs, protocol-relative ("//host"), backslashes, schemes
- * and control characters. Anything else falls back to `/profile`.
- */
-function safeRedirectPath(raw: string | null, origin: string): string {
-  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return DEFAULT_TARGET;
-  if (/[\\\u0000-\u001f\u007f]/.test(raw)) return DEFAULT_TARGET;
-  try {
-    const parsed = new URL(raw, origin);
-    if (parsed.origin !== origin) return DEFAULT_TARGET;
-    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
-  } catch {
-    return DEFAULT_TARGET;
-  }
-}
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

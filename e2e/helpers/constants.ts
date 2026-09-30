@@ -66,8 +66,10 @@ export const TEXT = {
   hero_tagline: 'Jocs de Taula i Rol a Terrassa',
 
   // Auth
-  login_submit: 'Iniciar sessió',
-  login_submitting: 'Iniciant sessió...',
+  login_submit: 'Entra',
+  login_magic_button: "Envia'm un enllaç d'accés",
+  login_magic_sent_title: 'Revisa el teu correu',
+  login_magic_error: "L'enllaç d'accés no és vàlid o ha caducat. Demana'n un de nou.",
   login_error_invalid: 'Correu o contrasenya incorrectes.',
   register_submit: 'Registrar-me',
   register_submitting: 'Registrant...',

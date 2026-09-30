@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import AuthHero from "@/components/auth/AuthHero";
 import LoginForm from "@/components/auth/LoginForm";
+import LoginSignupCard from "@/components/auth/LoginSignupCard";
 
 export const revalidate = false;
 
@@ -52,9 +53,10 @@ export default async function LoginPage({
       <NavBar />
       <AuthHero titleKey="login_title" subtitleKey="login_subtitle" />
 
-      <section className="flex-1 bg-brand-beige pb-20">
-        <div className="container mx-auto max-w-4xl px-6 pt-16">
+      <section className="flex-1 bg-brand-beige py-8 md:py-16">
+        <div className="mx-auto grid w-full max-w-[1040px] grid-cols-1 gap-6 px-4 md:grid-cols-2 md:gap-10 md:px-12">
           <LoginForm />
+          <LoginSignupCard />
         </div>
       </section>
 

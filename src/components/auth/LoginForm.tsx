@@ -1,18 +1,30 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+import { MdOutlineMail, MdMarkEmailRead } from "react-icons/md";
 import { Link } from "@/i18n/routing";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
-type FormStatus = "idle" | "submitting" | "error";
+type FormStatus = "idle" | "submitting" | "sending-link" | "link-sent" | "error";
 
 type FieldErrors = {
   email?: string;
   password?: string;
 };
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const inputClass =
+  "min-h-11 w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-[11px] text-base text-stone-custom placeholder:text-stone-custom/50 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50";
+
+const labelClass = "text-sm font-medium text-stone-custom/80";
+
+const bannerBase = "rounded-xl border px-4 py-3 text-sm";
+const errorBanner = `${bannerBase} border-red-200 bg-red-50 text-red-700`;
 
 export default function LoginForm() {
   const t = useTranslations("auth");
@@ -20,16 +32,26 @@ export default function LoginForm() {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [email, setEmail] = useState("");
+  const sentHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const confirmed = searchParams.get("confirmed");
   const recovery = searchParams.get("recovery");
+  const magic = searchParams.get("magic");
   const redirect = searchParams.get("redirect");
+
+  const isBusy = status === "submitting" || status === "sending-link";
+  const emailValid = EMAIL_RE.test(email.trim());
+
+  useEffect(() => {
+    if (status === "link-sent") sentHeadingRef.current?.focus();
+  }, [status]);
 
   function validate(data: { email: string; password: string }): FieldErrors {
     const errs: FieldErrors = {};
     if (!data.email.trim()) {
       errs.email = t("required_field");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    } else if (!EMAIL_RE.test(data.email)) {
       errs.email = t("invalid_email");
     }
     if (!data.password.trim()) {
@@ -40,8 +62,7 @@ export default function LoginForm() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = e.currentTarget;
-    const formData = new FormData(form);
+    const formData = new FormData(e.currentTarget);
 
     const data = {
       email: formData.get("email") as string,
@@ -76,158 +97,198 @@ export default function LoginForm() {
     // Hard navigation to ensure cookies are fully set before SSR reads them.
     // Using router.replace() here causes repeated RSC fetches due to
     // token refresh race between client-side Supabase and the middleware.
-    window.location.href = redirect ?? "/profile";
+    window.location.href = safeRedirectPath(redirect, window.location.origin);
   }
 
-  const isSubmitting = status === "submitting";
+  async function handleMagicLink() {
+    if (!emailValid || isBusy) return;
+
+    setStatus("sending-link");
+    setErrorMessage("");
+    setErrors({});
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: { shouldCreateUser: false },
+    });
+
+    // "otp_disabled" means no account for that email. Show the same neutral
+    // confirmation as a real send so the form does not reveal who is a member.
+    if (error && error.code !== "otp_disabled") {
+      setStatus("error");
+      setErrorMessage(
+        error.status === 429 || error.code === "over_email_send_rate_limit"
+          ? t("login_magic_error_rate_limit")
+          : t("login_error_generic")
+      );
+      return;
+    }
+
+    setStatus("link-sent");
+  }
+
+  const cardClass =
+    "flex flex-col gap-5 rounded-2xl bg-brand-white p-6 shadow-sm md:p-9";
+
+  if (status === "link-sent") {
+    return (
+      <div className={cardClass}>
+        <div className="flex flex-col items-start gap-4" role="status">
+          <MdMarkEmailRead
+            size={40}
+            aria-hidden="true"
+            className="text-brand-orange-text"
+          />
+          <h2
+            ref={sentHeadingRef}
+            tabIndex={-1}
+            className="text-2xl font-bold tracking-tight text-stone-custom outline-none"
+          >
+            {t("login_magic_sent_title")}
+          </h2>
+          <p className="text-[15px] leading-relaxed text-stone-custom/75">
+            {t("login_magic_sent_text", { email: email.trim() })}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setStatus("idle")}
+          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-stone-custom/15 bg-brand-white px-6 text-sm font-semibold text-stone-custom transition-colors hover:bg-stone-custom/5"
+        >
+          {t("login_magic_sent_back")}
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="mx-auto w-full max-w-md">
-      <AnimatePresence mode="wait">
-        <motion.form
-          key="login-form"
-          className="space-y-6"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.5 }}
-          onSubmit={handleSubmit}
-          noValidate
-        >
-          {confirmed === "success" && (
-            <motion.div
-              role="status"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
-            >
-              {t("login_confirmed_success")}
-            </motion.div>
-          )}
-
-          {confirmed === "error" && (
-            <motion.div
-              role="alert"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
-              {t("login_confirmed_error")}
-            </motion.div>
-          )}
-
-          {recovery === "error" && (
-            <motion.div
-              role="alert"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
-              {t("login_recovery_error")}
-            </motion.div>
-          )}
-
-          {status === "error" && errorMessage && (
-            <motion.div
-              role="alert"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
-              {errorMessage}
-            </motion.div>
-          )}
-
-          <div>
-            <label
-              htmlFor="email"
-              className="mb-2 block text-sm font-medium text-stone-custom/80"
-            >
-              {t("login_email_label")}{" "}
-              <span className="text-brand-red" aria-hidden="true">
-                *
-              </span>
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              autoComplete="email"
-              disabled={isSubmitting}
-              aria-invalid={!!errors.email}
-              aria-describedby={errors.email ? "email-error" : undefined}
-              onChange={() =>
-                errors.email && setErrors((e) => ({ ...e, email: undefined }))
-              }
-              className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/50 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
-            />
-            {errors.email && (
-              <p id="email-error" className="mt-1 text-xs text-red-600">
-                {errors.email}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="mb-2 block text-sm font-medium text-stone-custom/80"
-            >
-              {t("login_password_label")}{" "}
-              <span className="text-brand-red" aria-hidden="true">
-                *
-              </span>
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              autoComplete="current-password"
-              disabled={isSubmitting}
-              aria-invalid={!!errors.password}
-              aria-describedby={errors.password ? "password-error" : undefined}
-              onChange={() =>
-                errors.password &&
-                setErrors((e) => ({ ...e, password: undefined }))
-              }
-              className="w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/50 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50"
-            />
-            {errors.password && (
-              <p id="password-error" className="mt-1 text-xs text-red-600">
-                {errors.password}
-              </p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full rounded-xl bg-stone-custom px-6 py-3.5 text-sm font-semibold text-brand-white transition-colors hover:bg-stone-custom/90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-70"
+    <motion.form
+      className={cardClass}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      onSubmit={handleSubmit}
+      noValidate
+    >
+      <div aria-live="polite" className="flex flex-col gap-5 empty:hidden">
+        {confirmed === "success" && (
+          <div
+            role="status"
+            className={`${bannerBase} border-green-200 bg-green-50 text-green-700`}
           >
-            {isSubmitting ? t("login_submitting") : t("login_submit")}
-          </button>
-
-          <div className="flex flex-col items-center gap-3 text-sm">
-            <Link
-              href="/forgot-password"
-              className="text-brand-orange-text transition-colors hover:text-brand-orange"
-            >
-              {t("login_forgot_password")}
-            </Link>
-            <p className="text-stone-custom/60">
-              {t("login_no_account")}{" "}
-              <Link
-                href="/register"
-                className="font-medium text-brand-orange-text transition-colors hover:text-brand-orange"
-              >
-                {t("login_register_link")}
-              </Link>
-            </p>
+            {t("login_confirmed_success")}
           </div>
-        </motion.form>
-      </AnimatePresence>
-    </div>
+        )}
+        {confirmed === "error" && (
+          <div role="alert" className={errorBanner}>
+            {t("login_confirmed_error")}
+          </div>
+        )}
+        {recovery === "error" && (
+          <div role="alert" className={errorBanner}>
+            {t("login_recovery_error")}
+          </div>
+        )}
+        {magic === "error" && (
+          <div role="alert" className={errorBanner}>
+            {t("login_magic_error")}
+          </div>
+        )}
+        {status === "error" && errorMessage && (
+          <div role="alert" className={errorBanner}>
+            {errorMessage}
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="email" className={labelClass}>
+          {t("login_email_label")}
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+          autoComplete="email"
+          value={email}
+          disabled={isBusy}
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? "email-error" : undefined}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+          }}
+          className={inputClass}
+        />
+        {errors.email && (
+          <p id="email-error" className="text-xs text-red-600">
+            {errors.email}
+          </p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-baseline justify-between gap-3">
+          <label htmlFor="password" className={labelClass}>
+            {t("login_password_label")}
+          </label>
+          <Link
+            href="/forgot-password"
+            className="-my-3 inline-flex items-center py-3 text-[13px] font-medium text-brand-orange-text underline transition-colors hover:text-brand-orange"
+          >
+            {t("login_forgot_password")}
+          </Link>
+        </div>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          autoComplete="current-password"
+          disabled={isBusy}
+          aria-invalid={!!errors.password}
+          aria-describedby={errors.password ? "password-error" : undefined}
+          onChange={() =>
+            errors.password && setErrors((prev) => ({ ...prev, password: undefined }))
+          }
+          className={inputClass}
+        />
+        {errors.password && (
+          <p id="password-error" className="text-xs text-red-600">
+            {errors.password}
+          </p>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        disabled={isBusy}
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-stone-custom px-6 text-sm font-semibold text-brand-white transition-colors hover:bg-stone-custom/90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-70"
+      >
+        {t("login_submit")}
+      </button>
+
+      <div className="flex items-center gap-3 text-[13px] text-stone-custom/65">
+        <span className="h-px flex-1 bg-stone-custom/[0.12]" />
+        {t("login_divider")}
+        <span className="h-px flex-1 bg-stone-custom/[0.12]" />
+      </div>
+
+      <button
+        type="button"
+        onClick={handleMagicLink}
+        disabled={isBusy || !emailValid}
+        aria-describedby="magic-helper"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-stone-custom/15 bg-brand-white px-6 text-sm font-semibold text-stone-custom transition-colors hover:bg-stone-custom/5 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
+      >
+        <MdOutlineMail size={18} aria-hidden="true" />
+        {t("login_magic_button")}
+      </button>
+      <p id="magic-helper" className="text-[13px] leading-normal text-stone-custom/65">
+        {t("login_magic_helper")}
+      </p>
+    </motion.form>
   );
 }

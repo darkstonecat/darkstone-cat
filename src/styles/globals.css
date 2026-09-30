@@ -8,6 +8,7 @@
   --color-brand-red: #A61A1A;
   --color-brand-orange: #B54F00;
   --color-brand-orange-text: #A04500;
+  --color-brand-orange-light: #E07A2E; /* orange on dark backgrounds only */
   --color-brand-beige: #EEE8DC;
   --color-brand-blue: #05064D;
   --color-stone-custom: #1C1917;
