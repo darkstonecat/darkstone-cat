@@ -809,6 +809,7 @@
       "slide_label": "{current} of {total}",
       "prev_badge": "Previous badge",
       "next_badge": "Next badge",
+      "badge_position": "Badge {current} of {total}",
       "dot_label": "Badge {number}: {title}",
       "badge_locked": "(not earned yet)",
       "badge_member_year": "Member {year}",

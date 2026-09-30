@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, within, fireEvent } from '@testing-library/react'
 
 // Messages come back as `key` or `key(values)`, so tests read the rule, not the copy.
@@ -17,6 +17,17 @@ vi.mock('next/image', () => ({
 
 import SessionsList from '@/components/profile/SessionsList'
 import type { MemberSession, MemberSessionPlay } from '@/lib/member-sessions'
+import { toSessionRow } from '@/lib/member-home/sessions-view'
+
+// jsdom has no matchMedia; tests default to a desktop viewport.
+const stubViewport = (mobile: boolean) =>
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: mobile && query.includes('max-width'),
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }))
+beforeEach(() => stubViewport(false))
+afterEach(() => vi.unstubAllGlobals())
 
 const LUDOYA = 'https://ludoya.test'
 
@@ -39,7 +50,7 @@ const play = (over: Partial<MemberSessionPlay> = {}): MemberSessionPlay => ({
   ...over,
 })
 
-const session = (over: Partial<MemberSession> = {}): MemberSession => ({
+const baseSession = (over: Partial<MemberSession> = {}): MemberSession => ({
   id: 's1',
   title: 'Friday session',
   description: '',
@@ -61,6 +72,8 @@ const session = (over: Partial<MemberSession> = {}): MemberSession => ({
   plannedPlays: [play()],
   ...over,
 })
+
+const session = (over: Partial<MemberSession> = {}) => toSessionRow(baseSession(over), 'ca')
 
 describe('SessionsList states', () => {
   it('shows an error card with a Ludoya link and no session list', () => {
@@ -151,7 +164,7 @@ describe('SessionsList accordion', () => {
 })
 
 describe('SessionsList plays', () => {
-  const open = (s: MemberSession) => {
+  const open = (s: ReturnType<typeof session>) => {
     render(<SessionsList sessions={[s]} ludoyaUrl={LUDOYA} />)
     fireEvent.click(screen.getByRole('button', { name: /show_plays/ }))
     return within(screen.getByRole('list', { name: /plays_list/ }))
@@ -218,5 +231,23 @@ describe('SessionsList plays', () => {
     expect(plays.getByText('propose_title')).toBeInTheDocument()
     expect(plays.getByRole('link', { name: /propose_label\(Friday session\)/ })).toHaveAttribute('href', 'https://ludoya.test/events/s1')
     expect(screen.queryByRole('link', { name: /more/ })).toBeNull()
+  })
+})
+
+describe('SessionsList default expansion', () => {
+  it('expands only the first session on mobile', () => {
+    stubViewport(true)
+    render(<SessionsList sessions={[session({ id: 'a', title: 'A' }), session({ id: 'b', title: 'B' })]} ludoyaUrl={LUDOYA} />)
+    const buttons = screen.getAllByRole('button', { name: /(show|hide)_plays/ })
+    expect(buttons.map((b) => b.getAttribute('aria-expanded'))).toEqual(['true', 'false'])
+    fireEvent.click(buttons[0])
+    expect(buttons[0]).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('starts all collapsed on desktop', () => {
+    stubViewport(false)
+    render(<SessionsList sessions={[session({ id: 'a', title: 'A' }), session({ id: 'b', title: 'B' })]} ludoyaUrl={LUDOYA} />)
+    const buttons = screen.getAllByRole('button', { name: /(show|hide)_plays/ })
+    expect(buttons.map((b) => b.getAttribute('aria-expanded'))).toEqual(['false', 'false'])
   })
 })

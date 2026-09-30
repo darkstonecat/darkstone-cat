@@ -1,10 +1,11 @@
 import { Suspense } from "react";
 import { useTranslations } from "next-intl";
+import { getLocale } from "next-intl/server";
 import { MdGridView } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { ludoyaConfig } from "@/lib/ludoya/config";
 import { fetchMemberWeekSessions } from "@/lib/member-sessions";
-import { toMemberSessions } from "@/lib/member-home/sessions-view";
+import { toMemberSessions, toSessionRow } from "@/lib/member-home/sessions-view";
 import SessionsList from "./SessionsList";
 
 function SessionsSkeleton() {
@@ -32,8 +33,9 @@ function SessionsSkeleton() {
 
 /** Fetches this week's sessions from Ludoya; runs inside the Suspense boundary so a slow API never blocks the page. */
 async function SessionsData() {
-  const { sessions, error } = await fetchMemberWeekSessions();
-  return <SessionsList sessions={toMemberSessions(sessions)} error={error} ludoyaUrl={ludoyaConfig.appUrl} />;
+  const [{ sessions, error }, locale] = await Promise.all([fetchMemberWeekSessions(), getLocale()]);
+  const rows = toMemberSessions(sessions).map((session) => toSessionRow(session, locale));
+  return <SessionsList sessions={rows} error={error} ludoyaUrl={ludoyaConfig.appUrl} />;
 }
 
 /**

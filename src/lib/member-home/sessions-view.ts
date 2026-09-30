@@ -105,3 +105,18 @@ export function formatSessionWhen(session: Pick<MemberSession, "startsAt" | "end
     : `${formatParts(session.endsAt, locale, { day: "numeric", month: "short" })} ${time(session.endsAt)}`;
   return `${date} · ${time(session.startsAt)} – ${end}`;
 }
+
+/** A session with its date text already formatted, ready for the client list. */
+export type SessionRow = MemberSession & {
+  tile: { weekday: string; day: string };
+  when: string;
+};
+
+/**
+ * Formats the date text on the server: Node and browser ICU can differ
+ * (apostrophes, abbreviations), so a client component that formats dates
+ * risks a hydration mismatch.
+ */
+export function toSessionRow(session: MemberSession, locale: string): SessionRow {
+  return { ...session, tile: formatTile(session.startsAt, locale), when: formatSessionWhen(session, locale) };
+}

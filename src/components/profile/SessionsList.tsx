@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   MdAdd,
   MdExpandLess,
@@ -11,20 +11,20 @@ import {
   MdOutlineErrorOutline,
   MdOutlinePlace,
 } from "react-icons/md";
-import type { MemberSession, MemberSessionPlay } from "@/lib/member-sessions";
+import type { MemberSessionPlay } from "@/lib/member-sessions";
+import { useIsMobileViewport } from "@/hooks/useIsMobileViewport";
 import {
-  formatSessionWhen,
-  formatTile,
   MAX_PLAYS_SHOWN,
   MAX_STACK_COVERS,
   playSeats,
   SEAT_DOTS_MAX,
   summarizeSession,
+  type SessionRow,
 } from "@/lib/member-home/sessions-view";
 import { cn } from "@/lib/utils";
 
 type SessionsListProps = {
-  sessions: MemberSession[];
+  sessions: SessionRow[];
   /** Set when Ludoya could not be reached and there is no cached data. */
   error?: "api_error" | "timeout";
   /** Ludoya home, used by the empty and error states. */
@@ -121,13 +121,16 @@ function PlayRow({ play }: { play: MemberSessionPlay }) {
   );
 }
 
-function SessionItem({ session }: { session: MemberSession }) {
+function SessionItem({ session, openOnMobile }: { session: SessionRow; openOnMobile: boolean }) {
   const t = useTranslations("profile.home.sessions");
-  const locale = useLocale();
-  const [open, setOpen] = useState(false);
+  const isMobile = useIsMobileViewport();
+  // Until the person toggles it, the first session starts expanded on mobile only
+  // (desktop starts collapsed). `isMobile` is false while hydrating, so no mismatch.
+  const [toggled, setToggled] = useState<boolean | null>(null);
+  const open = toggled ?? (openOnMobile && isMobile);
   const panelId = `plays-${session.id}`;
   const special = session.type === "special";
-  const tile = formatTile(session.startsAt, locale);
+  const { tile } = session;
   const summary = summarizeSession(session);
   const shown = session.plannedPlays.slice(0, MAX_PLAYS_SHOWN);
   const hidden = session.plannedPlays.length - shown.length;
@@ -159,7 +162,7 @@ function SessionItem({ session }: { session: MemberSession }) {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-stone-custom/65">{formatSessionWhen(session, locale)}</p>
+              <p className="text-sm text-stone-custom/65">{session.when}</p>
               {session.place && (
                 <p
                   className={cn(
@@ -205,7 +208,7 @@ function SessionItem({ session }: { session: MemberSession }) {
             type="button"
             aria-expanded={open}
             aria-controls={panelId}
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setToggled(!open)}
             className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-stone-custom/20 bg-brand-white px-4 text-sm font-semibold text-stone-custom md:w-[150px]"
           >
             {open ? t("hide_plays") : t("show_plays")}
@@ -305,8 +308,8 @@ export default function SessionsList({ sessions, error, ludoyaUrl }: SessionsLis
 
   return (
     <ul className="flex flex-col gap-3">
-      {sessions.map((session) => (
-        <SessionItem key={session.id} session={session} />
+      {sessions.map((session, i) => (
+        <SessionItem key={session.id} session={session} openOnMobile={i === 0} />
       ))}
     </ul>
   );

@@ -8,7 +8,7 @@ const bgg = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/bgg", () => bgg);
 
-import { fetchMemberWeekSessions, fetchMonthEvents } from "@/lib/member-sessions";
+import { COVER_BUDGET_MS, fetchMemberWeekSessions, fetchMonthEvents } from "@/lib/member-sessions";
 
 const collectionGame = (over: Partial<BggGame>): BggGame => ({
   id: "1",
@@ -92,6 +92,24 @@ describe("fetchMemberWeekSessions", () => {
 
     expect(error).toBeUndefined();
     expect(sessions[0].plannedPlays.every((p) => p.coverUrl === p.imageUrl)).toBe(true);
+  });
+
+  it("does not wait for a slow BGG: after the cover budget the Ludoya covers are used", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    bgg.fetchBggCollection.mockReturnValue(new Promise(() => {})); // never settles
+
+    let settled = false;
+    const pending = fetchMemberWeekSessions().finally(() => (settled = true));
+    // The fixture read takes real I/O time before the cover timer starts, so keep advancing.
+    await vi.waitFor(async () => {
+      await vi.advanceTimersByTimeAsync(COVER_BUDGET_MS + 100);
+      expect(settled).toBe(true);
+    });
+    const { sessions, error } = await pending;
+
+    expect(error).toBeUndefined();
+    expect(sessions).toHaveLength(2);
+    expect(sessions.flatMap((s) => s.plannedPlays).every((p) => p.coverUrl === p.imageUrl)).toBe(true);
   });
 
   it("only resolves BGG covers for the plays the home shows (max 5 per session)", async () => {

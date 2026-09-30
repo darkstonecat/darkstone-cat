@@ -62,10 +62,36 @@ async function loadCollection(): Promise<BggGame[]> {
   }
 }
 
+/**
+ * Cover matching goes through BGG (collection, search, things), whose calls can
+ * take 30 s or poll on 202, so it is raced against this budget: plays that do
+ * not resolve in time keep Ludoya's own image and the page never waits on BGG.
+ * The lookups keep running and warm the fetch cache for the next render.
+ */
+export const COVER_BUDGET_MS = 2_500;
+
+async function resolveCoversWithin(shown: LudoyaSessionPlay[], budgetMs: number) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<Map<string, string | null>>((resolve) => {
+    timer = setTimeout(() => {
+      console.warn(`[Covers] BGG lookup exceeded ${budgetMs} ms; using Ludoya covers`);
+      resolve(new Map());
+    }, budgetMs);
+  });
+  const lookup = (async () => resolvePlayCovers(shown, await loadCollection()))().catch((error) => {
+    console.warn(`[Covers] BGG lookup failed: ${describeError(error)}`);
+    return new Map<string, string | null>();
+  });
+  try {
+    return await Promise.race([lookup, timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function withCovers(sessions: LudoyaSession[]): Promise<MemberSession[]> {
   const shown = sessions.flatMap((s) => s.plannedPlays.slice(0, MAX_PLAYS_SHOWN));
-  const covers =
-    shown.length > 0 ? await resolvePlayCovers(shown, await loadCollection()) : new Map<string, string | null>();
+  const covers = shown.length > 0 ? await resolveCoversWithin(shown, COVER_BUDGET_MS) : new Map<string, string | null>();
 
   return sessions.map((session) => ({
     ...session,

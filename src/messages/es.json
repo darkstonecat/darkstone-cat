@@ -809,6 +809,7 @@
       "slide_label": "{current} de {total}",
       "prev_badge": "Insignia anterior",
       "next_badge": "Insignia siguiente",
+      "badge_position": "Insignia {current} de {total}",
       "dot_label": "Insignia {number}: {title}",
       "badge_locked": "(todavía no conseguida)",
       "badge_member_year": "Miembro {year}",

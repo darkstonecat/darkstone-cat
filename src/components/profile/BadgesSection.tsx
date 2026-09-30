@@ -49,7 +49,7 @@ function BadgeCircle({ item, className }: { item: BadgeItem; className?: string 
       className={cn(
         "flex size-[72px] shrink-0 items-center justify-center rounded-full",
         item.earned
-          ? "bg-stone-custom text-brand-orange-light shadow-[0_0_0_4px_#fff,0_0_0_6px_#B54F00]"
+          ? "bg-stone-custom text-brand-orange-light shadow-[0_0_0_4px_var(--color-brand-white),0_0_0_6px_var(--color-brand-orange)]"
           : "border-2 border-dashed border-stone-custom/30 text-stone-custom/45",
         className
       )}
@@ -172,13 +172,16 @@ export default function BadgesSection({ items, className }: { items: BadgeItem[]
             })}
           </ul>
         </div>
+        <p className="sr-only" aria-live="polite" aria-atomic="true">
+          {t("badge_position", { current: index + 1, total: items.length })}
+        </p>
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
-            onClick={() => goTo(index - 1)}
-            disabled={index === 0}
+            onClick={() => index > 0 && goTo(index - 1)}
+            aria-disabled={index === 0}
             aria-label={t("prev_badge")}
-            className="flex size-11 items-center justify-center rounded-xl border border-stone-custom/15 text-stone-custom disabled:opacity-40"
+            className="flex size-11 items-center justify-center rounded-xl border border-stone-custom/15 text-stone-custom aria-disabled:opacity-40"
           >
             <MdChevronLeft aria-hidden="true" size={24} />
           </button>
@@ -204,10 +207,10 @@ export default function BadgesSection({ items, className }: { items: BadgeItem[]
           </div>
           <button
             type="button"
-            onClick={() => goTo(index + 1)}
-            disabled={index === items.length - 1}
+            onClick={() => index < items.length - 1 && goTo(index + 1)}
+            aria-disabled={index === items.length - 1}
             aria-label={t("next_badge")}
-            className="flex size-11 items-center justify-center rounded-xl border border-stone-custom/15 text-stone-custom disabled:opacity-40"
+            className="flex size-11 items-center justify-center rounded-xl border border-stone-custom/15 text-stone-custom aria-disabled:opacity-40"
           >
             <MdChevronRight aria-hidden="true" size={24} />
           </button>
