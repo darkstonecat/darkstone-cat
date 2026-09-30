@@ -204,7 +204,7 @@ export default function Footer() {
       <div className="bg-stone-custom px-6 py-5 lg:px-16">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 md:grid-cols-3">
           {/* Legal links */}
-          <div className="flex items-center justify-center gap-4 md:justify-start">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 md:justify-start">
             {LEGAL_LINKS.map((item, i) => (
               <span key={item.key} className="flex items-center gap-4">
                 <Link
