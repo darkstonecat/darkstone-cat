@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { PAGES, TEXT } from '../helpers/constants'
 import { deleteTestUser } from '../helpers/supabase-admin'
+import { countMessagesTo, waitForConfirmationLink } from '../helpers/mailpit'
 
 test.describe('Register page', () => {
   const testEmails: string[] = []
@@ -72,7 +73,7 @@ test.describe('Register page', () => {
     await expect(page.locator('a[href="/data-protection"]').first()).toBeVisible()
   })
 
-  test('successful registration swaps to the confirmation screen, resends and goes back', async ({ page }) => {
+  test('successful registration swaps to the confirmation screen, resends, confirms by email and logs in', async ({ page }) => {
     // Server action compilation on first call can be slow in dev mode
     test.slow()
 
@@ -83,6 +84,8 @@ test.describe('Register page', () => {
     await page.locator('#last_name').fill('Test')
     await page.locator('#email').fill(uniqueEmail)
     await page.locator('#password').fill('Register1234!')
+    await page.locator('#dni').fill('12345678Z')
+    await page.locator('#phone').fill('600123412')
     await page.locator('input[name="conduct"]').check()
     await page.locator('input[name="privacy"]').check()
     await page.locator('button[type="submit"]').click()
@@ -94,19 +97,35 @@ test.describe('Register page', () => {
     await expect(page.locator('main').getByText(uniqueEmail)).toBeVisible()
     await expect(page.getByRole('link', { name: TEXT.register_done_login })).toHaveAttribute('href', /\/login$/)
 
-    // Resend: local Supabase has confirmations off (no signup email is sent), so the
-    // auth call is stubbed and its payload checked instead of reading Mailpit.
-    await page.route('**/auth/v1/resend', (route) => route.fulfill({ status: 200, json: {} }))
-    const resendRequest = page.waitForRequest('**/auth/v1/resend')
+    // Confirmations are on locally (like production), so the optional data was saved:
+    // the "could not save your details" notice must not appear.
+    await expect(page.getByText(TEXT.register_done_profile_notice)).toHaveCount(0)
+
+    // Resend sends a real second email (Supabase throttles resends to one per second)
+    await expect.poll(() => countMessagesTo(uniqueEmail), { timeout: 20_000 }).toBe(1)
+    await page.waitForTimeout(1_200)
     await page.getByRole('button', { name: TEXT.register_done_resend }).click()
-    expect((await resendRequest).postDataJSON()).toMatchObject({ type: 'signup', email: uniqueEmail })
     await expect(page.getByRole('button', { name: TEXT.register_done_resent })).toBeDisabled()
+    await expect.poll(() => countMessagesTo(uniqueEmail), { timeout: 20_000 }).toBe(2)
 
     // Back to the form keeps the values
     await page.getByRole('button', { name: TEXT.register_done_back }).click()
     await expect(page.locator('#email')).toHaveValue(uniqueEmail)
     await expect(page.locator('#first_name')).toHaveValue('Reg')
     await expect(page.locator('input[name="conduct"]')).toBeChecked()
+
+    // Confirm through the emailed link, then log in and see the saved (masked) DNI
+    const link = await waitForConfirmationLink(uniqueEmail)
+    const confirm = await page.request.get(link, { maxRedirects: 0 })
+    expect(confirm.status()).toBe(303)
+
+    await page.goto(PAGES.login)
+    await page.locator('#email').fill(uniqueEmail)
+    await page.locator('#password').fill('Register1234!')
+    await page.locator('button[type="submit"]').click()
+    await page.waitForURL('**/profile', { timeout: 30_000 })
+    await page.goto('/profile/details')
+    await expect(page.getByText('678Z').first()).toBeAttached()
   })
 
   test('has link to login page', async ({ page }) => {
