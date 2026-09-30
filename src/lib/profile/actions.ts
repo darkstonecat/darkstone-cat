@@ -121,6 +121,12 @@ export async function exportProfileData(): Promise<{
     }
   }
 
+  const supabase = await createClient();
+  const { data: badgeRows } = await supabase
+    .from("member_badges")
+    .select("badge_key, awarded_at")
+    .eq("member_id", member.id);
+
   const exportData = {
     email,
     first_name: member.first_name,
@@ -135,6 +141,10 @@ export async function exportProfileData(): Promise<{
     newsletter_accepted: member.newsletter_accepted,
     membership_start_date: member.membership_start_date,
     created_at: member.created_at,
+    badges: (badgeRows ?? []).map((b) => ({
+      key: b.badge_key,
+      awarded_at: b.awarded_at,
+    })),
     exported_at: new Date().toISOString(),
   };
 
