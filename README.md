@@ -10,6 +10,7 @@
 
 - **Animated Landing Page** — Scroll-driven theme transitions, parallax galleries, and spring-based entrance animations
 - **Ludoteca (Game Library)** — Browse the association's collection with filters, search, and BGG integration via the [BoardGameGeek API](https://boardgamegeek.com/)
+- **Member Area ("La meva zona")** — Email/password or magic-link login, sign-up, member home with this week's public sessions and a month calendar from [Ludoya](https://ludoya.com), profile details and a member card with a real QR that resolves to a public verification page
 - **Multilingual** — Fully localized in **Catalan** (default), **Spanish**, and **English**
 - **Contact Form** — Server-side email delivery via Google Workspace SMTP (nodemailer)
 - **Cookie Consent & Analytics** — GDPR-compliant banner with Google Analytics integration
@@ -73,6 +74,9 @@ src/
 │   ├── [locale]/           # Localized pages (home, about, ludoteca, contact, etc.)
 │   ├── api/contact/        # Contact form API endpoint
 │   ├── api/events/         # Shareable event image generation
+│   ├── api/members/        # Member card image (with QR)
+│   ├── api/profile/        # Member home calendar months
+│   ├── auth/               # Email confirm, password recovery and magic-link callbacks
 │   ├── sitemap.ts          # Dynamic sitemap generation
 │   └── robots.ts           # Robots.txt configuration
 ├── components/
@@ -83,6 +87,7 @@ src/
 │   ├── events/             # Events carousel and event images tool
 │   ├── conduct/            # Code of conduct content
 │   ├── legal/              # Legal, privacy, and cookies pages
+│   ├── auth/, profile/, admin/  # Member area: sign-up/login, La meva zona, card, admin
 │   ├── NavBar.tsx          # Navigation with language switcher
 │   ├── Footer.tsx          # Site footer
 │   ├── SmoothScroll.tsx    # Lenis smooth scrolling provider

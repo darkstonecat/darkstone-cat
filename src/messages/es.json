@@ -621,7 +621,6 @@
     "login_magic_sent_text": "Si {email} corresponde a un socio, te hemos enviado un enlace para entrar. Caduca pronto y solo se puede usar una vez.",
     "login_magic_sent_back": "Usar otro correo",
     "login_magic_error": "El enlace de acceso no es válido o ha caducado. Pide uno nuevo.",
-    "login_magic_error_rate_limit": "Has pedido demasiados enlaces seguidos. Espera un rato e inténtalo de nuevo.",
     "login_cta_title": "¿Aún no eres socio?",
     "login_cta_text": "Es gratis. Date de alta en dos minutos y ven cualquier viernes o sábado al Centro Cívico Ca N'Aurell.",
     "login_cta_card": "Carnet digital con tu número de socio",

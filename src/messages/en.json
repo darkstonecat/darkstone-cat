@@ -621,7 +621,6 @@
     "login_magic_sent_text": "If {email} belongs to a member, we have sent you a sign-in link. It expires soon and can only be used once.",
     "login_magic_sent_back": "Use a different email",
     "login_magic_error": "The sign-in link is not valid or has expired. Request a new one.",
-    "login_magic_error_rate_limit": "You have requested too many links in a row. Wait a while and try again.",
     "login_cta_title": "Not a member yet?",
     "login_cta_text": "It is free. Sign up in two minutes and come any Friday or Saturday to the Ca N'Aurell Civic Centre.",
     "login_cta_card": "Digital card with your member number",
