@@ -44,10 +44,8 @@ test.describe('Profile edit', () => {
     await page.waitForURL('**/profile', { timeout: 10_000 })
     await expect(page).toHaveURL(/\/profile$/)
 
-    // Verify updated name is shown in the profile data (the navbar user button
-    // may also show it, so an unscoped getByText would match twice)
-    const section = page.locator('section').filter({ hasText: TEXT.profile_section_personal })
-    await expect(section.getByText('E2E-Updated', { exact: true })).toBeVisible()
+    // The member home greets by the updated first name
+    await expect(page.getByRole('heading', { level: 1, name: 'Hola, E2E-Updated' })).toBeVisible()
   })
 
   test('shows section headers', async ({ memberPage: page }) => {

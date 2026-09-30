@@ -49,6 +49,8 @@ export async function isAdmin(): Promise<boolean> {
 
 export async function getProfileData(): Promise<{
   email: string;
+  /** `auth.users.email_confirmed_at` is set. */
+  emailConfirmed: boolean;
   member: Member;
 } | null> {
   const supabase = await createClient();
@@ -75,6 +77,7 @@ export async function getProfileData(): Promise<{
 
   return {
     email: user.email ?? "",
+    emailConfirmed: Boolean(user.email_confirmed_at),
     member: data as Member,
   };
 }

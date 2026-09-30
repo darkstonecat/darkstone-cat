@@ -2,12 +2,15 @@ import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { getProfileData } from "@/lib/supabase/auth";
-import { decrypt } from "@/lib/encryption";
+import { getMemberBadges } from "@/lib/supabase/badges";
+import { buildProfileChecklist } from "@/lib/profile/completion";
+import { buildBadgeItems } from "@/lib/member-home/badge-items";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
-import AuthHero from "@/components/auth/AuthHero";
-import ProfileView from "@/components/profile/ProfileView";
+import HomeHero from "@/components/profile/HomeHero";
+import ProfileChecklist from "@/components/profile/ProfileChecklist";
+import BadgesSection from "@/components/profile/BadgesSection";
 
 export const revalidate = false;
 
@@ -42,39 +45,21 @@ export default async function ProfilePage({
   // Auth protection is handled by middleware (PROTECTED_ROUTES).
   // Do NOT redirect to /login here — it creates a loop when the middleware
   // and server component disagree about session state (cookie propagation race).
-  const profile = await getProfileData();
-
-  let email = "";
-  let phone: string | null = null;
-  let dni: string | null = null;
+  const [profile, badges] = await Promise.all([getProfileData(), getMemberBadges()]);
   const member = profile?.member ?? null;
-
-  if (profile) {
-    email = profile.email;
-
-    if (member?.phone_encrypted) {
-      try {
-        phone = decrypt(member.phone_encrypted);
-      } catch {
-        phone = null;
-      }
-    }
-
-    if (member?.dni_nie_encrypted) {
-      try {
-        dni = decrypt(member.dni_nie_encrypted);
-      } catch {
-        dni = null;
-      }
-    }
-  }
 
   const tNav = await getTranslations({ locale, namespace: "nav" });
   const t = await getTranslations({ locale, namespace: "metadata" });
+  const tHome = await getTranslations({ locale, namespace: "profile.home" });
   const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
     { name: tNav("profile"), path: "/profile" },
   ]);
   const webPageJsonLd = getWebPageJsonLd(locale, "/profile", t("profile_title"), t("profile_description"));
+
+  const checklist = profile
+    ? buildProfileChecklist({ emailConfirmed: profile.emailConfirmed, member: profile.member })
+    : [];
+  const checklistVisible = checklist.some((step) => !step.done);
 
   return (
     <main id="main-content" className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
@@ -83,32 +68,35 @@ export default async function ProfilePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
       />
       <NavBar />
-      <AuthHero titleKey="title" subtitleKey="subtitle" namespace="profile" />
 
-      <section className="flex-1 bg-brand-beige pb-20">
-        <div className="container mx-auto max-w-4xl px-6 pt-16">
-          {member ? (
-            <ProfileView
-              email={email}
-              firstName={member.first_name}
-              lastName={member.last_name}
-              phone={phone}
-              dni={dni}
-              postalCode={member.postal_code}
-              ludoyaUsername={member.ludoya_username}
-              bggUsername={member.bgg_username}
-              memberNumber={member.member_number}
-              role={member.role}
-              newsletterAccepted={member.newsletter_accepted}
-              membershipStartDate={member.membership_start_date}
-            />
-          ) : (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-700">
-              Could not load profile data. Please try refreshing the page.
+      {member ? (
+        <>
+          <HomeHero
+            firstName={member.first_name}
+            lastName={member.last_name}
+            memberNumber={member.member_number}
+            membershipStartDate={member.membership_start_date}
+          />
+
+          <div className="flex-1 bg-brand-beige px-4 py-6 md:px-12 md:pt-10 md:pb-20">
+            <div className="mx-auto flex max-w-[1216px] flex-col gap-5 md:gap-7">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
+                {checklistVisible && <ProfileChecklist steps={checklist} />}
+                <BadgesSection
+                  items={buildBadgeItems(badges)}
+                  className={checklistVisible ? "md:col-span-2" : "md:col-span-3"}
+                />
+              </div>
             </div>
-          )}
+          </div>
+        </>
+      ) : (
+        <div className="flex-1 bg-brand-beige px-6 pt-40 pb-20">
+          <div className="mx-auto max-w-2xl rounded-xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-700">
+            {tHome("load_error")}
+          </div>
         </div>
-      </section>
+      )}
 
       <Footer />
       <ScrollToTop />

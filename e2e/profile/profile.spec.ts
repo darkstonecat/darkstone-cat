@@ -1,59 +1,77 @@
 import { test, expect } from '../fixtures'
-import { PAGES, TEXT, MEMBER_EMAIL, MEMBER_FIRST_NAME, MEMBER_LAST_NAME } from '../helpers/constants'
+import { PAGES, MEMBER_FIRST_NAME } from '../helpers/constants'
 
-test.describe('Profile page', () => {
-  test('loads profile for authenticated member', async ({ memberPage: page }) => {
+// "La meva zona": the member home. Read-only, so it uses the shared member.
+test.describe('Member home (/profile)', () => {
+  test('greets the member and shows the member line', async ({ memberPage: page }) => {
     await page.goto(PAGES.profile)
-    await expect(page.getByText(TEXT.profile_section_personal)).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: `Hola, ${MEMBER_FIRST_NAME}` })).toBeVisible()
+    await expect(page.getByText(/Núm\. de soci/).first()).toBeVisible()
+    await expect(page.getByText(/Membre des del/).first()).toBeVisible()
   })
 
-  test('displays member name', async ({ memberPage: page }) => {
+  test('shows the Inici tab as current and links the other tabs', async ({ memberPage: page }) => {
     await page.goto(PAGES.profile)
-    // Name appears in the personal data section
-    const section = page.locator('section').filter({ hasText: TEXT.profile_section_personal })
-    await expect(section.getByText(MEMBER_FIRST_NAME, { exact: true })).toBeVisible()
-    await expect(section.getByText(MEMBER_LAST_NAME, { exact: true })).toBeVisible()
+    const tabs = page.getByRole('navigation', { name: 'Zona de socis' })
+    await expect(tabs.getByRole('link', { name: 'Inici' })).toHaveAttribute('aria-current', 'page')
+    await expect(tabs.getByRole('link', { name: 'Perfil' })).toHaveAttribute('href', '/profile/details')
+    await expect(tabs.getByRole('link', { name: 'Carnet' })).toHaveAttribute('href', '/profile/card')
   })
 
-  test('displays member email', async ({ memberPage: page }) => {
+  test('the mini card opens the member card', async ({ memberPage: page }) => {
     await page.goto(PAGES.profile)
-    await expect(page.getByText(MEMBER_EMAIL)).toBeVisible()
+    await page.getByRole('link', { name: /Obre el carnet/ }).click()
+    await expect(page).toHaveURL(/\/profile\/card$/)
   })
 
-  test('has edit profile button', async ({ memberPage: page }) => {
+  test('shows the profile checklist with links to where to fix each step', async ({ memberPage: page }) => {
     await page.goto(PAGES.profile)
-    const editLink = page.locator('a[href*="/profile/edit"]')
-    await expect(editLink).toBeVisible()
+    const card = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Completa el perfil' }) })
+    await expect(card).toBeVisible()
+    await expect(card.getByRole('progressbar')).toHaveAttribute('aria-valuemax', '4')
+    // The test member has no Ludoya/BGG username, so those steps are links.
+    await expect(card.getByRole('link', { name: 'Vincula Ludoya' })).toHaveAttribute('href', /\/profile\/details/)
+    await expect(card.getByRole('link', { name: 'Vincula BoardGameGeek' })).toHaveAttribute('href', /\/profile\/details/)
   })
 
-  test('has member card button', async ({ memberPage: page }) => {
+  test('shows the badges: the derived member badge is earned, the others are locked', async ({ memberPage: page }) => {
     await page.goto(PAGES.profile)
-    const cardLink = page.locator('a[href*="/profile/card"]')
-    await expect(cardLink).toBeVisible()
+    const badges = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Les teves insígnies' }) })
+    await expect(badges).toBeVisible()
+    const year = new Date().getFullYear()
+    await expect(badges.getByText(`Membre ${year}`).first()).toBeAttached()
+    await expect(badges.getByText('Voluntariat Egara Joga').first()).toBeAttached()
+    await expect(badges.getByText('Donant de la ludoteca').first()).toBeAttached()
   })
 
-  test('edit button navigates to edit page', async ({ memberPage: page }) => {
+  test('has no leftovers of the old data sheet', async ({ memberPage: page }) => {
     await page.goto(PAGES.profile)
-    await page.locator('a[href*="/profile/edit"]').click()
-    await expect(page).toHaveURL(/\/profile\/edit/)
+    await expect(page.getByText('Dades personals')).toHaveCount(0)
+    await expect(page.getByText('Descarregar les meves dades')).toHaveCount(0)
   })
 
-  test('shows all profile sections', async ({ memberPage: page }) => {
+  test('tabs navigate to the profile details page', async ({ memberPage: page }) => {
     await page.goto(PAGES.profile)
-    await expect(page.getByText(TEXT.profile_section_personal)).toBeVisible()
-    await expect(page.getByText(TEXT.profile_section_gaming)).toBeVisible()
-    await expect(page.getByText(TEXT.profile_section_membership)).toBeVisible()
-  })
-
-  test('has data download button', async ({ memberPage: page }) => {
-    await page.goto(PAGES.profile)
-    const downloadBtn = page.getByText('Descarregar les meves dades')
-    await expect(downloadBtn).toBeVisible()
-  })
-
-  test('links to the profile details page', async ({ memberPage: page }) => {
-    await page.goto(PAGES.profile)
-    await page.locator('a[href="/profile/details"]').first().click()
+    await page.getByRole('navigation', { name: 'Zona de socis' }).getByRole('link', { name: 'Perfil' }).click()
     await expect(page).toHaveURL(/\/profile\/details$/)
+  })
+})
+
+test.describe('Member home on mobile', () => {
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  test('shows the badges carousel with working controls and no horizontal scroll', async ({ memberPage: page }) => {
+    await page.goto(PAGES.profile)
+    const region = page.getByRole('region', { name: 'Insígnies', exact: true })
+    await expect(region).toBeVisible()
+    await expect(region.getByRole('group')).toHaveCount(3)
+    const prev = region.getByRole('button', { name: 'Insígnia anterior' })
+    const next = region.getByRole('button', { name: 'Insígnia següent' })
+    await expect(prev).toBeDisabled()
+    await next.click()
+    await expect(region.getByRole('button', { name: /Insígnia 2:/ })).toHaveAttribute('aria-current', 'true')
+    await expect(prev).toBeEnabled()
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+    expect(overflow).toBeLessThanOrEqual(0)
   })
 })

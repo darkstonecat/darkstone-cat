@@ -113,8 +113,17 @@ describe('getProfileData', () => {
     const data = await getProfileData()
     expect(data).toEqual({
       email: 'test@darkstone.cat',
+      emailConfirmed: false,
       member: mockMember,
     })
+  })
+
+  it('reports a confirmed email from email_confirmed_at', async () => {
+    setupMock({
+      user: { ...mockUser, email_confirmed_at: '2026-09-01T10:00:00Z' } as any,
+      member: mockMember,
+    })
+    expect((await getProfileData())?.emailConfirmed).toBe(true)
   })
 
   it('returns null on auth error', async () => {

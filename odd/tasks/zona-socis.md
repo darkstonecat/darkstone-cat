@@ -211,9 +211,10 @@ current data sheet off `/profile`.)
 
 ### B6 — La meva zona (screen 03)
 
-- [ ] B6.1 — `/profile` becomes the home: hero (greeting, number, since-date, tabs, mini card),
+- [x] B6.1 — `/profile` becomes the home: hero (greeting, number, since-date, tabs, mini card),
   "Completa el perfil" checklist (reads `email_confirmed_at`; hidden at 4/4), badges grid /
   mobile carousel from B1.3. Tests.
+  - Evidence: `/profile` renders `HomeHero` (mini card links to `/profile/card`, QR dropped as the spec allows), `ProfileChecklist` (progressbar, links to `/profile/edit` / `/profile/details#gaming-title` / `#account-title`, hidden at 4/4; `getProfileData` now returns `emailConfirmed`) and `BadgesSection` (desktop 3-col grid, mobile scroll-snap carousel with 286 px slides, 44 px prev/next, dots, region/group roles; full catalogue with locked badges). Old `ProfileView` and its unused `profile.*` keys removed; new `profile.home.*` keys in ca/es/en; `/profile` metadata renamed. Tests: `tests/unit/member-home-helpers.test.ts`, `tests/components/MemberHome.test.tsx`, `tests/server/auth.test.ts`; `npx playwright test e2e/profile e2e/navigation` all pass except the known `locale-routing` language switcher; `npm run test:unit` 444/444, `test:integration` 70/70, lint and tsc clean.
 - [ ] B6.2 — "Properes sessions": expandable per-session list (place per session, covers,
   counts, seat dots only desktop and capacity ≤ 8, max 5 plays, "Especial" chip, join/queue
   links to Ludoya), loading skeleton, empty, and Ludoya-down states. Mobile cards. Tests.

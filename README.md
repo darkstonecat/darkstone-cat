@@ -53,7 +53,7 @@
 | `/register` | Registration form |
 | `/forgot-password` | Password recovery |
 | `/reset-password` | Set new password (protected) |
-| `/profile` | Member profile view (protected) |
+| `/profile` | "La meva zona": member home with checklist and badges (protected) |
 | `/profile/details` | Profile details: hero, tabs and account (protected) |
 | `/profile/edit` | Profile edit form (protected) |
 | `/profile/card` | Member card with a real QR, image download (protected) |
