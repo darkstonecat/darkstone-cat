@@ -231,9 +231,11 @@ current data sheet off `/profile`.)
 
 ### B8 — Close
 
-- [ ] B8.1 — Docs: CLAUDE.md (Pages table, components, env vars, namespaces, Ludoya section),
+- [x] B8.1 — Docs: CLAUDE.md (Pages table, components, env vars, namespaces, Ludoya section),
   README.md pages table; Lighthouse config only for indexable pages (none new).
-- [ ] B8.2 — Full `npm test`, `npm run test:e2e`, `npm run build`, `npm run lint`; record results.
+  - Evidence: CLAUDE.md now lists `/api/profile/calendar`, `?locale` on the card route, `MemberCalendar`, the auth components, the `verify` namespace and the PUBLIC-only rule; Pages table, `/auth/magic-link`, `uqr`, env vars (`LUDOYA_API_KEY`, optional `LUDOYA_API_URL`/`LUDOYA_APP_URL`/`LUDOYA_MOCK`; `LUDOYA_GROUP_*` and `LUDOYA_IMAGE_BASE_URL` gone) and the Ludoya section were already current. README: member-area feature and structure. Lighthouse config and sitemap unchanged on purpose (no new indexable page; `/verify` and every profile page are `noindex`, the sitemap lists none). Cleanup: removed the unused `auth.login_magic_error_rate_limit` (3 locales, parity kept; `profile.edit_success` predates this feature and was left alone); no dead files or exports from the feature; no README section 10 sample data in `src`, `public` or `e2e` (only generic test usernames). Footer overflow at 320 px was pre-existing (`/about` too, 333 px wide); fixed with `flex-wrap` on the legal links row (`fix(footer)`), no change at 360 px.
+- [x] B8.2 — Full `npm test`, `npm run test:e2e`, `npm run build`, `npm run lint`; record results.
+  - Evidence (final tree): `npm run lint` clean; `npx tsc --noEmit` clean; `npm test` 59 files, 599/599 (unit 529/529, integration 70/70); `npm run test:e2e` 197 passed, 1 failed (the known pre-existing `locale-routing` "language switcher is visible"); `npm run build` OK; `npm run ludoya:check` all 5 sections pass (33 events, 6 inline plays, 4 children, user search, 12/12 images).
 
 ## Acceptance criteria
 
@@ -253,6 +255,16 @@ current data sheet off `/profile`.)
 - Q3 The mobile card page keeps the real NavBar; tapping the QR shows it full screen above
   everything, like other wallet/ticket apps.
 - Q4 Every Ludoya use moves to the public API; the old undocumented client is removed (B2.6).
+- Q5 (user, 2026-09-30) Visibility: the member home ("La meva zona": week sessions, calendar and
+  `/api/profile/calendar`) shows only `PUBLIC` sessions and plays, because web sign-up is open and
+  every account gets `role = 'member'`. `ONLY_GROUP` stays hidden until a board-approved/paid
+  member state exists. Supersedes the earlier PUBLIC + ONLY_GROUP decision (62d2275); `/events`
+  was always PUBLIC only. Commit 79b6c30 (`toPublicSessions`).
+- Sessions start collapsed on every viewport (deviation from the spec's mobile default) because
+  CSS alone cannot keep `aria-expanded` truthful (commit 5275a5a).
+- The username check shows the username only, never the Ludoya/BGG display name.
+- The sign-up privacy consent links `/data-protection`, which governs member data.
+- Event images match BGG by name + year (the public API has no BGG id).
 
 ## Progress
 
@@ -300,7 +312,24 @@ current data sheet off `/profile`.)
   - B6.3/B6.4 done: dc122b4, 647bf18. Checks: unit 507/507, integration 70/70,
     `e2e/profile`+`navigation` 74/75 (known pre-existing `locale-routing` failure), build OK.
     Assess high → verifier running.
-- Pending user actions: `LUDOYA_API_KEY` GitHub secret; B3.3 production Supabase checks.
+  - B6 calendar correction: cec3f85 (one shared events fetch for the week and every month),
+    bcc3eab (client-side month switching through `/api/profile/calendar`: navigation went from
+    6.5 s to 0.9 s with a slow week fetch; accessibility fixes), 5275a5a (sessions start collapsed
+    to avoid a layout shift after hydration), aa22f66 (carousel jump announced once; badge dates
+    formatted on the server). Unit 529/529, integration 70/70.
+  - B8 done: 79b6c30 (PUBLIC-only member home), 93547f8 (footer wrap at 320 px), docs commit
+    (CLAUDE.md, README, unused key). Results in B8.2.
+- Pending user actions:
+  - Add the `LUDOYA_API_KEY` GitHub secret (weekly `ludoya-check` workflow).
+  - B3.3 production Supabase: Site URL `https://www.darkstone.cat`, redirect allow-list including
+    `/auth/magic-link`, the Magic link template (already set), OTP expiry, email rate limits.
+  - Apply the new migrations to production when merging: `supabase/migrations/20260930100000_add_members_card_token.sql`,
+    `20260930100100_create_member_badges.sql`, `20260930100200_harden_member_card_and_badges.sql`,
+    `20260930110000_members_fk_on_delete_cascade.sql`, `20260930120000_verify_card_token.sql`.
+  - Browser check that "Veure a Ludoya" (`https://app.ludoya.com/<username>`) opens a personal
+    profile (unverified: the SPA returns 200 for any path).
+  - Future: a member approval state to show `ONLY_GROUP` sessions; optional cleanup job for
+    unconfirmed sign-ups.
 
 ## Notes
 
