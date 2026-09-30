@@ -146,7 +146,7 @@ describe("fetchMemberWeekSessions", () => {
     const { sessions } = await fetchMemberWeekSessions();
 
     const eventsUrl = fetchMock.mock.calls.map(([u]) => String(u)).find((u) => u.includes("/events"))!;
-    expect(eventsUrl).toContain("pastLimit=40");
+    expect(eventsUrl).toContain("pastLimit=200");
     expect(sessions.map((s) => s.id)).toEqual(["run"]);
   });
 
@@ -172,7 +172,7 @@ describe("fetchMonthEvents", () => {
     expect(bgg.searchBggGames).not.toHaveBeenCalled();
   });
 
-  it("asks for past events only when the month has already started", async () => {
+  it("uses the same events request as the week, for every month", async () => {
     vi.stubEnv("LUDOYA_MOCK", "");
     vi.stubEnv("LUDOYA_API_KEY", "ldy_test");
     const fetchMock = vi.fn<typeof fetch>(async (input) =>
@@ -187,11 +187,13 @@ describe("fetchMonthEvents", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
 
+    await fetchMemberWeekSessions();
     await fetchMonthEvents(2026, 10); // current month
     await fetchMonthEvents(2026, 11); // future month
+    await fetchMonthEvents(2026, 8); // past month
 
-    const urls = fetchMock.mock.calls.map(([u]) => String(u)).filter((u) => u.includes("/events"));
-    expect(urls[0]).toContain("pastLimit=200");
-    expect(urls[1]).not.toContain("pastLimit");
+    const urls = new Set(fetchMock.mock.calls.map(([u]) => String(u)).filter((u) => u.includes("/events")));
+    expect(urls.size).toBe(1);
+    expect([...urls][0]).toContain("pastLimit=200");
   });
 });

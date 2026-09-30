@@ -20,17 +20,19 @@ import {
 import type { LudoyaFetchError, LudoyaSession, LudoyaSessionPlay } from "./ludoya/types";
 
 /**
- * Past events requested with the week, so a multi-day event that already started
- * (and is still running) is not lost if Ludoya lists it under `pastEvents`.
- *
- * Probe (Sep 30 2026, live, one GET): `futureEvents` held only events that start
- * after "now" (none had started), `pastEvents` was empty without `pastLimit`, and
- * no event was in progress, so it is NOT proven where Ludoya puts a running
- * multi-day event. The extra parameter is cheap insurance: `pastLimit` counts
- * sub-events (plays) too, and 40 covers roughly the last week of a club with two
- * weekly sessions. `sessionsInNextDays` drops whatever already ended.
+ * The week and every calendar month share ONE events request: the same URL
+ * (`includeSubEvents` + `pastLimit` 200, the default of `fetchSessions`), so
+ * one page load costs one events fetch (plus locations) under the 60 s data
+ * cache instead of one per variant. The past events also keep a multi-day
+ * event that already started (and is still running) from being lost;
+ * `sessionsInNextDays` drops whatever already ended.
  */
-const WEEK_PAST_LIMIT = 40;
+const fetchAll = () =>
+  fetchSessions({
+    revalidate: ludoyaConfig.memberAreaRevalidateSeconds,
+    includePast: true,
+    limits: MEMBER_AREA_LIMITS,
+  });
 
 export interface MemberSessionPlay extends LudoyaSessionPlay {
   /** BGG cover when the game resolves by name and year, else Ludoya's. */
@@ -108,12 +110,7 @@ async function withCovers(sessions: LudoyaSession[]): Promise<MemberSession[]> {
  */
 export async function fetchMemberWeekSessions(now: Date = new Date()): Promise<MemberSessionsResult> {
   try {
-    const sessions = await fetchSessions({
-      revalidate: ludoyaConfig.memberAreaRevalidateSeconds,
-      includePast: true,
-      pastLimit: WEEK_PAST_LIMIT,
-      limits: MEMBER_AREA_LIMITS,
-    });
+    const sessions = await fetchAll();
     return { sessions: await withCovers(sessionsInNextDays(sessions, now)) };
   } catch (error) {
     console.error(`[Ludoya] Failed to fetch member sessions: ${describeError(error)}`);
@@ -123,17 +120,12 @@ export async function fetchMemberWeekSessions(now: Date = new Date()): Promise<M
 
 /**
  * Sessions starting in a Madrid calendar month (`month` is 1–12) for the home
- * calendar. Earlier days of the current month and past months come from
- * Ludoya's recent past events; the calendar pills need no covers.
+ * calendar, from the same request as the week. Earlier days and past months come
+ * from Ludoya's recent past events; the calendar pills need no covers.
  */
-export async function fetchMonthEvents(year: number, month: number, now: Date = new Date()): Promise<MonthEventsResult> {
-  const needsPast = new Date(Date.UTC(year, month - 1, 1)) < now;
+export async function fetchMonthEvents(year: number, month: number): Promise<MonthEventsResult> {
   try {
-    const sessions = await fetchSessions({
-      revalidate: ludoyaConfig.memberAreaRevalidateSeconds,
-      includePast: needsPast,
-      limits: MEMBER_AREA_LIMITS,
-    });
+    const sessions = await fetchAll();
     return { events: sessionsInMonth(sessions, year, month) };
   } catch (error) {
     console.error(`[Ludoya] Failed to fetch month events: ${describeError(error)}`);
