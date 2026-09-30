@@ -96,7 +96,8 @@ current data sheet off `/profile`.)
   (`volunteer_egara_joga`, `ludoteca_donor`). "Membre {year}" is derived, not stored
   (decision 3; year from `membership_start_date`, decision Q2). Tests: RLS integration.
   - Evidence: `db:reset` applied; `member-badges.test.ts` 8/8 pass (check constraint, unique pair, cascade, select own/admin all, no member or admin API writes).
-- [ ] B1.3 — Server helper `getMemberBadges()` + derived "Membre {year}". Unit test.
+- [x] B1.3 — Server helper `getMemberBadges()` + derived "Membre {year}". Unit test.
+  - Evidence: `tests/unit/member-badges.test.ts` 4/4 pass; helper in `src/lib/supabase/badges.ts` (pure `buildMemberBadges` + `getMemberBadges`).
 
 ### B2 — Ludoya public API adapter (replaces the old client, decision Q4)
 
