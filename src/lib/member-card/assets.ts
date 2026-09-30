@@ -1,11 +1,10 @@
 // ---------------------------------------------------------------------------
-// Member card — Asset loading (fonts as ArrayBuffer, background as data URI)
+// Member card — Asset loading (fonts as ArrayBuffer)
 // ---------------------------------------------------------------------------
 
 import {
   FONT_BELLEZA_BASE64,
   FONT_INTRO_BLACK_ALT_BASE64,
-  BACKGROUND_DATA_URI,
 } from "./asset-data";
 
 // ---------------------------------------------------------------------------
@@ -34,12 +33,4 @@ export function getFontIntroBlackAlt(): ArrayBuffer {
   if (cachedIntroBlackAlt) return cachedIntroBlackAlt;
   cachedIntroBlackAlt = decodeBase64ToArrayBuffer(FONT_INTRO_BLACK_ALT_BASE64);
   return cachedIntroBlackAlt;
-}
-
-// ---------------------------------------------------------------------------
-// Background image
-// ---------------------------------------------------------------------------
-
-export function getBackground(): string {
-  return BACKGROUND_DATA_URI;
 }

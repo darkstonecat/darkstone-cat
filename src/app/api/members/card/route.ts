@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
   const { data: member } = await supabase
     .from("members")
-    .select("first_name, last_name, member_number")
+    .select("first_name, last_name, member_number, membership_start_date, card_token")
     .eq("id", user.id)
     .single();
 
@@ -22,9 +22,13 @@ export async function GET(request: Request) {
   }
 
   const fullName = `${member.first_name} ${member.last_name}`;
-  const memberNumber = member.member_number;
 
-  const imageResponse = await composeMemberCard(fullName, memberNumber);
+  const imageResponse = await composeMemberCard({
+    fullName,
+    memberNumber: member.member_number,
+    membershipStartDate: member.membership_start_date,
+    cardToken: member.card_token,
+  });
 
   const { searchParams } = new URL(request.url);
   const isPreview = searchParams.get("preview") === "1";

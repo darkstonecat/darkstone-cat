@@ -36,3 +36,12 @@ export function qrToPath(matrix: QrMatrix, offset = 0): string {
   }
   return parts.join("");
 }
+
+/** Standalone SVG document (dark modules only, transparent background) with `quiet` modules of margin. */
+export function qrToSvg(matrix: QrMatrix, quiet = 0, color = "#1C1917"): string {
+  const dim = matrix.size + quiet * 2;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${dim} ${dim}" shape-rendering="crispEdges">` +
+    `<path fill="${color}" d="${qrToPath(matrix, quiet)}"/></svg>`
+  );
+}
