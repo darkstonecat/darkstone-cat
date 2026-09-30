@@ -9,11 +9,16 @@ import {
 import { useTranslations } from "next-intl";
 import {
   MdArrowForward,
-    MdOutlineGridView,
+  MdAutorenew,
+  MdCheck,
+  MdOutlineErrorOutline,
+  MdOutlineGridView,
 } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/client";
 import { updateMemberAfterSignup } from "@/lib/supabase/actions";
+import { checkBggUsername, checkLudoyaUsername } from "@/lib/profile/username-checks";
+import { useUsernameCheck, type UsernameCheckState } from "@/hooks/useUsernameCheck";
 import { cn } from "@/lib/utils";
 
 type FormStatus = "idle" | "submitting" | "error";
@@ -151,6 +156,45 @@ function TextField({
   );
 }
 
+function CheckStatus({
+  state,
+  name,
+  notFoundText,
+}: {
+  state: UsernameCheckState;
+  name: string;
+  notFoundText: string;
+}) {
+  const t = useTranslations("auth");
+  return (
+    <p role="status" className="text-[13px] leading-snug empty:hidden">
+      {state === "checking" && (
+        <span className="flex items-center gap-1.5 text-stone-custom/65">
+          <MdAutorenew size={14} aria-hidden="true" className="animate-spin" />
+          {t("register_check_checking")}
+        </span>
+      )}
+      {state === "found" && (
+        <span className="flex items-center gap-1.5 text-green-700">
+          <MdCheck size={14} aria-hidden="true" className="shrink-0" />
+          <span>
+            {t.rich("register_check_found", {
+              name,
+              strong: (chunks: ReactNode) => <strong className="font-semibold">{chunks}</strong>,
+            })}
+          </span>
+        </span>
+      )}
+      {state === "not_found" && (
+        <span className="flex items-start gap-1.5 text-brand-orange-text">
+          <MdOutlineErrorOutline size={14} aria-hidden="true" className="mt-0.5 shrink-0" />
+          {notFoundText}
+        </span>
+      )}
+    </p>
+  );
+}
+
 type Props = {
   /** Called after a successful sign-up with the (trimmed) submitted email. */
   onSuccess: (email: string) => void;
@@ -162,6 +206,8 @@ export default function RegisterForm({ onSuccess }: Props) {
   const [errorMessage, setErrorMessage] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [password, setPassword] = useState("");
+  const ludoya = useUsernameCheck(checkLudoyaUsername);
+  const bgg = useUsernameCheck(checkBggUsername);
 
   function validate(form: FormData): FieldErrors {
     const errs: FieldErrors = {};
@@ -431,10 +477,20 @@ export default function RegisterForm({ onSuccess }: Props) {
                 autoCapitalize="none"
                 spellCheck={false}
                 disabled={isSubmitting}
+                aria-describedby="ludoya_username-status"
                 onChange={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(/^@+/, "");
+                  ludoya.reset();
                 }}
+                onBlur={(e) => void ludoya.run(e.currentTarget.value)}
                 className="min-h-11 w-full min-w-0 bg-transparent px-2 py-[11px] text-base text-stone-custom outline-none placeholder:text-stone-custom/50 disabled:opacity-50"
+              />
+            </div>
+            <div id="ludoya_username-status">
+              <CheckStatus
+                state={ludoya.state}
+                name={ludoya.checked}
+                notFoundText={t("register_ludoya_not_found")}
               />
             </div>
           </div>
@@ -451,8 +507,18 @@ export default function RegisterForm({ onSuccess }: Props) {
               autoCapitalize="none"
               spellCheck={false}
               disabled={isSubmitting}
+              aria-describedby="bgg_username-status"
+              onChange={() => bgg.reset()}
+              onBlur={(e) => void bgg.run(e.currentTarget.value)}
               className={inputClass}
             />
+            <div id="bgg_username-status">
+              <CheckStatus
+                state={bgg.state}
+                name={bgg.checked}
+                notFoundText={t("register_bgg_not_found")}
+              />
+            </div>
           </div>
         </div>
       </FieldsetCard>
