@@ -113,6 +113,7 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/admin` | `admin/page.tsx` | Admin dashboard with stats and navigation — admin route (`revalidate = false`, `noindex`) |
 | `/admin/members` | `admin/members/page.tsx` | Member list with search, sort and CSV export — admin route (`revalidate = false`, `noindex`) |
 | `/data-protection` | `data-protection/page.tsx` | Data protection policy, RGPD compliance (`revalidate = false`) |
+| `/verify/[token]` | `verify/[token]/page.tsx` | Public card check from the member card QR: "Carnet vàlid · Núm. de soci …" or "Carnet no vàlid", nothing else (`force-dynamic`, `noindex`, not in sitemap, `Referrer-Policy: no-referrer` + `X-Robots-Tag` via `next.config.ts`). Lookup only through the `verify_card_token(p_token)` SECURITY DEFINER function (`src/lib/supabase/verify-card.ts`, anonymous cookie-less client) |
 
 API routes:
 - `src/app/api/contact/route.ts` — POST endpoint that sends email through Google Workspace SMTP (nodemailer, `smtp.gmail.com:465`) from `no-reply@darkstone.cat` to `hola@darkstone.cat`, with `replyTo` set to the sender. **CSRF guard: the `Origin` header must be in `ALLOWED_ORIGINS`** (`darkstone.cat`, `www.darkstone.cat`, `localhost:3000`), otherwise it returns `403 {"error":"forbidden"}` before doing anything. So the form **never works on `*.vercel.app` previews**; test it against a local build on port 3000. **Update that list if the production domain changes**, or the form starts failing silently
@@ -120,6 +121,8 @@ API routes:
 - `src/app/api/test-image/[count]/route.ts` — GET test image with 1–8 hardcoded games, for layout checks
 - `src/app/api/members/card/route.ts` — GET endpoint for the member card PNG (auth required; 1011x639 landscape face with a real QR of `https://www.darkstone.cat/verify/<card_token>`, rendered by `src/lib/member-card/composer.tsx`). `?preview=1` for inline display, without for download.
 - `src/app/api/admin/members/export/route.ts` — GET endpoint for CSV export of all members (admin required). Full decrypted data with UTF-8 BOM.
+
+The QR of the member card encodes `https://www.darkstone.cat/verify/<members.card_token>` (`buildCardVerifyUrl`); the token is 32 hex chars, revocable with `regenerate_card_token`, and never the member number. `robots.ts` deliberately does not `Disallow` `/verify/`: crawlers must be able to fetch the page to read its `noindex`.
 
 Auth callback routes: `src/app/auth/confirm/route.ts` (email confirmation), `src/app/auth/callback/route.ts` (password recovery), `src/app/auth/magic-link/route.ts` (passwordless login: `verifyOtp({ token_hash, type: 'email' })`, keeps the session, redirects to a same-origin relative `redirect` param or `/profile`, errors go to `/login?magic=error`; the Supabase "Magic link" template must point to `{{ .SiteURL }}/auth/magic-link?token_hash={{ .TokenHash }}&type=email`, locally in `supabase/templates/magic_link.html` via `supabase/config.toml`). These live outside `[locale]` because Supabase sends fixed URLs.
 
@@ -183,6 +186,7 @@ All interactive components use `"use client"`. Components are organized by page:
 - `src/components/conduct/` — Code of conduct (ConductContent)
 - `src/components/auth/` — Auth pages (AuthHero, LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm)
 - `src/components/profile/` — Profile pages (MemberHero, MemberTabs, MemberAvatar shared by the member area; GamingAccounts, MemberDataCard, NewsletterSwitch, AccountActions for `/profile/details`; CardFace, QrCodeSvg, CardQrOverlay, CardDownloadButton for `/profile/card`; ProfileView, ProfileEditForm, DeleteAccountDialog)
+- `src/app/[locale]/verify/[token]/` — Public card verification page (no components of its own)
 - `src/components/admin/` — Admin pages (AdminDashboard, MembersTable, ExportConfirmDialog)
 - `src/components/legal/` — Legal pages (LegalPageContent, LegalContent, PrivacyContent, CookiesContent, DataProtectionContent)
 - Root-level: NavBar, Footer, SmoothScroll, CookieBanner, CookieConsentProvider, GoogleAnalytics, ScrollProgress, ScrollToTop, TextReveal, LanguageSwitcher, ThemeLink, ErrorContent, SkipLink, CollaboratorModal

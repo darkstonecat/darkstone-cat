@@ -377,6 +377,8 @@
     "profile_edit_description": "Actualitza les teves dades de soci de Darkstone Catalunya.",
     "profile_card_title": "Carnet de soci",
     "profile_card_description": "Visualitza i descarrega el teu carnet de soci de Darkstone Catalunya.",
+    "verify_title": "Verificació de carnet",
+    "verify_description": "Comprova que un carnet de soci de Darkstone Catalunya és vàlid.",
     "profile_details_title": "Perfil i compte",
     "profile_details_description": "Gestiona les teves dades de soci, els teus perfils de joc i el teu compte de Darkstone Catalunya.",
     "admin_title": "Administració",
@@ -708,6 +710,16 @@
     "password_min_length": "Mínim 8 caràcters.",
     "must_accept_conduct": "Has d'acceptar les pautes de conducta.",
     "must_accept_privacy": "Has d'acceptar la política de privadesa."
+  },
+  "verify": {
+    "eyebrow": "Verificació de carnet",
+    "valid_title": "Carnet vàlid",
+    "invalid_title": "Carnet no vàlid",
+    "valid_text": "Aquest carnet de soci de Darkstone Catalunya és vàlid.",
+    "number_label": "Núm. de soci",
+    "invalid_text": "Aquest codi no correspon a cap carnet de soci vigent. Comprova que has escanejat el carnet correcte o demana al soci que te'l torni a ensenyar.",
+    "note": "Aquesta pàgina només confirma que el carnet és vàlid. No mostra cap dada personal.",
+    "home": "Torna a l'inici"
   },
   "profile": {
     "title": "El meu perfil",

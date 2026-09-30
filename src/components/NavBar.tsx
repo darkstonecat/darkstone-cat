@@ -61,6 +61,17 @@ const SUBPAGE_THEMES: Record<string, { text: string; bg: string }> = {
   "/data-protection": { text: "#FAFAF9", bg: "#1C1917" },
 };
 
+/** Dynamic routes have no exact key in `SUBPAGE_THEMES`; they match by prefix (dark hero pages). */
+const DYNAMIC_SUBPAGE_PREFIXES = ["/verify/"];
+
+function getSubpageTheme(pathname: string) {
+  if (SUBPAGE_THEMES[pathname]) return SUBPAGE_THEMES[pathname];
+  if (DYNAMIC_SUBPAGE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+    return SUBPAGE_THEMES["/profile"];
+  }
+  return SECTION_THEMES[""];
+}
+
 export default function NavBar() {
   const t = useTranslations("nav");
   const pathname = usePathname();
@@ -81,7 +92,7 @@ export default function NavBar() {
     if (isHomePage) {
       return SECTION_THEMES[homeActiveSection] ?? SECTION_THEMES[""];
     }
-    return SUBPAGE_THEMES[pathname] ?? SECTION_THEMES[""];
+    return getSubpageTheme(pathname);
   }, [isHomePage, homeActiveSection, pathname]);
 
   // Track scroll for backdrop blur

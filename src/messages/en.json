@@ -377,6 +377,8 @@
     "profile_edit_description": "Update your Darkstone Catalunya member data.",
     "profile_card_title": "Member card",
     "profile_card_description": "View and download your Darkstone Catalunya member card.",
+    "verify_title": "Card verification",
+    "verify_description": "Check that a Darkstone Catalunya member card is valid.",
     "profile_details_title": "Profile and account",
     "profile_details_description": "Manage your member details, your gaming profiles and your Darkstone Catalunya account.",
     "admin_title": "Administration",
@@ -708,6 +710,16 @@
     "password_min_length": "Minimum 8 characters.",
     "must_accept_conduct": "You must accept the code of conduct.",
     "must_accept_privacy": "You must accept the privacy policy."
+  },
+  "verify": {
+    "eyebrow": "Card verification",
+    "valid_title": "Valid card",
+    "invalid_title": "Invalid card",
+    "valid_text": "This Darkstone Catalunya member card is valid.",
+    "number_label": "Member no.",
+    "invalid_text": "This code does not match any current member card. Check that you scanned the right card, or ask the member to show it again.",
+    "note": "This page only confirms that the card is valid. It shows no personal data.",
+    "home": "Back to home"
   },
   "profile": {
     "title": "My profile",

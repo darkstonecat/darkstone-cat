@@ -57,6 +57,7 @@
 | `/profile/details` | Profile details: hero, tabs and account (protected) |
 | `/profile/edit` | Profile edit form (protected) |
 | `/profile/card` | Member card with a real QR, image download (protected) |
+| `/verify/[token]` | Public member card check from the QR (valid + member number only, `noindex`) |
 | `/admin` | Admin dashboard with stats (admin only) |
 | `/admin/members` | Member list with search, sort & CSV export (admin only) |
 | `/data-protection` | Data protection policy (RGPD) |

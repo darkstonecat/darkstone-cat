@@ -84,6 +84,15 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      // The card token is in the path: never leak it through the Referer header and keep the page
+      // out of indexes even if the meta robots tag is missed. Later rules override earlier ones.
+      {
+        source: "/:locale(es|en)?/verify/:token",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
     ];
   },
   async redirects() {
