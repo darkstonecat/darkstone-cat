@@ -121,9 +121,10 @@ current data sheet off `/profile`.)
   (decision 1); covers through `src/lib/game-matching.ts`. `/events` keeps its long cache.
   Unit tests.
   - Evidence: `tests/lib/ludoya/sessions.test.ts` + `tests/lib/member-sessions.test.ts` pass (Madrid-day windows, next-7-days incl. in-progress, month filter, `revalidate: 60` and single sub-events request, `pastLimit` only when the month already started, locations failure tolerated, BGG covers only on name+year match else Ludoya cover, BGG down falls back, errors as `api_error`/`timeout`). Home functions live in `src/lib/member-sessions.ts` (not in `src/lib/ludoya`) to avoid a `ludoya` ↔ `game-matching` import cycle.
-- [ ] B2.5 — Username checks as server actions: Ludoya `search/users?intent=PLAY` and BGG
+- [x] B2.5 — Username checks as server actions: Ludoya `search/users?intent=PLAY` and BGG
   `xmlapi2/user?name=` (existing Bearer token). Result states found / not found / failed; never
   blocking. Unit tests with mocked fetch.
+  - Evidence: server actions `checkLudoyaUsername` / `checkBggUsername` in `src/lib/profile/username-checks.ts` (found / not_found / failed, never throw, 20 checks/min per client IP and service); `tests/lib/username-lookup.test.ts`, `tests/lib/rate-limit.test.ts`, `tests/server/actions/username-checks.test.ts` pass. Real BGG shape (probed 2026-09-30): known user = 200 XML `<user id=… name=…>`; unknown name = **404 HTML page** (not a 200 with empty id); both handled, other outcomes = failed. Ludoya search returns partial matches, so found requires an exact case-insensitive username match.
 - [ ] B2.6 — Migrate existing consumers to the public API: `fetchUpcomingEvents` (`/events`,
   keeps its long cache), `resolveBggIds` + `/events/images`, `scripts/ludoya/check.mjs` and the
   weekly workflow (needs `LUDOYA_API_KEY` as a GitHub secret — user action). Remove the old
