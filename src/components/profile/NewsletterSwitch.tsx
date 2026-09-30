@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { setNewsletterAccepted } from "@/lib/profile/details-actions";
 import { cn } from "@/lib/utils";
+import LiveMessages from "./LiveMessages";
 
 /**
  * Email opt-in switch. Optimistic: flips at once, rolls back if the save fails.
@@ -51,7 +52,7 @@ export default function NewsletterSwitch({ initialValue }: { initialValue: boole
           aria-labelledby={titleId}
           aria-describedby={hintId}
           onClick={toggle}
-          disabled={busy}
+          aria-disabled={busy}
           className="relative flex min-h-11 min-w-[52px] shrink-0 items-center justify-center"
         >
           <span
@@ -71,17 +72,12 @@ export default function NewsletterSwitch({ initialValue }: { initialValue: boole
           </span>
         </button>
       </div>
-      <p
-        role={status === "error" ? "alert" : "status"}
-        aria-live="polite"
-        className={cn(
-          "text-[13px] empty:hidden",
-          status === "error" ? "font-medium text-brand-red" : "text-stone-custom/65"
-        )}
-      >
-        {status === "saved" ? (checked ? t("newsletter_on") : t("newsletter_off")) : null}
-        {status === "error" ? t("newsletter_error") : null}
-      </p>
+      <LiveMessages
+        statusClassName="text-stone-custom/65"
+        errorClassName="text-brand-red"
+        status={status === "saved" ? (checked ? t("newsletter_on") : t("newsletter_off")) : null}
+        error={status === "error" ? t("newsletter_error") : null}
+      />
     </div>
   );
 }

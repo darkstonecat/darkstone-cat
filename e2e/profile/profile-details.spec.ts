@@ -80,7 +80,7 @@ test.describe('Profile details cards', () => {
 
     await sw.click()
     await expect(sw).toHaveAttribute('aria-checked', after)
-    await expect(page.getByRole('status').filter({ hasText: /comunicacions per correu/ })).toBeVisible()
+    await expect(page.locator('[aria-live="polite"]').filter({ hasText: /comunicacions per correu/ })).toBeVisible()
     await page.reload()
     await expect(page.getByRole('switch', { name: 'Comunicacions per correu' })).toHaveAttribute('aria-checked', after)
 

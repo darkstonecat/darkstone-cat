@@ -11,15 +11,28 @@ type MemberDataCardProps = {
   /** Already masked on the server: the decrypted values never reach this component. */
   dni: MaskedValue | null;
   phone: MaskedValue | null;
+  /** A value is stored but could not be decrypted: show "unavailable" instead of "not provided". */
+  dniUnavailable?: boolean;
+  phoneUnavailable?: boolean;
 };
 
 /** "Dades de soci": read-only data sheet. Server component, so nothing sensitive is serialised to the client. */
-export default function MemberDataCard({ email, firstName, lastName, postalCode, dni, phone }: MemberDataCardProps) {
+export default function MemberDataCard({
+  email,
+  firstName,
+  lastName,
+  postalCode,
+  dni,
+  phone,
+  dniUnavailable = false,
+  phoneUnavailable = false,
+}: MemberDataCardProps) {
   const t = useTranslations("profile");
   const d = useTranslations("profile.details");
   const notProvided = t("not_provided");
+  const unavailable = d("data_unavailable");
 
-  const fields: { key: string; label: string; value: string | null; ariaLabel?: string }[] = [
+  const fields: { key: string; label: string; value: string | null; unavailable?: boolean; ariaLabel?: string }[] = [
     { key: "email", label: t("label_email"), value: email },
     { key: "first_name", label: t("label_first_name"), value: firstName },
     { key: "last_name", label: t("label_last_name"), value: lastName },
@@ -27,12 +40,14 @@ export default function MemberDataCard({ email, firstName, lastName, postalCode,
       key: "dni",
       label: t("label_dni"),
       value: dni?.masked ?? null,
+      unavailable: dniUnavailable,
       ariaLabel: dni ? (dni.tail ? d("dni_ends_with", { tail: dni.tail }) : d("dni_hidden")) : undefined,
     },
     {
       key: "phone",
       label: t("label_phone"),
       value: phone?.masked ?? null,
+      unavailable: phoneUnavailable,
       ariaLabel: phone ? (phone.tail ? d("phone_ends_with", { tail: phone.tail }) : d("phone_hidden")) : undefined,
     },
     { key: "postal_code", label: t("label_postal_code"), value: postalCode },
@@ -59,7 +74,7 @@ export default function MemberDataCard({ email, firstName, lastName, postalCode,
             <dt className="text-[13px] font-medium text-stone-custom/65">{f.label}</dt>
             <dd className="mt-1 break-words text-base text-stone-custom">
               {!f.value ? (
-                <span className="text-stone-custom/65">{notProvided}</span>
+                <span className="text-stone-custom/65">{f.unavailable ? unavailable : notProvided}</span>
               ) : f.ariaLabel ? (
                 <>
                   <span aria-hidden="true">{f.value}</span>

@@ -1,12 +1,13 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { MdCheckCircle, MdGridView, MdInfoOutline, MdOpenInNew } from "react-icons/md";
 import { cn } from "@/lib/utils";
 import { checkBggUsername, checkLudoyaUsername } from "@/lib/profile/username-checks";
 import { linkGamingAccount, unlinkGamingAccount, type GamingService } from "@/lib/profile/details-actions";
 import { useUsernameCheck } from "@/hooks/useUsernameCheck";
+import LiveMessages from "./LiveMessages";
 
 type GamingAccountsProps = {
   ludoyaUsername: string | null;
@@ -27,36 +28,73 @@ function GamingTile({ service, initialUsername }: { service: GamingService; init
   const [linked, setLinked] = useState<string | null>(initialUsername);
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<"invalid" | "failed" | null>(null);
+  const linkedRef = useRef<HTMLParagraphElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  // Set by the link/unlink handlers: the button that had focus disappears, so focus moves to what replaces it.
+  const focusAfter = useRef<"linked" | "input" | null>(null);
   const check = useUsernameCheck(CHECKERS[service]);
 
   const name = t(`${service}_name`);
   const isLinked = linked !== null;
 
+  useEffect(() => {
+    if (focusAfter.current === "linked") linkedRef.current?.focus();
+    else if (focusAfter.current === "input") inputRef.current?.focus();
+    focusAfter.current = null;
+  }, [linked]);
+
   async function handleLink(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (busy || !value.trim()) return;
     setBusy(true);
-    setError(false);
+    setError(null);
     const result = await linkGamingAccount(service, value).catch(() => ({ error: "failed" as const }));
     setBusy(false);
     if (result.error === null && result.username) {
+      focusAfter.current = "linked";
       setLinked(result.username);
       setValue("");
       check.reset();
     } else {
-      setError(true);
+      setError(result.error === "invalid" ? "invalid" : "failed");
     }
   }
 
   async function handleUnlink() {
     if (busy) return;
     setBusy(true);
-    setError(false);
+    setError(null);
     const result = await unlinkGamingAccount(service).catch(() => ({ error: "failed" as const }));
     setBusy(false);
-    if (result.error === null) setLinked(null);
-    else setError(true);
+    if (result.error === null) {
+      focusAfter.current = "input";
+      setLinked(null);
+    } else {
+      setError("failed");
+    }
+  }
+
+  let status: ReactNode = null;
+  let statusClass = "text-stone-custom/65";
+  if (!isLinked && check.state === "checking") {
+    status = t("check_checking");
+  } else if (!isLinked && check.state === "found") {
+    statusClass = "flex items-center gap-1.5 font-medium text-green-700";
+    status = (
+      <>
+        <MdCheckCircle aria-hidden="true" className="size-4 shrink-0" />
+        {t("check_found", { username: check.checked })}
+      </>
+    );
+  } else if (!isLinked && check.state === "not_found") {
+    statusClass = "flex items-center gap-1.5 font-medium text-brand-orange-text";
+    status = (
+      <>
+        <MdInfoOutline aria-hidden="true" className="size-4 shrink-0" />
+        {t(`${service}_not_found`)}
+      </>
+    );
   }
 
   const icon =
@@ -100,7 +138,9 @@ function GamingTile({ service, initialUsername }: { service: GamingService; init
 
       {isLinked ? (
         <>
-          <p className="break-all text-[15px] text-brand-white/75">@{linked}</p>
+          <p ref={linkedRef} tabIndex={-1} className="break-all text-[15px] text-brand-white/75 outline-none">
+            @{linked}
+          </p>
           <div className="flex flex-wrap gap-2.5">
             <a
               href={profileUrl(service, linked)}
@@ -115,8 +155,8 @@ function GamingTile({ service, initialUsername }: { service: GamingService; init
             <button
               type="button"
               onClick={handleUnlink}
-              disabled={busy}
-              className="inline-flex min-h-11 items-center rounded-xl border border-brand-white/25 px-4 text-sm font-semibold text-brand-white transition-colors hover:bg-brand-white/10 disabled:opacity-50"
+              aria-disabled={busy}
+              className="inline-flex min-h-11 items-center rounded-xl border border-brand-white/25 px-4 text-sm font-semibold text-brand-white transition-colors hover:bg-brand-white/10 aria-disabled:opacity-50"
             >
               {t("unlink")}
             </button>
@@ -130,6 +170,7 @@ function GamingTile({ service, initialUsername }: { service: GamingService; init
           <div className="flex gap-2">
             <input
               id={inputId}
+              ref={inputRef}
               type="text"
               value={value}
               onChange={(e) => setValue(e.target.value)}
@@ -139,12 +180,12 @@ function GamingTile({ service, initialUsername }: { service: GamingService; init
               autoCapitalize="none"
               spellCheck={false}
               maxLength={65}
-              className="min-h-11 min-w-0 flex-1 rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-2 text-base text-stone-custom outline-none transition-colors placeholder:text-stone-custom/50 focus:border-2 focus:border-brand-orange"
+              className="min-h-11 min-w-0 flex-1 rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-2 text-base text-stone-custom transition-colors placeholder:text-stone-custom/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
             />
             <button
               type="submit"
-              disabled={busy || !value.trim()}
-              className="inline-flex min-h-11 items-center rounded-xl bg-stone-custom px-4 text-sm font-semibold text-brand-white transition-colors hover:bg-stone-custom/90 disabled:opacity-50"
+              aria-disabled={busy || !value.trim()}
+              className="inline-flex min-h-11 items-center rounded-xl bg-stone-custom px-4 text-sm font-semibold text-brand-white transition-colors hover:bg-stone-custom/90 aria-disabled:opacity-50"
             >
               {t("link")}
             </button>
@@ -152,30 +193,14 @@ function GamingTile({ service, initialUsername }: { service: GamingService; init
         </form>
       )}
 
-      <div aria-live="polite" className="empty:hidden">
-        {!isLinked && check.state === "checking" && (
-          <p role="status" className="text-[13px] text-stone-custom/65">
-            {t("check_checking")}
-          </p>
-        )}
-        {!isLinked && check.state === "found" && (
-          <p role="status" className="flex items-center gap-1.5 text-[13px] font-medium text-green-700">
-            <MdCheckCircle aria-hidden="true" className="size-4 shrink-0" />
-            {t("check_found", { username: check.checked })}
-          </p>
-        )}
-        {!isLinked && check.state === "not_found" && (
-          <p role="status" className="flex items-center gap-1.5 text-[13px] font-medium text-brand-orange-text">
-            <MdInfoOutline aria-hidden="true" className="size-4 shrink-0" />
-            {t(`${service}_not_found`)}
-          </p>
-        )}
-        {error && (
-          <p role="alert" className={cn("text-[13px] font-medium", isLinked ? "text-brand-white" : "text-brand-red")}>
-            {t("save_error")}
-          </p>
-        )}
-      </div>
+      <LiveMessages
+        // Collapse the flex gap while both regions are empty.
+        className={status || error ? undefined : "-mt-3.5"}
+        statusClassName={statusClass}
+        errorClassName={isLinked ? "text-brand-white" : "text-brand-red"}
+        status={status}
+        error={error ? t(error === "invalid" ? "save_invalid" : "save_error") : null}
+      />
     </div>
   );
 }

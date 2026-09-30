@@ -7,9 +7,10 @@ import { exportProfileData } from "@/lib/profile/actions";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import DeleteAccountDialog from "./DeleteAccountDialog";
+import LiveMessages from "./LiveMessages";
 
 const BUTTON =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border bg-brand-white px-5 text-sm font-semibold transition-colors disabled:opacity-50 max-sm:w-full";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border bg-brand-white px-5 text-sm font-semibold transition-colors aria-disabled:opacity-50 max-sm:w-full";
 
 type AccountActionsProps = {
   email: string;
@@ -35,6 +36,7 @@ export default function AccountActions({ email, memberNumber }: AccountActionsPr
   }
 
   async function handleExport() {
+    if (exporting) return;
     setExporting(true);
     setExportError(false);
     const { data, error } = await exportProfileData().catch(() => ({ data: null, error: "failed" }));
@@ -57,7 +59,7 @@ export default function AccountActions({ email, memberNumber }: AccountActionsPr
         <button
           type="button"
           onClick={handlePassword}
-          disabled={password === "sending"}
+          aria-disabled={password === "sending"}
           className={cn(BUTTON, "border-stone-custom/15 text-stone-custom hover:bg-stone-custom/5")}
         >
           <MdVpnKey aria-hidden="true" className="size-[18px]" />
@@ -66,7 +68,7 @@ export default function AccountActions({ email, memberNumber }: AccountActionsPr
         <button
           type="button"
           onClick={handleExport}
-          disabled={exporting}
+          aria-disabled={exporting}
           className={cn(BUTTON, "border-stone-custom/15 text-stone-custom hover:bg-stone-custom/5")}
         >
           <MdFileDownload aria-hidden="true" className="size-[18px]" />
@@ -82,23 +84,14 @@ export default function AccountActions({ email, memberNumber }: AccountActionsPr
         </button>
       </div>
 
-      <div aria-live="polite" className="empty:hidden">
-        {password === "sent" && (
-          <p role="status" className="text-[13px] text-stone-custom/65">
-            {t("change_password_sent")}
-          </p>
-        )}
-        {password === "error" && (
-          <p role="alert" className="text-[13px] font-medium text-brand-red">
-            {t("change_password_error")}
-          </p>
-        )}
-        {exportError && (
-          <p role="alert" className="text-[13px] font-medium text-brand-red">
-            {t("download_error")}
-          </p>
-        )}
-      </div>
+      <LiveMessages
+        statusClassName="text-stone-custom/65"
+        errorClassName="text-brand-red"
+        status={password === "sent" ? t("change_password_sent") : null}
+        error={
+          password === "error" ? t("change_password_error") : exportError ? t("download_error") : null
+        }
+      />
 
       <DeleteAccountDialog open={deleteOpen} onClose={() => setDeleteOpen(false)} />
     </>

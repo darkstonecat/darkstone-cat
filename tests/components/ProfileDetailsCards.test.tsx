@@ -110,7 +110,7 @@ describe('GamingAccounts', () => {
     const input = tile.querySelector('input')!
     fireEvent.change(input, { target: { value: 'laia' } })
     fireEvent.submit(input.closest('form')!)
-    expect(await screen.findByRole('alert')).toHaveTextContent('save_error')
+    await waitFor(() => expect(tile.querySelector('[role="alert"]')).toHaveTextContent('save_error'))
     expect(tile).toHaveTextContent('not_linked')
   })
 
@@ -121,7 +121,72 @@ describe('GamingAccounts', () => {
     expect(mockUnlink).toHaveBeenCalledWith('bgg')
   })
 })
+describe('GamingAccounts accessibility', () => {
+  it('shows a distinct message when the username format is invalid', async () => {
+    mockLink.mockResolvedValue({ error: 'invalid' })
+    render(<GamingAccounts ludoyaUsername={null} bggUsername={null} />)
+    const input = screen.getByTestId('gaming-tile-bgg').querySelector('input')!
+    fireEvent.change(input, { target: { value: '???' } })
+    fireEvent.submit(input.closest('form')!)
+    const alert = screen.getByTestId('gaming-tile-bgg').querySelector('[role="alert"]')!
+    await waitFor(() => expect(alert).toHaveTextContent('save_invalid'))
+  })
+
+  it('keeps always-mounted live regions and announces the check without nested roles', async () => {
+    render(<GamingAccounts ludoyaUsername={null} bggUsername={null} />)
+    const tile = screen.getByTestId('gaming-tile-bgg')
+    expect(tile.querySelector('[aria-live="polite"]')).toBeInTheDocument()
+    expect(tile.querySelector('[role="alert"]')).toBeInTheDocument()
+    expect(tile.querySelector('.empty\\:hidden')).toBeNull()
+    const input = tile.querySelector('input')!
+    fireEvent.change(input, { target: { value: 'nobody' } })
+    fireEvent.blur(input)
+    const live = tile.querySelector('[aria-live="polite"]')!
+    await waitFor(() => expect(live).toHaveTextContent('bgg_not_found'))
+    expect(live.querySelector('[role]')).toBeNull()
+  })
+
+  it('moves focus to the linked username after linking and to the input after unlinking', async () => {
+    render(<GamingAccounts ludoyaUsername={null} bggUsername={null} />)
+    const tile = screen.getByTestId('gaming-tile-ludoya')
+    const input = tile.querySelector('input')!
+    fireEvent.change(input, { target: { value: 'laia' } })
+    fireEvent.submit(input.closest('form')!)
+    await waitFor(() => expect(tile).toHaveTextContent('@laia'))
+    expect(screen.getByText('@laia')).toHaveFocus()
+    fireEvent.click(within(tile).getByRole('button', { name: 'unlink' }))
+    await waitFor(() => expect(tile.querySelector('input')).toHaveFocus())
+  })
+
+  it('uses aria-disabled instead of disabled while busy and ignores repeat clicks', async () => {
+    let resolve!: (v: { error: null; username: null }) => void
+    mockUnlink.mockReturnValue(new Promise((r) => (resolve = r)))
+    render(<GamingAccounts ludoyaUsername="laia" bggUsername={null} />)
+    const btn = screen.getByRole('button', { name: 'unlink' })
+    fireEvent.click(btn)
+    expect(btn).toHaveAttribute('aria-disabled', 'true')
+    expect(btn).not.toBeDisabled()
+    fireEvent.click(btn)
+    expect(mockUnlink).toHaveBeenCalledTimes(1)
+    resolve({ error: null, username: null })
+    await waitFor(() => expect(screen.getByTestId('gaming-tile-ludoya')).toHaveTextContent('not_linked'))
+  })
+
+  it('does not strip the focus ring from the input', () => {
+    render(<GamingAccounts ludoyaUsername={null} bggUsername={null} />)
+    const cls = screen.getByTestId('gaming-tile-ludoya').querySelector('input')!.className
+    expect(cls).not.toContain('outline-none')
+    expect(cls).toContain('focus-visible:outline-brand-orange')
+  })
+})
+
 describe('NewsletterSwitch', () => {
+  it('renders both live regions before anything is announced', () => {
+    const { container } = render(<NewsletterSwitch initialValue />)
+    expect(container.querySelector('[aria-live="polite"]')).toBeEmptyDOMElement()
+    expect(container.querySelector('[role="alert"]')).toBeEmptyDOMElement()
+  })
+
   it('is a switch reflecting the saved value with a 44px hit area', () => {
     render(<NewsletterSwitch initialValue />)
     const sw = screen.getByRole('switch', { name: 'newsletter_title' })
@@ -177,6 +242,12 @@ describe('MemberDataCard', () => {
     expect(screen.getByText('phone_ends_with:412')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /edit/ })).toHaveAttribute('href', '/profile/edit')
     expect(screen.getByText('a@b.test')).toBeInTheDocument()
+  })
+
+  it('shows "unavailable", not "not provided", when a value could not be decrypted', () => {
+    render(<MemberDataCard {...props} dni={null} dniUnavailable />)
+    expect(screen.getByText('data_unavailable')).toBeInTheDocument()
+    expect(screen.queryByText('not_provided')).toBeNull()
   })
 
   it('shows "not provided" for missing values', () => {

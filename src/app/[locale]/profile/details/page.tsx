@@ -2,7 +2,7 @@ import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { getProfileData } from "@/lib/supabase/auth";
-import { decrypt } from "@/lib/encryption";
+import { maskEncryptedField } from "@/lib/profile/masked-field";
 import { maskDni, maskPhone } from "@/lib/profile/mask";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -36,16 +36,6 @@ export async function generateMetadata({
   };
 }
 
-/** Decrypts on the server and returns only the masked form; the raw value never leaves this function. */
-function maskEncrypted(encrypted: string | null, mask: typeof maskDni) {
-  if (!encrypted) return null;
-  try {
-    return mask(decrypt(encrypted));
-  } catch {
-    return null;
-  }
-}
-
 export default async function ProfileDetailsPage({
   params,
 }: {
@@ -70,6 +60,9 @@ export default async function ProfileDetailsPage({
     tMeta("profile_details_title"),
     tMeta("profile_details_description")
   );
+
+  const dni = maskEncryptedField(member?.dni_nie_encrypted ?? null, maskDni, "dni");
+  const phone = maskEncryptedField(member?.phone_encrypted ?? null, maskPhone, "phone");
 
   const cardClass = "rounded-2xl bg-brand-white p-5 sm:p-8";
   const titleClass = "text-[22px] font-bold text-stone-custom";
@@ -106,8 +99,10 @@ export default async function ProfileDetailsPage({
                 firstName={member.first_name}
                 lastName={member.last_name}
                 postalCode={member.postal_code}
-                dni={maskEncrypted(member.dni_nie_encrypted, maskDni)}
-                phone={maskEncrypted(member.phone_encrypted, maskPhone)}
+                dni={dni.value}
+                phone={phone.value}
+                dniUnavailable={dni.unavailable}
+                phoneUnavailable={phone.unavailable}
               />
 
               <section aria-labelledby="comms-title" className={`${cardClass} flex flex-col gap-4`}>
