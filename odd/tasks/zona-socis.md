@@ -91,10 +91,11 @@ current data sheet off `/profile`.)
   another's token, member cannot change own token). Route: inline candidate (one migration +
   types), delegate if RLS work grows.
   - Evidence: `db:reset` applied; integration rls+triggers 20/20 pass (token on new member, distinct tokens, own read, other unreadable, own update rejected, admin regenerate, non-admin rejected); lint and tsc clean. Token = 32 hex from `gen_random_uuid()` (no extension). Commit: see git log.
-- [ ] B1.2 — Migration: `member_badges` (member id, badge key, awarded_at, unique pair), RLS
+- [x] B1.2 — Migration: `member_badges` (member id, badge key, awarded_at, unique pair), RLS
   select-own + admin all, no member writes; badge keys as a check constraint
   (`volunteer_egara_joga`, `ludoteca_donor`). "Membre {year}" is derived, not stored
   (decision 3; year from `membership_start_date`, decision Q2). Tests: RLS integration.
+  - Evidence: `db:reset` applied; `member-badges.test.ts` 8/8 pass (check constraint, unique pair, cascade, select own/admin all, no member or admin API writes).
 - [ ] B1.3 — Server helper `getMemberBadges()` + derived "Membre {year}". Unit test.
 
 ### B2 — Ludoya public API adapter (replaces the old client, decision Q4)
