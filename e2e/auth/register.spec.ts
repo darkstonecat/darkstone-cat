@@ -72,7 +72,7 @@ test.describe('Register page', () => {
     await expect(page.locator('a[href="/privacy"]').first()).toBeVisible()
   })
 
-  test('successful registration swaps to the confirmation screen', async ({ page }) => {
+  test('successful registration swaps to the confirmation screen, resends and goes back', async ({ page }) => {
     // Server action compilation on first call can be slow in dev mode
     test.slow()
 
@@ -87,8 +87,26 @@ test.describe('Register page', () => {
     await page.locator('input[name="privacy"]').check()
     await page.locator('button[type="submit"]').click()
 
-    await expect(page.getByRole('heading', { level: 1, name: TEXT.register_done_title })).toBeVisible({ timeout: 60_000 })
+    const h1 = page.getByRole('heading', { level: 1, name: TEXT.register_done_title })
+    await expect(h1).toBeVisible({ timeout: 60_000 })
+    await expect(h1).toBeFocused()
+    await expect(page).toHaveURL(/\/register$/)
     await expect(page.locator('main').getByText(uniqueEmail)).toBeVisible()
+    await expect(page.getByRole('link', { name: TEXT.register_done_login })).toHaveAttribute('href', /\/login$/)
+
+    // Resend: local Supabase has confirmations off (no signup email is sent), so the
+    // auth call is stubbed and its payload checked instead of reading Mailpit.
+    await page.route('**/auth/v1/resend', (route) => route.fulfill({ status: 200, json: {} }))
+    const resendRequest = page.waitForRequest('**/auth/v1/resend')
+    await page.getByRole('button', { name: TEXT.register_done_resend }).click()
+    expect((await resendRequest).postDataJSON()).toMatchObject({ type: 'signup', email: uniqueEmail })
+    await expect(page.getByRole('button', { name: TEXT.register_done_resent })).toBeDisabled()
+
+    // Back to the form keeps the values
+    await page.getByRole('button', { name: TEXT.register_done_back }).click()
+    await expect(page.locator('#email')).toHaveValue(uniqueEmail)
+    await expect(page.locator('#first_name')).toHaveValue('Reg')
+    await expect(page.locator('input[name="conduct"]')).toBeChecked()
   })
 
   test('has link to login page', async ({ page }) => {

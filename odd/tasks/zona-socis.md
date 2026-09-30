@@ -169,9 +169,11 @@ current data sheet off `/profile`.)
 - [x] B4.2 — On-blur Ludoya/BGG checks wired to B2.5 (idle/checking/found/not found/failed).
   Component tests.
   - Evidence: `useUsernameCheck` hook (idle/checking/found/not_found/failed; per-value cache, no duplicate call while in flight or for an unchanged value, stale answers discarded, leading `@` stripped) wired on blur to `checkLudoyaUsername`/`checkBggUsername` in `RegisterForm`; `role="status"` lines with icon + text; not_found is a soft warning that never blocks submit, failed is silent. `tests/components/RegisterUsernameChecks.test.tsx` 7/7 with mocked actions; lint and `tsc` clean. Deviation: the found line shows the username as typed, not the account's display name (the actions return only a status; exposing a stranger's name on a public form needs a product/privacy decision).
-- [ ] B4.3 — 02b state: success swaps to "Revisa el teu correu" (focus h1, submitted email,
+- [x] B4.3 — 02b state: success swaps to "Revisa el teu correu" (focus h1, submitted email,
   `auth.resend({ type: 'signup' })` with 60 s cooldown, "back to form" keeps values, link to
   `/login`). Tests: component + E2E. Visual comparison desktop + mobile.
+  - Evidence: done screen implemented in `RegisterDone` (landed with B4.1 because sign-up needs a success screen): h1 focused after submit, email from state only, resend via `auth.resend({ type: 'signup', email })` (idle/sending/sent with 60 s cooldown/error/rate-limit, `aria-live`), back to form keeps values (form stays mounted, hidden), `/login` link. Tests: `tests/components/RegisterDone.test.tsx` 4/4 (fake timers for the cooldown), `RegisterFlow.test.tsx` (swap, focus, back keeps values), E2E `register.spec.ts` (swap, focused h1, email shown, resend payload, back keeps values; the resend call is stubbed because local Supabase has `enable_confirmations = false`, so no signup email reaches Mailpit). Checks: lint clean, `tsc` clean, `npm run test:unit` 317/317, `npm run test:integration` 52/52, `npx playwright test e2e/auth` 26/26. Visual comparison (1280 DSF1, 390 DSF2 for 02; 1280 for 02b) after fixing legend padding, hero-to-body and card spacing: 02b matches (page 1245 vs 1254 px; hero 4 px shorter, real NavBar/Footer); 02 desktop matches structure, aside width 300, card and row spacing; remaining differences are sample data, the real NavBar/Footer, and on mobile the shared `AuthHero` top padding (`pt-32`, from B3.2), about 30 px taller than the mockup under the fixed NavBar.
+
 
 ### B7 — Profile shell + profile details (screen 04) — runs before B5/B6
 
