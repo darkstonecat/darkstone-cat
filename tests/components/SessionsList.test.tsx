@@ -235,19 +235,13 @@ describe('SessionsList plays', () => {
 })
 
 describe('SessionsList default expansion', () => {
-  it('expands only the first session on mobile', () => {
-    stubViewport(true)
-    render(<SessionsList sessions={[session({ id: 'a', title: 'A' }), session({ id: 'b', title: 'B' })]} ludoyaUrl={LUDOYA} />)
-    const buttons = screen.getAllByRole('button', { name: /(show|hide)_plays/ })
-    expect(buttons.map((b) => b.getAttribute('aria-expanded'))).toEqual(['true', 'false'])
-    fireEvent.click(buttons[0])
-    expect(buttons[0]).toHaveAttribute('aria-expanded', 'false')
-  })
-
-  it('starts all collapsed on desktop', () => {
-    stubViewport(false)
+  it.each([true, false])('starts every session collapsed (mobile viewport: %s), so hydration never shifts the layout', (mobile) => {
+    stubViewport(mobile)
     render(<SessionsList sessions={[session({ id: 'a', title: 'A' }), session({ id: 'b', title: 'B' })]} ludoyaUrl={LUDOYA} />)
     const buttons = screen.getAllByRole('button', { name: /(show|hide)_plays/ })
     expect(buttons.map((b) => b.getAttribute('aria-expanded'))).toEqual(['false', 'false'])
+    for (const button of buttons) {
+      expect(document.getElementById(button.getAttribute('aria-controls')!)).toHaveAttribute('hidden')
+    }
   })
 })

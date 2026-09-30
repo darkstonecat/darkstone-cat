@@ -12,7 +12,6 @@ import {
   MdOutlinePlace,
 } from "react-icons/md";
 import type { MemberSessionPlay } from "@/lib/member-sessions";
-import { useIsMobileViewport } from "@/hooks/useIsMobileViewport";
 import {
   MAX_PLAYS_SHOWN,
   MAX_STACK_COVERS,
@@ -121,13 +120,13 @@ function PlayRow({ play }: { play: MemberSessionPlay }) {
   );
 }
 
-function SessionItem({ session, openOnMobile }: { session: SessionRow; openOnMobile: boolean }) {
+function SessionItem({ session }: { session: SessionRow }) {
   const t = useTranslations("profile.home.sessions");
-  const isMobile = useIsMobileViewport();
-  // Until the person toggles it, the first session starts expanded on mobile only
-  // (desktop starts collapsed). `isMobile` is false while hydrating, so no mismatch.
-  const [toggled, setToggled] = useState<boolean | null>(null);
-  const open = toggled ?? (openOnMobile && isMobile);
+  // Collapsed everywhere until the person opens it. Expanding the first session
+  // on mobile only was decided after hydration (the viewport is unknown on the
+  // server), which shifted the layout; CSS alone cannot keep `aria-expanded`
+  // truthful, so no session starts open.
+  const [open, setOpen] = useState(false);
   const panelId = `plays-${session.id}`;
   const special = session.type === "special";
   const { tile } = session;
@@ -208,7 +207,7 @@ function SessionItem({ session, openOnMobile }: { session: SessionRow; openOnMob
             type="button"
             aria-expanded={open}
             aria-controls={panelId}
-            onClick={() => setToggled(!open)}
+            onClick={() => setOpen(!open)}
             className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-stone-custom/20 bg-brand-white px-4 text-sm font-semibold text-stone-custom md:w-[150px]"
           >
             {open ? t("hide_plays") : t("show_plays")}
@@ -308,8 +307,8 @@ export default function SessionsList({ sessions, error, ludoyaUrl }: SessionsLis
 
   return (
     <ul className="flex flex-col gap-3">
-      {sessions.map((session, i) => (
-        <SessionItem key={session.id} session={session} openOnMobile={i === 0} />
+      {sessions.map((session) => (
+        <SessionItem key={session.id} session={session} />
       ))}
     </ul>
   );
