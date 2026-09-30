@@ -63,7 +63,16 @@ test.describe('Register page', () => {
     await expect(page.getByText(TEXT.must_accept_privacy)).toBeVisible()
   })
 
-  test('successful registration shows success message', async ({ page }) => {
+  test('consents start unchecked and the three steps are shown', async ({ page }) => {
+    await expect(page.locator('input[name="conduct"]')).not.toBeChecked()
+    await expect(page.locator('input[name="privacy"]')).not.toBeChecked()
+    await expect(page.locator('input[name="newsletter"]')).not.toBeChecked()
+    await expect(page.getByRole('list', { name: /passos/i }).locator('li')).toHaveCount(3)
+    await expect(page.locator('a[href="/conduct"]').first()).toBeVisible()
+    await expect(page.locator('a[href="/privacy"]').first()).toBeVisible()
+  })
+
+  test('successful registration swaps to the confirmation screen', async ({ page }) => {
     // Server action compilation on first call can be slow in dev mode
     test.slow()
 
@@ -78,11 +87,12 @@ test.describe('Register page', () => {
     await page.locator('input[name="privacy"]').check()
     await page.locator('button[type="submit"]').click()
 
-    await expect(page.getByText(TEXT.register_success_title)).toBeVisible({ timeout: 60_000 })
+    await expect(page.getByRole('heading', { level: 1, name: TEXT.register_done_title })).toBeVisible({ timeout: 60_000 })
+    await expect(page.locator('main').getByText(uniqueEmail)).toBeVisible()
   })
 
   test('has link to login page', async ({ page }) => {
-    const loginLink = page.locator('a[href*="/login"]')
+    const loginLink = page.locator('main a[href*="/login"]')
     await expect(loginLink).toBeVisible()
     await loginLink.click()
     await expect(page).toHaveURL(/\/login/)

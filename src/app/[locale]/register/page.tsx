@@ -4,8 +4,7 @@ import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo"
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
-import AuthHero from "@/components/auth/AuthHero";
-import RegisterForm from "@/components/auth/RegisterForm";
+import RegisterFlow from "@/components/auth/RegisterFlow";
 
 export const revalidate = false;
 
@@ -50,13 +49,7 @@ export default async function RegisterPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
       />
       <NavBar />
-      <AuthHero titleKey="register_title" subtitleKey="register_subtitle" />
-
-      <section className="flex-1 bg-brand-beige pb-20">
-        <div className="container mx-auto max-w-4xl px-6 pt-16">
-          <RegisterForm />
-        </div>
-      </section>
+      <RegisterFlow />
 
       <Footer />
       <ScrollToTop />

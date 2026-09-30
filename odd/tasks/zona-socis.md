@@ -160,11 +160,12 @@ current data sheet off `/profile`.)
 
 ### B4 — Sign-up + "Revisa el teu correu" (screens 02, 02b)
 
-- [ ] B4.1 — Register redesign: hero steps, three fieldsets, aside (below submit on mobile),
+- [x] B4.1 — Register redesign: hero steps, three fieldsets, aside (below submit on mobile),
   consent box (required unchecked, newsletter optional → `newsletter_accepted`; no acceptance
   timestamp: required consent is implied by the account creation date, decision Q1), presentational
   strength meter (rule stays min 8). Tests: update `e2e/auth/register.spec.ts`,
   `tests/server/actions/signup.test.ts`.
+  - Evidence: `RegisterFlow` (hero + steps + form + aside + swap) replaces the page body; `RegisterForm` rewritten (three `FieldsetCard`s, strength meter, consent box, submit row; privacy link now `/privacy`); `AuthHero` gained optional `children`/`headingRef` (login unaffected). Sign-up needs a success screen, so `RegisterDone` (B4.3 code) lands in this commit; B4.2/B4.3 commits add username checks and the done-screen tests. `tests/components/RegisterFlow.test.tsx` 8/8, `npx playwright test e2e/auth` 26/26, lint and `tsc` clean. `signup.test.ts` unchanged (server action untouched). Route: inline (single writer).
 - [ ] B4.2 — On-blur Ludoya/BGG checks wired to B2.5 (idle/checking/found/not found/failed).
   Component tests.
 - [ ] B4.3 — 02b state: success swaps to "Revisa el teu correu" (focus h1, submitted email,
