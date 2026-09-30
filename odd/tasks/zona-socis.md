@@ -155,8 +155,12 @@ current data sheet off `/profile`.)
   `e2e/auth/login.spec.ts`. Visual comparison.
   - Commit: d81e96a. Route: delegated (writer trigger).
   - Evidence: `tests/components/LoginForm.test.tsx` 11/11; `npx playwright test e2e/auth` 25/25 (incl. new magic-link E2E through local Mailpit: neutral sent state for unknown email, real link signs in and lands on `/profile`, replay goes to `/login?magic=error`, unsafe `redirect` falls back to `/profile`, both buttons disabled while submitting); `e2e/navigation`+`admin`+`seo` 85/86 (the only failure, `locale-routing` "language switcher is visible", fails identically on the base without my changes). lint clean, `npm run test:unit` 249/249, `npm run test:integration` 52/52, `npx tsc --noEmit` only errors in `tests/lib/ludoya/normalize.test.ts` (other writer). Visual comparison at 1280 px (DSF 1) and 390 px (DSF 2): after fixing hero padding, grid width (944 px incl. gutters), input height (48), forgot link hit area and card B line-heights, the only differences left are the real NavBar/Footer render (logo x 28 vs 52, footer lazy animation) and sample data; page height 1340 vs 1347 px. Mobile follows the spec proposal (single column, photo 140 px). Also: new token `brand-orange-light` (#E07A2E), shared `src/lib/safe-redirect.ts` now also guards the password-login `redirect` param (was an open redirect), `AuthHero` paddings enlarged (all auth pages).
-- [ ] B3.3 — External check (user): Supabase prod Site URL, redirect allow-list includes
+- [x] B3.3 — External check (user): Supabase prod Site URL, redirect allow-list includes
   `/auth/magic-link`, OTP expiry, email rate limits. Recorded, not code.
+  - Evidence (2026-09-30, confirmed by the user in the Supabase dashboard): Site URL
+    `https://www.darkstone.cat`; redirect URLs include `/auth/magic-link`, `/auth/confirm` and
+    `/auth/callback`; Magic link template points to `/auth/magic-link?token_hash=…&type=email`;
+    Confirm email on; OTP expiry 3600 s; default email rate limits kept.
 
 ### B4 — Sign-up + "Revisa el teu correu" (screens 02, 02b)
 
@@ -320,9 +324,9 @@ current data sheet off `/profile`.)
   - B8 done: 79b6c30 (PUBLIC-only member home), 93547f8 (footer wrap at 320 px), docs commit
     (CLAUDE.md, README, unused key). Results in B8.2.
 - Pending user actions:
-  - Add the `LUDOYA_API_KEY` GitHub secret (weekly `ludoya-check` workflow).
-  - B3.3 production Supabase: Site URL `https://www.darkstone.cat`, redirect allow-list including
-    `/auth/magic-link`, the Magic link template (already set), OTP expiry, email rate limits.
+  - Done 2026-09-30: `LUDOYA_API_KEY` GitHub secret added (value verified only when the weekly
+    workflow first runs from `main`: run it by hand after merging); B3.3 production Supabase
+    checked.
   - Apply the new migrations to production when merging: `supabase/migrations/20260930100000_add_members_card_token.sql`,
     `20260930100100_create_member_badges.sql`, `20260930100200_harden_member_card_and_badges.sql`,
     `20260930110000_members_fk_on_delete_cascade.sql`, `20260930120000_verify_card_token.sql`.
