@@ -5,6 +5,7 @@ import { mockMotion, mockTranslator } from '../helpers/register-mocks'
 const mockSignUp = vi.fn()
 const mockResend = vi.fn()
 const mockUpdateMember = vi.fn()
+const mockDiscard = vi.fn()
 const mockCheckLudoya = vi.fn()
 const mockCheckBgg = vi.fn()
 
@@ -18,6 +19,7 @@ vi.mock('@/lib/supabase/client', () => ({
 }))
 vi.mock('@/lib/supabase/actions', () => ({
   updateMemberAfterSignup: (...args: unknown[]) => mockUpdateMember(...args),
+  discardUnconfirmedSignup: (...args: unknown[]) => mockDiscard(...args),
 }))
 vi.mock('@/lib/profile/username-checks', () => ({
   checkLudoyaUsername: (...args: unknown[]) => mockCheckLudoya(...args),
@@ -47,6 +49,7 @@ describe('RegisterFlow (sign-up form)', () => {
     vi.clearAllMocks()
     mockSignUp.mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null })
     mockUpdateMember.mockResolvedValue({ error: null })
+    mockDiscard.mockResolvedValue({ discarded: true })
     mockResend.mockResolvedValue({ error: null })
     mockCheckLudoya.mockResolvedValue({ status: 'found' })
     mockCheckBgg.mockResolvedValue({ status: 'not_found' })
@@ -60,13 +63,13 @@ describe('RegisterFlow (sign-up form)', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('register_title')
   })
 
-  it('starts with every consent unchecked and links to conduct and privacy', () => {
+  it('starts with every consent unchecked and links to conduct and data protection', () => {
     render(<RegisterFlow />)
     for (const name of ['conduct', 'privacy', 'newsletter']) {
       expect(checkbox(name).checked).toBe(false)
     }
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'))
-    expect(hrefs).toEqual(expect.arrayContaining(['/conduct', '/privacy', '/login']))
+    expect(hrefs).toEqual(expect.arrayContaining(['/conduct', '/data-protection', '/login']))
   })
 
   it('blocks submit until the required consents are accepted', async () => {
@@ -149,5 +152,102 @@ describe('RegisterFlow (sign-up form)', () => {
     expect(screen.getByLabelText(/^register_email_label/)).toHaveValue('soci@example.cat')
     expect(screen.getByLabelText(/^register_first_name_label/)).toHaveValue('Nom')
     expect(checkbox('conduct').checked).toBe(true)
+  })
+
+  async function submitValid(email?: string) {
+    fillRequired(email)
+    if (!checkbox('conduct').checked) fireEvent.click(checkbox('conduct'))
+    if (!checkbox('privacy').checked) fireEvent.click(checkbox('privacy'))
+    fireEvent.click(screen.getByRole('button', { name: /register_submit/ }))
+  }
+
+  it('shows the DNI-specific error for a malformed DNI', async () => {
+    render(<RegisterFlow />)
+    fillRequired()
+    type('register_dni_label', '1234')
+    fireEvent.click(checkbox('conduct'))
+    fireEvent.click(checkbox('privacy'))
+    fireEvent.click(screen.getByRole('button', { name: /register_submit/ }))
+    expect(await screen.findByText('invalid_dni')).toBeInTheDocument()
+    expect(mockSignUp).not.toHaveBeenCalled()
+  })
+
+  it('passes dni, postal code and usernames to the member update', async () => {
+    render(<RegisterFlow />)
+    fillRequired()
+    type('register_dni_label', '12345678A')
+    type('register_postal_code_label', '08221')
+    type('register_ludoya_label', 'darkstone')
+    type('register_bgg_label', 'dark_bgg')
+    fireEvent.click(checkbox('conduct'))
+    fireEvent.click(checkbox('privacy'))
+    fireEvent.click(screen.getByRole('button', { name: /register_submit/ }))
+    await screen.findByRole('heading', { level: 1, name: 'register_done_title' })
+    expect(mockUpdateMember).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-1',
+        dni: '12345678A',
+        postal_code: '08221',
+        ludoya_username: 'darkstone',
+        bgg_username: 'dark_bgg',
+      })
+    )
+  })
+
+  it('shows the generic error for an unknown sign-up failure and can retry', async () => {
+    mockSignUp.mockResolvedValueOnce({ data: {}, error: { message: 'boom' } })
+    render(<RegisterFlow />)
+    await submitValid()
+    expect(await screen.findByRole('alert')).toHaveTextContent('register_error_generic')
+    expect(screen.getByRole('button', { name: /register_submit/ })).toBeEnabled()
+  })
+
+  it('does not stick in submitting when signUp throws', async () => {
+    mockSignUp.mockRejectedValueOnce(new Error('network'))
+    render(<RegisterFlow />)
+    await submitValid()
+    expect(await screen.findByRole('alert')).toHaveTextContent('register_error_generic')
+    expect(screen.getByRole('button', { name: /register_submit/ })).toBeEnabled()
+  })
+
+  it.each([
+    ['returns an error', () => mockUpdateMember.mockResolvedValueOnce({ error: 'x' })],
+    ['throws', () => mockUpdateMember.mockRejectedValueOnce(new Error('x'))],
+  ])('still shows the done screen with a notice when the member update %s', async (_n, arrange) => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    arrange()
+    render(<RegisterFlow />)
+    await submitValid()
+    await screen.findByRole('heading', { level: 1, name: 'register_done_title' })
+    expect(screen.getByText('register_done_profile_notice')).toBeInTheDocument()
+    expect(spy).toHaveBeenCalledWith(expect.not.stringContaining('soci@example.cat'))
+    spy.mockRestore()
+  })
+
+  it('keeps the live regions rendered before any message', async () => {
+    render(<RegisterFlow />)
+    expect(document.querySelectorAll('[role="status"]').length).toBeGreaterThan(0)
+    for (const el of document.querySelectorAll('[role="status"]')) {
+      expect(el.className).not.toContain('empty:hidden')
+    }
+  })
+
+  it('discards the first unconfirmed sign-up when going back and submitting again', async () => {
+    render(<RegisterFlow />)
+    await submitValid()
+    await screen.findByRole('heading', { level: 1, name: 'register_done_title' })
+    expect(mockDiscard).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'register_done_back' }))
+    await screen.findByRole('heading', { level: 1, name: 'register_title' })
+    mockSignUp.mockResolvedValueOnce({ data: { user: { id: 'user-2' } }, error: null })
+    type('register_email_label', 'otro@example.cat')
+    fireEvent.click(screen.getByRole('button', { name: /register_submit/ }))
+
+    await waitFor(() => expect(mockDiscard).toHaveBeenCalledWith('user-1'))
+    await waitFor(() =>
+      expect(mockUpdateMember).toHaveBeenLastCalledWith(expect.objectContaining({ userId: 'user-2' }))
+    )
+    expect(mockDiscard).toHaveBeenCalledTimes(1)
   })
 })

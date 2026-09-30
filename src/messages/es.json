@@ -653,7 +653,7 @@
     "register_bgg_not_found": "No lo hemos encontrado en BGG. Revisa que esté bien escrito; puedes guardarlo igualmente.",
     "register_section_consents": "Antes de crear la cuenta",
     "register_conduct_checkbox": "He leído y acepto las <link>pautas de conducta</link>",
-    "register_privacy_checkbox": "Acepto la <link>política de privacidad</link>",
+    "register_privacy_checkbox": "Acepto la <link>política de protección de datos</link>",
     "register_newsletter_consent": "Acepto recibir comunicaciones de Darkstone por correo electrónico",
     "register_newsletter_checkbox": "Quiero recibir información sobre eventos y novedades",
     "register_submit": "Crear mi cuenta",
@@ -676,6 +676,7 @@
     "register_done_resend_error": "No se ha podido enviar el correo. Inténtalo de nuevo.",
     "register_done_resend_rate_limit": "Has pedido demasiados correos seguidos. Espera un rato e inténtalo de nuevo.",
     "register_done_wrong": "¿Has escrito mal el correo?",
+    "register_done_profile_notice": "No hemos podido guardar los datos opcionales. Puedes añadirlos desde tu perfil.",
     "register_done_back": "Volver al formulario",
     "register_done_login": "Ya lo he confirmado · Entra",
 
@@ -703,6 +704,7 @@
 
     "required_field": "Este campo es obligatorio.",
     "invalid_email": "Introduce un correo electrónico válido.",
+    "invalid_dni": "Introduce un DNI o NIE válido.",
     "password_min_length": "Mínimo 8 caracteres.",
     "must_accept_conduct": "Debes aceptar el código de conducta.",
     "must_accept_privacy": "Debes aceptar la política de privacidad."

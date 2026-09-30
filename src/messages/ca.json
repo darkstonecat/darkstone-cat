@@ -653,7 +653,7 @@
     "register_bgg_not_found": "No l'hem trobat a BGG. Revisa que estigui ben escrit; el pots desar igualment.",
     "register_section_consents": "Abans de crear el compte",
     "register_conduct_checkbox": "He llegit i accepto les <link>pautes de conducta</link>",
-    "register_privacy_checkbox": "Accepto la <link>política de privadesa</link>",
+    "register_privacy_checkbox": "Accepto la <link>política de protecció de dades</link>",
     "register_newsletter_consent": "Accepto rebre comunicacions de Darkstone per correu electrònic",
     "register_newsletter_checkbox": "Vull rebre informació sobre esdeveniments i novetats",
     "register_submit": "Crea el meu compte",
@@ -676,6 +676,7 @@
     "register_done_resend_error": "No s'ha pogut enviar el correu. Torna-ho a provar.",
     "register_done_resend_rate_limit": "Has demanat massa correus seguits. Espera una estona i torna-ho a provar.",
     "register_done_wrong": "Has escrit malament el correu?",
+    "register_done_profile_notice": "No hem pogut desar les dades opcionals. Pots afegir-les des del teu perfil.",
     "register_done_back": "Torna al formulari",
     "register_done_login": "Ja l'he confirmat · Entra",
 
@@ -703,6 +704,7 @@
 
     "required_field": "Aquest camp és obligatori.",
     "invalid_email": "Introdueix un correu electrònic vàlid.",
+    "invalid_dni": "Introdueix un DNI o NIE vàlid.",
     "password_min_length": "Mínim 8 caràcters.",
     "must_accept_conduct": "Has d'acceptar les pautes de conducta.",
     "must_accept_privacy": "Has d'acceptar la política de privadesa."

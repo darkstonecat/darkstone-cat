@@ -14,11 +14,13 @@ export const RESEND_COOLDOWN_MS = 60_000;
 type Props = {
   /** Email the member just submitted; comes from form state, never from storage. */
   email: string;
+  /** False when the optional details from the form could not be stored. */
+  profileSaved?: boolean;
   onBack: () => void;
 };
 
 /** Screen 02b: "Revisa el teu correu". Rendered under the swapped hero. */
-export default function RegisterDone({ email, onBack }: Props) {
+export default function RegisterDone({ email, profileSaved = true, onBack }: Props) {
   const t = useTranslations("auth");
   const [status, setStatus] = useState<ResendStatus>("idle");
   const [errorKey, setErrorKey] = useState<
@@ -88,7 +90,7 @@ export default function RegisterDone({ email, onBack }: Props) {
               : t("register_done_resend")}
         </button>
 
-        <div aria-live="polite" className="empty:hidden">
+        <div aria-live="polite" className="empty:-mt-5">
           {status === "sent" && (
             <p className="sr-only">{t("register_done_resent_live", { email })}</p>
           )}
@@ -98,6 +100,12 @@ export default function RegisterDone({ email, onBack }: Props) {
             </p>
           )}
         </div>
+
+        {!profileSaved && (
+          <p role="status" className="text-[13px] text-brand-orange-text">
+            {t("register_done_profile_notice")}
+          </p>
+        )}
 
         <p className="text-[13px] text-stone-custom/65">
           {t("register_done_wrong")}{" "}

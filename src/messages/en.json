@@ -653,7 +653,7 @@
     "register_bgg_not_found": "We couldn't find it on BGG. Check the spelling; you can still save it.",
     "register_section_consents": "Before creating your account",
     "register_conduct_checkbox": "I have read and accept the <link>code of conduct</link>",
-    "register_privacy_checkbox": "I accept the <link>privacy policy</link>",
+    "register_privacy_checkbox": "I accept the <link>data protection policy</link>",
     "register_newsletter_consent": "I agree to receive emails from Darkstone",
     "register_newsletter_checkbox": "I want to receive information about events and news",
     "register_submit": "Create my account",
@@ -676,6 +676,7 @@
     "register_done_resend_error": "We couldn't send the email. Please try again.",
     "register_done_resend_rate_limit": "You've requested too many emails in a row. Wait a while and try again.",
     "register_done_wrong": "Typed the wrong email?",
+    "register_done_profile_notice": "We could not save your optional details. You can add them from your profile.",
     "register_done_back": "Back to the form",
     "register_done_login": "I've already confirmed · Log in",
 
@@ -703,6 +704,7 @@
 
     "required_field": "This field is required.",
     "invalid_email": "Enter a valid email address.",
+    "invalid_dni": "Enter a valid DNI or NIE.",
     "password_min_length": "Minimum 8 characters.",
     "must_accept_conduct": "You must accept the code of conduct.",
     "must_accept_privacy": "You must accept the privacy policy."

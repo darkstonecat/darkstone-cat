@@ -69,7 +69,7 @@ test.describe('Register page', () => {
     await expect(page.locator('input[name="newsletter"]')).not.toBeChecked()
     await expect(page.getByRole('list', { name: /passos/i }).locator('li')).toHaveCount(3)
     await expect(page.locator('a[href="/conduct"]').first()).toBeVisible()
-    await expect(page.locator('a[href="/privacy"]').first()).toBeVisible()
+    await expect(page.locator('a[href="/data-protection"]').first()).toBeVisible()
   })
 
   test('successful registration swaps to the confirmation screen, resends and goes back', async ({ page }) => {

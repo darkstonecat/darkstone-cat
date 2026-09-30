@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useRef,
   useState,
   type FormEvent,
   type InputHTMLAttributes,
@@ -16,9 +17,10 @@ import {
 } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/client";
-import { updateMemberAfterSignup } from "@/lib/supabase/actions";
+import { discardUnconfirmedSignup, updateMemberAfterSignup } from "@/lib/supabase/actions";
 import { checkBggUsername, checkLudoyaUsername } from "@/lib/profile/username-checks";
 import { useUsernameCheck, type UsernameCheckState } from "@/hooks/useUsernameCheck";
+import { isValidDniNie } from "@/lib/validation/member-fields";
 import { cn } from "@/lib/utils";
 
 type FormStatus = "idle" | "submitting" | "error";
@@ -33,8 +35,6 @@ type FieldErrors = {
   privacy?: string;
 };
 
-const DNI_REGEX = /^[0-9]{8}[A-Za-z]$/;
-const NIE_REGEX = /^[XYZxyz][0-9]{7}[A-Za-z]$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const inputClass =
@@ -167,7 +167,7 @@ function CheckStatus({
 }) {
   const t = useTranslations("auth");
   return (
-    <p role="status" className="text-[13px] leading-snug empty:hidden">
+    <p role="status" className="text-[13px] leading-snug">
       {state === "checking" && (
         <span className="flex items-center gap-1.5 text-stone-custom/65">
           <MdAutorenew size={14} aria-hidden="true" className="animate-spin" />
@@ -196,8 +196,11 @@ function CheckStatus({
 }
 
 type Props = {
-  /** Called after a successful sign-up with the (trimmed) submitted email. */
-  onSuccess: (email: string) => void;
+  /**
+   * Called after a successful sign-up with the (trimmed) submitted email.
+   * `profileSaved` is false when the optional details could not be stored.
+   */
+  onSuccess: (email: string, profileSaved: boolean) => void;
 };
 
 export default function RegisterForm({ onSuccess }: Props) {
@@ -208,6 +211,8 @@ export default function RegisterForm({ onSuccess }: Props) {
   const [password, setPassword] = useState("");
   const ludoya = useUsernameCheck(checkLudoyaUsername);
   const bgg = useUsernameCheck(checkBggUsername);
+  /** Sign-up already created for this form ("back to the form" keeps the values). */
+  const pendingSignupId = useRef<string | null>(null);
 
   function validate(form: FormData): FieldErrors {
     const errs: FieldErrors = {};
@@ -230,8 +235,8 @@ export default function RegisterForm({ onSuccess }: Props) {
     if (!(form.get("first_name") as string).trim()) errs.first_name = t("required_field");
     if (!(form.get("last_name") as string).trim()) errs.last_name = t("required_field");
 
-    if (dni && !DNI_REGEX.test(dni) && !NIE_REGEX.test(dni)) {
-      errs.dni = t("invalid_email"); // reused as generic format error — but let's use a clearer one
+    if (dni && !isValidDniNie(dni)) {
+      errs.dni = t("invalid_dni");
     }
 
     if (!form.get("conduct")) errs.conduct = t("must_accept_conduct");
@@ -255,50 +260,78 @@ export default function RegisterForm({ onSuccess }: Props) {
     const firstName = (formData.get("first_name") as string).trim();
     const lastName = (formData.get("last_name") as string).trim();
 
-    const supabase = createClient();
-    const { data: signUpData, error } = await supabase.auth.signUp({
-      email,
-      password: formData.get("password") as string,
-      options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-        },
-      },
-    });
-
-    if (error) {
-      setStatus("error");
-      if (
-        error.message.includes("already registered") ||
-        error.message.includes("already been registered")
-      ) {
-        setErrorMessage(t("register_error_email_in_use"));
-      } else {
-        setErrorMessage(t("register_error_generic"));
+    // The person went back to fix the email and submitted again: drop the first,
+    // unconfirmed sign-up so its data does not linger. Best effort, never blocks.
+    if (pendingSignupId.current) {
+      const previousId = pendingSignupId.current;
+      pendingSignupId.current = null;
+      try {
+        await discardUnconfirmedSignup(previousId);
+      } catch {
+        // ignored: the server also refuses anything but a fresh unconfirmed user
       }
+    }
+
+    let userId = "";
+    try {
+      const supabase = createClient();
+      const { data: signUpData, error } = await supabase.auth.signUp({
+        email,
+        password: formData.get("password") as string,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+          },
+        },
+      });
+
+      if (error) {
+        setStatus("error");
+        if (
+          error.message.includes("already registered") ||
+          error.message.includes("already been registered")
+        ) {
+          setErrorMessage(t("register_error_email_in_use"));
+        } else {
+          setErrorMessage(t("register_error_generic"));
+        }
+        return;
+      }
+      userId = signUpData.user?.id ?? "";
+    } catch {
+      setStatus("error");
+      setErrorMessage(t("register_error_generic"));
       return;
     }
 
-    // Update member with optional fields + consents via Server Action
-    // Uses admin client because no session exists yet (email confirmation pending)
-    const { error: updateError } = await updateMemberAfterSignup({
-      userId: signUpData.user?.id ?? "",
-      phone: formData.get("phone") as string,
-      dni: formData.get("dni") as string,
-      postal_code: formData.get("postal_code") as string,
-      ludoya_username: formData.get("ludoya_username") as string,
-      bgg_username: formData.get("bgg_username") as string,
-      newsletter_accepted: !!formData.get("newsletter"),
-    });
+    pendingSignupId.current = userId || null;
 
-    if (updateError) {
-      // Non-critical: signup succeeded, member row exists, but optional fields failed
-      console.error("Failed to update member after signup:", updateError);
+    // Update member with optional fields + consents via Server Action.
+    // Uses admin client because no session exists yet (email confirmation pending).
+    // The account already exists, so a failure here must not block the done screen.
+    let profileSaved = true;
+    try {
+      const { error: updateError } = await updateMemberAfterSignup({
+        userId,
+        phone: formData.get("phone") as string,
+        dni: formData.get("dni") as string,
+        postal_code: formData.get("postal_code") as string,
+        ludoya_username: formData.get("ludoya_username") as string,
+        bgg_username: formData.get("bgg_username") as string,
+        newsletter_accepted: !!formData.get("newsletter"),
+      });
+      if (updateError) profileSaved = false;
+    } catch {
+      profileSaved = false;
+    }
+    if (!profileSaved) {
+      // Deliberately no error object: it could echo personal data.
+      console.error("Sign-up succeeded but the optional member details were not saved");
     }
 
     setStatus("idle");
-    onSuccess(email);
+    onSuccess(email, profileSaved);
   }
 
   const isSubmitting = status === "submitting";
@@ -465,7 +498,7 @@ export default function RegisterForm({ onSuccess }: Props) {
               <MdOutlineGridView size={16} aria-hidden="true" />
               {t("register_ludoya_label")}
             </label>
-            <div className="flex min-h-11 items-center overflow-hidden rounded-xl border border-stone-custom/15 bg-brand-white focus-within:border-brand-orange">
+            <div className="flex min-h-11 items-center overflow-hidden rounded-xl border border-stone-custom/15 bg-brand-white focus-within:border-brand-orange focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-orange">
               <span aria-hidden="true" className="pl-4 text-base text-stone-custom/65">
                 @
               </span>
@@ -530,7 +563,7 @@ export default function RegisterForm({ onSuccess }: Props) {
         bodyClassName="gap-3.5"
       >
         {consentBox("conduct", "register_conduct_checkbox", "/conduct")}
-        {consentBox("privacy", "register_privacy_checkbox", "/privacy")}
+        {consentBox("privacy", "register_privacy_checkbox", "/data-protection")}
         <div className="h-px bg-stone-custom/10" />
         <label className="flex min-h-11 items-start gap-3 md:min-h-0">
           <input

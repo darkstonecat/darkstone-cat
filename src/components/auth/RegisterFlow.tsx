@@ -66,6 +66,7 @@ function Aside() {
  */
 export default function RegisterFlow() {
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
+  const [profileSaved, setProfileSaved] = useState(true);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const done = submittedEmail !== null;
 
@@ -86,7 +87,8 @@ export default function RegisterFlow() {
       <section className="flex-1 bg-brand-beige pt-8 pb-14 md:pt-14 md:pb-[72px]" hidden={done}>
         <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6 px-4 md:px-12 lg:flex-row-reverse lg:gap-12">
           <RegisterForm
-            onSuccess={(email) => {
+            onSuccess={(email, saved) => {
+              setProfileSaved(saved);
               setSubmittedEmail(email);
               window.scrollTo({ top: 0 });
             }}
@@ -98,6 +100,7 @@ export default function RegisterFlow() {
       {done && (
         <RegisterDone
           email={submittedEmail}
+          profileSaved={profileSaved}
           onBack={() => {
             setSubmittedEmail(null);
             requestAnimationFrame(() => document.getElementById("email")?.focus());
