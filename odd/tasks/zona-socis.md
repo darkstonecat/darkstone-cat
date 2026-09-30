@@ -117,9 +117,10 @@ current data sheet off `/profile`.)
   `queuedParticipantCount`, `minParticipants`, `organizer.name`, special flag (reuse the existing
   regular/special rule). `LudoyaShapeError` with field paths. Unit tests.
   - Evidence: `tests/lib/ludoya/normalize.test.ts` 14/14 pass (sessions + plays from fixtures, drafts/cancelled/standalone skipped, regular vs special, place + seat counts, organizer, usual venue by default location id with name as received, locations, user search, `LudoyaShapeError` field paths). Guards moved to `shape.ts`, shared with the legacy normalizer. Gaps: `queuedParticipantCount` and RPG flag are absent from the public API (field is null / `isRpg` optional).
-- [ ] B2.4 — `fetchMemberWeekSessions()` / `fetchMonthEvents()` with `revalidate: 60`
+- [x] B2.4 — `fetchMemberWeekSessions()` / `fetchMonthEvents()` with `revalidate: 60`
   (decision 1); covers through `src/lib/game-matching.ts`. `/events` keeps its long cache.
   Unit tests.
+  - Evidence: `tests/lib/ludoya/sessions.test.ts` + `tests/lib/member-sessions.test.ts` pass (Madrid-day windows, next-7-days incl. in-progress, month filter, `revalidate: 60` and single sub-events request, `pastLimit` only when the month already started, locations failure tolerated, BGG covers only on name+year match else Ludoya cover, BGG down falls back, errors as `api_error`/`timeout`). Home functions live in `src/lib/member-sessions.ts` (not in `src/lib/ludoya`) to avoid a `ludoya` ↔ `game-matching` import cycle.
 - [ ] B2.5 — Username checks as server actions: Ludoya `search/users?intent=PLAY` and BGG
   `xmlapi2/user?name=` (existing Bearer token). Result states found / not found / failed; never
   blocking. Unit tests with mocked fetch.

@@ -120,21 +120,29 @@ const byStart = (a: { startsAt: string }, b: { startsAt: string }) =>
 
 /**
  * `GET /events?includeSubEvents=true` → upcoming sessions with their planned
- * plays, classified as regular or special.
+ * plays, classified as regular or special. With `includePast`, the events
+ * requested through `pastLimit` are included too.
  *
  * Drafts and cancelled events are skipped; special events further than 12
  * months away are dropped. Plays are the `PLANNED_PLAY` children that carry a
  * game; a play with no parent session (a standalone table) has no session to
  * show under and is ignored.
  */
-export function parseSessionsResponse(raw: unknown): LudoyaSession[] {
-  const elements = requireArray(raw, "futureEvents.elements", "events");
+export function parseSessionsResponse(
+  raw: unknown,
+  { includePast = false }: { includePast?: boolean } = {}
+): LudoyaSession[] {
+  const future = requireArray(raw, "futureEvents.elements", "events");
+  const past = includePast ? requireArray(raw, "pastEvents.elements", "events") : [];
+  const elements = [
+    ...future.map((item, i) => ({ item, ctx: `events.futureEvents.elements[${i}]` })),
+    ...past.map((item, i) => ({ item, ctx: `events.pastEvents.elements[${i}]` })),
+  ];
   const sessions: LudoyaSession[] = [];
   const playsByParent = new Map<string, LudoyaSessionPlay[]>();
   const sessionIds = new Set<string>();
 
-  elements.forEach((item, index) => {
-    const ctx = `events.futureEvents.elements[${index}]`;
+  elements.forEach(({ item, ctx }) => {
     if (!isObject(item)) throw new LudoyaShapeError(ctx, "object", item);
     if (optionalBoolean(item, "canceled", ctx) || optionalBoolean(item, "draft", ctx)) return;
 

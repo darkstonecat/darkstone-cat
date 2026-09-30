@@ -317,11 +317,17 @@ export function getDifficultyFrame(weight: number, type: GameType): FrameColor {
 // ---------------------------------------------------------------------------
 
 /**
- * Which cover to use. With an exact BGG id the BGG cover is reliable. With a
- * name-based match the BGG item may be the wrong game, so Ludoya's cover
- * (always the right game) wins.
+ * Which cover to use. With an exact BGG id, or a name match whose publication
+ * year also agrees, the BGG cover is reliable. With a name-only match the BGG
+ * item may be the wrong edition or game, so Ludoya's cover (always the right
+ * game) wins.
  */
 type CoverPreference = "bgg" | "ludoya";
+
+/** BGG cover only when name and publication year both match. */
+function coverPreferenceFor(play: LudoyaPlannedPlay, bggYear: number): CoverPreference {
+  return play.yearPublished > 0 && bggYear > 0 && play.yearPublished === bggYear ? "bgg" : "ludoya";
+}
 
 function pickCover(bggImage: string, play: LudoyaPlannedPlay, prefer: CoverPreference): string {
   if (prefer === "ludoya") return play.imageUrl || bggImage;
@@ -445,6 +451,60 @@ function gameKey(game: ResolvedGame): string {
   return game.bggId || `ludoya:${normalizeName(game.name)}`;
 }
 
+type AcceptFn = (index: number, game: ResolvedGame, source: ResolutionSource) => void;
+
+/**
+ * Resolve games by name and year: first the club collection, then BGG search
+ * plus its thing data. Whatever stays unresolved is left to the caller.
+ */
+async function resolveByName(
+  pendingPlays: PendingPlay[],
+  bggGames: BggGame[],
+  accept: AcceptFn
+): Promise<void> {
+  const resolvedIndexes = new Set<number>();
+  const acceptTracked: AcceptFn = (index, game, source) => {
+    accept(index, game, source);
+    if (game.imageUrl) resolvedIndexes.add(index);
+  };
+
+  // Name match in the club collection
+  const searchable: PendingPlay[] = [];
+  for (const pending of pendingPlays) {
+    const game = findInCollectionByName(pending.play.gameName, bggGames);
+    if (game) acceptTracked(pending.index, buildFromBggGame(pending.play, game, coverPreferenceFor(pending.play, game.year)), "collection-name");
+    if (!resolvedIndexes.has(pending.index)) searchable.push(pending);
+  }
+
+  // BGG search + thing for games outside the collection
+  if (searchable.length > 0) {
+    const searchResults = await Promise.all(
+      searchable.map((p) => searchBggGames(p.play.gameName, 5))
+    );
+    const candidates = new Map<number, { id: string; year: number }>(); // play index → BGG result
+    searchable.forEach((pending, i) => {
+      const best = pickBestSearchResult(
+        searchResults[i],
+        normalizeName(pending.play.gameName),
+        pending.play.yearPublished
+      );
+      if (best) candidates.set(pending.index, { id: best.id, year: best.year });
+    });
+
+    if (candidates.size > 0) {
+      const things = await fetchBggThings(Array.from(new Set(Array.from(candidates.values()).map((c) => c.id))));
+      for (const pending of searchable) {
+        const candidate = candidates.get(pending.index);
+        const thing = candidate ? things.get(candidate.id) : undefined;
+        if (thing && candidate) {
+          const prefer = coverPreferenceFor(pending.play, candidate.year);
+          acceptTracked(pending.index, buildFromThingData(pending.play, thing, prefer), "bgg-search");
+        }
+      }
+    }
+  }
+}
+
 /**
  * Resolve event planned plays to enriched game data for image generation.
  *
@@ -500,37 +560,8 @@ export async function resolveEventGames(
     }
   }
 
-  // Step 4a: name match in the club collection
-  const searchable: PendingPlay[] = [];
-  for (const pending of byName) {
-    const game = findInCollectionByName(pending.play.gameName, bggGames);
-    if (game) accept(pending.index, buildFromBggGame(pending.play, game, "ludoya"), "collection-name");
-    if (!resolved.has(pending.index)) searchable.push(pending);
-  }
-
-  // Step 4b: BGG search + thing for games outside the collection
-  if (searchable.length > 0) {
-    const searchResults = await Promise.all(
-      searchable.map((p) => searchBggGames(p.play.gameName, 5))
-    );
-    const candidates = new Map<number, string>(); // play index → BGG id
-    searchable.forEach((pending, i) => {
-      const best = pickBestSearchResult(
-        searchResults[i],
-        normalizeName(pending.play.gameName),
-        pending.play.yearPublished
-      );
-      if (best) candidates.set(pending.index, best.id);
-    });
-
-    if (candidates.size > 0) {
-      const things = await fetchBggThings(Array.from(new Set(candidates.values())));
-      for (const pending of searchable) {
-        const thing = things.get(candidates.get(pending.index) ?? "");
-        if (thing) accept(pending.index, buildFromThingData(pending.play, thing, "ludoya"), "bgg-search");
-      }
-    }
-  }
+  // Step 4: name (+ year) match in the club collection, then BGG search
+  await resolveByName(byName, bggGames, accept);
 
   // Step 5: Ludoya cover with the default frame
   plannedPlays.forEach((play, index) => {
@@ -558,4 +589,28 @@ export async function resolveEventGames(
     });
 
   return prioritizeGames(deduped);
+}
+
+/**
+ * Cover for each planned play, keyed by play id: the BGG cover when the game
+ * resolves by name and year (club collection, then BGG search), otherwise the
+ * Ludoya cover. Never throws; a BGG failure just leaves Ludoya covers.
+ */
+export async function resolvePlayCovers(
+  plays: (LudoyaPlannedPlay & { id: string })[],
+  bggGames: BggGame[]
+): Promise<Map<string, string | null>> {
+  const covers = new Map<string, string | null>(plays.map((p) => [p.id, p.imageUrl]));
+  const resolved = new Map<number, string>();
+  const accept: AcceptFn = (index, game) => {
+    if (game.imageUrl) resolved.set(index, game.imageUrl);
+  };
+
+  try {
+    await resolveByName(plays.map((play, index) => ({ index, play })), bggGames, accept);
+  } catch (error) {
+    console.warn("[Covers] BGG resolution failed, using Ludoya covers:", error);
+  }
+  resolved.forEach((url, index) => covers.set(plays[index].id, url));
+  return covers;
 }
