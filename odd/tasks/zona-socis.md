@@ -284,7 +284,22 @@ current data sheet off `/profile`.)
     in B8.
   - Pre-existing bug found: `members.id` FK to `auth.users` has no `ON DELETE CASCADE`, so
     `deleteAccount` likely fails. Correction round running: B7 minors + FK cascade migration +
-    local `enable_confirmations = true` to mirror production.
+    local `enable_confirmations = true` to mirror production. Done: 0c49c4a (B7 minors),
+    27fa4ce (FK `ON DELETE CASCADE`, bug reproduced first), 1870a5c (local confirmations; E2E
+    confirms through Mailpit). Parent spot check: unit 398/398 twice.
+  - B5 done: 6dc6968, ad5f6a8, a7e8cf8, 8fb75af (writer). Assess high → verifier: 1 major (the
+    `/verify/<token>` URL reached Vercel Analytics, Speed Insights and GA) + minor (PNG always
+    Catalan, QR quiet zone < 4 modules, overlay background not inert, Lenis effect deps, hex).
+    Fixed in 76204d7 (scrubbed `beforeSend`, GA disabled on verify paths) and 486a37c (PNG
+    locale, 4-module quiet zone with a real PNG decode test, `inert`). Unit 444/444.
+  - B6.1/B6.2 done: 67f5719, 055b460. Orchestrator decision: the member home shows PUBLIC +
+    ONLY_GROUP sessions and plays (auth-only page); `/events` and share images stay PUBLIC
+    only (62d2275). Verifier: 1 major (locale date strings formatted in client components →
+    hydration mismatch risk) + minor (BGG covers outside the time budget, carousel focus loss,
+    hex in shadow, mobile first session not open by default). Fixed in 32bfe25.
+  - B6.3/B6.4 done: dc122b4, 647bf18. Checks: unit 507/507, integration 70/70,
+    `e2e/profile`+`navigation` 74/75 (known pre-existing `locale-routing` failure), build OK.
+    Assess high → verifier running.
 - Pending user actions: `LUDOYA_API_KEY` GitHub secret; B3.3 production Supabase checks.
 
 ## Notes
