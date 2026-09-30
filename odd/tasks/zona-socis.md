@@ -112,10 +112,11 @@ current data sheet off `/profile`.)
   per-call `revalidate`. Server-only module guard. The organisation is implied by the key, so
   group-id config and rediscovery go away. Unit tests with fixtures.
   - Evidence: `tests/lib/ludoya/client.test.ts` 13/13 pass (URL + `X-Api-Key` + revalidate, missing key, 401 no retry, 5xx retry, 429 `Retry-After` honoured / over cap surfaced, timeout/network codes, key never in errors or logs, mock fixtures). Old client kept as `legacy-*` files until B2.6; `server-only` added as a dependency with a Vitest alias stub.
-- [ ] B2.3 — Normalize + types for member-area data: session place (`location.name/address`,
+- [x] B2.3 — Normalize + types for member-area data: session place (`location.name/address`,
   usual venue by `isDefault`/id, shown as received), `participantCount`, `capacity`,
   `queuedParticipantCount`, `minParticipants`, `organizer.name`, special flag (reuse the existing
   regular/special rule). `LudoyaShapeError` with field paths. Unit tests.
+  - Evidence: `tests/lib/ludoya/normalize.test.ts` 14/14 pass (sessions + plays from fixtures, drafts/cancelled/standalone skipped, regular vs special, place + seat counts, organizer, usual venue by default location id with name as received, locations, user search, `LudoyaShapeError` field paths). Guards moved to `shape.ts`, shared with the legacy normalizer. Gaps: `queuedParticipantCount` and RPG flag are absent from the public API (field is null / `isRpg` optional).
 - [ ] B2.4 — `fetchMemberWeekSessions()` / `fetchMonthEvents()` with `revalidate: 60`
   (decision 1); covers through `src/lib/game-matching.ts`. `/events` keeps its long cache.
   Unit tests.
