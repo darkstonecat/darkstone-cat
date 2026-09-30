@@ -53,6 +53,7 @@ const SUBPAGE_THEMES: Record<string, { text: string; bg: string }> = {
   "/forgot-password": { text: "#FAFAF9", bg: "#1C1917" },
   "/reset-password": { text: "#FAFAF9", bg: "#1C1917" },
   "/profile": { text: "#FAFAF9", bg: "#1C1917" },
+  "/profile/details": { text: "#FAFAF9", bg: "#1C1917" },
   "/profile/edit": { text: "#FAFAF9", bg: "#1C1917" },
   "/profile/card": { text: "#FAFAF9", bg: "#1C1917" },
   "/admin": { text: "#FAFAF9", bg: "#1C1917" },

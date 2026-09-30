@@ -107,6 +107,7 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/forgot-password` | `forgot-password/page.tsx` | Password recovery (`revalidate = false`, `noindex`) |
 | `/reset-password` | `reset-password/page.tsx` | Set new password — protected route (`revalidate = false`, `noindex`) |
 | `/profile` | `profile/page.tsx` | Member profile view — protected route (`revalidate = false`, `noindex`) |
+| `/profile/details` | `profile/details/page.tsx` | Profile details with the shared member hero and Inici / Perfil / Carnet tabs — protected route (`revalidate = false`, `noindex`) |
 | `/profile/edit` | `profile/edit/page.tsx` | Profile edit form — protected route (`revalidate = false`, `noindex`) |
 | `/profile/card` | `profile/card/page.tsx` | Member card preview & download — protected route (`revalidate = false`, `noindex`) |
 | `/admin` | `admin/page.tsx` | Admin dashboard with stats and navigation — admin route (`revalidate = false`, `noindex`) |
@@ -181,7 +182,7 @@ All interactive components use `"use client"`. Components are organized by page:
 - `src/components/faq/` — FAQ page (FaqContent)
 - `src/components/conduct/` — Code of conduct (ConductContent)
 - `src/components/auth/` — Auth pages (AuthHero, LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm)
-- `src/components/profile/` — Profile pages (ProfileView, ProfileEditForm, MemberCard, DeleteAccountDialog)
+- `src/components/profile/` — Profile pages (MemberHero, MemberTabs, MemberAvatar shared by the member area; ProfileView, ProfileEditForm, MemberCard, DeleteAccountDialog)
 - `src/components/admin/` — Admin pages (AdminDashboard, MembersTable, ExportConfirmDialog)
 - `src/components/legal/` — Legal pages (LegalPageContent, LegalContent, PrivacyContent, CookiesContent, DataProtectionContent)
 - Root-level: NavBar, Footer, SmoothScroll, CookieBanner, CookieConsentProvider, GoogleAnalytics, ScrollProgress, ScrollToTop, TextReveal, LanguageSwitcher, ThemeLink, ErrorContent, SkipLink, CollaboratorModal

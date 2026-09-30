@@ -50,4 +50,10 @@ test.describe('Profile page', () => {
     const downloadBtn = page.getByText('Descarregar les meves dades')
     await expect(downloadBtn).toBeVisible()
   })
+
+  test('links to the profile details page', async ({ memberPage: page }) => {
+    await page.goto(PAGES.profile)
+    await page.locator('a[href="/profile/details"]').first().click()
+    await expect(page).toHaveURL(/\/profile\/details$/)
+  })
 })

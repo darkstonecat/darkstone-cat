@@ -5,7 +5,7 @@ import { updateSession } from "./lib/supabase/middleware";
 
 const intlMiddleware = createMiddleware(routing);
 
-const PROTECTED_ROUTES = ["/profile", "/profile/edit", "/profile/card", "/reset-password"];
+const PROTECTED_ROUTES = ["/profile", "/profile/details", "/profile/edit", "/profile/card", "/reset-password"];
 const ADMIN_ROUTES = ["/admin", "/admin/members", "/events/images"];
 const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
 

@@ -134,6 +134,12 @@ export default function ProfileView({
             {t("edit_button")}
           </Link>
           <Link
+            href="/profile/details"
+            className="rounded-xl border border-stone-custom/15 bg-brand-white px-6 py-3 text-sm font-semibold text-stone-custom transition-colors hover:bg-stone-custom/5"
+          >
+            {t("details_button")}
+          </Link>
+          <Link
             href="/profile/card"
             className="rounded-xl border border-stone-custom/15 bg-brand-white px-6 py-3 text-sm font-semibold text-stone-custom transition-colors hover:bg-stone-custom/5"
           >

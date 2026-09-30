@@ -16,6 +16,7 @@
     "profile": "Perfil",
     "profile_edit": "Editar perfil",
     "profile_card": "Carnet de soci",
+    "profile_details": "Perfil i compte",
     "logout": "Tancar sessió",
     "admin": "Admin",
     "admin_members": "Socis"
@@ -376,6 +377,8 @@
     "profile_edit_description": "Actualitza les teves dades de soci de Darkstone Catalunya.",
     "profile_card_title": "Carnet de soci",
     "profile_card_description": "Visualitza i descarrega el teu carnet de soci de Darkstone Catalunya.",
+    "profile_details_title": "Perfil i compte",
+    "profile_details_description": "Gestiona les teves dades de soci, els teus perfils de joc i el teu compte de Darkstone Catalunya.",
     "admin_title": "Administració",
     "admin_description": "Panell d'administració de Darkstone Catalunya.",
     "admin_members_title": "Socis — Administració",
@@ -758,7 +761,14 @@
     "delete_cancel": "Cancel·lar",
     "delete_error": "No s'ha pogut eliminar el compte. Torna-ho a provar.",
 
-    "download_generating": "Generant les teves dades..."
+    "download_generating": "Generant les teves dades...",
+    "tabs_label": "Zona de socis",
+    "tab_home": "Inici",
+    "tab_details": "Perfil",
+    "tab_card": "Carnet",
+    "hero_number": "Núm. de soci",
+    "hero_since": "Membre des del",
+    "details_button": "Perfil i compte"
   },
   "admin": {
     "title": "Administració",

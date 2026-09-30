@@ -39,6 +39,7 @@ export const PAGES = {
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
   profile: '/profile',
+  profileDetails: '/profile/details',
   profileEdit: '/profile/edit',
   profileCard: '/profile/card',
   admin: '/admin',

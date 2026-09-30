@@ -16,6 +16,7 @@
     "profile": "Profile",
     "profile_edit": "Edit profile",
     "profile_card": "Member card",
+    "profile_details": "Profile and account",
     "logout": "Log out",
     "admin": "Admin",
     "admin_members": "Members"
@@ -376,6 +377,8 @@
     "profile_edit_description": "Update your Darkstone Catalunya member data.",
     "profile_card_title": "Member card",
     "profile_card_description": "View and download your Darkstone Catalunya member card.",
+    "profile_details_title": "Profile and account",
+    "profile_details_description": "Manage your member details, your gaming profiles and your Darkstone Catalunya account.",
     "admin_title": "Administration",
     "admin_description": "Darkstone Catalunya administration panel.",
     "admin_members_title": "Members — Administration",
@@ -758,7 +761,14 @@
     "delete_cancel": "Cancel",
     "delete_error": "Could not delete account. Please try again.",
 
-    "download_generating": "Generating your data..."
+    "download_generating": "Generating your data...",
+    "tabs_label": "Member area",
+    "tab_home": "Home",
+    "tab_details": "Profile",
+    "tab_card": "Card",
+    "hero_number": "Member no.",
+    "hero_since": "Member since",
+    "details_button": "Profile and account"
   },
   "admin": {
     "title": "Administration",

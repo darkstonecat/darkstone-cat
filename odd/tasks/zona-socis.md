@@ -177,10 +177,11 @@ current data sheet off `/profile`.)
 
 ### B7 — Profile shell + profile details (screen 04) — runs before B5/B6
 
-- [ ] B7.1 — Shared member hero + sub-nav tabs (Inici / Perfil / Carnet) and initials avatar;
+- [x] B7.1 — Shared member hero + sub-nav tabs (Inici / Perfil / Carnet) and initials avatar;
   route `/profile/details` with the current data sheet moved there temporarily; `/profile`
   still renders the old view until B6. NavBar `SUBPAGE_THEMES` + menu link. E2E `profile.spec.ts`
   adjusted.
+  - Evidence: `MemberHero` (avatar, h1 name, number, "Membre des del" via `formatCalendarDate`) + `MemberTabs` (`nav` with `aria-current="page"`, active tab passed by the page so B5/B6 reuse it) + `MemberAvatar` (initials, `aria-hidden`); `/profile/details` (noindex, `revalidate = false`, breadcrumb JSON-LD) shows the old data sheet under the hero for now; added to `SUBPAGE_THEMES` and `PROTECTED_ROUTES`; the NavBar menu lists no profile sub-pages, so no menu link (the old `/profile` view links to details). `tests/unit/initials.test.ts` + `tests/components/MemberHero.test.tsx` 9/9; `npx playwright test e2e/profile` 24/24 (new `profile-details.spec.ts`, `profile.spec.ts` link test). Route: delegated writer (B7.1 + B7.2 one session).
 - [ ] B7.2 — Profile details cards: "On jugues" (link/unlink Ludoya and BGG with soft checks
   from B2.5), "Dades de soci" (server-side masked DNI/phone, "Edita" → `/profile/edit`),
   "Comunicacions" (`role=switch`, optimistic toggle with rollback, 44 px hit area),
