@@ -1,0 +1,209 @@
+{
+  "locations": [
+    {
+      "id": "cb3ba5f9ea124546b83011d2d23df546",
+      "name": "Centre Cívic Ca N’Aurell",
+      "address": "Plaça del Tint, 4, Terrassa, Espanya",
+      "latitude": 41.5658039,
+      "longitude": 2.0039451,
+      "imageUrl": null,
+      "capacity": null,
+      "isDefault": true,
+      "spots": []
+    },
+    {
+      "id": "958b82d5622248a08821a11fc8bf9558",
+      "name": "Casa de Colònies Mas Po-Canyadó",
+      "address": "Urbanització Bosque, s/n, 08105 Sant Fost de Campsentelles, Barcelona, Espanya",
+      "latitude": 41.4934806,
+      "longitude": 2.2547999,
+      "imageUrl": null,
+      "capacity": null,
+      "isDefault": false,
+      "spots": []
+    },
+    {
+      "id": "acd38d543a204e8c82ebda33474b6742",
+      "name": "Club La Torre de Daus",
+      "address": "Carrer de Moratín, 64, 08206 Sabadell, Barcelona, Espanya",
+      "latitude": 41.5471614,
+      "longitude": 2.0969602,
+      "imageUrl": null,
+      "capacity": null,
+      "isDefault": false,
+      "spots": []
+    },
+    {
+      "id": "680d04a8e8e540838b893b13e34c5db5",
+      "name": "El Cartón Peleón",
+      "address": "Avinguda de Josep Tarradellas, 100, 08225 Terrassa, Barcelona, Espanya",
+      "latitude": 41.5733098,
+      "longitude": 2.0028743,
+      "imageUrl": null,
+      "capacity": null,
+      "isDefault": false,
+      "spots": []
+    },
+    {
+      "id": "e43a4fd7bb3b42f2bb4a162b42dde9ee",
+      "name": "El Vapor de Prodis",
+      "address": "Carrer del Bruc, 46, 08224 Terrassa, Barcelona, España",
+      "latitude": 41.5655423,
+      "longitude": 2.0022396,
+      "imageUrl": null,
+      "capacity": null,
+      "isDefault": false,
+      "spots": []
+    },
+    {
+      "id": "a2f24cbf4ddb46b4ae08da1b51014ee4",
+      "name": "Kame Kame Comics Terrassa",
+      "address": "Carrer de Topete, 129, 131, 08221 Terrassa, Barcelona, Espanya",
+      "latitude": 41.5592212,
+      "longitude": 2.0176577,
+      "imageUrl": null,
+      "capacity": null,
+      "isDefault": false,
+      "spots": []
+    },
+    {
+      "id": "612bf21ff48744838a0678b2b31778a9",
+      "name": "Nikochan Arena",
+      "address": "Plaça del Triomf, 32, Terrassa, España",
+      "latitude": 41.5722133,
+      "longitude": 2.0132205,
+      "imageUrl": null,
+      "capacity": null,
+      "isDefault": false,
+      "spots": []
+    },
+    {
+      "id": "fe947d0d0e6342aaadb393542ddddf45",
+      "name": "Recinte Firal de Terrassa",
+      "address": "Passeig del Vint-i-dos de Juliol, 265, 08225 Terrassa, Barcelona, Espanya",
+      "latitude": 41.570626,
+      "longitude": 2.0077087,
+      "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/locations/3b0a0c8ca66b4654a5d5c7185aca138b.jpg",
+      "capacity": null,
+      "isDefault": false,
+      "spots": [
+        {
+          "id": "f8f5149c1357414e9d31ae8996c84555",
+          "name": "BoTC 2",
+          "capacity": null
+        },
+        {
+          "id": "a811c08ddd164ec3ac06f0c153a4581d",
+          "name": "Torneig 1",
+          "capacity": null
+        },
+        {
+          "id": "9d2d39d98ee441c7bc82e3e428f51a57",
+          "name": "Torneig 2",
+          "capacity": null
+        },
+        {
+          "id": "2e4da93152ba40abbcdee4b060226d4a",
+          "name": "Tastet Rol",
+          "capacity": null
+        },
+        {
+          "id": "99889f399a50403593dd5d007621572e",
+          "name": "Devir",
+          "capacity": null
+        },
+        {
+          "id": "692d47513aaa4564bf54565ca5ed845c",
+          "name": "Juegorama",
+          "capacity": null
+        },
+        {
+          "id": "8923826d448e45598a8d4ba9cd62b29c",
+          "name": "A Risk Cat",
+          "capacity": null
+        },
+        {
+          "id": "9292aea9b84a42c28e625dedcac4876e",
+          "name": "Eclipse",
+          "capacity": null
+        },
+        {
+          "id": "35f8d1e842114c4685a41447b8d798f1",
+          "name": "DMZ",
+          "capacity": null
+        },
+        {
+          "id": "1c543e9def004909ada25f206b42b241",
+          "name": "Ludo",
+          "capacity": null
+        },
+        {
+          "id": "ef29260303c44032a36e740429c35d8c",
+          "name": "SD Games",
+          "capacity": null
+        },
+        {
+          "id": "1b00c5733ea344f4ba4e6a1bb047be8a",
+          "name": "2tomatoes",
+          "capacity": null
+        },
+        {
+          "id": "477d1570c6be466ba49686e709924494",
+          "name": "Maldito",
+          "capacity": null
+        },
+        {
+          "id": "7b16d96f31974bf4bba9242eec065e00",
+          "name": "GimcanaxGirona",
+          "capacity": null
+        },
+        {
+          "id": "0dbe3b53968842ce9bca4448fb1f953a",
+          "name": "Synergic",
+          "capacity": null
+        },
+        {
+          "id": "32e0389993b743948c911a335d739b0a",
+          "name": "Invedars",
+          "capacity": null
+        },
+        {
+          "id": "e71fee1a38834085a5a17d1b95d5b0aa",
+          "name": "Prof. Mompi",
+          "capacity": null
+        },
+        {
+          "id": "213c8f664a2f4ecdb583ade1ba716f60",
+          "name": "Key Enigma",
+          "capacity": null
+        },
+        {
+          "id": "5cf8145de41941bb9730a9b00b9ec673",
+          "name": "Looping Games",
+          "capacity": null
+        },
+        {
+          "id": "ad233d2d77f04e39af2acd3bd69c6eac",
+          "name": "Trencadaus",
+          "capacity": null
+        },
+        {
+          "id": "338d0264b9d749d69845affd18285c0d",
+          "name": "BoTC 1",
+          "capacity": null
+        }
+      ]
+    },
+    {
+      "id": "c7690bd3a17a4ed8b3cbd2239ffce45d",
+      "name": "Troll Cave Terrassa",
+      "address": "Carrer del Puig Novell, 6, Terrassa, Espanya",
+      "latitude": 41.5625082,
+      "longitude": 2.0135763,
+      "imageUrl": null,
+      "capacity": null,
+      "isDefault": false,
+      "spots": []
+    }
+  ]
+}

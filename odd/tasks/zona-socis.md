@@ -101,11 +101,12 @@ current data sheet off `/profile`.)
 
 ### B2 — Ludoya public API adapter (replaces the old client, decision Q4)
 
-- [ ] B2.1 — Probe: fetch `GET /public/v1/openapi.json`, record response shapes for `events`
+- [x] B2.1 — Probe: fetch `GET /public/v1/openapi.json`, record response shapes for `events`
   (with `includeSubEvents`), `events/{id}/children`, `locations`, `search/users`,
   `search/boardgames`; save sanitized fixtures under `public/mock/ludoya/`. No personal data in
   fixtures. **Gate for B2.6**: find the public-API replacement for the BGG-id bridge
   (`GET /boardgames/{slug}` in `resolveBggIds`); if none exists, stop and ask before B2.6.
+  - Evidence: 9 GET probes against production (all 200, `Cache-Control: private, max-age=30`); sanitized fixtures in `public/mock/ludoya/v1/` (events with sub-events, 2 children, locations, users found/empty, boardgame search; organizer replaced by "Organizer A", user by "Member A"). Gate result: no BGG id in any public game shape, so the bridge is dropped; event images resolve by name + year (user decision 2026-09-30).
 - [ ] B2.2 — Public client in `src/lib/ludoya/client.ts`: `LUDOYA_API_KEY` env, `X-Api-Key`
   header, typed error codes (`rate_limited` → honour `Retry-After`), mock mode `LUDOYA_MOCK`,
   per-call `revalidate`. Server-only module guard. The organisation is implied by the key, so
@@ -223,6 +224,18 @@ current data sheet off `/profile`.)
 - 2026-09-30: plan created, no code written. Open questions Q1–Q4 decided. Next: B1.1.
 
 ## Notes
+
+- Public API shapes seen in B2.1 (production, 2026-09-30):
+  - `GET /events?includeSubEvents=true` returns children in the same list (`parentId`), so the
+    home and `/events` need one call, not one per event. The list has no `childEventCounts`.
+    `draft: true` events are included (skip them). Standalone `PLANNED_PLAY` (no `parentId`,
+    e.g. an RPG table with a `master`) also appears.
+  - Event location is embedded, but its `isDefault` is always false there; the usual venue must
+    come from `GET /locations` (`isDefault`) matched by id.
+  - Missing from the public API: `queuedParticipantCount` (no waiting-list count), `game.type`
+    (no RPG flag), BGG id, `childEventCounts`. Organizer is `master`/`teacher` (optional).
+  - `search/users` returns `{users:{elements:[{id,username,name,avatarUrl}]}}`; no match is a
+    200 with an empty `elements`.
 
 - Route per task is declared when the task starts; B2, B4, B6 and B7.2 each touch 2+ non-trivial
   files and will use one delegated writer.

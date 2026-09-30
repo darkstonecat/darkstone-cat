@@ -1,0 +1,15 @@
+{
+  "users": {
+    "totalNumber": 1,
+    "pageNumber": 0,
+    "size": 1,
+    "elements": [
+      {
+        "id": "00000000000000000000000000000002",
+        "username": "member-a",
+        "name": "Member A",
+        "avatarUrl": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "children": [
+    {
+      "id": "38e80c459a864857b78d4ec042d26055",
+      "slug": "emberleaf-2026-10-02",
+      "parentId": "da653bb7f37f4af1911a962a61630b6d",
+      "type": "PLANNED_PLAY",
+      "title": "Emberleaf",
+      "description": null,
+      "startsAt": "2026-10-02T14:00:00Z",
+      "endsAt": "2026-10-02T16:00:00Z",
+      "timeZone": "Europe/Madrid",
+      "imageUrl": null,
+      "capacity": 4,
+      "location": {
+        "id": "cb3ba5f9ea124546b83011d2d23df546",
+        "name": "Centre Cívic Ca N’Aurell",
+        "address": "Plaça del Tint, 4, Terrassa, Espanya",
+        "latitude": 41.5658039,
+        "longitude": 2.0039451,
+        "imageUrl": null,
+        "capacity": null,
+        "isDefault": false,
+        "spots": []
+      },
+      "game": {
+        "id": "3ccf7fad777f48438cc0a358d7da370e",
+        "slug": "emberleaf",
+        "name": "Emberleaf",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/games/7aefdbcb634e408e9cb13ff5f5f77144.jpg"
+      },
+      "visibility": "PUBLIC",
+      "minParticipants": 1,
+      "participantCount": 3,
+      "canceled": false
+    },
+    {
+      "id": "0c175e7c33784088af01b68dd7f23218",
+      "slug": "signorie-2026-10-02",
+      "parentId": "da653bb7f37f4af1911a962a61630b6d",
+      "type": "PLANNED_PLAY",
+      "title": "Signorie",
+      "description": null,
+      "startsAt": "2026-10-02T14:15:00Z",
+      "endsAt": "2026-10-02T16:15:00Z",
+      "timeZone": "Europe/Madrid",
+      "imageUrl": null,
+      "capacity": 4,
+      "location": {
+        "id": "cb3ba5f9ea124546b83011d2d23df546",
+        "name": "Centre Cívic Ca N’Aurell",
+        "address": "Plaça del Tint, 4, Terrassa, Espanya",
+        "latitude": 41.5658039,
+        "longitude": 2.0039451,
+        "imageUrl": null,
+        "capacity": null,
+        "isDefault": false,
+        "spots": []
+      },
+      "game": {
+        "id": "e048ff7c1df246ec9d59a7840d8ada6a",
+        "slug": "signorie",
+        "name": "Signorie",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/games/dd10a5c0cee14150a0a98e8f41e3834c.jpg",
+        "yearPublished": 2015
+      },
+      "visibility": "PUBLIC",
+      "minParticipants": 2,
+      "participantCount": 2,
+      "canceled": false
+    },
+    {
+      "id": "75caa28b9475497e95243ecc3f5df529",
+      "slug": "forest-shuffle-smoky-mountains-2026-10-02",
+      "parentId": "da653bb7f37f4af1911a962a61630b6d",
+      "type": "PLANNED_PLAY",
+      "title": "Forest Shuffle: Smoky Mountains",
+      "description": null,
+      "startsAt": "2026-10-02T14:45:00Z",
+      "endsAt": "2026-10-02T15:45:00Z",
+      "timeZone": "Europe/Madrid",
+      "imageUrl": null,
+      "capacity": 5,
+      "location": {
+        "id": "cb3ba5f9ea124546b83011d2d23df546",
+        "name": "Centre Cívic Ca N’Aurell",
+        "address": "Plaça del Tint, 4, Terrassa, Espanya",
+        "latitude": 41.5658039,
+        "longitude": 2.0039451,
+        "imageUrl": null,
+        "capacity": null,
+        "isDefault": false,
+        "spots": []
+      },
+      "game": {
+        "id": "86ceb80bc1dc42f0a49f02179b17a564",
+        "slug": "forest-shuffle-smoky-mountains",
+        "name": "Forest Shuffle: Smoky Mountains",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/games/080e96b9469840388b357ce463146272.jpg",
+        "yearPublished": 2026
+      },
+      "visibility": "PUBLIC",
+      "minParticipants": 2,
+      "participantCount": 5,
+      "canceled": false
+    },
+    {
+      "id": "ccb3dde169f348d0b18a497edf542eb7",
+      "slug": "fabricas-fantasticas-2026-10-02",
+      "parentId": "da653bb7f37f4af1911a962a61630b6d",
+      "type": "PLANNED_PLAY",
+      "title": "Fábricas Fantásticas",
+      "description": null,
+      "startsAt": "2026-10-02T16:15:00Z",
+      "endsAt": "2026-10-02T17:15:00Z",
+      "timeZone": "Europe/Madrid",
+      "imageUrl": null,
+      "capacity": 5,
+      "location": {
+        "id": "cb3ba5f9ea124546b83011d2d23df546",
+        "name": "Centre Cívic Ca N’Aurell",
+        "address": "Plaça del Tint, 4, Terrassa, Espanya",
+        "latitude": 41.5658039,
+        "longitude": 2.0039451,
+        "imageUrl": null,
+        "capacity": null,
+        "isDefault": false,
+        "spots": []
+      },
+      "game": {
+        "id": "131968b208b44389af2d079539c24be7",
+        "slug": "fantastic-factories",
+        "name": "Fábricas Fantásticas",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/game-versions/0baee2ede37b41f0b7e1ceaec40af934.jpg",
+        "yearPublished": 2022
+      },
+      "visibility": "PUBLIC",
+      "minParticipants": 1,
+      "participantCount": 5,
+      "canceled": false
+    }
+  ]
+}

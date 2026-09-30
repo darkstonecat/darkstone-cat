@@ -1,0 +1,611 @@
+{
+  "futureEvents": {
+    "totalNumber": 15,
+    "pageNumber": 0,
+    "size": 15,
+    "elements": [
+      {
+        "id": "da653bb7f37f4af1911a962a61630b6d",
+        "slug": "divendres-de-jocs-2026-10-02",
+        "parentId": null,
+        "type": "MEETUP",
+        "title": "Divendres de jocs!",
+        "description": "Vine a jugar a jocs de taula i rol amb nosaltres!",
+        "startsAt": "2026-10-02T14:00:00Z",
+        "endsAt": "2026-10-02T18:30:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/posts/e4447d280b6440368cf94b8a80917406-1.jfif",
+        "capacity": null,
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "visibility": "PUBLIC",
+        "participantCount": 10,
+        "canceled": false
+      },
+      {
+        "id": "38e80c459a864857b78d4ec042d26055",
+        "slug": "emberleaf-2026-10-02",
+        "parentId": "da653bb7f37f4af1911a962a61630b6d",
+        "type": "PLANNED_PLAY",
+        "title": "Emberleaf",
+        "description": null,
+        "startsAt": "2026-10-02T14:00:00Z",
+        "endsAt": "2026-10-02T16:00:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": null,
+        "capacity": 4,
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "game": {
+          "id": "3ccf7fad777f48438cc0a358d7da370e",
+          "slug": "emberleaf",
+          "name": "Emberleaf",
+          "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/games/7aefdbcb634e408e9cb13ff5f5f77144.jpg"
+        },
+        "visibility": "PUBLIC",
+        "minParticipants": 1,
+        "participantCount": 3,
+        "canceled": false
+      },
+      {
+        "id": "0c175e7c33784088af01b68dd7f23218",
+        "slug": "signorie-2026-10-02",
+        "parentId": "da653bb7f37f4af1911a962a61630b6d",
+        "type": "PLANNED_PLAY",
+        "title": "Signorie",
+        "description": null,
+        "startsAt": "2026-10-02T14:15:00Z",
+        "endsAt": "2026-10-02T16:15:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": null,
+        "capacity": 4,
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "game": {
+          "id": "e048ff7c1df246ec9d59a7840d8ada6a",
+          "slug": "signorie",
+          "name": "Signorie",
+          "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/games/dd10a5c0cee14150a0a98e8f41e3834c.jpg",
+          "yearPublished": 2015
+        },
+        "visibility": "PUBLIC",
+        "minParticipants": 2,
+        "participantCount": 2,
+        "canceled": false
+      },
+      {
+        "id": "75caa28b9475497e95243ecc3f5df529",
+        "slug": "forest-shuffle-smoky-mountains-2026-10-02",
+        "parentId": "da653bb7f37f4af1911a962a61630b6d",
+        "type": "PLANNED_PLAY",
+        "title": "Forest Shuffle: Smoky Mountains",
+        "description": null,
+        "startsAt": "2026-10-02T14:45:00Z",
+        "endsAt": "2026-10-02T15:45:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": null,
+        "capacity": 5,
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "game": {
+          "id": "86ceb80bc1dc42f0a49f02179b17a564",
+          "slug": "forest-shuffle-smoky-mountains",
+          "name": "Forest Shuffle: Smoky Mountains",
+          "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/games/080e96b9469840388b357ce463146272.jpg",
+          "yearPublished": 2026
+        },
+        "visibility": "PUBLIC",
+        "minParticipants": 2,
+        "participantCount": 5,
+        "canceled": false
+      },
+      {
+        "id": "ccb3dde169f348d0b18a497edf542eb7",
+        "slug": "fabricas-fantasticas-2026-10-02",
+        "parentId": "da653bb7f37f4af1911a962a61630b6d",
+        "type": "PLANNED_PLAY",
+        "title": "Fábricas Fantásticas",
+        "description": null,
+        "startsAt": "2026-10-02T16:15:00Z",
+        "endsAt": "2026-10-02T17:15:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": null,
+        "capacity": 5,
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "game": {
+          "id": "131968b208b44389af2d079539c24be7",
+          "slug": "fantastic-factories",
+          "name": "Fábricas Fantásticas",
+          "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/game-versions/0baee2ede37b41f0b7e1ceaec40af934.jpg",
+          "yearPublished": 2022
+        },
+        "visibility": "PUBLIC",
+        "minParticipants": 1,
+        "participantCount": 5,
+        "canceled": false
+      },
+      {
+        "id": "a851a75f8cae4530adc8f33750f1e2ed",
+        "slug": "dissabtes-de-jocs-2026-10-03",
+        "parentId": null,
+        "type": "MEETUP",
+        "title": "Dissabtes de jocs!",
+        "description": "Vine a jugar a jocs de taula i rol amb nosaltres!",
+        "startsAt": "2026-10-03T08:00:00Z",
+        "endsAt": "2026-10-03T11:30:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/posts/a851a75f8cae4530adc8f33750f1e2ed-1.jpg",
+        "capacity": null,
+        "languages": [
+          "es"
+        ],
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "visibility": "PUBLIC",
+        "participantCount": 6,
+        "canceled": false
+      },
+      {
+        "id": "ae4b445e26ef4f5aa9339a3cd4e66514",
+        "slug": "ostia-2026-10-03",
+        "parentId": "a851a75f8cae4530adc8f33750f1e2ed",
+        "type": "PLANNED_PLAY",
+        "title": "Ostia",
+        "description": null,
+        "startsAt": "2026-10-03T08:00:00Z",
+        "endsAt": "2026-10-03T10:00:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": null,
+        "capacity": 4,
+        "languages": [
+          "es"
+        ],
+        "languagesInherited": true,
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "game": {
+          "id": "44f9a7d2bd0c4cbb9d5672a4fd07a7fe",
+          "slug": "ostia-2",
+          "name": "Ostia",
+          "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/games/b6c2db60b4e649efadbb81449625530e.jpg"
+        },
+        "visibility": "PUBLIC",
+        "minParticipants": 1,
+        "participantCount": 2,
+        "canceled": false
+      },
+      {
+        "id": "8190d7dd4664423aab991d6ee47a5da9",
+        "slug": "marvel-champions-el-juego-de-cartas-2026-10-03",
+        "parentId": "a851a75f8cae4530adc8f33750f1e2ed",
+        "type": "PLANNED_PLAY",
+        "title": "Marvel Champions: El Juego de Cartas",
+        "description": null,
+        "startsAt": "2026-10-03T08:00:00Z",
+        "endsAt": "2026-10-03T09:30:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": null,
+        "capacity": 4,
+        "languages": [
+          "es"
+        ],
+        "languagesInherited": true,
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "game": {
+          "id": "1e42813d2fab4ff7a35c42d1f0b22905",
+          "slug": "marvel-champions-the-card-game",
+          "name": "Marvel Champions: El Juego de Cartas",
+          "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/game-versions/0829bcda3fa94da8bac925805d883016.jpg",
+          "yearPublished": 2019
+        },
+        "visibility": "PUBLIC",
+        "minParticipants": 1,
+        "participantCount": 4,
+        "canceled": false
+      },
+      {
+        "id": "e7bde5fa2c524ed6ba8c4ed6a609067b",
+        "slug": "divendres-de-jocs-2026-10-09",
+        "parentId": null,
+        "type": "MEETUP",
+        "title": "Divendres de jocs!",
+        "description": "Vine a jugar a jocs de taula i rol amb nosaltres!",
+        "startsAt": "2026-10-09T14:00:00Z",
+        "endsAt": "2026-10-09T18:30:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/posts/e4447d280b6440368cf94b8a80917406-1.jfif",
+        "capacity": null,
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "visibility": "PUBLIC",
+        "participantCount": 1,
+        "canceled": false
+      },
+      {
+        "id": "b1b6c7532a404401acdf30d8b0b12785",
+        "slug": "el-principio-del-fuego-y-la-ceniza-2026-10-10",
+        "parentId": null,
+        "type": "PLANNED_PLAY",
+        "title": "el principio del fuego y la ceniza",
+        "description": "Sample campaign description.",
+        "startsAt": "2026-10-10T08:00:00Z",
+        "endsAt": "2026-10-10T11:00:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/posts/b1b6c7532a404401acdf30d8b0b12785-1.jpg",
+        "capacity": 8,
+        "languages": [
+          "es"
+        ],
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "game": {
+          "id": "23e9a39aa4a547209778b985ee6f0f3d",
+          "slug": "dungeons-and-dragons-5th-edition",
+          "name": "Dungeons & Dragons (5th Edition)",
+          "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/games/8abf151de3214f9789ba56215e122f5c.jpg"
+        },
+        "visibility": "PUBLIC",
+        "minParticipants": 4,
+        "participantCount": 3,
+        "canceled": false,
+        "master": {
+          "id": "00000000000000000000000000000001",
+          "username": "organizer-a",
+          "name": "Organizer A",
+          "avatarUrl": null
+        }
+      },
+      {
+        "id": "f26a2c52903a4c2b96d8a6626d998fe1",
+        "slug": "dissabtes-de-jocs-2026-10-10-3mjlut7089ti",
+        "parentId": null,
+        "type": "MEETUP",
+        "title": "Dissabtes de jocs!",
+        "description": "Vine a jugar a jocs de taula i rol amb nosaltres!",
+        "startsAt": "2026-10-10T08:00:00Z",
+        "endsAt": "2026-10-10T11:30:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/posts/f26a2c52903a4c2b96d8a6626d998fe1-1.jpg",
+        "capacity": null,
+        "languages": [
+          "ca"
+        ],
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "visibility": "PUBLIC",
+        "draft": true,
+        "participantCount": 0,
+        "canceled": false
+      },
+      {
+        "id": "88d66dcd2d4648d3b13907f4912917fd",
+        "slug": "juguem-a-el-carton-peleon-2026-10-11",
+        "parentId": null,
+        "type": "MEETUP",
+        "title": "Juguem a El Cartón Peleón!",
+        "description": null,
+        "startsAt": "2026-10-11T13:30:00Z",
+        "endsAt": "2026-10-11T18:30:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/posts/88d66dcd2d4648d3b13907f4912917fd-2.jpg",
+        "capacity": null,
+        "languages": [
+          "ca"
+        ],
+        "location": {
+          "id": "680d04a8e8e540838b893b13e34c5db5",
+          "name": "El Cartón Peleón",
+          "address": "Avinguda de Josep Tarradellas, 100, 08225 Terrassa, Barcelona, Espanya",
+          "latitude": 41.5733098,
+          "longitude": 2.0028743,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "visibility": "PUBLIC",
+        "participantCount": 1,
+        "canceled": false
+      },
+      {
+        "id": "9175f400a7204b40aac678cb586b9b6b",
+        "slug": "juguem-a-el-carton-peleon-2026-10-11-zqqu3zq60eak",
+        "parentId": null,
+        "type": "MEETUP",
+        "title": "Juguem a El Cartón Peleón!",
+        "description": null,
+        "startsAt": "2026-11-08T14:30:00Z",
+        "endsAt": "2026-11-08T19:30:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/posts/9175f400a7204b40aac678cb586b9b6b-2.jpg",
+        "capacity": null,
+        "languages": [
+          "ca"
+        ],
+        "location": {
+          "id": "680d04a8e8e540838b893b13e34c5db5",
+          "name": "El Cartón Peleón",
+          "address": "Avinguda de Josep Tarradellas, 100, 08225 Terrassa, Barcelona, Espanya",
+          "latitude": 41.5733098,
+          "longitude": 2.0028743,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "visibility": "PUBLIC",
+        "draft": true,
+        "participantCount": 0,
+        "canceled": false
+      },
+      {
+        "id": "053e43407bdb44afa1ebc54539c7843c",
+        "slug": "053e43407bdb44afa1ebc54539c7843c",
+        "parentId": null,
+        "type": "MEETUP",
+        "title": "Egara Juga 2026",
+        "description": null,
+        "startsAt": "2026-11-28T09:00:00Z",
+        "endsAt": "2026-11-29T16:00:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": null,
+        "capacity": null,
+        "location": {
+          "id": "fe947d0d0e6342aaadb393542ddddf45",
+          "name": "Recinte Firal de Terrassa",
+          "address": "Passeig del Vint-i-dos de Juliol, 265, 08225 Terrassa, Barcelona, Espanya",
+          "latitude": 41.570626,
+          "longitude": 2.0077087,
+          "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/locations/3b0a0c8ca66b4654a5d5c7185aca138b.jpg",
+          "capacity": null,
+          "isDefault": false,
+          "spots": [
+            {
+              "id": "f8f5149c1357414e9d31ae8996c84555",
+              "name": "BoTC 2",
+              "capacity": null
+            },
+            {
+              "id": "a811c08ddd164ec3ac06f0c153a4581d",
+              "name": "Torneig 1",
+              "capacity": null
+            },
+            {
+              "id": "9d2d39d98ee441c7bc82e3e428f51a57",
+              "name": "Torneig 2",
+              "capacity": null
+            },
+            {
+              "id": "2e4da93152ba40abbcdee4b060226d4a",
+              "name": "Tastet Rol",
+              "capacity": null
+            },
+            {
+              "id": "99889f399a50403593dd5d007621572e",
+              "name": "Devir",
+              "capacity": null
+            },
+            {
+              "id": "692d47513aaa4564bf54565ca5ed845c",
+              "name": "Juegorama",
+              "capacity": null
+            },
+            {
+              "id": "8923826d448e45598a8d4ba9cd62b29c",
+              "name": "A Risk Cat",
+              "capacity": null
+            },
+            {
+              "id": "9292aea9b84a42c28e625dedcac4876e",
+              "name": "Eclipse",
+              "capacity": null
+            },
+            {
+              "id": "35f8d1e842114c4685a41447b8d798f1",
+              "name": "DMZ",
+              "capacity": null
+            },
+            {
+              "id": "1c543e9def004909ada25f206b42b241",
+              "name": "Ludo",
+              "capacity": null
+            },
+            {
+              "id": "ef29260303c44032a36e740429c35d8c",
+              "name": "SD Games",
+              "capacity": null
+            },
+            {
+              "id": "1b00c5733ea344f4ba4e6a1bb047be8a",
+              "name": "2tomatoes",
+              "capacity": null
+            },
+            {
+              "id": "477d1570c6be466ba49686e709924494",
+              "name": "Maldito",
+              "capacity": null
+            },
+            {
+              "id": "7b16d96f31974bf4bba9242eec065e00",
+              "name": "GimcanaxGirona",
+              "capacity": null
+            },
+            {
+              "id": "0dbe3b53968842ce9bca4448fb1f953a",
+              "name": "Synergic",
+              "capacity": null
+            },
+            {
+              "id": "32e0389993b743948c911a335d739b0a",
+              "name": "Invedars",
+              "capacity": null
+            },
+            {
+              "id": "e71fee1a38834085a5a17d1b95d5b0aa",
+              "name": "Prof. Mompi",
+              "capacity": null
+            },
+            {
+              "id": "213c8f664a2f4ecdb583ade1ba716f60",
+              "name": "Key Enigma",
+              "capacity": null
+            },
+            {
+              "id": "5cf8145de41941bb9730a9b00b9ec673",
+              "name": "Looping Games",
+              "capacity": null
+            },
+            {
+              "id": "ad233d2d77f04e39af2acd3bd69c6eac",
+              "name": "Trencadaus",
+              "capacity": null
+            },
+            {
+              "id": "338d0264b9d749d69845affd18285c0d",
+              "name": "BoTC 1",
+              "capacity": null
+            }
+          ]
+        },
+        "visibility": "PUBLIC",
+        "restrictedAttendance": true,
+        "participantCount": 21,
+        "canceled": false
+      },
+      {
+        "id": "acb7b0e42ffd45d7844a031407d426dc",
+        "slug": "divendres-de-jocs-2026-12-25",
+        "parentId": null,
+        "type": "MEETUP",
+        "title": "Divendres de jocs!",
+        "description": "Vine a jugar a jocs de taula i rol amb nosaltres!",
+        "startsAt": "2026-12-25T15:00:00Z",
+        "endsAt": "2026-12-25T19:30:00Z",
+        "timeZone": "Europe/Madrid",
+        "imageUrl": "https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net/posts/e4447d280b6440368cf94b8a80917406-1.jfif",
+        "capacity": null,
+        "location": {
+          "id": "cb3ba5f9ea124546b83011d2d23df546",
+          "name": "Centre Cívic Ca N’Aurell",
+          "address": "Plaça del Tint, 4, Terrassa, Espanya",
+          "latitude": 41.5658039,
+          "longitude": 2.0039451,
+          "imageUrl": null,
+          "capacity": null,
+          "isDefault": false,
+          "spots": []
+        },
+        "visibility": "PUBLIC",
+        "participantCount": 3,
+        "canceled": false
+      }
+    ]
+  },
+  "pastEvents": {
+    "totalNumber": 0,
+    "pageNumber": 0,
+    "size": 0,
+    "elements": []
+  }
+}
