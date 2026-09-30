@@ -4,7 +4,7 @@
  */
 
 export const VENUE = {
-  name: "Casal Cívic Ca N'Aurell",
+  name: "Centre Cívic Ca N'Aurell",
   streetAddress: "Plaça del Tint, 4",
   postalCode: "08224",
   locality: "Terrassa",

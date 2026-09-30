@@ -13,6 +13,8 @@ main element of the page.
 - Session hours and venue name disagree across the site:
   - Truth: **Casal Cívic Ca N'Aurell** (official name on the Ajuntament de Terrassa website and the building sign; Google Maps says "Centre", which caused the confusion; corrected by the user),
     Friday 16:00–20:30, Saturday 10:00–13:30.
+  - Superseded 2026-09-30: the board decided to use **"Centre Cívic Ca N'Aurell"**, the name
+    already used in Ludoya, so the site matches the events data. Hours are unchanged.
   - Wrong: `faq.schedule_a` (17:00–21:00 / 10:00–14:00), Organization JSON-LD
     `openingHoursSpecification` in `src/app/[locale]/layout.tsx` (same wrong hours),
     "Centre Cívic" in several message strings.
