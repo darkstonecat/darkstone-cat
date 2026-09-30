@@ -57,6 +57,42 @@ test.describe('Member home (/profile)', () => {
   })
 })
 
+// The E2E server runs with LUDOYA_MOCK=1 (public/mock/ludoya/v1 fixtures). Their
+// dates are fixed, so the week window shows sessions only around the fixture
+// dates and the empty state afterwards: the tests accept both and check the rest.
+test.describe('Member home sessions', () => {
+  test('renders the sessions card in the page shell', async ({ memberPage: page }) => {
+    await page.goto(PAGES.profile)
+    const card = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Properes sessions' }) })
+    await expect(card).toBeVisible()
+    await expect(card.getByText('Aquesta setmana')).toBeVisible()
+    await expect(card.getByRole('link', { name: /Tots els esdeveniments/ })).toHaveAttribute('href', '/events')
+    // Once streamed in, the skeleton is gone.
+    await expect(card.getByRole('status').filter({ hasText: 'Carregant' })).toHaveCount(0)
+  })
+
+  test('lists sessions with an accessible accordion, or the empty state', async ({ memberPage: page }) => {
+    await page.goto(PAGES.profile)
+    const card = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Properes sessions' }) })
+    const toggles = card.getByRole('button', { name: /Veure partides/ })
+    await expect(toggles.first().or(card.getByText('Encara no hi ha partides programades'))).toBeVisible()
+    if ((await toggles.count()) === 0) return
+
+    const toggle = toggles.first()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await toggle.click()
+    await expect(card.getByRole('button', { name: /Amaga/ }).first()).toHaveAttribute('aria-expanded', 'true')
+    const panelId = await card.getByRole('button', { name: /Amaga/ }).first().getAttribute('aria-controls')
+    const panel = page.locator(`[id="${panelId}"]`)
+    await expect(panel).toBeVisible()
+    await expect(panel.getByText('Proposa una partida')).toBeVisible()
+    for (const link of await panel.getByRole('link').all()) {
+      await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+      await expect(link).toHaveAttribute('target', '_blank')
+    }
+  })
+})
+
 test.describe('Member home on mobile', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 

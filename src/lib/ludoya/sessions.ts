@@ -27,6 +27,8 @@ export interface FetchSessionsOptions {
   revalidate: number;
   /** Also fetch recent past events (calendar months that already happened). */
   includePast?: boolean;
+  /** Past events to request when `includePast` is set; defaults to `PAST_EVENTS_LIMIT`. */
+  pastLimit?: number;
   /** Timeout, attempts and total budget for the calls (see `LudoyaGetOptions`). */
   limits?: Pick<LudoyaGetOptions, "timeoutMs" | "attempts" | "budgetMs">;
 }
@@ -46,10 +48,10 @@ async function fetchLocations(limits: FetchSessionsOptions["limits"]): Promise<L
 }
 
 /** All upcoming (and optionally recent past) sessions with plays and the usual-venue flag. */
-export async function fetchSessions({ revalidate, includePast = false, limits }: FetchSessionsOptions): Promise<LudoyaSession[]> {
+export async function fetchSessions({ revalidate, includePast = false, pastLimit = PAST_EVENTS_LIMIT, limits }: FetchSessionsOptions): Promise<LudoyaSession[]> {
   const [raw, locations] = await Promise.all([
     ludoyaGet(
-      ludoyaEndpoints.events({ includeSubEvents: true, pastLimit: includePast ? PAST_EVENTS_LIMIT : undefined }),
+      ludoyaEndpoints.events({ includeSubEvents: true, pastLimit: includePast ? pastLimit : undefined }),
       { revalidate, ...limits }
     ),
     fetchLocations(limits),

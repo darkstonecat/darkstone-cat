@@ -106,7 +106,7 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/register` | `register/page.tsx` | Registration form (`revalidate = false`, `noindex`) |
 | `/forgot-password` | `forgot-password/page.tsx` | Password recovery (`revalidate = false`, `noindex`) |
 | `/reset-password` | `reset-password/page.tsx` | Set new password — protected route (`revalidate = false`, `noindex`) |
-| `/profile` | `profile/page.tsx` | "La meva zona", the member home: greeting hero with tabs and mini card, "Completa el perfil" checklist (hidden at 4/4), badges (grid / mobile carousel) — protected route (`revalidate = false`, `noindex`) |
+| `/profile` | `profile/page.tsx` | "La meva zona", the member home: greeting hero with tabs and mini card, "Completa el perfil" checklist (hidden at 4/4), badges (grid / mobile carousel), "Properes sessions" (this week's Ludoya sessions and plays streamed in a Suspense boundary with skeleton / empty / error states, expandable rows) — protected route (`revalidate = false`, `noindex`) |
 | `/profile/details` | `profile/details/page.tsx` | Profile and account: shared member hero + tabs, cards "On jugues" (link Ludoya/BGG), "Dades de soci" (masked DNI/phone), "Comunicacions" (email switch), "Compte" — protected route (`revalidate = false`, `noindex`) |
 | `/profile/edit` | `profile/edit/page.tsx` | Profile edit form — protected route (`revalidate = false`, `noindex`) |
 | `/profile/card` | `profile/card/page.tsx` | Member card (tilted landscape card on desktop, portrait card + full-screen QR overlay on mobile, keeps the real NavBar), download — protected route (`revalidate = false`, `noindex`) |
@@ -185,7 +185,7 @@ All interactive components use `"use client"`. Components are organized by page:
 - `src/components/faq/` — FAQ page (FaqContent)
 - `src/components/conduct/` — Code of conduct (ConductContent)
 - `src/components/auth/` — Auth pages (AuthHero, LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm)
-- `src/components/profile/` — Profile pages (MemberHero, MemberTabs, MemberAvatar shared by the member area; GamingAccounts, MemberDataCard, NewsletterSwitch, AccountActions for `/profile/details`; CardFace, QrCodeSvg, CardQrOverlay, CardDownloadButton for `/profile/card`; HomeHero, ProfileChecklist, BadgesSection for the home `/profile`; ProfileEditForm, DeleteAccountDialog)
+- `src/components/profile/` — Profile pages (MemberHero, MemberTabs, MemberAvatar shared by the member area; GamingAccounts, MemberDataCard, NewsletterSwitch, AccountActions for `/profile/details`; CardFace, QrCodeSvg, CardQrOverlay, CardDownloadButton for `/profile/card`; HomeHero, ProfileChecklist, BadgesSection, SessionsSection (server, Suspense + fetch), SessionsList (client accordion) for the home `/profile`, with pure helpers in `src/lib/member-home/` (`badge-items.ts`, `sessions-view.ts`: public-only filter, seat status, counts, Madrid dates); ProfileEditForm, DeleteAccountDialog)
 - `src/app/[locale]/verify/[token]/` — Public card verification page (no components of its own)
 - `src/components/admin/` — Admin pages (AdminDashboard, MembersTable, ExportConfirmDialog)
 - `src/components/legal/` — Legal pages (LegalPageContent, LegalContent, PrivacyContent, CookiesContent, DataProtectionContent)

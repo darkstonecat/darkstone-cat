@@ -142,6 +142,7 @@ function parsePlay(item: unknown, ctx: string): LudoyaSessionPlay | null {
     participantCount: optionalNumber(item, "participantCount", ctx) ?? 0,
     capacity: optionalNumber(item, "capacity", ctx),
     minParticipants: optionalNumber(item, "minParticipants", ctx),
+    organizerName: parseOrganizerName(item, ctx),
     ludoyaUrl: ludoyaUrls.eventPage(id),
     visibility,
   };

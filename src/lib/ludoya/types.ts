@@ -66,6 +66,8 @@ export interface LudoyaSessionPlay extends LudoyaPlannedPlay {
   participantCount: number;
   capacity: number | null;
   minParticipants: number | null;
+  /** Game master or teacher when the play names one. */
+  organizerName: string | null;
   ludoyaUrl: string;
   /** A play has its own visibility, independent of its session's. */
   visibility: "PUBLIC" | "ONLY_GROUP";

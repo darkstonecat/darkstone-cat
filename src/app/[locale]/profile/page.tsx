@@ -11,6 +11,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import HomeHero from "@/components/profile/HomeHero";
 import ProfileChecklist from "@/components/profile/ProfileChecklist";
 import BadgesSection from "@/components/profile/BadgesSection";
+import SessionsSection from "@/components/profile/SessionsSection";
 
 export const revalidate = false;
 
@@ -78,8 +79,8 @@ export default async function ProfilePage({
             membershipStartDate={member.membership_start_date}
           />
 
-          <div className="flex-1 bg-brand-beige px-4 py-6 md:px-12 md:pt-10 md:pb-20">
-            <div className="mx-auto flex max-w-[1216px] flex-col gap-5 md:gap-7">
+          <div className="flex-1 bg-brand-beige px-4 py-6 md:px-12 md:pt-12 md:pb-20">
+            <div className="mx-auto flex max-w-[1120px] flex-col gap-5 md:gap-7">
               <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
                 {checklistVisible && <ProfileChecklist steps={checklist} />}
                 <BadgesSection
@@ -87,6 +88,7 @@ export default async function ProfilePage({
                   className={checklistVisible ? "md:col-span-2" : "md:col-span-3"}
                 />
               </div>
+              <SessionsSection />
             </div>
           </div>
         </>

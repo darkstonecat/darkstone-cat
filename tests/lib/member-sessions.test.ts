@@ -100,6 +100,38 @@ describe("fetchMemberWeekSessions", () => {
     expect(bgg.searchBggGames).toHaveBeenCalledTimes(6);
   });
 
+  it("asks for a few past events so a running multi-day event is not lost", async () => {
+    vi.stubEnv("LUDOYA_MOCK", "");
+    vi.stubEnv("LUDOYA_API_KEY", "ldy_test");
+    const fetchMock = vi.fn<typeof fetch>(async (input) =>
+      new Response(
+        JSON.stringify(
+          String(input).includes("/locations")
+            ? { locations: [] }
+            : {
+                futureEvents: { elements: [] },
+                pastEvents: {
+                  elements: [
+                    // Started yesterday, still running: must stay in the week.
+                    { id: "run", type: "MEETUP", visibility: "PUBLIC", title: "Running", startsAt: "2026-10-01T09:00:00Z", endsAt: "2026-10-03T16:00:00Z" },
+                    // Ended already: must go.
+                    { id: "old", type: "MEETUP", visibility: "PUBLIC", title: "Old", startsAt: "2026-09-25T09:00:00Z", endsAt: "2026-09-25T12:00:00Z" },
+                  ],
+                },
+              }
+        ),
+        { status: 200 }
+      )
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { sessions } = await fetchMemberWeekSessions();
+
+    const eventsUrl = fetchMock.mock.calls.map(([u]) => String(u)).find((u) => u.includes("/events"))!;
+    expect(eventsUrl).toContain("pastLimit=40");
+    expect(sessions.map((s) => s.id)).toEqual(["run"]);
+  });
+
   it("reports api_error and timeout instead of throwing", async () => {
     vi.stubEnv("LUDOYA_MOCK", "");
     vi.stubEnv("LUDOYA_API_KEY", "ldy_test");

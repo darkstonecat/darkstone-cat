@@ -285,3 +285,25 @@ describe("parseSessionsResponse visibility", () => {
     expect(() => parseSessionsResponse({ futureEvents: { elements: [] } }, { includePast: true })).toThrow(/pastEvents\.elements/);
   });
 });
+
+describe("parseSessionsResponse play organizer", () => {
+  it("reads the game master or teacher of a play, and null when there is none", () => {
+    const session = { id: "s", type: "MEETUP", title: "S", visibility: "PUBLIC", startsAt: "2026-11-01T10:00:00Z", endsAt: "2026-11-01T14:00:00Z" };
+    const play = (id: string, extra: object) => ({
+      id,
+      parentId: "s",
+      type: "PLANNED_PLAY",
+      title: id,
+      visibility: "PUBLIC",
+      startsAt: "2026-11-01T10:00:00Z",
+      game: { name: id },
+      ...extra,
+    });
+    const [result] = parseSessionsResponse({
+      futureEvents: {
+        elements: [session, play("a", { master: { name: "Host A" } }), play("b", { teacher: { name: "Host B" } }), play("c", {})],
+      },
+    });
+    expect(result.plannedPlays.map((p) => p.organizerName)).toEqual(["Host A", "Host B", null]);
+  });
+});

@@ -10,6 +10,7 @@ import "server-only";
 import { fetchBggCollection, type BggGame } from "./bgg";
 import { resolvePlayCovers } from "./game-matching";
 import { ludoyaConfig, MEMBER_AREA_LIMITS } from "./ludoya/config";
+import { MAX_PLAYS_SHOWN } from "./member-home/sessions-view";
 import { describeError, isTimeoutError } from "./ludoya/client";
 import {
   fetchSessions,
@@ -18,8 +19,18 @@ import {
 } from "./ludoya/sessions";
 import type { LudoyaFetchError, LudoyaSession, LudoyaSessionPlay } from "./ludoya/types";
 
-/** The home shows at most this many plays per session, so only those get BGG covers. */
-export const MAX_PLAYS_SHOWN = 5;
+/**
+ * Past events requested with the week, so a multi-day event that already started
+ * (and is still running) is not lost if Ludoya lists it under `pastEvents`.
+ *
+ * Probe (Sep 30 2026, live, one GET): `futureEvents` held only events that start
+ * after "now" (none had started), `pastEvents` was empty without `pastLimit`, and
+ * no event was in progress, so it is NOT proven where Ludoya puts a running
+ * multi-day event. The extra parameter is cheap insurance: `pastLimit` counts
+ * sub-events (plays) too, and 40 covers roughly the last week of a club with two
+ * weekly sessions. `sessionsInNextDays` drops whatever already ended.
+ */
+const WEEK_PAST_LIMIT = 40;
 
 export interface MemberSessionPlay extends LudoyaSessionPlay {
   /** BGG cover when the game resolves by name and year, else Ludoya's. */
@@ -71,7 +82,12 @@ async function withCovers(sessions: LudoyaSession[]): Promise<MemberSession[]> {
  */
 export async function fetchMemberWeekSessions(now: Date = new Date()): Promise<MemberSessionsResult> {
   try {
-    const sessions = await fetchSessions({ revalidate: ludoyaConfig.memberAreaRevalidateSeconds, limits: MEMBER_AREA_LIMITS });
+    const sessions = await fetchSessions({
+      revalidate: ludoyaConfig.memberAreaRevalidateSeconds,
+      includePast: true,
+      pastLimit: WEEK_PAST_LIMIT,
+      limits: MEMBER_AREA_LIMITS,
+    });
     return { sessions: await withCovers(sessionsInNextDays(sessions, now)) };
   } catch (error) {
     console.error(`[Ludoya] Failed to fetch member sessions: ${describeError(error)}`);
