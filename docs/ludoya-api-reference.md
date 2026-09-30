@@ -37,7 +37,7 @@ GET /locations                          (cached 1 h, optional)
   → the location with isDefault = true is the usual venue
 ```
 
-There is no per-event children request any more. For months that already started, the calendar adds `pastLimit=60` (most recent past events, sub-events included).
+There is no per-event children request any more. For months that already started, the calendar adds `pastLimit=200` (most recent past events). `pastLimit` counts sub-events too (checked live, Sep 2026: 60 returned ~19 sessions, 200 ~48), so it is a cap: months further back than that can be incomplete.
 
 ### Cache and resilience
 
@@ -153,11 +153,12 @@ Many `ludoya-only` entries in production mean BGG is failing or names diverge; a
    # replace master/teacher with {"id":"…","username":"organizer-a","name":"Organizer A","avatarUrl":null}
    ```
 
-   `children-<eventId>.json` fixtures come from `GET /events/{id}/children` for events that have plays; `search-users-found.json` holds the placeholder user the mock treats as existing (`member-a`).
+   `search-users-found.json` holds the placeholder user the mock treats as existing (`member-a`).
 
 ## Known behaviour
 
-- **Visibility.** The organisation key returns every visibility. `/events` and event images list `PUBLIC` only; the member area also keeps `ONLY_GROUP`.
+- **Visibility.** The organisation key returns every visibility, and each play has its own (independent of its session's). `/events` and event images list `PUBLIC` sessions and plays only; the member area also keeps `ONLY_GROUP`. A missing or unrecognised visibility is skipped with a warning, never assumed public.
+- **Nullable dates.** `startsAt`/`endsAt` are nullable in the OpenAPI; an item with a null date is skipped with a warning instead of failing the feed.
 - **DST.** Classification of regular sessions converts with `timeZone` (Fri 16:00–20:30, Sat 10:00–13:30 local).
 - **Zero-length events.** Some special events have `startsAt === endsAt`.
 - **Images.** JPEG bytes served as `application/octet-stream`. Next.js' optimizer sniffs them; the event image generator (`src/lib/event-image/assets.ts`) sniffs them too, because Satori rejects non-image MIME types.
