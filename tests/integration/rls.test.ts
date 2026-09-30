@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import {
+  supabaseAdmin,
   createTestUser,
   createTestAdmin,
   createAuthenticatedClient,
@@ -50,6 +51,25 @@ describe('SELECT policies', () => {
       .eq('id', userB.id)
 
     expect(data).toHaveLength(0)
+  })
+
+  it('member reads their own card_token but not another member\'s', async () => {
+    const client = await createAuthenticatedClient(
+      'rls-a@test.local',
+      'password123'
+    )
+    const { data: own } = await client
+      .from('members')
+      .select('card_token')
+      .eq('id', userA.id)
+      .single()
+    expect(own!.card_token).toMatch(/^[0-9a-f]{32}$/)
+
+    const { data: other } = await client
+      .from('members')
+      .select('card_token')
+      .eq('id', userB.id)
+    expect(other).toHaveLength(0)
   })
 
   it('admin sees all members', async () => {
@@ -141,6 +161,19 @@ describe('UPDATE policies', () => {
     expect(error).not.toBeNull()
   })
 
+  it('member cannot change their own card_token', async () => {
+    const client = await createAuthenticatedClient(
+      'rls-a@test.local',
+      'password123'
+    )
+    const { error } = await client
+      .from('members')
+      .update({ card_token: 'forged-token' })
+      .eq('id', userA.id)
+
+    expect(error).not.toBeNull()
+  })
+
   it('admin can update any member profile', async () => {
     const client = await createAuthenticatedClient(
       'rls-admin@test.local',
@@ -152,5 +185,47 @@ describe('UPDATE policies', () => {
       .eq('id', userA.id)
 
     expect(error).toBeNull()
+  })
+})
+
+describe('regenerate_card_token()', () => {
+  it('admin regenerates a member token', async () => {
+    const { data: before } = await supabaseAdmin
+      .from('members')
+      .select('card_token')
+      .eq('id', userB.id)
+      .single()
+
+    const client = await createAuthenticatedClient(
+      'rls-admin@test.local',
+      'password123'
+    )
+    const { data: newToken, error } = await client.rpc('regenerate_card_token', {
+      target_member_id: userB.id,
+    })
+
+    expect(error).toBeNull()
+    expect(newToken).toMatch(/^[0-9a-f]{32}$/)
+    expect(newToken).not.toBe(before!.card_token)
+
+    const { data: after } = await supabaseAdmin
+      .from('members')
+      .select('card_token')
+      .eq('id', userB.id)
+      .single()
+    expect(after!.card_token).toBe(newToken)
+  })
+
+  it('non-admin cannot regenerate a token', async () => {
+    const client = await createAuthenticatedClient(
+      'rls-a@test.local',
+      'password123'
+    )
+    const { error } = await client.rpc('regenerate_card_token', {
+      target_member_id: userB.id,
+    })
+
+    expect(error).not.toBeNull()
+    expect(error!.message).toContain('admin role required')
   })
 })

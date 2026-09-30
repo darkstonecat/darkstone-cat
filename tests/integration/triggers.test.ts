@@ -100,3 +100,32 @@ describe('generate_member_number()', () => {
   })
 })
 
+
+describe('members.card_token', () => {
+  it('assigns a URL-safe token to a new member', async () => {
+    const user = await createTestUser('trigger-token-1@test.local', 'password123')
+    userIds.push(user.id)
+
+    const { data } = await supabaseAdmin
+      .from('members')
+      .select('card_token')
+      .eq('id', user.id)
+      .single()
+
+    expect(data!.card_token).toMatch(/^[0-9a-f]{32}$/)
+  })
+
+  it('assigns a different token to each member', async () => {
+    const user1 = await createTestUser('trigger-token-2@test.local', 'password123')
+    const user2 = await createTestUser('trigger-token-3@test.local', 'password123')
+    userIds.push(user1.id, user2.id)
+
+    const { data } = await supabaseAdmin
+      .from('members')
+      .select('card_token')
+      .in('id', [user1.id, user2.id])
+
+    expect(data).toHaveLength(2)
+    expect(data![0].card_token).not.toBe(data![1].card_token)
+  })
+})

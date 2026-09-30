@@ -14,6 +14,7 @@ export type Member = {
   ludoya_username: string | null;
   bgg_username: string | null;
   role: "member" | "admin";
+  card_token: string;
   newsletter_accepted: boolean;
   membership_start_date: string | null;
   created_at: string;

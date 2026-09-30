@@ -84,12 +84,13 @@ current data sheet off `/profile`.)
 
 ### B1 — Data model (Supabase)
 
-- [ ] B1.1 — Migration: `members.card_token` (random, unique, not null, backfilled for existing
+- [x] B1.1 — Migration: `members.card_token` (random, unique, not null, backfilled for existing
   rows, default for new rows) + `regenerate_card_token(member)` admin-only function; RLS keeps
   the token readable by its owner and admins only. Types in `src/lib/supabase/auth.ts`.
   Tests: `tests/integration/triggers`/`rls` cases (new member gets a token, member cannot read
   another's token, member cannot change own token). Route: inline candidate (one migration +
   types), delegate if RLS work grows.
+  - Evidence: `db:reset` applied; integration rls+triggers 20/20 pass (token on new member, distinct tokens, own read, other unreadable, own update rejected, admin regenerate, non-admin rejected); lint and tsc clean. Token = 32 hex from `gen_random_uuid()` (no extension). Commit: see git log.
 - [ ] B1.2 — Migration: `member_badges` (member id, badge key, awarded_at, unique pair), RLS
   select-own + admin all, no member writes; badge keys as a check constraint
   (`volunteer_egara_joga`, `ludoteca_donor`). "Membre {year}" is derived, not stored
