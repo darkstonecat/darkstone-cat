@@ -97,7 +97,7 @@ export async function updateMemberAfterSignup(
 /**
  * Deletes a sign-up the person abandoned ("wrong email, go back") so its
  * personal data does not linger. Only an unconfirmed user created within the
- * last 30 minutes qualifies; its members row is removed too. Never throws.
+ * last 30 minutes qualifies; its members row cascades. Never throws.
  */
 export async function discardUnconfirmedSignup(userId: string): Promise<{ discarded: boolean }> {
   try {
@@ -106,8 +106,7 @@ export async function discardUnconfirmedSignup(userId: string): Promise<{ discar
     if (!(await isFreshUnconfirmedUser(supabase, userId, DISCARD_WINDOW_MS))) {
       return { discarded: false };
     }
-    // Explicit delete: the members FK has no ON DELETE CASCADE in every environment.
-    await supabase.from("members").delete().eq("id", userId);
+    // The members row (and its badges) goes with the auth user: members.id is ON DELETE CASCADE.
     const { error } = await supabase.auth.admin.deleteUser(userId);
     return { discarded: !error };
   } catch {

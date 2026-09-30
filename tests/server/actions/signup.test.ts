@@ -167,9 +167,10 @@ describe('discardUnconfirmedSignup', () => {
     mockMemberDelete.mockResolvedValue({ error: null })
   })
 
-  it('deletes a fresh unconfirmed user and its member row', async () => {
+  it('deletes a fresh unconfirmed user (member row cascades)', async () => {
     expect(await discardUnconfirmedSignup('user-1')).toEqual({ discarded: true })
-    expect(mockMemberDelete).toHaveBeenCalledWith('id', 'user-1')
+    // The members row goes through the FK cascade, not an explicit delete.
+    expect(mockMemberDelete).not.toHaveBeenCalled()
     expect(mockDeleteUser).toHaveBeenCalledWith('user-1')
   })
 

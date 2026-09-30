@@ -2,10 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { supabaseAdmin, createTestUser } from '../helpers/supabase'
 
 describe('account deletion', () => {
-  it('deleting member + auth user cleans up both tables', async () => {
+  it('deleting only the auth user removes the member row (ON DELETE CASCADE)', async () => {
     const user = await createTestUser('delete-1@test.local', 'password123')
 
-    // Verify member exists
     const { data: before } = await supabaseAdmin
       .from('members')
       .select('id')
@@ -13,24 +12,37 @@ describe('account deletion', () => {
       .single()
     expect(before).not.toBeNull()
 
-    // Delete member first (FK constraint), then auth user
-    await supabaseAdmin.from('members').delete().eq('id', user.id)
     const { error } = await supabaseAdmin.auth.admin.deleteUser(user.id)
     expect(error).toBeNull()
 
-    // Verify member row is gone
     const { data: afterMember } = await supabaseAdmin
       .from('members')
       .select('id')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
     expect(afterMember).toBeNull()
+  })
+
+  it('also removes the member badges through the members cascade', async () => {
+    const user = await createTestUser('delete-badges@test.local', 'password123')
+    const { error: insertError } = await supabaseAdmin
+      .from('member_badges')
+      .insert({ member_id: user.id, badge_key: 'ludoteca_donor' })
+    expect(insertError).toBeNull()
+
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(user.id)
+    expect(error).toBeNull()
+
+    const { data: remaining } = await supabaseAdmin
+      .from('member_badges')
+      .select('member_id')
+      .eq('member_id', user.id)
+    expect(remaining).toEqual([])
   })
 
   it('auth.users entry is removed after deletion', async () => {
     const user = await createTestUser('delete-2@test.local', 'password123')
 
-    await supabaseAdmin.from('members').delete().eq('id', user.id)
     await supabaseAdmin.auth.admin.deleteUser(user.id)
 
     const { data } = await supabaseAdmin.auth.admin.getUserById(user.id)
