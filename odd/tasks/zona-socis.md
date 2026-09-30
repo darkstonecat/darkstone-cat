@@ -251,7 +251,15 @@ current data sheet off `/profile`.)
   - B1 done: f42cf94, 8dfd8b6, 216b455; verifier (high) → 1 major (member could backdate
     `membership_start_date`) + 3 minor, fixed in 081c0b2, 055cd9a. Spot check: integration 52/52.
   - B2 done (see B2.6). Decision: event images match BGG by name + year (public API has no bggId).
-  - B3.1/B3.2 done: 1adc2c4, d81e96a; assess high → verifier pending. B3.3 is a user action.
+  - B3.1/B3.2 done: 1adc2c4, d81e96a; assess high → verifier: 1 major (open redirect after
+    password login via dot segments, e.g. `/.//evil.com`) + minor (429 revealed membership,
+    magic link lost `redirect`/locale, focus lost). Fixed in 97484ef (validate after URL parsing,
+    neutral 429, `magic_redirect` cookie on `/auth`, focus to `#email`, scanner limitation
+    documented). Spot check: safe-redirect + magic-link tests 53/53. B3.3 is a user action.
+  - B4 done: 52181c2, 71b10e2, 22bc816 (writer). Orchestrator decision: the username check
+    shows the username only, never the Ludoya/BGG display name (public form, avoids exposing
+    third-party names). Local Supabase has `enable_confirmations = false`, so the resend E2E
+    stubs `/auth/v1/resend`. Assess high → verifier running.
 - Pending user actions: `LUDOYA_API_KEY` GitHub secret; B3.3 production Supabase checks.
 
 ## Notes
