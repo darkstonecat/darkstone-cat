@@ -1,14 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { revalidateTag, fetchMember, fetchPublic } = vi.hoisted(() => ({
+const { revalidateTag, fetchMember, fetchPublic, fetchBgg } = vi.hoisted(() => ({
   revalidateTag: vi.fn(),
   fetchMember: vi.fn(),
   fetchPublic: vi.fn(),
+  fetchBgg: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({ revalidateTag }));
 vi.mock("@/lib/member-sessions", () => ({ fetchMemberAreaSessions: fetchMember }));
 vi.mock("@/lib/ludoya", () => ({ fetchPublicSessions: fetchPublic }));
+
+vi.mock("@/lib/bgg", () => ({ BGG_CACHE_TAG: "bgg", fetchBggCollectionOrThrow: fetchBgg }));
 
 import { REFRESH_JOBS, runRefreshJobs } from "@/lib/cache-refresh";
 
@@ -48,5 +51,21 @@ describe("runRefreshJobs", () => {
     expect(job.tag).toBe("ludoya");
     expect(fetchMember).toHaveBeenCalledTimes(1);
     expect(fetchPublic).toHaveBeenCalledTimes(1);
+  });
+
+  it("registers the BGG job after Ludoya and warms the club collection", async () => {
+    expect(REFRESH_JOBS.map((j) => j.name)).toEqual(["ludoya", "bgg"]);
+    const job = REFRESH_JOBS.find((j) => j.name === "bgg")!;
+    await job.warm();
+
+    expect(job.tag).toBe("bgg");
+    expect(fetchBgg).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports the BGG job as failed when the collection warm-up throws", async () => {
+    fetchBgg.mockRejectedValueOnce(new Error("bgg down"));
+    const job = REFRESH_JOBS.find((j) => j.name === "bgg")!;
+
+    expect(await runRefreshJobs([job])).toEqual([{ name: "bgg", ok: false, error: "bgg down" }]);
   });
 });

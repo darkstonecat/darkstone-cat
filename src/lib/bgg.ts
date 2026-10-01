@@ -57,10 +57,22 @@ const parser = new XMLParser({
 // ---------------------------------------------------------------------------
 
 const BGG_BASE = "https://boardgamegeek.com/xmlapi2";
+
+/**
+ * Data-cache tag of the club collection requests (collection, expansions and
+ * their thing enrichment). Per-game lookups (search, `fetchBggThings`) stay
+ * untagged. Every call site of a tagged URL must pass the tag: the cache key
+ * ignores tags and an entry keeps those of the request that wrote it.
+ */
+export const BGG_CACHE_TAG = "bgg";
+const COLLECTION_TAGS = [BGG_CACHE_TAG];
 const MAX_RETRIES = 5;
 const BATCH_SIZE = 20;
 
-async function fetchBggXml(url: string): Promise<string> {
+async function fetchBggXml(
+  url: string,
+  options?: { tags?: string[] }
+): Promise<string> {
   const token = process.env.BGG_API_KEY;
   if (!token) throw new Error("BGG_API_KEY not set");
 
@@ -73,7 +85,10 @@ async function fetchBggXml(url: string): Promise<string> {
     const res = await fetch(url, {
       headers,
       signal: AbortSignal.timeout(30_000),
-      next: { revalidate: 86400 },
+      next: {
+        revalidate: 86400,
+        ...(options?.tags && { tags: options.tags }),
+      },
     });
 
     if (res.status === 200) return res.text();
@@ -249,7 +264,7 @@ async function fetchThingData(
     const url = `${BGG_BASE}/thing?id=${batch.join(",")}&stats=1`;
 
     try {
-      const xml = await fetchBggXml(url);
+      const xml = await fetchBggXml(url, { tags: COLLECTION_TAGS });
       const parsed = parser.parse(xml);
       const items = parsed?.items?.item;
       if (!items) continue;
@@ -501,7 +516,7 @@ export async function fetchBggCollectionCount(): Promise<number> {
   try {
     if (hasToken) {
       const url = `${BGG_BASE}/collection?username=${username}&own=1&subtype=boardgame&stats=1`;
-      const xml = await fetchBggXml(url);
+      const xml = await fetchBggXml(url, { tags: COLLECTION_TAGS });
       return parseCollectionItems(xml).length;
     } else {
       const xml = await readMockXml("collection.xml");
@@ -514,77 +529,86 @@ export async function fetchBggCollectionCount(): Promise<number> {
   }
 }
 
-export async function fetchBggCollection(): Promise<BggCollectionResult> {
+/**
+ * Loads the club collection and throws on any failure. Used by the scheduled
+ * cache refresh so a failed warm-up is reported; pages use
+ * `fetchBggCollection`, which turns the error into a result.
+ */
+export async function fetchBggCollectionOrThrow(): Promise<BggCollectionResult> {
   const hasToken = !!process.env.BGG_API_KEY;
   const username = process.env.BGG_USERNAME!;
 
+  let baseGames: BggGame[];
+  let expansionItems: BggGame[];
+
+  if (hasToken) {
+    // Production mode: two separate calls (API doesn't accept combined subtypes)
+    const baseUrl = `${BGG_BASE}/collection?username=${username}&own=1&subtype=boardgame&stats=1`;
+    const expUrl = `${BGG_BASE}/collection?username=${username}&own=1&subtype=boardgameexpansion&stats=1`;
+    const [baseXml, expXml] = await Promise.all([
+      fetchBggXml(baseUrl, { tags: COLLECTION_TAGS }),
+      fetchBggXml(expUrl, { tags: COLLECTION_TAGS }),
+    ]);
+
+    expansionItems = parseCollectionItems(expXml).map(rawToGame);
+
+    // BGG may return expansions in the base call with subtype="boardgame",
+    // so remove any overlap — the expansion call is the source of truth.
+    const expIds = new Set(expansionItems.map((g) => g.id));
+    baseGames = parseCollectionItems(baseXml)
+      .map(rawToGame)
+      .filter((g) => !expIds.has(g.id));
+
+    // Fetch thing data for all items (weight, minAge, expansion links)
+    const allIds = [...baseGames, ...expansionItems].map((g) => g.id);
+    const thingMap = await fetchThingData(allIds);
+    enrichWithThingData(baseGames, thingMap);
+    enrichWithThingData(expansionItems, thingMap);
+    linkExpansionsByThing(baseGames, expansionItems, thingMap);
+  } else {
+    // Mock mode: collection.xml + things.xml (enrichment data)
+    const [collectionXml, thingsXml] = await Promise.all([
+      readMockXml("collection.xml"),
+      readMockXml("things.xml"),
+    ]);
+
+    const allGames = parseCollectionItems(collectionXml).map(rawToGame);
+    const thingMap = parseMockThings(thingsXml);
+    enrichWithThingData(allGames, thingMap);
+
+    baseGames = allGames.filter((g) => g.subtype === "boardgame");
+    expansionItems = allGames.filter(
+      (g) => g.subtype === "boardgameexpansion"
+    );
+
+    linkExpansionsByThing(baseGames, expansionItems, thingMap);
+  }
+
+  // Combine base games + expansions, deduplicate
+  const allItems = [...baseGames, ...expansionItems];
+  const seen = new Set<string>();
+  const deduped = allItems.filter((g) => {
+    if (seen.has(g.id)) return false;
+    seen.add(g.id);
+    return true;
+  });
+
+  // Sort alphabetically by name
+  deduped.sort((a, b) => a.name.localeCompare(b.name));
+
+  const baseCount = deduped.filter((g) => g.subtype === "boardgame").length;
+
+  return {
+    games: deduped,
+    baseCount,
+    totalWithExpansions: deduped.length,
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
+export async function fetchBggCollection(): Promise<BggCollectionResult> {
   try {
-    let baseGames: BggGame[];
-    let expansionItems: BggGame[];
-
-    if (hasToken) {
-      // Production mode: two separate calls (API doesn't accept combined subtypes)
-      const baseUrl = `${BGG_BASE}/collection?username=${username}&own=1&subtype=boardgame&stats=1`;
-      const expUrl = `${BGG_BASE}/collection?username=${username}&own=1&subtype=boardgameexpansion&stats=1`;
-      const [baseXml, expXml] = await Promise.all([
-        fetchBggXml(baseUrl),
-        fetchBggXml(expUrl),
-      ]);
-
-      expansionItems = parseCollectionItems(expXml).map(rawToGame);
-
-      // BGG may return expansions in the base call with subtype="boardgame",
-      // so remove any overlap — the expansion call is the source of truth.
-      const expIds = new Set(expansionItems.map((g) => g.id));
-      baseGames = parseCollectionItems(baseXml)
-        .map(rawToGame)
-        .filter((g) => !expIds.has(g.id));
-
-      // Fetch thing data for all items (weight, minAge, expansion links)
-      const allIds = [...baseGames, ...expansionItems].map((g) => g.id);
-      const thingMap = await fetchThingData(allIds);
-      enrichWithThingData(baseGames, thingMap);
-      enrichWithThingData(expansionItems, thingMap);
-      linkExpansionsByThing(baseGames, expansionItems, thingMap);
-    } else {
-      // Mock mode: collection.xml + things.xml (enrichment data)
-      const [collectionXml, thingsXml] = await Promise.all([
-        readMockXml("collection.xml"),
-        readMockXml("things.xml"),
-      ]);
-
-      const allGames = parseCollectionItems(collectionXml).map(rawToGame);
-      const thingMap = parseMockThings(thingsXml);
-      enrichWithThingData(allGames, thingMap);
-
-      baseGames = allGames.filter((g) => g.subtype === "boardgame");
-      expansionItems = allGames.filter(
-        (g) => g.subtype === "boardgameexpansion"
-      );
-
-      linkExpansionsByThing(baseGames, expansionItems, thingMap);
-    }
-
-    // Combine base games + expansions, deduplicate
-    const allItems = [...baseGames, ...expansionItems];
-    const seen = new Set<string>();
-    const deduped = allItems.filter((g) => {
-      if (seen.has(g.id)) return false;
-      seen.add(g.id);
-      return true;
-    });
-
-    // Sort alphabetically by name
-    deduped.sort((a, b) => a.name.localeCompare(b.name));
-
-    const baseCount = deduped.filter((g) => g.subtype === "boardgame").length;
-
-    return {
-      games: deduped,
-      baseCount,
-      totalWithExpansions: deduped.length,
-      fetchedAt: new Date().toISOString(),
-    };
+    return await fetchBggCollectionOrThrow();
   } catch (err) {
     console.error("Failed to fetch BGG collection:", err);
 

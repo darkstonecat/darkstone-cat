@@ -1,7 +1,8 @@
 name: Cache refresh
 
-# Keeps the Ludoya data on the site (member area and /events) at most about a
-# day old even when nobody visits: calls /api/cron/refresh, which marks the
+# Keeps the Ludoya data on the site (member area and /events) and the BGG club
+# collection (ludoteca, /about count) at most about a day old even when nobody
+# visits: calls /api/cron/refresh, which marks the
 # tagged fetch caches stale and re-reads them (see src/lib/cache-refresh.ts).
 # Production only (previews sit behind Vercel Authentication). Needs the
 # CRON_SECRET repository secret, with the same value as CRON_SECRET in Vercel

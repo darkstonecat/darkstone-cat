@@ -6,12 +6,13 @@
 // `/api/cron/refresh` marks each job's tag stale (`"max"`: stale data keeps
 // being served while it refreshes, so an outage never empties the cache) and
 // re-reads the same requests the pages use. Add a job here to cover another
-// cache (e.g. BGG once its fetches are tagged).
+// cache.
 
 import "server-only";
 import { revalidateTag } from "next/cache";
 import { LUDOYA_CACHE_TAG } from "./ludoya/config";
 import { fetchPublicSessions } from "./ludoya";
+import { BGG_CACHE_TAG, fetchBggCollectionOrThrow } from "./bgg";
 import { fetchMemberAreaSessions } from "./member-sessions";
 
 export interface RefreshJob {
@@ -38,6 +39,13 @@ export const REFRESH_JOBS: RefreshJob[] = [
     tag: LUDOYA_CACHE_TAG,
     // Member area (60 s, with past events) and the public /events pages (24 h).
     warm: () => Promise.all([fetchMemberAreaSessions(), fetchPublicSessions()]),
+  },
+  {
+    name: "bgg",
+    tag: BGG_CACHE_TAG,
+    // Club collection page (24 h). The throwing variant makes a failed BGG
+    // call fail the job; in mock mode it just re-reads the local fixtures.
+    warm: () => fetchBggCollectionOrThrow(),
   },
 ];
 
