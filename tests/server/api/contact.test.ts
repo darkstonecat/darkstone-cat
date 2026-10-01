@@ -255,8 +255,15 @@ describe('POST /api/contact', () => {
       expect(warn).toHaveBeenCalledWith('[contact] dropped: too_fast')
     })
 
-    it.each([[undefined], ['5000'], [Number.NaN], [-1]])(
-      'drops a missing or invalid elapsedMs (%s)',
+    it('sends when elapsedMs is missing (tab opened before the check shipped)', async () => {
+      const { elapsedMs: _omitted, ...withoutElapsed } = validBody
+      const res = await POST(makeRequest(withoutElapsed))
+      expect(res.status).toBe(200)
+      expect(mockSend).toHaveBeenCalledTimes(1)
+    })
+
+    it.each([['5000'], [Number.NaN], [-1]])(
+      'drops an invalid elapsedMs (%s)',
       async (elapsedMs) => {
         vi.spyOn(console, 'warn').mockImplementation(() => {})
         const res = await POST(makeRequest({ ...validBody, elapsedMs }))

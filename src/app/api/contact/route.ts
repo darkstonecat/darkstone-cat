@@ -129,13 +129,16 @@ export async function POST(request: Request) {
 
   // Bot traps: a filled honeypot or a submit faster than a person can type gets the
   // normal success answer, so scripts get no signal to adapt to. Nothing is sent.
+  // A missing elapsedMs is let through: a tab opened before this check shipped
+  // would otherwise lose a real message silently. Rate limits still apply.
   const elapsedMs = body.elapsedMs;
   const honeypotFilled =
     typeof body.website === "string" && body.website.trim().length > 0;
   const tooFast =
-    typeof elapsedMs !== "number" ||
-    !Number.isFinite(elapsedMs) ||
-    elapsedMs < MIN_FILL_MS;
+    elapsedMs !== undefined &&
+    (typeof elapsedMs !== "number" ||
+      !Number.isFinite(elapsedMs) ||
+      elapsedMs < MIN_FILL_MS);
   if (honeypotFilled || tooFast) {
     console.warn(`[contact] dropped: ${honeypotFilled ? "honeypot" : "too_fast"}`);
     return succeed();
