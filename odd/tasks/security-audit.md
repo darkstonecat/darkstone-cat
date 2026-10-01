@@ -73,7 +73,7 @@ No Critical or High findings. `npm audit --omit=dev`: 0 vulnerabilities.
 | D-7 | Encryption key/format validation not strict | Low | Fix (T4) |
 | D-8 | Sensitive pages have no explicit `Cache-Control` | Info (verify) | Verify on a production build (T4) |
 | D-9 | `/verify` shows the member number | Info | Accept (by design) |
-| D-10 | Production schema not verifiable from the repo | Info | Ops: user runs the policy query |
+| D-10 | Production schema not verifiable from the repo | Info | Verified: production policies identical to the migrations |
 
 ## Tasks
 
@@ -96,7 +96,7 @@ Order matters: apply the migrations BEFORE pushing or deploying `develop-users`.
 
 1. [x] **Apply to the production Supabase project** (done 2026-10-01 by the user with `supabase db push` via the session pooler; anonymous PostgREST probes then returned 42501 for `generate_member_number`, `is_email_confirmed`, `unconfirmed_user_id`, `rate_limit_hit` and the `rate_limit_hits` table) (`httvpxakxaycqbagybym`), in order: `20261001100000_shared_rate_limiter.sql`, `20261001110000_member_data_hardening.sql`, `20261001120000_is_email_confirmed.sql`, `20261001130000_unconfirmed_user_id.sql`. Then test sign-up (member number assigned), magic link and the contact form on the preview.
 2. [x] **Supabase dashboard, Auth** (done 2026-10-01 by the user: min length 8 and Secure password change enabled; templates already correct: Confirm signup `/auth/confirm?...&type=email`, Reset password `/auth/callback?...&type=recovery`, both verified against the routes. Left off on purpose: "Require current password when updating" (the only password change is the recovery flow, where the user does not know it), "Password requirements" (the client does not enforce character classes; length is enough), leaked-password check (Pro plan)): minimum password length 8; enable "Secure password change"; check that the Confirm signup template sends `type=email` or `type=signup` (and links to `/auth/confirm`) and Reset password sends `type=recovery` (links to `/auth/callback`), otherwise A-10's whitelist rejects them; Site URL `https://www.darkstone.cat` and redirect allow-list limited to the production `/auth/*` URLs; optionally lower the email OTP/magic-link expiry from 3600 s to 900-1800 s.
-3. **Supabase SQL editor (D-10)**: run `select tablename, policyname, cmd, qual, with_check from pg_policies where schemaname = 'public';` and compare with the migrations.
+3. [x] **Supabase SQL editor (D-10)** (done 2026-10-01: production `pg_policies` and RLS flags identical to local from the repo migrations; 6 policies, RLS on `members`, `member_badges`, `rate_limit_hits`. Note: `admins_update_all` lets an admin change any column incl. `role`, by design; keep admin accounts few): run `select tablename, policyname, cmd, qual, with_check from pg_policies where schemaname = 'public';` and compare with the migrations.
 4. **Vercel Firewall (optional)**: a rate-limit rule on `POST /api/contact` (e.g. 10/min per IP) as a cheap extra layer.
 5. **Future option**: CAPTCHA (Cloudflare Turnstile) on sign-up/login/contact if abuse appears; needs code changes and a privacy note.
 6. Never set `CONTACT_ALLOW_LOCALHOST` in Vercel.
@@ -119,3 +119,4 @@ Order matters: apply the migrations BEFORE pushing or deploying `develop-users`.
 - 2026-10-01: T6 closed. Whole-branch checks after all commits: `npm run lint` clean, `npm run test:unit` 680 passed, `npm run build` OK (integration 105 passed and `e2e/auth` 29 passed in T5b). Parent fix 43ebbb0: a missing `elapsedMs` is accepted (a tab opened before the deploy must not lose its message silently).
 - 2026-10-01: the 4 migrations applied to production Supabase `httvpxakxaycqbagybym`; anonymous grants verified (all 42501). Pending: sign-up, magic link and contact form smoke test on the preview after push; dashboard Auth settings; D-10 policy query.
 - 2026-10-01: Supabase dashboard Auth settings done by the user (see ops item 2). CAPTCHA/BotID: user decision to keep the current invisible layers (honeypot, fill time, shared rate limit) and revisit only if spam appears.
+- 2026-10-01: D-10 closed, production policies match local exactly. Remaining for the user: remove `SUPABASE_DB_PASSWORD` from `.env.local` (rotate it), push `develop-users`, smoke test sign-up / magic link / login on the preview.
