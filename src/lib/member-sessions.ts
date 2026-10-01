@@ -27,7 +27,7 @@ import type { LudoyaFetchError, LudoyaSession, LudoyaSessionPlay } from "./ludoy
  * event that already started (and is still running) from being lost;
  * `sessionsInNextDays` drops whatever already ended.
  */
-const fetchAll = () =>
+export const fetchMemberAreaSessions = () =>
   fetchSessions({
     revalidate: ludoyaConfig.memberAreaRevalidateSeconds,
     includePast: true,
@@ -110,7 +110,7 @@ async function withCovers(sessions: LudoyaSession[]): Promise<MemberSession[]> {
  */
 export async function fetchMemberWeekSessions(now: Date = new Date()): Promise<MemberSessionsResult> {
   try {
-    const sessions = await fetchAll();
+    const sessions = await fetchMemberAreaSessions();
     return { sessions: await withCovers(sessionsInNextDays(sessions, now)) };
   } catch (error) {
     console.error(`[Ludoya] Failed to fetch member sessions: ${describeError(error)}`);
@@ -125,7 +125,7 @@ export async function fetchMemberWeekSessions(now: Date = new Date()): Promise<M
  */
 export async function fetchMonthEvents(year: number, month: number): Promise<MonthEventsResult> {
   try {
-    const sessions = await fetchAll();
+    const sessions = await fetchMemberAreaSessions();
     return { events: sessionsInMonth(sessions, year, month) };
   } catch (error) {
     console.error(`[Ludoya] Failed to fetch month events: ${describeError(error)}`);

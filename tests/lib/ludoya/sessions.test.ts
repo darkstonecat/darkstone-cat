@@ -98,7 +98,7 @@ describe("fetchSessions", () => {
 
     const eventCalls = fetchMock.mock.calls.filter(([u]) => String(u).includes("/events"));
     expect(String(eventCalls[0][0])).toBe("https://api.ludoya.com/public/v1/events?includeSubEvents=true");
-    expect((eventCalls[0][1] as { next?: unknown }).next).toEqual({ revalidate: 60 });
+    expect((eventCalls[0][1] as { next?: unknown }).next).toEqual({ revalidate: 60, tags: ["ludoya"] });
     expect(String(eventCalls[1][0])).toContain("pastLimit=200");
   });
 

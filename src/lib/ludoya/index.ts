@@ -55,6 +55,9 @@ function toPublicEvent(session: LudoyaSession): LudoyaEvent {
   };
 }
 
+/** The `/events` request (long cache, no past); the scheduled refresh warms this exact call. */
+export const fetchPublicSessions = () => fetchSessions({ revalidate: ludoyaConfig.eventsRevalidateSeconds });
+
 /**
  * Upcoming public events (regular sessions and special events) for `/events`
  * and the event images. Keeps the long cache: those pages do not show seat
@@ -62,7 +65,7 @@ function toPublicEvent(session: LudoyaSession): LudoyaEvent {
  */
 export async function fetchUpcomingEvents(): Promise<LudoyaEventsResult> {
   try {
-    const sessions = await fetchSessions({ revalidate: ludoyaConfig.eventsRevalidateSeconds });
+    const sessions = await fetchPublicSessions();
     const events = sessions.filter((s) => s.visibility === "PUBLIC").map(toPublicEvent);
 
     return {

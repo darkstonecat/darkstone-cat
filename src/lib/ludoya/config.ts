@@ -53,6 +53,12 @@ export const ludoyaConfig = {
 export const MEMBER_AREA_LIMITS = { timeoutMs: 10_000, attempts: 2, budgetMs: 12_000 } as const;
 export const USERNAME_CHECK_LIMITS = { timeoutMs: 3_000, attempts: 2, budgetMs: 5_000 } as const;
 
+/**
+ * Data-cache tag on every Ludoya events/locations fetch. The scheduled refresh
+ * (`@/lib/cache-refresh`) marks it stale with `revalidateTag`.
+ */
+export const LUDOYA_CACHE_TAG = "ludoya";
+
 /** API version prefix, shared by every endpoint. */
 export const LUDOYA_API_PREFIX = "/public/v1";
 

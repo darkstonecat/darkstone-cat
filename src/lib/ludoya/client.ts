@@ -89,6 +89,8 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export interface LudoyaGetOptions {
   /** Next.js data-cache lifetime in seconds for this request. */
   revalidate?: number;
+  /** Next.js data-cache tags for this request, for `revalidateTag`. */
+  tags?: string[];
   /** Per-attempt timeout. Defaults to `ludoyaConfig.requestTimeoutMs`. */
   timeoutMs?: number;
   /** Maximum attempts, first one included. Defaults to `ludoyaConfig.retryAttempts`. */
@@ -116,6 +118,7 @@ export async function ludoyaGet<T = unknown>(
   endpointPath: string,
   {
     revalidate = ludoyaConfig.eventsRevalidateSeconds,
+    tags,
     timeoutMs = ludoyaConfig.requestTimeoutMs,
     attempts = ludoyaConfig.retryAttempts,
     budgetMs,
@@ -139,7 +142,7 @@ export async function ludoyaGet<T = unknown>(
       const res = await fetch(url, {
         headers: { accept: "application/json", "X-Api-Key": apiKey },
         signal: AbortSignal.timeout(Math.max(1, Math.min(timeoutMs, remaining()))),
-        next: { revalidate },
+        next: { revalidate, ...(tags && { tags }) },
       });
       if (res.ok) {
         try {

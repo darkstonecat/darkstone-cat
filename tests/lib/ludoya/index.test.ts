@@ -67,7 +67,7 @@ describe("fetchUpcomingEvents", () => {
 
     expect(specialEvents.map((e) => e.id)).toEqual(["open"]);
     const eventsCall = fetchMock.mock.calls.find(([u]) => String(u).includes("/events"))!;
-    expect((eventsCall[1] as { next?: unknown }).next).toEqual({ revalidate: 86_400 });
+    expect((eventsCall[1] as { next?: unknown }).next).toEqual({ revalidate: 86_400, tags: ["ludoya"] });
   });
 
   it("keeps ONLY_GROUP plays out of the public projection and its count", async () => {

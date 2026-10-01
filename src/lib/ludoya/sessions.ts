@@ -7,7 +7,7 @@
 
 import "server-only";
 import { describeError, ludoyaGet, type LudoyaGetOptions } from "./client";
-import { ludoyaConfig, ludoyaEndpoints } from "./config";
+import { LUDOYA_CACHE_TAG, ludoyaConfig, ludoyaEndpoints } from "./config";
 import { parseLocationsResponse, parseSessionsResponse, withUsualVenue } from "./normalize";
 import type { LudoyaLocation, LudoyaSession } from "./types";
 
@@ -37,6 +37,7 @@ async function fetchLocations(limits: FetchSessionsOptions["limits"]): Promise<L
   try {
     const raw = await ludoyaGet(ludoyaEndpoints.locations(), {
       revalidate: ludoyaConfig.locationsRevalidateSeconds,
+      tags: [LUDOYA_CACHE_TAG],
       ...limits,
     });
     return parseLocationsResponse(raw);
@@ -52,7 +53,7 @@ export async function fetchSessions({ revalidate, includePast = false, pastLimit
   const [raw, locations] = await Promise.all([
     ludoyaGet(
       ludoyaEndpoints.events({ includeSubEvents: true, pastLimit: includePast ? pastLimit : undefined }),
-      { revalidate, ...limits }
+      { revalidate, tags: [LUDOYA_CACHE_TAG], ...limits }
     ),
     fetchLocations(limits),
   ]);

@@ -53,6 +53,15 @@ describe("ludoyaGet", () => {
     expect((init as { next?: { revalidate: number } }).next).toEqual({ revalidate: 60 });
   });
 
+  it("forwards cache tags to fetch's next.tags", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({ locations: [] }));
+
+    await ludoyaGet("/locations", { revalidate: 60, tags: ["ludoya"] });
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect((init as { next?: unknown }).next).toEqual({ revalidate: 60, tags: ["ludoya"] });
+  });
+
   it("fails without a network call when the API key is missing", async () => {
     vi.stubEnv("LUDOYA_API_KEY", "");
 
