@@ -48,6 +48,15 @@ test.describe('Profile edit', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Hola, E2E-Updated' })).toBeVisible()
   })
 
+  // Rejected by the server before any write, so the shared member is safe to use.
+  test('shows a translated error for an invalid postal code', async ({ memberPage: page }) => {
+    await page.goto(PAGES.profileEdit)
+    await page.locator('#postal_code').fill('8221')
+    await page.locator('button[type="submit"]').click()
+    await expect(page.getByText('Codi postal no vàlid. Ha de tenir 5 xifres.')).toBeVisible()
+    await expect(page).toHaveURL(/\/profile\/edit/)
+  })
+
   test('shows section headers', async ({ memberPage: page }) => {
     await page.goto(PAGES.profileEdit)
     await expect(page.getByText(TEXT.profile_section_personal)).toBeVisible()

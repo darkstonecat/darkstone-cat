@@ -4,12 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getProfileData } from "@/lib/supabase/auth";
 import { encrypt, decrypt } from "@/lib/encryption";
-
-// ---------------------------------------------------------------------------
-// DNI/NIE validation (Spanish format)
-// ---------------------------------------------------------------------------
-
-const DNI_NIE_REGEX = /^[0-9XYZ]\d{7}[A-Z]$/i;
+import { normalizeUsername } from "@/lib/profile/username-pattern";
+import { isValidDniNie, isValidPhone, isValidPostalCode } from "@/lib/validation/member-fields";
 
 // ---------------------------------------------------------------------------
 // updateMemberProfile
@@ -26,46 +22,82 @@ type ProfileUpdateData = {
   newsletter_accepted: boolean;
 };
 
+/** Stable codes the form maps to translated messages; never a database message. */
+export type ProfileUpdateError =
+  | "unauthenticated"
+  | "invalid"
+  | "invalid_name"
+  | "invalid_phone"
+  | "invalid_dni"
+  | "invalid_postal_code"
+  | "invalid_username"
+  | "failed";
+
+const MAX_NAME_LENGTH = 100;
+
+/** Optional text field: undefined/null/blank becomes "", anything that is not a string is rejected. */
+function optionalText(value: unknown): string | null {
+  if (value === undefined || value === null) return "";
+  return typeof value === "string" ? value.trim() : null;
+}
+
 export async function updateMemberProfile(
   data: ProfileUpdateData
-): Promise<{ error: string | null }> {
+): Promise<{ error: ProfileUpdateError | null }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Not authenticated" };
+    return { error: "unauthenticated" };
   }
 
-  if (!data.first_name.trim() || !data.last_name.trim()) {
-    return { error: "First name and last name are required." };
+  // Server actions receive arbitrary client input: never assume the TypeScript shape.
+  if (!data || typeof data !== "object" || typeof data.newsletter_accepted !== "boolean") {
+    return { error: "invalid" };
   }
 
-  if (data.dni?.trim() && !DNI_NIE_REGEX.test(data.dni.trim())) {
-    return { error: "Invalid DNI/NIE format." };
+  const firstName = optionalText(data.first_name);
+  const lastName = optionalText(data.last_name);
+  if (
+    !firstName ||
+    !lastName ||
+    firstName.length > MAX_NAME_LENGTH ||
+    lastName.length > MAX_NAME_LENGTH
+  ) {
+    return { error: "invalid_name" };
+  }
+
+  const phone = optionalText(data.phone);
+  if (phone === null || (phone && !isValidPhone(phone))) return { error: "invalid_phone" };
+
+  const dni = optionalText(data.dni);
+  if (dni === null || (dni && !isValidDniNie(dni))) return { error: "invalid_dni" };
+
+  const postalCode = optionalText(data.postal_code);
+  if (postalCode === null || (postalCode && !isValidPostalCode(postalCode))) {
+    return { error: "invalid_postal_code" };
+  }
+
+  const ludoyaRaw = optionalText(data.ludoya_username);
+  const bggRaw = optionalText(data.bgg_username);
+  const ludoya = ludoyaRaw ? normalizeUsername(ludoyaRaw) : null;
+  const bgg = bggRaw ? normalizeUsername(bggRaw) : null;
+  if (ludoyaRaw === null || bggRaw === null || (ludoyaRaw && !ludoya) || (bggRaw && !bgg)) {
+    return { error: "invalid_username" };
   }
 
   const updatePayload: Record<string, unknown> = {
-    first_name: data.first_name.trim(),
-    last_name: data.last_name.trim(),
-    postal_code: data.postal_code?.trim() || null,
-    ludoya_username: data.ludoya_username?.trim() || null,
-    bgg_username: data.bgg_username?.trim() || null,
+    first_name: firstName,
+    last_name: lastName,
+    postal_code: postalCode || null,
+    ludoya_username: ludoya,
+    bgg_username: bgg,
     newsletter_accepted: data.newsletter_accepted,
+    phone_encrypted: phone ? encrypt(phone) : null,
+    dni_nie_encrypted: dni ? encrypt(dni) : null,
   };
-
-  if (data.phone?.trim()) {
-    updatePayload.phone_encrypted = encrypt(data.phone.trim());
-  } else {
-    updatePayload.phone_encrypted = null;
-  }
-
-  if (data.dni?.trim()) {
-    updatePayload.dni_nie_encrypted = encrypt(data.dni.trim());
-  } else {
-    updatePayload.dni_nie_encrypted = null;
-  }
 
   const { error } = await supabase
     .from("members")
@@ -73,14 +105,16 @@ export async function updateMemberProfile(
     .eq("id", user.id);
 
   if (error) {
-    return { error: error.message };
+    // Postgres/PostgREST code only: the message can echo column values (personal data).
+    console.error("[profile-update] members update failed code=%s", error.code ?? "unknown");
+    return { error: "failed" };
   }
 
   // Sync name to auth.users.user_metadata so NavBar shows updated name
   await supabase.auth.updateUser({
     data: {
-      first_name: data.first_name.trim(),
-      last_name: data.last_name.trim(),
+      first_name: firstName,
+      last_name: lastName,
     },
   });
 
@@ -169,7 +203,8 @@ export async function deleteAccount(): Promise<{ error: string | null }> {
   const { error } = await adminClient.auth.admin.deleteUser(user.id);
 
   if (error) {
-    return { error: error.message };
+    console.error("[delete-account] auth.admin.deleteUser failed status=%s", error.status ?? "unknown");
+    return { error: "failed" };
   }
 
   return { error: null };

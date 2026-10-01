@@ -127,6 +127,32 @@ describe('GET /api/admin/members/export', () => {
     expect(csv).toContain('"Has ""Quotes"""')
   })
 
+  it('neutralises formula injection in member-controlled cells', async () => {
+    setupMock({
+      user: { id: 'u1' },
+      member: { role: 'admin' },
+      rpcData: [
+        { ...fakeMember, first_name: '=HYPERLINK("http://evil.test")', last_name: '@SUM(A1)' },
+      ],
+    })
+    const csv = await (await GET()).text()
+    expect(csv).toContain(`"'=HYPERLINK(""http://evil.test"")"`)
+    expect(csv).toContain("'@SUM(A1)")
+  })
+
+  it('logs one audit line with the user id and row count only', async () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
+    setupMock({
+      user: { id: 'u1' },
+      member: { role: 'admin' },
+      rpcData: [fakeMember, fakeMember],
+    })
+    await GET()
+    expect(info).toHaveBeenCalledTimes(1)
+    expect(info).toHaveBeenCalledWith('[admin-export] user=%s rows=%d', 'u1', 2)
+    info.mockRestore()
+  })
+
   it('handles decryption errors gracefully (empty cells)', async () => {
     vi.mocked(decrypt).mockImplementation(() => {
       throw new Error('decrypt failed')

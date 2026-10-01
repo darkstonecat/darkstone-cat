@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { motion, AnimatePresence } from "motion/react";
-import { updateMemberProfile } from "@/lib/profile/actions";
+import { updateMemberProfile, type ProfileUpdateError } from "@/lib/profile/actions";
 
 type ProfileEditFormProps = {
   email: string;
@@ -21,6 +21,14 @@ type ProfileEditFormProps = {
 };
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
+
+const EDIT_ERROR_KEYS: Partial<Record<ProfileUpdateError, string>> = {
+  invalid_name: "edit_name_error",
+  invalid_phone: "edit_phone_error",
+  invalid_dni: "edit_dni_error",
+  invalid_postal_code: "edit_postal_code_error",
+  invalid_username: "edit_username_error",
+};
 
 const inputClass =
   "w-full rounded-xl border border-stone-custom/15 bg-brand-white px-4 py-3 text-stone-custom placeholder:text-stone-custom/50 outline-none transition-colors focus:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange focus-visible:outline-offset-2 disabled:opacity-50";
@@ -68,11 +76,7 @@ export default function ProfileEditForm({
 
     if (error) {
       setStatus("error");
-      if (error.includes("DNI") || error.includes("NIE")) {
-        setErrorMessage(t("edit_dni_error"));
-      } else {
-        setErrorMessage(t("edit_error"));
-      }
+      setErrorMessage(t(EDIT_ERROR_KEYS[error] ?? "edit_error"));
       return;
     }
 
@@ -129,6 +133,7 @@ export default function ProfileEditForm({
                   type="text"
                   id="first_name"
                   name="first_name"
+                  maxLength={100}
                   defaultValue={firstName}
                   required
                   disabled={isSubmitting}
@@ -146,6 +151,7 @@ export default function ProfileEditForm({
                   type="text"
                   id="last_name"
                   name="last_name"
+                  maxLength={100}
                   defaultValue={lastName}
                   required
                   disabled={isSubmitting}

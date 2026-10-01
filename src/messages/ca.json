@@ -749,6 +749,10 @@
     "edit_success": "Perfil actualitzat correctament.",
     "edit_error": "No s'ha pogut actualitzar el perfil.",
     "edit_dni_error": "Format de DNI/NIE no vàlid.",
+    "edit_name_error": "Introdueix el nom i els cognoms (màxim 100 caràcters cadascun).",
+    "edit_phone_error": "Telèfon no vàlid. Fes servir només xifres, espais i el signe + (6 a 20 caràcters).",
+    "edit_postal_code_error": "Codi postal no vàlid. Ha de tenir 5 xifres.",
+    "edit_username_error": "Nom d'usuari no vàlid. Fes servir només lletres, números, espais i els signes _ . -",
 
     "card": {
       "eyebrow": "Zona de socis",

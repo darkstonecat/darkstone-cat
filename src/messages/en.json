@@ -749,6 +749,10 @@
     "edit_success": "Profile updated successfully.",
     "edit_error": "Could not update profile.",
     "edit_dni_error": "Invalid DNI/NIE format.",
+    "edit_name_error": "Enter your first and last name (100 characters at most each).",
+    "edit_phone_error": "Invalid phone number. Use only digits, spaces and the + sign (6 to 20 characters).",
+    "edit_postal_code_error": "Invalid postal code. It must have 5 digits.",
+    "edit_username_error": "Invalid username. Use only letters, numbers, spaces and the signs _ . -",
 
     "card": {
       "eyebrow": "Members' area",

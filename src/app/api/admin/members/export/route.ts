@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { decrypt } from "@/lib/encryption";
+import { escapeCsv } from "@/lib/csv";
 import type { AdminMember } from "@/lib/supabase/auth";
 
 export async function GET() {
@@ -85,12 +86,8 @@ export async function GET() {
     ];
   });
 
-  function escapeCsv(value: string): string {
-    if (value.includes(",") || value.includes('"') || value.includes("\n")) {
-      return `"${value.replace(/"/g, '""')}"`;
-    }
-    return value;
-  }
+  // Audit trail: who exported and how many rows (user id only, no personal data).
+  console.info("[admin-export] user=%s rows=%d", user.id, rows.length);
 
   const csvLines = [
     headers.map(escapeCsv).join(","),
