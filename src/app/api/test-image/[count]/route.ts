@@ -110,6 +110,11 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ count: string }> }
 ) {
+  // Layout-check helper for development only.
+  if (process.env.NODE_ENV === "production") {
+    return new NextResponse(null, { status: 404, headers: { "Cache-Control": "no-store" } });
+  }
+
   const { count: countStr } = await params;
   const count = parseInt(countStr, 10);
 

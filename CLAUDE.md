@@ -117,8 +117,8 @@ Next.js App Router with `next-intl` v4 for internationalization:
 
 API routes:
 - `src/app/api/contact/route.ts` — POST endpoint that sends email through Google Workspace SMTP (nodemailer, `smtp.gmail.com:465`, connection/greeting/socket timeouts set on the transport) from `no-reply@darkstone.cat` to `hola@darkstone.cat`, with `replyTo` set to the sender. **CSRF guard: the `Origin` header must be in `ALLOWED_ORIGINS`** (`darkstone.cat`, `www.darkstone.cat`), otherwise it returns `403 {"error":"forbidden"}` before doing anything. `http://localhost:3000` is accepted only when `NODE_ENV !== "production"` or `CONTACT_ALLOW_LOCALHOST=1` (for testing a local production build; never set it in Vercel). So the form **never works on `*.vercel.app` previews**; test it against a local build on port 3000 with that flag. **Update that list if the production domain changes**, or the form starts failing silently. Order of checks: origin, body size (`Content-Length` or text over 32 KB → 413), JSON object (otherwise 400 `invalid_request`), bot traps, field validation (name 100 / email 254 / subject 150 / message 5000 chars after trim; limits are mirrored as `maxLength` in `ContactForm.tsx`; errors `<field>_required`, `<field>_too_long`, `email_invalid`), then the shared rate limits (per IP 5/hour, only consumed by valid requests, plus the whole-site bucket `contact:global` at 50/day; both → 429 `rate_limited`; IP from `src/lib/client-ip.ts`: `x-real-ip`, then first `x-forwarded-for` hop). Bot traps: the form has a hidden honeypot field `website` and sends `elapsedMs` since it was shown; a filled honeypot or an `elapsedMs` under 3000 or not a number (a missing one is let through, so a tab opened before a deploy still works) answers the normal `200 {"success":true}` WITHOUT sending mail and logs `[contact] dropped: honeypot|too_fast`. SMTP failures log only `{ code, responseCode, command }`.
-- `src/app/api/events/[eventId]/image/route.ts` — GET 1080×1080 PNG for an event (Satori via `next/og`, `src/lib/event-image/`)
-- `src/app/api/test-image/[count]/route.ts` — GET test image with 1–8 hardcoded games, for layout checks
+- `src/app/api/events/[eventId]/image/route.ts` — GET 1080×1080 PNG for an event (Satori via `next/og`, `src/lib/event-image/`). **Admin only** (401 without a session, 403 for a non-admin, `no-store`): its only caller is the admin tool `/events/images`
+- `src/app/api/test-image/[count]/route.ts` — GET test image with 1–8 hardcoded games, for layout checks (development only: 404 when `NODE_ENV === "production"`)
 - `src/app/api/members/card/route.ts` — GET endpoint for the member card PNG (auth required; 1011x639 landscape face with a real QR of `https://www.darkstone.cat/verify/<card_token>`, rendered by `src/lib/member-card/composer.tsx`). `?preview=1` for inline display, without for download; `?locale=ca|es|en` localizes the PNG labels (unknown values fall back to Catalan).
 - `src/app/api/profile/calendar/route.ts` — GET `?month=YYYY-MM&locale=` returns one pre-formatted calendar month for La meva zona (members only, `no-store`; month range 3 back / 6 forward, otherwise 400). The client `MemberCalendar` calls it to switch months without re-rendering the page; the Ludoya request behind it is the shared 60 s fetch.
 - `src/app/api/cron/refresh/route.ts` — GET scheduled cache refresh (`Authorization: Bearer $CRON_SECRET`, constant-time compare; 500 `not_configured` without the secret, 401 otherwise, 502 if a job failed, `no-store`). Runs the jobs in `src/lib/cache-refresh.ts` (per job: `revalidateTag(tag, "max")`, then the warm-up). Called by `.github/workflows/cache-refresh.yml`
@@ -265,7 +265,7 @@ When adding a new page, update **all** of the following:
 
 ### Security Headers & Build Config (next.config.ts)
 
-HSTS, CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy (camera/microphone/geolocation disabled). Remote image pattern: `cf.geekdo-images.com` (BGG images).
+HSTS, CSP (`'unsafe-eval'` in `script-src` only outside production, verified on a production build; `'unsafe-inline'` stays until a nonce CSP exists), X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy (camera/microphone/geolocation disabled). Remote image pattern: `cf.geekdo-images.com` (BGG images).
 
 - `experimental.optimizePackageImports`: `react-icons` — when adding new icon libraries, add them here for proper tree-shaking.
 
@@ -312,7 +312,7 @@ Migrations: new `CHECK` constraints are added `NOT VALID` (length-only) so legac
 | `BGG_USERNAME` | BoardGameGeek username for ludoteca collection |
 | `BGG_API_KEY` | BoardGameGeek XML API key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-only, for admin operations like account deletion) |
-| `ENCRYPTION_KEY` | 64-character hex string (32 bytes) for AES-256-GCM encryption of member DNI and phone |
+| `ENCRYPTION_KEY` | 64-character hex string (`/^[0-9a-f]{64}$/i`, 32 bytes) for AES-256-GCM encryption of member DNI and phone. `src/lib/encryption.ts` and `src/lib/supabase/admin.ts` import `server-only`; `decrypt` rejects anything that is not `iv:tag:data` with a 12-byte IV and 16-byte tag |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase publishable key for client-side auth |
 | `LUDOYA_API_KEY` | Ludoya public API key (Business plan, 100 req/min). Server-side only; never expose to the browser. Used by `src/lib/ludoya/client.ts` |

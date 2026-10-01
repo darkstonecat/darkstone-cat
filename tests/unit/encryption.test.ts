@@ -63,4 +63,47 @@ describe('encryption', () => {
       'ENCRYPTION_KEY must be a 64-character hex string'
     )
   })
+
+  it('throws when ENCRYPTION_KEY has the right length but non-hex characters', async () => {
+    process.env.ENCRYPTION_KEY = 'z'.repeat(64)
+    const { encrypt } = await import('@/lib/encryption')
+    expect(() => encrypt('test')).toThrow('ENCRYPTION_KEY must be a 64-character hex string')
+  })
+
+  it('accepts an uppercase hex key', async () => {
+    process.env.ENCRYPTION_KEY = 'ABCDEF0123456789'.repeat(4)
+    const { encrypt, decrypt } = await import('@/lib/encryption')
+    expect(decrypt(encrypt('x'))).toBe('x')
+  })
+
+  describe('decrypt input validation', () => {
+    it.each([
+      ['empty string', ''],
+      ['one part', 'abc'],
+      ['two parts', 'abc:def'],
+      ['four parts', 'a:b:c:d'],
+    ])('rejects %s with a clear error', async (_label, input) => {
+      const { decrypt } = await import('@/lib/encryption')
+      expect(() => decrypt(input)).toThrow('expected 3 colon-separated parts')
+    })
+
+    it('rejects a wrong IV length', async () => {
+      const { encrypt, decrypt } = await import('@/lib/encryption')
+      const parts = encrypt('test').split(':')
+      parts[0] = Buffer.alloc(8).toString('base64')
+      expect(() => decrypt(parts.join(':'))).toThrow('IV must be 12 bytes')
+    })
+
+    it('rejects a wrong auth tag length', async () => {
+      const { encrypt, decrypt } = await import('@/lib/encryption')
+      const parts = encrypt('test').split(':')
+      parts[1] = Buffer.alloc(8).toString('base64')
+      expect(() => decrypt(parts.join(':'))).toThrow('auth tag must be 16 bytes')
+    })
+
+    it('rejects non-string input', async () => {
+      const { decrypt } = await import('@/lib/encryption')
+      expect(() => decrypt(null as never)).toThrow('expected 3 colon-separated parts')
+    })
+  })
 })

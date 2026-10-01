@@ -1,3 +1,4 @@
+import "server-only";
 import { randomBytes, createCipheriv, createDecipheriv } from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
@@ -10,9 +11,9 @@ function getKey(): Buffer {
   if (cachedKey) return cachedKey;
 
   const hex = process.env.ENCRYPTION_KEY;
-  if (!hex || hex.length !== 64) {
+  if (!hex || !/^[0-9a-f]{64}$/i.test(hex)) {
     throw new Error(
-      "ENCRYPTION_KEY must be a 64-character hex string (32 bytes)"
+      "ENCRYPTION_KEY must be a 64-character hex string (32 bytes, characters 0-9 and a-f)"
     );
   }
 
@@ -42,11 +43,22 @@ export function encrypt(plainText: string): string {
 
 export function decrypt(encryptedText: string): string {
   const key = getKey();
-  const [ivB64, authTagB64, dataB64] = encryptedText.split(":");
+  const parts = typeof encryptedText === "string" ? encryptedText.split(":") : [];
+  if (parts.length !== 3) {
+    throw new Error("Invalid ciphertext: expected 3 colon-separated parts (iv:tag:data)");
+  }
+  const [ivB64, authTagB64, dataB64] = parts;
 
   const iv = Buffer.from(ivB64, "base64");
   const authTag = Buffer.from(authTagB64, "base64");
   const encrypted = Buffer.from(dataB64, "base64");
+
+  if (iv.length !== IV_LENGTH) {
+    throw new Error(`Invalid ciphertext: IV must be ${IV_LENGTH} bytes`);
+  }
+  if (authTag.length !== AUTH_TAG_LENGTH) {
+    throw new Error(`Invalid ciphertext: auth tag must be ${AUTH_TAG_LENGTH} bytes`);
+  }
 
   const decipher = createDecipheriv(ALGORITHM, key, iv, {
     authTagLength: AUTH_TAG_LENGTH,

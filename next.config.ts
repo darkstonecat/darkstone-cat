@@ -10,6 +10,7 @@ const buildDate = new Date().toISOString().slice(0, 16).replace("T", " ");
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const analyzer = withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
 
+const isProd = process.env.NODE_ENV === "production";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://httvpxakxaycqbagybym.supabase.co";
 
 const securityHeaders = [
@@ -41,7 +42,8 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com",
+      // 'unsafe-eval' is only needed by React's dev tooling (stack reconstruction); never ship it.
+      `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"} https://www.googletagmanager.com https://va.vercel-scripts.com`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://cf.geekdo-images.com https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net https://www.googletagmanager.com",
       "font-src 'self'",
