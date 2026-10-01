@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { PAGES, TEXT } from '../helpers/constants'
+import { MEMBER_EMAIL, PAGES, TEXT } from '../helpers/constants'
 import { deleteTestUser } from '../helpers/supabase-admin'
 import { countMessagesTo, waitForConfirmationLink } from '../helpers/mailpit'
 
@@ -97,10 +97,6 @@ test.describe('Register page', () => {
     await expect(page.locator('main').getByText(uniqueEmail)).toBeVisible()
     await expect(page.getByRole('link', { name: TEXT.register_done_login })).toHaveAttribute('href', /\/login$/)
 
-    // Confirmations are on locally (like production), so the optional data was saved:
-    // the "could not save your details" notice must not appear.
-    await expect(page.getByText(TEXT.register_done_profile_notice)).toHaveCount(0)
-
     // Resend sends a real second email (Supabase throttles resends to one per second)
     await expect.poll(() => countMessagesTo(uniqueEmail), { timeout: 20_000 }).toBe(1)
     await page.waitForTimeout(1_200)
@@ -126,6 +122,24 @@ test.describe('Register page', () => {
     await page.waitForURL('**/profile', { timeout: 30_000 })
     await page.goto('/profile/details')
     await expect(page.getByText('678Z').first()).toBeAttached()
+  })
+
+  test('an already registered email gets the same confirmation screen as a new one', async ({ page }) => {
+    test.slow()
+
+    await page.locator('#first_name').fill('Dup')
+    await page.locator('#last_name').fill('Test')
+    await page.locator('#email').fill(MEMBER_EMAIL)
+    await page.locator('#password').fill('Register1234!')
+    await page.locator('input[name="conduct"]').check()
+    await page.locator('input[name="privacy"]').check()
+    await page.locator('button[type="submit"]').click()
+
+    await expect(page.getByRole('heading', { level: 1, name: TEXT.register_done_title })).toBeVisible({ timeout: 60_000 })
+    await expect(page.locator('main').getByText(MEMBER_EMAIL)).toBeVisible()
+    await expect(page.getByRole('link', { name: TEXT.register_done_login })).toBeVisible()
+    // The old "already exists" error must not appear anywhere
+    await expect(page.getByText(/Ja existeix un compte/)).toHaveCount(0)
   })
 
   test('has link to login page', async ({ page }) => {

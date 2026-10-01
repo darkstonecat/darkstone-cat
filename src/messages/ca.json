@@ -661,7 +661,6 @@
     "register_submitting": "Creant el compte…",
     "register_has_account": "Ja ets soci?",
     "register_login_link": "Accedeix",
-    "register_error_email_in_use": "Ja existeix un compte amb aquest correu electrònic.",
     "register_error_generic": "S'ha produït un error en el registre. Torna-ho a provar.",
     "register_aside_title": "Què inclou ser soci",
     "register_aside_text": "Un número de soci i un carnet digital des del primer dia. Les partides les seguim organitzant a Ludoya; aquí hi tens la resta de la vida de l'associació.",
@@ -677,7 +676,6 @@
     "register_done_resend_error": "No s'ha pogut enviar el correu. Torna-ho a provar.",
     "register_done_resend_rate_limit": "Has demanat massa correus seguits. Espera una estona i torna-ho a provar.",
     "register_done_wrong": "Has escrit malament el correu?",
-    "register_done_profile_notice": "No hem pogut desar les dades opcionals. Pots afegir-les des del teu perfil.",
     "register_done_back": "Torna al formulari",
     "register_done_login": "Ja l'he confirmat · Entra",
 

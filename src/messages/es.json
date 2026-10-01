@@ -661,7 +661,6 @@
     "register_submitting": "Creando la cuenta…",
     "register_has_account": "¿Ya eres socio?",
     "register_login_link": "Accede",
-    "register_error_email_in_use": "Ya existe una cuenta con este correo electrónico.",
     "register_error_generic": "Se ha producido un error en el registro. Inténtalo de nuevo.",
     "register_aside_title": "Qué incluye ser socio",
     "register_aside_text": "Un número de socio y un carnet digital desde el primer día. Las partidas las seguimos organizando en Ludoya; aquí tienes el resto de la vida de la asociación.",
@@ -677,7 +676,6 @@
     "register_done_resend_error": "No se ha podido enviar el correo. Inténtalo de nuevo.",
     "register_done_resend_rate_limit": "Has pedido demasiados correos seguidos. Espera un rato e inténtalo de nuevo.",
     "register_done_wrong": "¿Has escrito mal el correo?",
-    "register_done_profile_notice": "No hemos podido guardar los datos opcionales. Puedes añadirlos desde tu perfil.",
     "register_done_back": "Volver al formulario",
     "register_done_login": "Ya lo he confirmado · Entra",
 

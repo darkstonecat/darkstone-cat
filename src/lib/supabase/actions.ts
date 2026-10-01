@@ -20,6 +20,16 @@ const DISCARD_WINDOW_MS = 30 * 60 * 1000;
 const GENERIC_ERROR = "Could not save member data";
 
 /**
+ * The browser shows the same screen whether or not the details were saved (so it
+ * cannot reveal an existing account), which makes this log the only trace. The
+ * reason is a fixed code: never log ids, emails or caught errors.
+ */
+function refuse(reason: string): { error: string } {
+  console.warn("[signup] member details not saved reason=%s", reason);
+  return { error: GENERIC_ERROR };
+}
+
+/**
  * A sign-up is "fresh" when the auth user exists, never confirmed its email and
  * was created within `windowMs`. The action runs with the admin client and the
  * caller has no session yet, so this is the only proof the id belongs to a
@@ -63,7 +73,7 @@ export async function updateMemberAfterSignup(
     const supabase = createAdminClient();
 
     if (!(await isFreshUnconfirmedUser(supabase, data.userId, COMPLETE_WINDOW_MS))) {
-      return { error: GENERIC_ERROR };
+      return refuse("not_fresh_unconfirmed_user");
     }
 
     // Only a blank row may be completed: this action never overwrites saved data.
@@ -72,9 +82,9 @@ export async function updateMemberAfterSignup(
       .select("dni_nie_encrypted, phone_encrypted, postal_code, ludoya_username, bgg_username")
       .eq("id", data.userId)
       .maybeSingle();
-    if (rowError || !row) return { error: GENERIC_ERROR };
+    if (rowError || !row) return refuse("member_row_unavailable");
     if (Object.values(row).some((v) => v !== null && v !== "")) {
-      return { error: GENERIC_ERROR };
+      return refuse("member_row_not_blank");
     }
 
     const updatePayload: Record<string, unknown> = {
@@ -87,10 +97,10 @@ export async function updateMemberAfterSignup(
     if (bggClean) updatePayload.bgg_username = bggClean;
 
     const { error } = await supabase.from("members").update(updatePayload).eq("id", data.userId);
-    if (error) return { error: GENERIC_ERROR };
+    if (error) return refuse("update_failed");
     return { error: null };
   } catch {
-    return { error: GENERIC_ERROR };
+    return refuse("unexpected_error");
   }
 }
 

@@ -78,7 +78,6 @@ export const TEXT = {
   register_done_resent: 'Correu enviat',
   register_done_back: 'Torna al formulari',
   register_done_login: "Ja l'he confirmat · Entra",
-  register_done_profile_notice: 'No hem pogut desar les dades opcionals',
   required_field: 'Aquest camp és obligatori.',
   invalid_email: 'Introdueix un correu electrònic vàlid.',
   password_min_length: 'Mínim 8 caràcters.',

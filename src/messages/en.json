@@ -661,7 +661,6 @@
     "register_submitting": "Creating your account…",
     "register_has_account": "Already a member?",
     "register_login_link": "Log in",
-    "register_error_email_in_use": "An account with this email already exists.",
     "register_error_generic": "An error occurred during registration. Please try again.",
     "register_aside_title": "What membership includes",
     "register_aside_text": "A member number and a digital card from day one. We keep organising the games on Ludoya; here you get the rest of the association's life.",
@@ -677,7 +676,6 @@
     "register_done_resend_error": "We couldn't send the email. Please try again.",
     "register_done_resend_rate_limit": "You've requested too many emails in a row. Wait a while and try again.",
     "register_done_wrong": "Typed the wrong email?",
-    "register_done_profile_notice": "We could not save your optional details. You can add them from your profile.",
     "register_done_back": "Back to the form",
     "register_done_login": "I've already confirmed · Log in",
 

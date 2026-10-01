@@ -128,15 +128,27 @@ describe('RegisterFlow (sign-up form)', () => {
     expect(screen.getByRole('link', { name: 'register_done_login' })).toHaveAttribute('href', '/login')
   })
 
-  it('shows the email-in-use error and stays on the form', async () => {
-    mockSignUp.mockResolvedValue({ data: {}, error: { message: 'User already registered' } })
+  it.each([
+    ['message', { message: 'User already registered' }],
+    ['code', { message: 'x', code: 'user_already_exists' }],
+  ])('shows the same done screen for an already registered email (%s)', async (_n, error) => {
+    mockSignUp.mockResolvedValue({ data: {}, error })
     render(<RegisterFlow />)
     fillRequired()
     fireEvent.click(checkbox('conduct'))
     fireEvent.click(checkbox('privacy'))
     fireEvent.click(screen.getByRole('button', { name: /register_submit/ }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('register_error_email_in_use')
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'register_done_title' })
+    ).toBeInTheDocument()
+    expect(screen.getByText(/register_done_text:soci@example\.cat/)).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    // Nothing was created: no member update, and no id to discard later
     expect(mockUpdateMember).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'register_done_back' }))
+    fireEvent.click(screen.getByRole('button', { name: /register_submit/ }))
+    await waitFor(() => expect(mockSignUp).toHaveBeenCalledTimes(2))
+    expect(mockDiscard).not.toHaveBeenCalled()
   })
 
   it('goes back to the form with the values kept', async () => {
@@ -213,15 +225,15 @@ describe('RegisterFlow (sign-up form)', () => {
   it.each([
     ['returns an error', () => mockUpdateMember.mockResolvedValueOnce({ error: 'x' })],
     ['throws', () => mockUpdateMember.mockRejectedValueOnce(new Error('x'))],
-  ])('still shows the done screen with a notice when the member update %s', async (_n, arrange) => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  ])('shows the very same done screen when the member update %s', async (_n, arrange) => {
     arrange()
     render(<RegisterFlow />)
     await submitValid()
     await screen.findByRole('heading', { level: 1, name: 'register_done_title' })
-    expect(screen.getByText('register_done_profile_notice')).toBeInTheDocument()
-    expect(spy).toHaveBeenCalledWith(expect.not.stringContaining('soci@example.cat'))
-    spy.mockRestore()
+    // No warning: it would tell an existing account apart from a new one
+    expect(screen.queryByText('register_done_profile_notice')).not.toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByText(/register_done_text:soci@example\.cat/)).toBeInTheDocument()
   })
 
   it('keeps the live regions rendered before any message', async () => {

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useLenis } from "./SmoothScroll";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuthUser } from "@/hooks/useAuthUser";
+import { signOutCurrentSession } from "@/lib/supabase/session-actions";
 
 function hexToRgba(hex: string, alpha: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -14,6 +15,9 @@ function hexToRgba(hex: string, alpha: number): string {
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+/** Longest the logout waits for the server to revoke the session. */
+const SIGN_OUT_TIMEOUT_MS = 3000;
 
 const NAV_LINKS = [
   { href: "/", key: "home" },
@@ -231,11 +235,23 @@ export default function NavBar() {
     return () => document.removeEventListener("click", handleClick);
   }, [dropdownOpen]);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
     setDropdownOpen(false);
 
-    // Supabase signOut() acquires a Navigator Lock that often hangs.
-    // Instead, delete the auth cookies directly and hard-redirect.
+    // Revoke the session server-side. The browser signOut() acquires a
+    // Navigator Lock that often hangs, so the server client does it; the wait
+    // is bounded so a slow server never traps the member on the page.
+    try {
+      await Promise.race([
+        signOutCurrentSession(),
+        new Promise((resolve) => setTimeout(resolve, SIGN_OUT_TIMEOUT_MS)),
+      ]);
+    } catch {
+      // Fall through to the cookie wipe below.
+    }
+
+    // Fallback: delete the auth cookies directly (no-op when the server
+    // already cleared them) and hard-redirect.
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     if (url) {
       const projectRef = new URL(url).hostname.split(".")[0];

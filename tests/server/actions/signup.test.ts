@@ -140,6 +140,23 @@ describe('updateMemberAfterSignup', () => {
     })
   })
 
+  describe('server-side trace of refusals', () => {
+    it('logs only a fixed reason code, never ids or personal data', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      mockMaybeSingle.mockResolvedValue({
+        data: { ...blankRow, dni_nie_encrypted: 'encrypted:old' },
+        error: null,
+      })
+      await updateMemberAfterSignup({ ...baseData, phone: '612345678' })
+      expect(warn).toHaveBeenCalledWith(
+        '[signup] member details not saved reason=%s',
+        'member_row_not_blank'
+      )
+      expect(JSON.stringify(warn.mock.calls)).not.toContain('612345678')
+      warn.mockRestore()
+    })
+  })
+
   describe('format validation', () => {
     it.each([
       ['dni', '1234A'],

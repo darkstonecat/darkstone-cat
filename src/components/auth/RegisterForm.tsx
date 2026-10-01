@@ -195,12 +195,22 @@ function CheckStatus({
   );
 }
 
+/** GoTrue answers a sign-up for a confirmed email with "User already registered". */
+function isAlreadyRegistered(error: { message?: string; code?: string }): boolean {
+  return (
+    error.code === "user_already_exists" ||
+    !!error.message?.includes("already registered") ||
+    !!error.message?.includes("already been registered")
+  );
+}
+
 type Props = {
   /**
-   * Called after a successful sign-up with the (trimmed) submitted email.
-   * `profileSaved` is false when the optional details could not be stored.
+   * Called with the (trimmed) submitted email once the form is done. It is the
+   * same call whether the account is new or the email was already registered,
+   * so the screen after it never reveals which one happened.
    */
-  onSuccess: (email: string, profileSaved: boolean) => void;
+  onSuccess: (email: string) => void;
 };
 
 export default function RegisterForm({ onSuccess }: Props) {
@@ -287,15 +297,16 @@ export default function RegisterForm({ onSuccess }: Props) {
       });
 
       if (error) {
-        setStatus("error");
-        if (
-          error.message.includes("already registered") ||
-          error.message.includes("already been registered")
-        ) {
-          setErrorMessage(t("register_error_email_in_use"));
-        } else {
-          setErrorMessage(t("register_error_generic"));
+        if (isAlreadyRegistered(error)) {
+          // Same outcome as a new sign-up, so the form does not reveal whether
+          // an account exists for this email. Nothing was created: skip the
+          // member update and do not track an id to discard.
+          setStatus("idle");
+          onSuccess(email);
+          return;
         }
+        setStatus("error");
+        setErrorMessage(t("register_error_generic"));
         return;
       }
       userId = signUpData.user?.id ?? "";
@@ -309,10 +320,12 @@ export default function RegisterForm({ onSuccess }: Props) {
 
     // Update member with optional fields + consents via Server Action.
     // Uses admin client because no session exists yet (email confirmation pending).
-    // The account already exists, so a failure here must not block the done screen.
-    let profileSaved = true;
+    // The account already exists, so a failure here must not block the done screen,
+    // and it must not change it either (that would reveal an existing account):
+    // the action logs the reason server-side and the member completes the data
+    // later from the "Completa el perfil" checklist.
     try {
-      const { error: updateError } = await updateMemberAfterSignup({
+      await updateMemberAfterSignup({
         userId,
         phone: formData.get("phone") as string,
         dni: formData.get("dni") as string,
@@ -321,17 +334,12 @@ export default function RegisterForm({ onSuccess }: Props) {
         bgg_username: formData.get("bgg_username") as string,
         newsletter_accepted: !!formData.get("newsletter"),
       });
-      if (updateError) profileSaved = false;
     } catch {
-      profileSaved = false;
-    }
-    if (!profileSaved) {
-      // Deliberately no error object: it could echo personal data.
-      console.error("Sign-up succeeded but the optional member details were not saved");
+      // ignored on purpose, see above
     }
 
     setStatus("idle");
-    onSuccess(email, profileSaved);
+    onSuccess(email);
   }
 
   const isSubmitting = status === "submitting";

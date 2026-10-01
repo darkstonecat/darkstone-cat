@@ -1,15 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import type { EmailOtpType } from "@supabase/supabase-js";
+
+// Types the confirmation templates send: sign-up confirmation (`email` in the
+// current Supabase docs, `signup` in older templates) and email-change
+// confirmation. Never `recovery`, `magiclink` or `invite`: those have their own
+// routes or are not used, and this route discards the session it creates.
+const ALLOWED_TYPES = ["signup", "email", "email_change"] as const;
+type ConfirmType = (typeof ALLOWED_TYPES)[number];
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
-  const type = searchParams.get("type") as EmailOtpType | null;
+  const type = searchParams.get("type");
 
   const baseUrl = new URL("/", request.url).origin;
 
-  if (!token_hash || !type) {
+  if (!token_hash || !type || !(ALLOWED_TYPES as readonly string[]).includes(type)) {
     return NextResponse.redirect(`${baseUrl}/login?confirmed=error`);
   }
 
@@ -35,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  const { error } = await supabase.auth.verifyOtp({ token_hash, type });
+  const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as ConfirmType });
 
   if (error) {
     return NextResponse.redirect(`${baseUrl}/login?confirmed=error`);
