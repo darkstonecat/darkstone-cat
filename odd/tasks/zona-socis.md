@@ -333,6 +333,11 @@ current data sheet off `/profile`.)
   - Done 2026-09-30: the user confirmed in a browser that "Veure a Ludoya"
     (`https://app.ludoya.com/<username>`) opens the personal profile.
   - Merging to `main` (production) is deferred by the user: work continues on `develop-users`.
+    While testing, the Supabase Site URL may point to the `develop-users` preview
+    (`https://darkstone-cat-git-develop-users-darkstonecat-6804s-projects.vercel.app`), because
+    every auth email link is built from `{{ .SiteURL }}` and production (`main`) has no auth routes
+    yet (they answer 404). **When merging to `main`, set the Site URL back to
+    `https://www.darkstone.cat`.** Magic link verified on the preview on 2026-10-01.
   - Done 2026-10-01: the five migrations are applied to the production Supabase project
     (`httvpxakxaycqbagybym`; the database is only used by `develop-users`). The remote history
     had three versions with no local file (`20260313133454` fix_members_rls_recursion,
