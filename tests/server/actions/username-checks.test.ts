@@ -15,6 +15,12 @@ vi.mock("next/headers", () => ({
       ...(realIp ? { "x-real-ip": realIp } : {}),
     }),
 }));
+// The shared limiter is unavailable here, so the in-memory fallback does the throttling.
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: () => ({
+    rpc: () => ({ abortSignal: () => Promise.resolve({ data: null, error: { code: "TEST" } }) }),
+  }),
+}));
 vi.mock("@/lib/ludoya/username", () => ({ lookupLudoyaUsername: lookups.ludoya }));
 vi.mock("@/lib/bgg-user", () => ({ lookupBggUsername: lookups.bgg }));
 
@@ -23,6 +29,7 @@ import { resetRateLimits } from "@/lib/rate-limit";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.spyOn(console, "warn").mockImplementation(() => {});
   resetRateLimits();
   forwardedFor = "203.0.113.7";
   realIp = null;

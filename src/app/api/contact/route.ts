@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 import { getClientIp } from "@/lib/client-ip";
-import { allowRequest } from "@/lib/rate-limit";
+import { allowRequestShared } from "@/lib/rate-limit";
 
 // Google Workspace SMTP. SMTP_PASSWORD is an app password of SMTP_USER.
 // Timeouts keep a stalled SMTP server from holding the function open: connect and
@@ -34,6 +34,9 @@ const MIN_FILL_MS = 3_000;
 
 const RATE_WINDOW_MS = 3_600_000; // 1 hour
 const RATE_MAX_REQUESTS = 5;
+/** Whole-site ceiling per day, so a botnet of distinct IPs cannot flood the inbox or burn the SMTP quota. */
+const GLOBAL_WINDOW_MS = 86_400_000; // 1 day
+const GLOBAL_MAX_REQUESTS = 50;
 
 // --- Cache headers for all responses ---
 const NO_CACHE_HEADERS = {
@@ -154,9 +157,12 @@ export async function POST(request: Request) {
   const message = readField(body.message, MAX_MESSAGE, "message");
   if ("error" in message) return fail(message.error, 400);
 
-  // Rate limiting by IP
+  // Rate limiting: per IP first, then the whole-site daily cap. Shared across instances.
   const ip = getClientIp(request.headers);
-  if (!allowRequest(`contact:${ip}`, RATE_MAX_REQUESTS, RATE_WINDOW_MS)) {
+  if (!(await allowRequestShared("contact", ip, RATE_MAX_REQUESTS, RATE_WINDOW_MS))) {
+    return fail("rate_limited", 429);
+  }
+  if (!(await allowRequestShared("contact:global", null, GLOBAL_MAX_REQUESTS, GLOBAL_WINDOW_MS))) {
     return fail("rate_limited", 429);
   }
 

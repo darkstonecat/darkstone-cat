@@ -13,7 +13,20 @@ vi.mock('nodemailer', () => ({
   },
 }))
 
+const rpc = vi.hoisted(() => vi.fn())
+
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: () => ({ rpc }),
+}))
+
 import { POST } from '@/app/api/contact/route'
+
+/** The shared limiter is unavailable by default, so these tests exercise the in-memory fallback. */
+function rpcUnavailable() {
+  rpc.mockReturnValue({
+    abortSignal: () => Promise.resolve({ data: null, error: { code: 'TEST' } }),
+  })
+}
 
 let ipSeq = 100
 
@@ -50,6 +63,9 @@ describe('POST /api/contact', () => {
     mockSend.mockResolvedValue({ messageId: 'msg-1' })
     vi.unstubAllEnvs()
     vi.restoreAllMocks()
+    rpc.mockReset()
+    rpcUnavailable()
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
   })
 
   it('configures SMTP timeouts on the transport', () => {
@@ -365,6 +381,52 @@ describe('POST /api/contact', () => {
         makeRequest(validBody, { ...headers, 'x-forwarded-for': 'spoof-new' })
       )
       expect(res.status).toBe(429)
+    })
+  })
+
+  describe('shared rate limiter', () => {
+    function rpcDecides(decide: (bucket: string) => boolean) {
+      rpc.mockImplementation((_fn: string, args: { p_bucket: string }) => ({
+        abortSignal: () => Promise.resolve({ data: decide(args.p_bucket), error: null }),
+      }))
+    }
+
+    it('checks a hashed per-IP bucket (5/hour) and a global bucket (50/day)', async () => {
+      rpcDecides(() => true)
+      const ip = '55.55.55.55'
+      const res = await POST(makeRequest(validBody, { 'x-forwarded-for': ip }))
+      expect(res.status).toBe(200)
+      expect(rpc).toHaveBeenCalledTimes(2)
+      const [perIp, global] = rpc.mock.calls.map((c) => c[1])
+      expect(perIp.p_bucket).toMatch(/^contact:[0-9a-f]{64}$/)
+      expect(JSON.stringify(perIp)).not.toContain(ip)
+      expect(perIp).toMatchObject({ p_max: 5, p_window_seconds: 3600 })
+      expect(global).toEqual({ p_bucket: 'contact:global', p_max: 50, p_window_seconds: 86_400 })
+    })
+
+    it('answers 429 when the per-IP bucket is full, before the global one', async () => {
+      rpcDecides((bucket) => bucket === 'contact:global')
+      const res = await POST(makeRequest(validBody))
+      expect(res.status).toBe(429)
+      expect(await res.json()).toEqual({ error: 'rate_limited' })
+      expect(rpc).toHaveBeenCalledTimes(1)
+      expect(mockSend).not.toHaveBeenCalled()
+    })
+
+    it('answers 429 when the global daily cap is reached', async () => {
+      rpcDecides((bucket) => bucket !== 'contact:global')
+      const res = await POST(makeRequest(validBody))
+      expect(res.status).toBe(429)
+      expect(await res.json()).toEqual({ error: 'rate_limited' })
+      expect(mockSend).not.toHaveBeenCalled()
+    })
+
+    it('does not touch the database for invalid or dropped requests', async () => {
+      rpcDecides(() => true)
+      await POST(makeRequest({ ...validBody, name: '' }))
+      await POST(makeRequest({ ...validBody, website: 'bot' }))
+      await POST(makeRequest('nope'))
+      expect(rpc).not.toHaveBeenCalled()
     })
   })
 

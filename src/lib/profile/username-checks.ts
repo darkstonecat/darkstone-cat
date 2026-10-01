@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { lookupBggUsername } from "@/lib/bgg-user";
 import { lookupLudoyaUsername } from "@/lib/ludoya/username";
 import { getClientIp } from "@/lib/client-ip";
-import { allowRequest } from "@/lib/rate-limit";
+import { allowRequestShared } from "@/lib/rate-limit";
 import { USERNAME_PATTERN } from "./username-pattern";
 
 /**
@@ -19,7 +19,7 @@ export type UsernameCheckResult = { status: "found" | "not_found" | "failed" };
  * service rejects those characters.
  */
 const CHECKS_PER_MINUTE = 20;
-/** Per server instance, across all clients, for lookups that spend the shared Ludoya quota (100/min). */
+/** Across all clients and instances, for lookups that spend the shared Ludoya quota (100/min). */
 const LUDOYA_GLOBAL_PER_MINUTE = 30;
 
 async function prepare(scope: string, username: unknown, globalPerMinute?: number): Promise<string | null> {
@@ -28,8 +28,8 @@ async function prepare(scope: string, username: unknown, globalPerMinute?: numbe
   const clean = username.trim();
   if (!USERNAME_PATTERN.test(clean)) return null;
   // The sign-up form is public, so keep one client from draining the shared upstream quota.
-  if (!allowRequest(`${scope}:${getClientIp(await headers())}`, CHECKS_PER_MINUTE, 60_000)) return null;
-  if (globalPerMinute !== undefined && !allowRequest(`${scope}:global`, globalPerMinute, 60_000)) return null;
+  if (!(await allowRequestShared(scope, getClientIp(await headers()), CHECKS_PER_MINUTE, 60_000))) return null;
+  if (globalPerMinute !== undefined && !(await allowRequestShared(`${scope}:global`, null, globalPerMinute, 60_000))) return null;
   return clean;
 }
 
