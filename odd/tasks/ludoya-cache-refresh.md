@@ -54,8 +54,10 @@ Out of scope: preview deployments (protected by Vercel Authentication; user deci
 
 ## Progress
 
-- 2026-10-01: document created after exploration. Nothing implemented yet.
+- 2026-10-01: document created after exploration.
+- 2026-10-01: T1 a53f55e, T2 6037482, T3 1da9f5f (delegated writer). Checks: `npm run test:unit` 52 files / 537 tests passed; `npm run lint` clean; `npx tsc --noEmit` clean.
+- Risk to verify in production: after `revalidateTag(tag, "max")` the warm-up read is served stale while the refetch runs in the background; confirm on Vercel that the background refresh completes (check data age after a manual workflow run).
 
 ## Next step
 
-T1 + T2 + T3 through one delegated writer.
+Merge, set `CRON_SECRET` in Vercel (Production) and GitHub, run the workflow once with `workflow_dispatch`.
