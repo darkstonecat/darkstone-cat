@@ -1,0 +1,24 @@
+name: Cache refresh
+
+# Keeps the Ludoya data on the site (member area and /events) at most about a
+# day old even when nobody visits: calls /api/cron/refresh, which marks the
+# tagged fetch caches stale and re-reads them (see src/lib/cache-refresh.ts).
+# Production only (previews sit behind Vercel Authentication). Needs the
+# CRON_SECRET repository secret, with the same value as CRON_SECRET in Vercel
+# (Production). Schedules run from the default branch only.
+
+on:
+  schedule:
+    # UTC. Twice a day because GitHub may delay or skip scheduled runs.
+    - cron: "23 3,15 * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Refresh production caches
+        run: curl -fsS --max-time 60 -H "Authorization: Bearer $CRON_SECRET" https://www.darkstone.cat/api/cron/refresh
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}

@@ -76,6 +76,7 @@ src/
 │   ├── api/events/         # Shareable event image generation
 │   ├── api/members/        # Member card image (with QR)
 │   ├── api/profile/        # Member home calendar months
+│   ├── api/cron/           # Scheduled cache refresh (Bearer CRON_SECRET)
 │   ├── auth/               # Email confirm, password recovery and magic-link callbacks
 │   ├── sitemap.ts          # Dynamic sitemap generation
 │   └── robots.ts           # Robots.txt configuration
@@ -178,6 +179,7 @@ CI runs all tests automatically via GitHub Actions on push/PR to `main`.
 | `BGG_USERNAME` | BoardGameGeek username for the ludoteca collection |
 | `BGG_API_KEY` | BoardGameGeek XML API key |
 | `LUDOYA_API_KEY` | Ludoya public API key (server-side only), see `docs/ludoya-api-reference.md` |
+| `CRON_SECRET` | Bearer secret for `/api/cron/refresh` (same value in Vercel Production and the GitHub repository secret) |
 
 ### Development without API keys
 
