@@ -7,6 +7,7 @@ import { MdOutlineMail, MdMarkEmailRead } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { motion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
+import { requestMagicLink } from "@/lib/supabase/magic-link-actions";
 import {
   MAGIC_REDIRECT_COOKIE,
   MAGIC_REDIRECT_MAX_AGE,
@@ -133,19 +134,16 @@ export default function LoginForm() {
       // Cookies blocked: the link still works and lands on the default page.
     }
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: { shouldCreateUser: false },
-    });
-
-    // "otp_disabled" (no account) and 429 (rate limit) show the same neutral
-    // confirmation as a real send, so the form never reveals who is a member.
-    const neutral =
-      error?.code === "otp_disabled" ||
-      error?.status === 429 ||
-      error?.code === "over_email_send_rate_limit";
-    if (error && !neutral) {
+    // Sent through the server, which only mails confirmed accounts and always
+    // answers the same, so the form never reveals who is a member.
+    let failed = false;
+    try {
+      const { error } = await requestMagicLink(email.trim());
+      failed = error !== null;
+    } catch {
+      failed = true;
+    }
+    if (failed) {
       setStatus("error");
       setErrorMessage(t("login_error_generic"));
       return;

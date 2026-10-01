@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 
-const mockSignInWithOtp = vi.fn()
+const mockRequestMagicLink = vi.fn()
 const mockSignInWithPassword = vi.fn()
 let searchString = ''
 let locale = 'ca'
@@ -23,8 +23,12 @@ vi.mock('@/i18n/routing', () => ({
 
 vi.mock('@/lib/supabase/client', () => ({
   createClient: vi.fn(() => ({
-    auth: { signInWithOtp: mockSignInWithOtp, signInWithPassword: mockSignInWithPassword },
+    auth: { signInWithPassword: mockSignInWithPassword },
   })),
+}))
+
+vi.mock('@/lib/supabase/magic-link-actions', () => ({
+  requestMagicLink: (...args: unknown[]) => mockRequestMagicLink(...args),
 }))
 
 vi.mock('motion/react', () => ({
@@ -46,7 +50,7 @@ describe('LoginForm', () => {
     vi.clearAllMocks()
     searchString = ''
     locale = 'ca'
-    mockSignInWithOtp.mockResolvedValue({ error: null })
+    mockRequestMagicLink.mockResolvedValue({ error: null })
   })
 
   it('disables the magic link button until the email is valid', () => {
@@ -58,49 +62,36 @@ describe('LoginForm', () => {
     expect(magicButton()).toBeEnabled()
   })
 
-  it('sends the magic link without creating users and shows the sent state', async () => {
+  it('requests the magic link through the server and shows the sent state', async () => {
     render(<LoginForm />)
     typeEmail(' laia@example.cat ')
     fireEvent.click(magicButton())
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: 'login_magic_sent_title' })).toBeInTheDocument()
     )
-    expect(mockSignInWithOtp).toHaveBeenCalledWith({
-      email: 'laia@example.cat',
-      options: { shouldCreateUser: false },
-    })
+    expect(mockRequestMagicLink).toHaveBeenCalledWith('laia@example.cat')
     expect(screen.getByText('login_magic_sent_text:laia@example.cat')).toBeInTheDocument()
   })
 
-  it('shows the same sent state when the account does not exist (otp_disabled)', async () => {
-    mockSignInWithOtp.mockResolvedValue({ error: { code: 'otp_disabled', status: 422 } })
-    render(<LoginForm />)
-    typeEmail('ghost@example.cat')
-    fireEvent.click(magicButton())
-    await waitFor(() =>
-      expect(screen.getByRole('heading', { name: 'login_magic_sent_title' })).toBeInTheDocument()
-    )
-  })
-
-  it('shows the neutral sent state on a 429 (no membership enumeration)', async () => {
-    mockSignInWithOtp.mockResolvedValue({ error: { code: 'over_email_send_rate_limit', status: 429 } })
-    render(<LoginForm />)
-    typeEmail('laia@example.cat')
-    fireEvent.click(magicButton())
-    await waitFor(() =>
-      expect(screen.getByRole('heading', { name: 'login_magic_sent_title' })).toBeInTheDocument()
-    )
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-  })
-
-  it('shows a generic error for other failures', async () => {
-    mockSignInWithOtp.mockResolvedValue({ error: { code: 'unexpected_failure', status: 500 } })
+  it('shows a generic error when the server reports a failure', async () => {
+    mockRequestMagicLink.mockResolvedValue({ error: 'failed' })
     render(<LoginForm />)
     typeEmail('laia@example.cat')
     fireEvent.click(magicButton())
     await waitFor(() =>
       expect(screen.getByRole('alert')).toHaveTextContent('login_error_generic')
     )
+  })
+
+  it('shows a generic error when the server action throws', async () => {
+    mockRequestMagicLink.mockRejectedValue(new Error('network'))
+    render(<LoginForm />)
+    typeEmail('laia@example.cat')
+    fireEvent.click(magicButton())
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent('login_error_generic')
+    )
+    expect(screen.getByRole('button', { name: 'login_magic_button' })).toBeEnabled()
   })
 
   it('lets the member go back from the sent state', async () => {
