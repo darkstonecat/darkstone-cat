@@ -20,6 +20,6 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Refresh production caches
-        run: curl -fsS --max-time 60 -H "Authorization: Bearer $CRON_SECRET" https://www.darkstone.cat/api/cron/refresh
+        run: curl -fsS --max-time 120 -H "Authorization: Bearer $CRON_SECRET" https://www.darkstone.cat/api/cron/refresh
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
