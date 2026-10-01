@@ -333,7 +333,17 @@ current data sheet off `/profile`.)
   - Done 2026-09-30: the user confirmed in a browser that "Veure a Ludoya"
     (`https://app.ludoya.com/<username>`) opens the personal profile.
   - Merging to `main` (production) is deferred by the user: work continues on `develop-users`.
-    The migrations above are applied to production only when that merge happens.
+  - Done 2026-10-01: the five migrations are applied to the production Supabase project
+    (`httvpxakxaycqbagybym`; the database is only used by `develop-users`). The remote history
+    had three versions with no local file (`20260313133454` fix_members_rls_recursion,
+    `20260316080538` add_email_to_admin_members_view, `20260318114433`
+    remove_unused_member_columns): the local `20260312191146` is a consolidated schema that
+    already contains them (commits f1b14f7, d3717c5), and the production schema matched it, so
+    they were marked `reverted` with `supabase migration repair` (history only) before
+    `supabase db push`. Verified after the push: schema identical to local, 165 members all with
+    a unique 32-hex `card_token`, `members_id_fkey ... ON DELETE CASCADE`, `verify_card_token`
+    returns false for an unknown token. Connection note: the direct DB host is IPv6-only, so the
+    CLI must use the session pooler URL (`--db-url`).
   - Future: a member approval state to show `ONLY_GROUP` sessions; optional cleanup job for
     unconfirmed sign-ups.
 
