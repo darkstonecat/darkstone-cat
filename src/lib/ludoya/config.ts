@@ -45,9 +45,12 @@ export const ludoyaConfig = {
 
 /**
  * Time limits for calls made while a person waits (member area, sign-up
- * checks), tighter than the defaults the cached public pages can afford.
+ * checks). The member area streams behind a Suspense skeleton, so it can wait:
+ * `GET /events` was measured at 4.5–5.4 s (Oct 2026), and a timeout below that
+ * failed every attempt. The budget leaves room for a retry only after a fast
+ * failure (5xx, network), never for a second slow attempt.
  */
-export const MEMBER_AREA_LIMITS = { timeoutMs: 4_000, attempts: 2, budgetMs: 8_000 } as const;
+export const MEMBER_AREA_LIMITS = { timeoutMs: 10_000, attempts: 2, budgetMs: 12_000 } as const;
 export const USERNAME_CHECK_LIMITS = { timeoutMs: 3_000, attempts: 2, budgetMs: 5_000 } as const;
 
 /** API version prefix, shared by every endpoint. */
