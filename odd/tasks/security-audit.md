@@ -97,4 +97,4 @@ To be completed in T6.
 
 - 2026-10-01: audit done (3 auditors), triage recorded above.
 - 2026-10-01: T1 done, commit 18f0c3e. Checks: `npm run lint` clean, `npx tsc --noEmit` clean, `npm run test:unit` 568 passed, `npm run test:integration` 70 passed, `e2e/forms/contact.spec.ts` 10 passed. Deviation: drop responses use `{ success: true }` (the real success shape) instead of `{ ok: true }` so bots cannot tell them apart.
-- 2026-10-01: T2 done (commit recorded in the following docs commit). Migration `20261001100000_shared_rate_limiter.sql` applied locally (`supabase migration up`, then verified from scratch with `npm run db:reset`); NOT applied to production. Checks: lint clean, `tsc --noEmit` clean, `test:unit` 583 passed, `test:integration` 82 passed (12 new), contact e2e spec 10 passed.
+- 2026-10-01: T2 done, commit 8bb0174. Migration `20261001100000_shared_rate_limiter.sql` applied locally (`supabase migration up`, then verified from scratch with `npm run db:reset`); NOT applied to production. Checks: lint clean, `tsc --noEmit` clean, `test:unit` 583 passed, `test:integration` 82 passed (12 new), contact e2e spec 10 passed.
