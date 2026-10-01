@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { MEMBER_EMAIL, PAGES, TEXT } from '../helpers/constants'
-import { deleteTestUser } from '../helpers/supabase-admin'
+import { createUnconfirmedUser, deleteTestUser } from '../helpers/supabase-admin'
 import { countMessagesTo, waitForConfirmationLink } from '../helpers/mailpit'
 
 test.describe('Register page', () => {
@@ -122,6 +122,43 @@ test.describe('Register page', () => {
     await page.waitForURL('**/profile', { timeout: 30_000 })
     await page.goto('/profile/details')
     await expect(page.getByText('678Z').first()).toBeAttached()
+  })
+
+  test('signing up over an unconfirmed pre-registration: the new password wins', async ({ page }) => {
+    test.slow()
+
+    const victimEmail = `e2e-hijack-${Date.now()}@test.local`
+    testEmails.push(victimEmail)
+    // A stranger pre-registered the email with their own password and never confirmed it.
+    await createUnconfirmedUser(victimEmail, 'Attacker1234!')
+
+    await page.locator('#first_name').fill('Vic')
+    await page.locator('#last_name').fill('Tim')
+    await page.locator('#email').fill(victimEmail)
+    await page.locator('#password').fill('Victim1234!')
+    await page.locator('input[name="conduct"]').check()
+    await page.locator('input[name="privacy"]').check()
+    await page.locator('button[type="submit"]').click()
+    await expect(page.getByRole('heading', { level: 1, name: TEXT.register_done_title })).toBeVisible({ timeout: 60_000 })
+
+    const link = await waitForConfirmationLink(victimEmail)
+    const confirm = await page.request.get(link, { maxRedirects: 0 })
+    expect(confirm.status()).toBe(303)
+
+    // The attacker's password no longer works...
+    await page.goto(PAGES.login)
+    await page.locator('#email').fill(victimEmail)
+    await page.locator('#password').fill('Attacker1234!')
+    await page.locator('button[type="submit"]').click()
+    await expect(page).toHaveURL(/\/login/)
+    await expect(page).not.toHaveURL(/\/profile/)
+
+    // ...and the victim's does.
+    await page.goto(PAGES.login)
+    await page.locator('#email').fill(victimEmail)
+    await page.locator('#password').fill('Victim1234!')
+    await page.locator('button[type="submit"]').click()
+    await page.waitForURL('**/profile', { timeout: 30_000 })
   })
 
   test('an already registered email gets the same confirmation screen as a new one', async ({ page }) => {

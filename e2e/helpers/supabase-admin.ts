@@ -110,3 +110,14 @@ export async function findUserByEmail(email: string): Promise<string | null> {
   const user = list?.users?.find((u) => u.email === email)
   return user?.id ?? null
 }
+
+/**
+ * Create a user whose email was never confirmed: what a stranger leaves behind when
+ * they pre-register someone else's email with their own password.
+ */
+export async function createUnconfirmedUser(email: string, password: string): Promise<string> {
+  const supabase = getAdminClient()
+  const { data, error } = await supabase.auth.admin.createUser({ email, password, email_confirm: false })
+  if (error) throw new Error(`Failed to create unconfirmed user ${email}: ${error.message}`)
+  return data.user.id
+}

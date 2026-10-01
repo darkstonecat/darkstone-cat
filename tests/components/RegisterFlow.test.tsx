@@ -6,6 +6,7 @@ const mockSignUp = vi.fn()
 const mockResend = vi.fn()
 const mockUpdateMember = vi.fn()
 const mockDiscard = vi.fn()
+const mockPrepare = vi.fn()
 const mockCheckLudoya = vi.fn()
 const mockCheckBgg = vi.fn()
 
@@ -20,6 +21,7 @@ vi.mock('@/lib/supabase/client', () => ({
 vi.mock('@/lib/supabase/actions', () => ({
   updateMemberAfterSignup: (...args: unknown[]) => mockUpdateMember(...args),
   discardUnconfirmedSignup: (...args: unknown[]) => mockDiscard(...args),
+  prepareSignup: (...args: unknown[]) => mockPrepare(...args),
 }))
 vi.mock('@/lib/profile/username-checks', () => ({
   checkLudoyaUsername: (...args: unknown[]) => mockCheckLudoya(...args),
@@ -50,6 +52,7 @@ describe('RegisterFlow (sign-up form)', () => {
     mockSignUp.mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null })
     mockUpdateMember.mockResolvedValue({ error: null })
     mockDiscard.mockResolvedValue({ discarded: true })
+    mockPrepare.mockResolvedValue({ ok: true })
     mockResend.mockResolvedValue({ error: null })
     mockCheckLudoya.mockResolvedValue({ status: 'found' })
     mockCheckBgg.mockResolvedValue({ status: 'not_found' })
@@ -261,5 +264,24 @@ describe('RegisterFlow (sign-up form)', () => {
       expect(mockUpdateMember).toHaveBeenLastCalledWith(expect.objectContaining({ userId: 'user-2' }))
     )
     expect(mockDiscard).toHaveBeenCalledTimes(1)
+  })
+
+  it('prepares the sign-up (last sign-up wins) right before signUp', async () => {
+    const order: string[] = []
+    mockPrepare.mockImplementation(async () => { order.push('prepare'); return { ok: true } })
+    mockSignUp.mockImplementation(async () => { order.push('signUp'); return { data: { user: { id: 'user-1' } }, error: null } })
+    render(<RegisterFlow />)
+    await submitValid()
+    await screen.findByRole('heading', { level: 1, name: 'register_done_title' })
+    expect(mockPrepare).toHaveBeenCalledWith('soci@example.cat')
+    expect(order).toEqual(['prepare', 'signUp'])
+  })
+
+  it('still signs up when the prepare step throws', async () => {
+    mockPrepare.mockRejectedValue(new Error('boom'))
+    render(<RegisterFlow />)
+    await submitValid()
+    await screen.findByRole('heading', { level: 1, name: 'register_done_title' })
+    expect(mockSignUp).toHaveBeenCalledTimes(1)
   })
 })

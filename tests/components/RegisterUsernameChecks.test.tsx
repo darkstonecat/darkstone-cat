@@ -5,6 +5,7 @@ import { mockMotion, mockTranslator } from '../helpers/register-mocks'
 const mockSignUp = vi.fn()
 const mockResend = vi.fn()
 const mockUpdateMember = vi.fn()
+const mockPrepare = vi.fn()
 const mockCheckLudoya = vi.fn()
 const mockCheckBgg = vi.fn()
 
@@ -18,6 +19,7 @@ vi.mock('@/lib/supabase/client', () => ({
 }))
 vi.mock('@/lib/supabase/actions', () => ({
   updateMemberAfterSignup: (...args: unknown[]) => mockUpdateMember(...args),
+  prepareSignup: (...args: unknown[]) => mockPrepare(...args),
 }))
 vi.mock('@/lib/profile/username-checks', () => ({
   checkLudoyaUsername: (...args: unknown[]) => mockCheckLudoya(...args),

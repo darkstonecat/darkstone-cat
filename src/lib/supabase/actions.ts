@@ -1,6 +1,9 @@
 "use server";
 
+import { headers } from "next/headers";
 import { createAdminClient } from "./admin";
+import { getClientIp } from "@/lib/client-ip";
+import { allowRequestShared } from "@/lib/rate-limit";
 import { encrypt } from "@/lib/encryption";
 import { normalizeUsername } from "@/lib/profile/username-pattern";
 import { isValidDniNie, isValidPhone, isValidPostalCode } from "@/lib/validation/member-fields";
@@ -18,6 +21,11 @@ type SignupData = {
 const COMPLETE_WINDOW_MS = 10 * 60 * 1000;
 const DISCARD_WINDOW_MS = 30 * 60 * 1000;
 const GENERIC_ERROR = "Could not save member data";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_EMAIL_LENGTH = 254;
+const PREPARE_IP_LIMIT = 10;
+const PREPARE_WINDOW_MS = 10 * 60 * 1000;
 
 /**
  * The browser shows the same screen whether or not the details were saved (so it
@@ -122,4 +130,53 @@ export async function discardUnconfirmedSignup(userId: string): Promise<{ discar
   } catch {
     return { discarded: false };
   }
+}
+
+/**
+ * Runs right BEFORE the browser calls `signUp`: the last sign-up wins for an
+ * unconfirmed account.
+ *
+ * GoTrue keeps an existing unconfirmed user, and its password, when the same email
+ * signs up again. Someone who pre-registered a victim's email with their own
+ * password would otherwise own the account once the victim confirms it. Here the
+ * stale unconfirmed user (and its members row, which cascades) is deleted so the
+ * next `signUp` creates a fresh one with the new password. A confirmed user is never
+ * touched: the lookup only returns unconfirmed ones.
+ *
+ * Throttled per client IP only. A per-address limit would let an attacker burn the
+ * victim's bucket first and keep the pre-registered account alive; the IP limit still
+ * caps how many pending sign-ups one client can cancel.
+ *
+ * The answer is always `{ ok: true }` (unknown, unconfirmed, confirmed, throttled,
+ * failed), so it cannot be used to find out who is a member, and it never blocks the
+ * sign-up: a failure is logged without the address and the sign-up proceeds.
+ */
+export async function prepareSignup(email: string): Promise<{ ok: true }> {
+  try {
+    if (typeof email !== "string") return { ok: true };
+    const clean = email.trim().toLowerCase();
+    if (!clean || clean.length > MAX_EMAIL_LENGTH || !EMAIL_RE.test(clean)) return { ok: true };
+
+    const ip = getClientIp(await headers());
+    if (!(await allowRequestShared("signup-prepare-ip", ip, PREPARE_IP_LIMIT, PREPARE_WINDOW_MS))) {
+      return { ok: true };
+    }
+
+    const supabase = createAdminClient();
+    const { data: staleId, error: lookupError } = await supabase.rpc("unconfirmed_user_id", {
+      p_email: clean,
+    });
+    if (lookupError) {
+      console.error("[signup] prepare lookup failed code=%s", lookupError.code ?? "unknown");
+      return { ok: true };
+    }
+    if (typeof staleId !== "string" || !staleId) return { ok: true };
+
+    // The members row (and its badges) goes with the auth user: members.id is ON DELETE CASCADE.
+    const { error } = await supabase.auth.admin.deleteUser(staleId);
+    if (error) console.error("[signup] prepare delete failed status=%s", error.status ?? "unknown");
+  } catch {
+    console.error("[signup] prepare unexpected error");
+  }
+  return { ok: true };
 }

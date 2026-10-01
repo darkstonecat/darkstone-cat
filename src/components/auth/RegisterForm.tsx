@@ -17,7 +17,7 @@ import {
 } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/client";
-import { discardUnconfirmedSignup, updateMemberAfterSignup } from "@/lib/supabase/actions";
+import { discardUnconfirmedSignup, prepareSignup, updateMemberAfterSignup } from "@/lib/supabase/actions";
 import { checkBggUsername, checkLudoyaUsername } from "@/lib/profile/username-checks";
 import { useUsernameCheck, type UsernameCheckState } from "@/hooks/useUsernameCheck";
 import { isValidDniNie } from "@/lib/validation/member-fields";
@@ -280,6 +280,15 @@ export default function RegisterForm({ onSuccess }: Props) {
       } catch {
         // ignored: the server also refuses anything but a fresh unconfirmed user
       }
+    }
+
+    // Last sign-up wins: drop a stale UNCONFIRMED account for this email so the new
+    // password is the one that ends up confirmed. Same answer in every case and never
+    // blocks the sign-up.
+    try {
+      await prepareSignup(email);
+    } catch {
+      // ignored: signing up must work even if this step could not run
     }
 
     let userId = "";
