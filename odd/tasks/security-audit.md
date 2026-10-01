@@ -79,7 +79,7 @@ No Critical or High findings. `npm audit --omit=dev`: 0 vulnerabilities.
 
 - [x] **T1 Contact form input hardening** (C-2, C-3, C-4, C-5, C-6, C-8). Route: delegated (writer, 2+ non-trivial files).
 - [x] **T2 Shared rate limiter** (C-1, A-8): Supabase table + SECURITY DEFINER function, hashed keys, in-memory fallback; used by the contact route (per IP + global daily cap) and the username checks. Route: delegated.
-- [ ] **T3 Member data validation and export** (A-5, D-1/A-6, D-2, D-4, D-5). Route: delegated.
+- [x] **T3 Member data validation and export** (A-5, D-1/A-6, D-2, D-4, D-5). Route: delegated.
 - [ ] **T4 Platform hardening** (D-3/A-9, D-6, D-7, D-8, C-9 partial). Route: delegated.
 - [ ] **T5 Auth hardening** (A-1, A-2, A-4, A-7 local, A-10). Route: delegated.
 - [ ] **T6 Docs and report**: CLAUDE.md, README if affected, final report and ops checklist. Route: inline.
@@ -98,3 +98,4 @@ To be completed in T6.
 - 2026-10-01: audit done (3 auditors), triage recorded above.
 - 2026-10-01: T1 done, commit 18f0c3e. Checks: `npm run lint` clean, `npx tsc --noEmit` clean, `npm run test:unit` 568 passed, `npm run test:integration` 70 passed, `e2e/forms/contact.spec.ts` 10 passed. Deviation: drop responses use `{ success: true }` (the real success shape) instead of `{ ok: true }` so bots cannot tell them apart.
 - 2026-10-01: T2 done, commit 8bb0174. Migration `20261001100000_shared_rate_limiter.sql` applied locally (`supabase migration up`, then verified from scratch with `npm run db:reset`); NOT applied to production. Checks: lint clean, `tsc --noEmit` clean, `test:unit` 583 passed, `test:integration` 82 passed (12 new), contact e2e spec 10 passed.
+- 2026-10-01: T3 done, commit 112a95c. Migration `20261001110000_member_data_hardening.sql` applied locally only (`supabase migration up`); NOT applied to production. D-5 verified before the fix: anon `POST /rest/v1/rpc/generate_member_number` returned `"000-034"` (callable, burns a sequence value); after: `42501 permission denied`. Grants kept for postgres (trigger path) and service_role. Checks: lint clean, `tsc --noEmit` clean, `test:unit` 606 passed, `test:integration` 93 passed (11 new), e2e `profile-edit` (+1 new) and `admin/members-list` passed.
