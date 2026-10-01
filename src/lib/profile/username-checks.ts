@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { lookupBggUsername } from "@/lib/bgg-user";
 import { lookupLudoyaUsername } from "@/lib/ludoya/username";
+import { getClientIp } from "@/lib/client-ip";
 import { allowRequest } from "@/lib/rate-limit";
 import { USERNAME_PATTERN } from "./username-pattern";
 
@@ -21,20 +22,13 @@ const CHECKS_PER_MINUTE = 20;
 /** Per server instance, across all clients, for lookups that spend the shared Ludoya quota (100/min). */
 const LUDOYA_GLOBAL_PER_MINUTE = 30;
 
-async function clientKey(scope: string): Promise<string> {
-  const h = await headers();
-  // The platform sets x-real-ip; only fall back to the first forwarded hop.
-  const ip = h.get("x-real-ip")?.trim() || h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  return `${scope}:${ip}`;
-}
-
 async function prepare(scope: string, username: unknown, globalPerMinute?: number): Promise<string | null> {
   // Server actions receive whatever the client posts, not what the type says.
   if (typeof username !== "string") return null;
   const clean = username.trim();
   if (!USERNAME_PATTERN.test(clean)) return null;
   // The sign-up form is public, so keep one client from draining the shared upstream quota.
-  if (!allowRequest(await clientKey(scope), CHECKS_PER_MINUTE, 60_000)) return null;
+  if (!allowRequest(`${scope}:${getClientIp(await headers())}`, CHECKS_PER_MINUTE, 60_000)) return null;
   if (globalPerMinute !== undefined && !allowRequest(`${scope}:global`, globalPerMinute, 60_000)) return null;
   return clean;
 }

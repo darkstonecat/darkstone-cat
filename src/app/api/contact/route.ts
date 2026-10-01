@@ -1,7 +1,11 @@
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
+import { getClientIp } from "@/lib/client-ip";
+import { allowRequest } from "@/lib/rate-limit";
 
 // Google Workspace SMTP. SMTP_PASSWORD is an app password of SMTP_USER.
+// Timeouts keep a stalled SMTP server from holding the function open: connect and
+// greeting must finish quickly, and the socket may stay idle for at most 15 s.
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -10,26 +14,26 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
   },
+  connectionTimeout: 5_000,
+  greetingTimeout: 5_000,
+  socketTimeout: 15_000,
 });
 
 const SENDER_EMAIL = "no-reply@darkstone.cat";
 const CONTACT_EMAIL = "hola@darkstone.cat";
 
-// --- Rate limiting (in-memory, resets on cold start) ---
-const WINDOW_MS = 3_600_000; // 1 hour
-const MAX_REQUESTS = 5;
-const rateLimitMap = new Map<string, number[]>();
+// --- Limits ---
+const MAX_NAME = 100;
+const MAX_EMAIL = 254;
+const MAX_SUBJECT = 150;
+const MAX_MESSAGE = 5_000;
+/** Four fields at their limits (message can be all 4-byte characters) fit well under this. */
+const MAX_BODY_BYTES = 32 * 1024;
+/** Bots that post faster than this after the form mounted are dropped silently. */
+const MIN_FILL_MS = 3_000;
 
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = (rateLimitMap.get(ip) ?? []).filter(
-    (t) => now - t < WINDOW_MS
-  );
-  rateLimitMap.set(ip, timestamps);
-  if (timestamps.length >= MAX_REQUESTS) return true;
-  timestamps.push(now);
-  return false;
-}
+const RATE_WINDOW_MS = 3_600_000; // 1 hour
+const RATE_MAX_REQUESTS = 5;
 
 // --- Cache headers for all responses ---
 const NO_CACHE_HEADERS = {
@@ -39,99 +43,151 @@ const NO_CACHE_HEADERS = {
 const ALLOWED_ORIGINS = new Set([
   "https://darkstone.cat",
   "https://www.darkstone.cat",
-  "http://localhost:3000",
 ]);
+const LOCALHOST_ORIGIN = "http://localhost:3000";
+
+/**
+ * localhost is accepted outside production, or when CONTACT_ALLOW_LOCALHOST=1 is set
+ * (testing the form against a local production build). Never set it in Vercel.
+ */
+function isAllowedOrigin(origin: string): boolean {
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+  return (
+    origin === LOCALHOST_ORIGIN &&
+    (process.env.NODE_ENV !== "production" ||
+      process.env.CONTACT_ALLOW_LOCALHOST === "1")
+  );
+}
+
+const EMAIL_PATTERN =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
+function fail(error: string, status: number) {
+  return NextResponse.json({ error }, { status, headers: NO_CACHE_HEADERS });
+}
+
+function succeed() {
+  return NextResponse.json({ success: true }, { headers: NO_CACHE_HEADERS });
+}
+
+/** Reads and parses the JSON body, refusing oversized payloads before and after reading. */
+async function readJsonObject(
+  request: Request
+): Promise<{ body: Record<string, unknown> } | { response: Response }> {
+  const declared = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > MAX_BODY_BYTES) {
+    return { response: fail("payload_too_large", 413) };
+  }
+
+  let raw: string;
+  try {
+    raw = await request.text();
+  } catch {
+    return { response: fail("invalid_request", 400) };
+  }
+  if (raw.length > MAX_BODY_BYTES) {
+    return { response: fail("payload_too_large", 413) };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return { response: fail("invalid_request", 400) };
+  }
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    return { response: fail("invalid_request", 400) };
+  }
+  return { body: parsed as Record<string, unknown> };
+}
+
+/** Required text field: trimmed, non-empty, within the limit. */
+function readField(
+  value: unknown,
+  max: number,
+  prefix: string
+): { value: string } | { error: string } {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return { error: `${prefix}_required` };
+  }
+  const trimmed = value.trim();
+  if (trimmed.length > max) return { error: `${prefix}_too_long` };
+  return { value: trimmed };
+}
 
 export async function POST(request: Request) {
   // CSRF protection: validate Origin header
   const origin = request.headers.get("origin");
-  if (!origin || !ALLOWED_ORIGINS.has(origin)) {
-    return NextResponse.json(
-      { error: "forbidden" },
-      { status: 403, headers: NO_CACHE_HEADERS }
-    );
+  if (!origin || !isAllowedOrigin(origin)) return fail("forbidden", 403);
+
+  const parsed = await readJsonObject(request);
+  if ("response" in parsed) return parsed.response;
+  const { body } = parsed;
+
+  // Bot traps: a filled honeypot or a submit faster than a person can type gets the
+  // normal success answer, so scripts get no signal to adapt to. Nothing is sent.
+  const elapsedMs = body.elapsedMs;
+  const honeypotFilled =
+    typeof body.website === "string" && body.website.trim().length > 0;
+  const tooFast =
+    typeof elapsedMs !== "number" ||
+    !Number.isFinite(elapsedMs) ||
+    elapsedMs < MIN_FILL_MS;
+  if (honeypotFilled || tooFast) {
+    console.warn(`[contact] dropped: ${honeypotFilled ? "honeypot" : "too_fast"}`);
+    return succeed();
   }
 
+  // Validate before spending a rate-limit slot, so malformed requests cost nothing.
+  const name = readField(body.name, MAX_NAME, "name");
+  if ("error" in name) return fail(name.error, 400);
+
+  const email = readField(body.email, MAX_EMAIL, "email");
+  if ("error" in email) {
+    return fail(email.error === "email_required" ? "email_invalid" : email.error, 400);
+  }
+  if (!EMAIL_PATTERN.test(email.value)) return fail("email_invalid", 400);
+
+  const subject = readField(body.subject, MAX_SUBJECT, "subject");
+  if ("error" in subject) return fail(subject.error, 400);
+
+  const message = readField(body.message, MAX_MESSAGE, "message");
+  if ("error" in message) return fail(message.error, 400);
+
   // Rate limiting by IP
-  const forwarded = request.headers.get("x-forwarded-for");
-  const ip = forwarded?.split(",")[0].trim() ?? "unknown";
-  if (isRateLimited(ip)) {
-    return NextResponse.json(
-      { error: "rate_limited" },
-      { status: 429, headers: NO_CACHE_HEADERS }
-    );
+  const ip = getClientIp(request.headers);
+  if (!allowRequest(`contact:${ip}`, RATE_MAX_REQUESTS, RATE_WINDOW_MS)) {
+    return fail("rate_limited", 429);
   }
 
   try {
-    const body = await request.json();
-    const { name, email, subject, message } = body;
-
-    // Validation
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
-      return NextResponse.json(
-        { error: "name_required" },
-        { status: 400, headers: NO_CACHE_HEADERS }
-      );
-    }
-    if (!email || typeof email !== "string" || !/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/.test(email)) {
-      return NextResponse.json(
-        { error: "email_invalid" },
-        { status: 400, headers: NO_CACHE_HEADERS }
-      );
-    }
-    if (!subject || typeof subject !== "string" || subject.trim().length === 0) {
-      return NextResponse.json(
-        { error: "subject_required" },
-        { status: 400, headers: NO_CACHE_HEADERS }
-      );
-    }
-    if (!message || typeof message !== "string" || message.trim().length === 0) {
-      return NextResponse.json(
-        { error: "message_required" },
-        { status: 400, headers: NO_CACHE_HEADERS }
-      );
-    }
-
-    // Send email with timeout
-    const sendPromise = transporter.sendMail({
+    await transporter.sendMail({
       from: `"Web [darkstone.cat]" <${SENDER_EMAIL}>`,
       to: CONTACT_EMAIL,
-      replyTo: email,
-      subject: `[Formulari Web] ${subject.trim()}`,
+      replyTo: email.value,
+      subject: `[Formulari Web] ${subject.value}`,
       html: `
         <h2>Nou missatge de contacte</h2>
-        <p><strong>Nom:</strong> ${escapeHtml(name.trim())}</p>
-        <p><strong>Email:</strong> ${escapeHtml(email.trim())}</p>
-        <p><strong>Assumpte:</strong> ${escapeHtml(subject.trim())}</p>
+        <p><strong>Nom:</strong> ${escapeHtml(name.value)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email.value)}</p>
+        <p><strong>Assumpte:</strong> ${escapeHtml(subject.value)}</p>
         <hr />
-        <p>${escapeHtml(message.trim()).replace(/\n/g, "<br />")}</p>
+        <p>${escapeHtml(message.value).replace(/\n/g, "<br />")}</p>
       `,
     });
-
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("SMTP timeout")), 15_000)
-    );
-
-    try {
-      await Promise.race([sendPromise, timeoutPromise]);
-    } catch (smtpError) {
-      console.error("SMTP error:", smtpError);
-      return NextResponse.json(
-        { error: "send_failed" },
-        { status: 500, headers: NO_CACHE_HEADERS }
-      );
-    }
-
-    return NextResponse.json(
-      { success: true },
-      { headers: NO_CACHE_HEADERS }
-    );
-  } catch {
-    return NextResponse.json(
-      { error: "server_error" },
-      { status: 500, headers: NO_CACHE_HEADERS }
-    );
+  } catch (smtpError) {
+    // Log only the diagnostic fields: the error object can carry the recipient, the
+    // sender's address and the full SMTP transcript.
+    const { code, responseCode, command } = smtpError as {
+      code?: unknown;
+      responseCode?: unknown;
+      command?: unknown;
+    };
+    console.error("[contact] SMTP error", { code, responseCode, command });
+    return fail("send_failed", 500);
   }
+
+  return succeed();
 }
 
 function escapeHtml(text: string): string {

@@ -49,6 +49,38 @@ test.describe('Contact form', () => {
     )
   })
 
+  test('sends the bot-trap fields and keeps the honeypot out of reach', async ({ page }) => {
+    const trap = page.locator('input[name="website"]')
+    await expect(trap).toHaveAttribute('tabindex', '-1')
+    await expect(trap).toHaveAttribute('autocomplete', 'off')
+    await expect(trap.locator('xpath=..')).toHaveAttribute('aria-hidden', 'true')
+    // Off-screen: a person can neither see nor click it.
+    const box = await trap.boundingBox()
+    expect(box!.x + box!.width).toBeLessThan(0)
+
+    let payload: Record<string, unknown> | null = null
+    await page.route('**/api/contact', async (route) => {
+      payload = route.request().postDataJSON()
+      await route.fulfill({ status: 200, body: JSON.stringify({ success: true }) })
+    })
+
+    await page.locator('#name').fill('E2E Tester')
+    await page.locator('#email').fill('test@example.com')
+    await page.locator('#subject').fill('Subject')
+    await page.locator('#message').fill('Message body')
+    await page.locator('button[type="submit"]').click()
+
+    await expect(page.locator('[role="status"]')).toBeVisible()
+    expect(payload).toMatchObject({ website: '', elapsedMs: expect.any(Number) })
+  })
+
+  test('limits the length of each field', async ({ page }) => {
+    await expect(page.locator('#name')).toHaveAttribute('maxlength', '100')
+    await expect(page.locator('#email')).toHaveAttribute('maxlength', '254')
+    await expect(page.locator('#subject')).toHaveAttribute('maxlength', '150')
+    await expect(page.locator('#message')).toHaveAttribute('maxlength', '5000')
+  })
+
   test('shows error on API failure', async ({ page }) => {
     // Mock API failure
     await page.route('**/api/contact', (route) =>

@@ -77,7 +77,7 @@ No Critical or High findings. `npm audit --omit=dev`: 0 vulnerabilities.
 
 ## Tasks
 
-- [ ] **T1 Contact form input hardening** (C-2, C-3, C-4, C-5, C-6, C-8). Route: delegated (writer, 2+ non-trivial files).
+- [x] **T1 Contact form input hardening** (C-2, C-3, C-4, C-5, C-6, C-8). Route: delegated (writer, 2+ non-trivial files).
 - [ ] **T2 Shared rate limiter** (C-1, A-8): Supabase table + SECURITY DEFINER function, hashed keys, in-memory fallback; used by the contact route (per IP + global daily cap) and the username checks. Route: delegated.
 - [ ] **T3 Member data validation and export** (A-5, D-1/A-6, D-2, D-4, D-5). Route: delegated.
 - [ ] **T4 Platform hardening** (D-3/A-9, D-6, D-7, D-8, C-9 partial). Route: delegated.
@@ -96,3 +96,4 @@ To be completed in T6.
 ## Progress
 
 - 2026-10-01: audit done (3 auditors), triage recorded above.
+- 2026-10-01: T1 done (commit recorded in the next line). Checks: `npm run lint` clean, `npx tsc --noEmit` clean, `npm run test:unit` 568 passed, `npm run test:integration` 70 passed, `e2e/forms/contact.spec.ts` 10 passed. Deviation: drop responses use `{ success: true }` (the real success shape) instead of `{ ok: true }` so bots cannot tell them apart.

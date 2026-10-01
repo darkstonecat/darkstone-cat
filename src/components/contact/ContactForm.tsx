@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "motion/react";
 
 type FormStatus = "idle" | "sending" | "success" | "error";
+
+// Keep in sync with the limits in src/app/api/contact/route.ts.
+const MAX_NAME = 100;
+const MAX_EMAIL = 254;
+const MAX_SUBJECT = 150;
+const MAX_MESSAGE = 5000;
 
 type FieldErrors = {
   name?: string;
@@ -17,6 +23,13 @@ export default function ContactForm() {
   const t = useTranslations("contact_page");
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errors, setErrors] = useState<FieldErrors>({});
+  // When the form appeared; the server drops submissions faster than a person can type.
+  const shownAt = useRef(0);
+  const formShown = status !== "success";
+
+  useEffect(() => {
+    if (formShown) shownAt.current = Date.now();
+  }, [formShown]);
 
   function validate(data: {
     name: string;
@@ -47,6 +60,7 @@ export default function ContactForm() {
       subject: formData.get("subject") as string,
       message: formData.get("message") as string,
     };
+    const honeypot = (formData.get("website") as string) ?? "";
 
     const fieldErrors = validate(data);
     setErrors(fieldErrors);
@@ -58,7 +72,11 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          website: honeypot,
+          elapsedMs: Date.now() - shownAt.current,
+        }),
       });
 
       if (!res.ok) throw new Error();
@@ -150,6 +168,7 @@ export default function ContactForm() {
                 id="name"
                 name="name"
                 required
+                maxLength={MAX_NAME}
                 autoComplete="name"
                 placeholder={t("name_placeholder")}
                 disabled={isSending}
@@ -177,6 +196,7 @@ export default function ContactForm() {
                 id="email"
                 name="email"
                 required
+                maxLength={MAX_EMAIL}
                 autoComplete="email"
                 placeholder={t("email_placeholder")}
                 disabled={isSending}
@@ -204,6 +224,7 @@ export default function ContactForm() {
                 id="subject"
                 name="subject"
                 required
+                maxLength={MAX_SUBJECT}
                 placeholder={t("subject_placeholder")}
                 disabled={isSending}
                 aria-invalid={!!errors.subject}
@@ -230,6 +251,7 @@ export default function ContactForm() {
                 id="message"
                 name="message"
                 required
+                maxLength={MAX_MESSAGE}
                 rows={5}
                 placeholder={t("message_placeholder")}
                 disabled={isSending}
@@ -244,6 +266,20 @@ export default function ContactForm() {
               {errors.message && (
                 <p id="message-error" className="mt-1 text-xs text-red-600">{errors.message}</p>
               )}
+            </div>
+
+            {/* Honeypot: invisible and unreachable for people and assistive tech, bots fill it. */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-[-9999px] h-0 w-0 overflow-hidden"
+            >
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                defaultValue=""
+              />
             </div>
 
             <button
