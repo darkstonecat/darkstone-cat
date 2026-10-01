@@ -39,7 +39,7 @@ Out of scope: preview deployments (protected by Vercel Authentication; user deci
 ## Tasks
 
 - [x] **T1 — Tag Ludoya fetches.** `ludoyaGet` accepts and forwards `next.tags`; a shared tag constant (e.g. `LUDOYA_CACHE_TAG` in `src/lib/ludoya/config.ts`) applied to the events and locations requests. Unit test that the tag reaches `fetch`. Route: delegated (writer, with T2).
-- [ ] **T2 — Refresh route.** `src/lib/cache-refresh.ts` registry (tag + warm function; Ludoya entry warms the member-area and `/events` requests) and `src/app/api/cron/refresh/route.ts` (Bearer `CRON_SECRET`, 500/401/200 JSON with per-job result, `no-store`). Unit tests for auth outcomes and that `revalidateTag(tag, "max")` runs before the warm-up. Route: delegated (writer, 2+ non-trivial files).
+- [x] **T2 — Refresh route.** `src/lib/cache-refresh.ts` registry (tag + warm function; Ludoya entry warms the member-area and `/events` requests) and `src/app/api/cron/refresh/route.ts` (Bearer `CRON_SECRET`, 500/401/200 JSON with per-job result, `no-store`). Unit tests for auth outcomes and that `revalidateTag(tag, "max")` runs before the warm-up. Route: delegated (writer, 2+ non-trivial files).
 - [ ] **T3 — Schedule and docs.** `.github/workflows/cache-refresh.yml` (twice a day UTC + `workflow_dispatch`, `curl -fsS` with the secret, short timeout); CLAUDE.md (API routes list, env var `CRON_SECRET`, workflow note), README if applicable. Route: delegated (same writer).
 
 ## Acceptance criteria
