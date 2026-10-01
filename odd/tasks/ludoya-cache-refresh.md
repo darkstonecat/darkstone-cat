@@ -56,7 +56,9 @@ Out of scope: preview deployments (protected by Vercel Authentication; user deci
 
 - 2026-10-01: document created after exploration.
 - 2026-10-01: T1 a53f55e, T2 6037482, T3 1da9f5f (delegated writer). Checks: `npm run test:unit` 52 files / 537 tests passed; `npm run lint` clean; `npx tsc --noEmit` clean.
-- Risk to verify in production: after `revalidateTag(tag, "max")` the warm-up read is served stale while the refetch runs in the background; confirm on Vercel that the background refresh completes (check data age after a manual workflow run).
+- Background refresh: after `revalidateTag(tag, "max")` the warm-up read is served stale while the refetch runs in the background. Checked in Next's source: background fetch revalidations go to `workStore.pendingRevalidates`, which the route handler hands to `waitUntil` (`next/dist/server/route-modules/app-route/module.js:242-244`), so Vercel keeps the invocation alive until they finish. Still worth confirming the data age after the first manual workflow run.
+- Known limitation (accepted): a background refetch failure is not visible in the route's response (the job reports ok while stale data stays); a failed `/locations` call is tolerated as before (only the usual-venue flag). Both show up in the Vercel logs.
+- 2026-10-01: parent spot check re-ran `npm run test:unit` (537 passed) and `npx tsc --noEmit` (clean). RDD off (global); assessment tier `high` → independent read-only verifier: PASS, no blocking defects (auth fail-closed and constant-time, cache keys identical to the pages' requests, mock mode and username search unchanged, workflow valid; 6 files / 59 targeted tests passed).
 
 ## Next step
 
