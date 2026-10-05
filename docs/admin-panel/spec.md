@@ -58,11 +58,14 @@ Roles are hierarchical: `superadmin` ⊃ `board` ⊃ `member`. A role is indepen
 | Award and revoke badges | — | ✅ | ✅ |
 | Regenerate a member card | — | ✅ | ✅ |
 | Export the member list (CSV) and one member's data | — | ✅ | ✅ |
+| Export an e-mail list (A-16) | — | ✅ | ✅ |
+| Send a member an access link (A-15) | — | ✅ | ✅ |
 | Read the audit log | — | ✅ | ✅ |
-| Site operations (event images, cache refresh, game name overrides) | — | ✅ | ✅ |
+| Site operations (event images, cache refresh) | — | ✅ | ✅ |
 | Grant / revoke `board` | — | — | ✅ |
 | Grant / revoke `superadmin` | — | — | ✅ ² |
 | Anonymise a former member (erasure request) | — | — | ✅ |
+| Export the *llibre de socis* (S-4) | — | — | ✅ |
 
 ¹ Not on a member who holds `board` or `superadmin` (BR-12).
 ² Never below two superadmins (BR-10).
@@ -172,8 +175,9 @@ The law sets no fixed period for former members' data. It sets a criterion:
 |---|---|
 | Active member | All data is used normally. |
 | *Baixa* | Contact and profile data are deleted (§4.2). The register is **blocked**: kept, but restricted (below). |
-| Blocked, up to 3 years | The board sees only member number, name, e-mail, dates, *baixa per*, *motiu* and badges. The e-mail is visible because it is needed to identify the person on a request (P-1, P-3, P-4). The DNI is hidden from the board. A superadmin can reveal it only with a written reason, e.g. a request from an authority, and it is logged. The record is not exported in the CSV and is used for nothing else. The board can reinstate the person (A-7). |
+| Blocked, up to 3 years | The board sees only member number, name, e-mail, dates, *baixa per*, *motiu* and badges. The e-mail is visible because it is needed to identify the person on a request (P-1, P-3, P-4). The DNI is hidden from the board. A superadmin can reveal it only with a written reason, e.g. a request from an authority, and it is logged. The record is not exported in the member CSV. Its only other use is the *llibre de socis* export (S-4), which the law requires. The board can reinstate the person (A-7). |
 | 3 years after the *baixa* | A daily job **purges** the record: it deletes the login account, e-mail, name, DNI, badges and *motiu*. What remains is an anonymous stub (member number, *alta* and *baixa* dates), so the number is never reused and the statistics stay right. → `member.purge` |
+| Sign-up never confirmed, 30 days old | The same daily job deletes the account and its member row. The person never became a member, so the association has no reason to keep their e-mail or name. → `account.purge_unconfirmed` |
 
 **Erasure requests** (GDPR art. 17) arrive by e-mail at `hola@darkstone.cat` and follow P-4:
 
@@ -205,11 +209,14 @@ Every **change made by a board member or superadmin** is recorded, plus every **
 | `card.regenerate` | board | member |
 | `export.members_csv` | board | filter used, row count |
 | `export.member_data` | board | member |
+| `export.member_register` | superadmin | row count |
+| `export.emails` | board | list (`association` / `newsletter`), number of addresses |
+| `member.send_access_link` | board | member |
 | `role.grant` / `role.revoke` | superadmin | member + role |
 | `member.anonymise` | superadmin | member |
 | `member.purge` | system (retention job) | member number |
+| `account.purge_unconfirmed` | system (retention job) | number of accounts deleted (no e-mails) |
 | `ops.cache_refresh` | board | jobs run, result |
-| `ops.game_override.create` / `.update` / `.delete` | board | override |
 
 Reading is recorded only when it exposes sensitive data: revealing DNI/phone and exports. Opening the list or a member detail is not recorded.
 
@@ -253,7 +260,9 @@ Reading is recorded only when it exposes sensitive data: revealing DNI/phone and
 | BR-18 | A former member's login account is banned in Supabase Auth while former. They cannot sign in by any method, and no screen ever says that an account is closed (§4.4). |
 | BR-19 | Sessions that Ludoya marks as members-only (`ONLY_GROUP`) are never shown on the site. Members see them in Ludoya itself. |
 | BR-20 | On *baixa*, phone, postal code and gaming usernames are deleted. The rest of the register is blocked for 3 years and then purged (§4.5). |
-| BR-21 | A blocked record is shown to the board only with its register fields. Its DNI can be revealed only by a superadmin with a written reason. It is never included in the CSV export. |
+| BR-21 | A blocked record is shown to the board only with its register fields. Its DNI can be revealed only by a superadmin with a written reason. It is never included in the member CSV. The only exception is the *llibre de socis* export (S-4). |
+| BR-22 | An account whose e-mail was never confirmed is not a member: it is not listed, not counted, and is deleted after 30 days (§4.5). |
+| BR-23 | E-mail lists depend on the purpose. The association list (all active members) is only for association matters: assemblies, statutes, important notices. News and activities go only to the newsletter list (active members who accepted it). Former members and unconfirmed accounts are never in either list. |
 
 ## 7. Use cases
 
@@ -332,7 +341,23 @@ The CSV holds active members only. Blocked records are never exported (BR-21). I
 
 **A-14 · Refresh caches** — V-6. Buttons "Actualitza Ludoya" / "Actualitza ludoteca (BGG)". They run the same jobs as the scheduled refresh and show the result. → `ops.cache_refresh`
 
-**A-15 · Manage game name overrides** — V-6. A list of *Ludoya game name → BGG id*, used when the automatic match by name and year fails. It replaces the hard-coded `GAME_NAME_OVERRIDES`. → `ops.game_override.*`
+**A-15 · Send an access link** — from A-3, active members only. Use case: "no puc entrar" or "no em arriba el correu" (procedure P-6).
+1. The board member clicks "Envia enllaç d'accés".
+2. The site sends a sign-in link (magic link) **to the member's own account e-mail**. It goes to nobody else, and the board never sees the link.
+3. At most one link per member every 10 minutes.
+
+→ `member.send_access_link`
+
+**A-16 · Export an e-mail list** — V-2, "Exporta correus". Use case: writing to the members from the association's Gmail (Google Workspace). Follows P-7.
+1. The dialog asks which list (BR-23):
+   - **Comunicacions de l'associació**: every active member. For assemblies, statutes changes and important notices. The legal basis is the membership itself.
+   - **Butlletí**: active members who accepted the newsletter. For news, events and activities. The legal basis is their consent.
+2. The dialog reminds the three rules of P-7: export again before every send, always use BCC (or a Google Group), and delete the file afterwards.
+3. Two outputs:
+   - **"Copia les adreces"** copies the addresses separated by commas, ready to paste into the BCC field.
+   - **"Descarrega CSV"** downloads name and e-mail, to import into a Google Group or Google Contacts.
+
+→ `export.emails`
 
 ### 7.3 Superadmin
 
@@ -348,6 +373,13 @@ The CSV holds active members only. Blocked records are never exported (BR-21). I
 3. The data is deleted.
 
 → `member.anonymise`
+
+**S-4 · Export the *llibre de socis*** — V-2, superadmin only. Use case: the register of members that the law requires (LO 1/2002 art. 14; the Catalan *llibre de socis* records *altes* and *baixes*). A request from an authority is another case.
+1. The dialog warns that the file includes former members whose data is blocked, and that it may be used only for that legal purpose.
+2. Download the CSV. It has one row per member, active or blocked (purged stubs excluded), with these columns: member number, name, *primera alta*, *alta actual*, *data de baixa*.
+3. Which fields the *llibre* must contain, e.g. whether DNI is required, is to be confirmed before implementation. Only the confirmed fields are added.
+
+→ `export.member_register`
 
 ## 8. Views
 
@@ -376,13 +408,15 @@ All admin views use the dark header pattern of the member area (eyebrow "ADMINIS
   - Alta actual
 - A row opens V-3.
 - "Exporta CSV" button → A-10 dialog.
+- "Exporta correus" button → A-16 dialog.
+- "Exporta llibre de socis" button (superadmin only) → S-4 dialog.
 - Empty state: "Cap soci coincideix amb la cerca."
 - Mobile: rows become cards.
 
 ### V-3 · Fitxa de soci — `/admin/members/<number>`
 - Header:
   - Name, member number, state badge, role badge.
-  - Actions menu: Edita, Dona de baixa / Reincorpora, Regenera carnet, Exporta dades.
+  - Actions menu: Edita, Envia enllaç d'accés, Dona de baixa / Reincorpora, Regenera carnet, Exporta dades.
   - Anonimitza (superadmin, former only).
 - **Dades personals**:
   - Active member: name, e-mail (read-only), phone and DNI (masked, with the reveal button), postal code, Ludoya, BGG. Edit mode reuses the profile edit fields.
@@ -405,7 +439,6 @@ All admin views use the dark header pattern of the member area (eyebrow "ADMINIS
 ### V-6 · Eines — `/admin/tools`
 - **Imatges d'esdeveniments**: link to the existing `/events/images` (which moves under `/admin`, with a permanent redirect).
 - **Memòria cau**: the two refresh buttons with the last result and time.
-- **Correspondències de jocs**: an editable table of *Nom a Ludoya → BGG id*, with a link that checks the id on BGG.
 
 ### V-7 · Member-side changes
 - `/profile/details` › Compte: "Dona't de baixa" opens the M-1 dialog. The account is not deleted.
@@ -418,7 +451,7 @@ All admin views use the dark header pattern of the member area (eyebrow "ADMINIS
 ### V-8 · Procediments — `/admin/procedures`
 Step-by-step guides for the requests that reach the board outside the site. Every board member can read them.
 - An index lists the procedures. Each one opens as its own section.
-- Each action dialog links to its procedure: A-6 → P-2, A-7 → P-1, A-9 → P-5, A-11 → P-3, S-3 → P-4.
+- Each action dialog links to its procedure: A-6 → P-2, A-7 → P-1, A-9 → P-5, A-11 → P-3, A-15 → P-6, A-16 → P-7, S-3 → P-4.
 - The text lives in the translation files, versioned with the code that runs each action. It is not editable from the panel: it changes rarely, and it must match what the buttons actually do.
 
 **P-1 · Reincorporació d'un exsoci**
@@ -450,6 +483,23 @@ Step-by-step guides for the requests that reach the board outside the site. Ever
 1. Click "Regenera carnet". The old QR stops working at once.
 2. Tell the member to download the new card from "Carnet".
 
+**P-6 · Un soci no pot entrar**
+1. Find the person in Socis.
+   - If they are not listed, the account was never confirmed and was deleted, or it never existed. Tell them to sign up again.
+   - If they are a former member, follow P-1 instead.
+2. Click "Envia enllaç d'accés". The link goes only to the account e-mail.
+3. Tell them to check the spam folder. Once inside, they can set a new password from "Compte".
+4. If they no longer have access to that e-mail, the board cannot change it (BR-13). The person signs up again with the new e-mail, and the board gives the old account *baixa* with the reason "Compte duplicat".
+
+**P-7 · Enviar un correu als socis**
+1. Choose the list by the purpose of the message (BR-23):
+   - assembly, statutes or important notice → "Comunicacions de l'associació";
+   - news, events or activities → "Butlletí".
+2. Export the list **right before sending** (A-16). Never reuse an earlier export or a list saved in Gmail. It would still include people who left, or who switched the newsletter off.
+3. Send from the association's account, with the addresses in **BCC (CCO)**, never in To or CC. Otherwise every member sees everyone else's e-mail, which is a data breach. A Google Group whose members cannot see each other is an alternative.
+4. In a newsletter, end with: "Per deixar de rebre el butlletí, desactiva-ho a La meva zona › Comunicacions."
+5. Delete the exported file once the message has been sent.
+
 ## 9. Decisions
 
 | ID | Question | Answer |
@@ -465,6 +515,10 @@ Step-by-step guides for the requests that reach the board outside the site. Ever
 
 - Membership fees, payments, SEPA collections and renewal reminders (no fees).
 - A member approval step (every member is equal).
-- Sending newsletters from the panel (the export is enough for now).
+- Sending newsletters from the panel. The e-mail export (A-16) plus Gmail is enough for now.
+- Syncing a Google Group with the member lists automatically (Google Workspace Admin API). It would keep the lists always up to date, but it is left for a later version.
 - Member directory, QR check-in at events, game lending, advanced statistics. These are possible future ideas.
+- Two-step verification (TOTP) for board and superadmin accounts. It is recommended, because a board account can read members' DNI, but it is left for a later version to avoid friction.
+- Editing the Ludoya → BGG game matches from the panel. `GAME_NAME_OVERRIDES` stays in the code, and is empty today.
+- Internal notes about members, and creating new badge types from the panel.
 - Implementation plan, data migrations and tests: to be written once this specification is agreed.
