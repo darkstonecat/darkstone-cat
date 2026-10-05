@@ -287,3 +287,44 @@ describe('BR-10: at least two superadmins', () => {
     expect(await countActiveSuperadmins()).toBe(2)
   })
 })
+
+// Audit log cases that need a superadmin (migration 20261005100200_audit_log.sql). They live here
+// because this is the only file allowed to create superadmins; the rest is in audit-log.test.ts.
+// At this point superA and superB are the two active superadmins.
+describe('audit log as a superadmin', () => {
+  it('a superadmin logs the register export (superadmin only) and reads the log', async () => {
+    const client = await createAuthenticatedClient(emails.superA, password)
+    const { data: id, error } = await client.rpc('log_admin_event', {
+      p_action: 'export.member_register',
+      p_target: null,
+      p_details: { rows: 12 },
+      p_reason: null,
+    })
+    expect(error).toBeNull()
+
+    const { data, error: readError } = await client
+      .from('audit_log')
+      .select('action, actor_id, actor_role, details')
+      .eq('id', id)
+    expect(readError).toBeNull()
+    expect(data).toEqual([
+      { action: 'export.member_register', actor_id: users.superA.id, actor_role: 'superadmin', details: { rows: 12 } },
+    ])
+  })
+
+  it('a superadmin reveals a former member\'s DNI only with a reason (BR-21)', async () => {
+    const client = await createAuthenticatedClient(emails.superA, password)
+    const args = { p_action: 'member.reveal_sensitive', p_target: users.former.id, p_details: { field: 'dni' } }
+
+    const noReason = await client.rpc('log_admin_event', { ...args, p_reason: '   ' })
+    expect(noReason.error?.message).toContain('audit:reason_required')
+
+    const phone = await client.rpc('log_admin_event', { ...args, p_details: { field: 'phone' }, p_reason: 'Requeriment escrit' })
+    expect(phone.error?.message).toContain('audit:invalid_details')
+
+    const { data: id, error } = await client.rpc('log_admin_event', { ...args, p_reason: 'Requeriment escrit' })
+    expect(error).toBeNull()
+    const { data } = await supabaseAdmin.from('audit_log').select('target_member_id, reason').eq('id', id).single()
+    expect(data).toEqual({ target_member_id: users.former.id, reason: 'Requeriment escrit' })
+  })
+})

@@ -64,7 +64,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 
 - [x] T1 — M1 `membership_state`: membership columns + backfill, NOT VALID CHECKs, `card_issued_at`, column-level UPDATE grants, `members_update_own` blocks former members, drop `admins_update_all`, FK cascade replaced by an `auth.users` AFTER DELETE trigger that only deletes active members, state-aware `verify_card_token` and `is_email_confirmed`, `member_badges.awarded_by` — route: delegated (writer trigger: migration + 3+ test files)
 - [x] T2 — M2 `roles_expand`: role CHECK widened (member/admin/board/superadmin), `role_since`, `role_rank`, `has_role`, `is_admin` on top of it, role-guard trigger for BR-10/11/12, existing guards switched to `has_role` — route: delegated
-- [ ] T3 — M3 `audit_log`: append-only table, RLS read for board, `audit_write()` internal, `log_admin_event()` whitelist — route: delegated
+- [x] T3 — M3 `audit_log`: append-only table, RLS read for board, `audit_write()` internal, `log_admin_event()` whitelist — route: delegated
 - [ ] T4 — TypeScript role model: `requireRole()` guard, proxy `/admin` prefix, NavBar and `useAuthUser` with `isBoardRole()` — route: delegated
 - [ ] T5 — M4 read RPCs: `admin_list_members`, `admin_get_member`, `admin_stats`, `admin_list_activity` — route: delegated
 - [ ] T6 — Leave and rejoin functions (ban, sessions, card token) — route: delegated
@@ -112,6 +112,11 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
    like `board`), and no current code path writes `role`. After applying, an admin should still
    open `/admin`, see the member list and regenerate a card. From then on a superadmin can only
    be demoted while two others remain (BR-10): promote the replacement first.
+3. `supabase/migrations/20261005100200_audit_log.sql` (T3). Safe to apply before any code
+   ships: it only adds `audit_log`, its trigger and three functions; nothing reads or writes
+   them yet. Must be applied before T5+ code is deployed (every admin function and action
+   writes an entry). After applying, `select count(*) from public.audit_log` as an admin works
+   and an UPDATE on the table fails with `audit:append_only`.
 
 ## Progress
 
@@ -131,6 +136,17 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   `NOT NULL DEFAULT now()`; `regenerate_card_token` does not update it yet (T7).
   `scripts/migrate-members.mjs` sets `membership_start_date` only, so a future import would
   get `current_joined_on` = import day; existing rows are backfilled.
+- Independent read-only verification (tier `high`): PASS, no defects. Follow-ups carried to
+  later tasks:
+  - T5/T9a: `get_all_members_for_admin` inner-joins `auth.users`, so former-member stubs
+    without a login account drop out of the admin list and CSV; use a LEFT JOIN plus the
+    state columns.
+  - T6: a former member whose login was deleted and who signs up again gets a new row and
+    member number from `handle_new_user`; the rejoin flow (BR-1) must account for it.
+  - T27 runbook: `DROP CONSTRAINT members_id_fkey` and `DROP POLICY admins_update_all` have
+    no `IF EXISTS`; confirm both names on prod before applying M1 (it fails atomically).
+  - Optional: `anon`/`authenticated` still hold TRIGGER and REFERENCES on `members` and
+    `member_badges` (Supabase default, not exploitable through PostgREST).
 
 ### T2 — done (route: delegated)
 
@@ -164,6 +180,48 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Not guarded: DELETE of a superadmin row (account deletion cascades through
   `handle_deleted_user`); T8/T26 must block a superadmin's self-deletion/leave per BR-10/BR-12.
 
+### T3 — done (route: delegated)
+
+- Commit: `feat(db): Add an append-only admin audit log` on `develop-users`
+  (hash in `git log -- supabase/migrations/20261005100200_audit_log.sql`).
+- Test-first: RED observed with the new `tests/integration/audit-log.test.ts` (suite failed in
+  setup: `log_admin_event` not found) and the new superadmin block in `roles.test.ts`; GREEN
+  after `npm run db:reset` (55/55 in those two files).
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 61 files / 684 tests passed; `npm run test:integration` 17 files /
+  187 tests passed (run twice, both green).
+- Action keys (spec §5.1, 18, the table CHECK): `member.update`, `member.reveal_sensitive`,
+  `membership.leave`, `membership.rejoin`, `badge.award`, `badge.revoke`, `card.regenerate`,
+  `export.members_csv`, `export.member_data`, `export.member_register`, `export.emails`,
+  `member.send_access_link`, `role.grant`, `role.revoke`, `member.anonymise`, `member.purge`,
+  `account.purge_unconfirmed`, `ops.cache_refresh`.
+- `log_admin_event()` whitelist (board+, authenticated only): the 4 exports, `member.reveal_sensitive`,
+  `member.send_access_link`, `ops.cache_refresh`. `export.member_register` needs superadmin.
+  Target required (not purged) for member_data / reveal / access link (access link: active
+  only); no target for the others. Reveal needs `details.field` = `dni`|`phone`; on a former
+  member only a superadmin, only `dni`, with a non-blank reason (BR-21). Not enforced (open):
+  minimum reason length (D-E), A-11 on a former member stays board (D-D). If T7 moves the
+  reveal into a DB function, drop it from the whitelist there.
+- Grants: anon nothing; authenticated SELECT (RLS `TO authenticated USING (SELECT has_role('board'))`);
+  service_role SELECT only (no INSERT/UPDATE/DELETE/TRUNCATE; sequence revoked too). Writes only
+  through `audit_write()` (SECURITY DEFINER, EXECUTE revoked from PUBLIC/anon/authenticated/
+  service_role; T5–T8 functions call it) and `log_admin_event()`. Trigger refuses UPDATE,
+  TRUNCATE and DELETE of entries younger than 3 years for every role including the owner; T12
+  retention deletes as the owner (SECURITY DEFINER function or postgres connection).
+- BR-15 enforced in `audit_write()` and again as a CHECK (`audit_details_leak()`): no key at
+  any depth named dni/nie/dni_nie/dni_nie_encrypted/phone/phone_encrypted/phone_number/
+  telefon/telephone/mobile, and no string value shaped like a DNI, NIE or phone (9–15 digits).
+  Field names go as values (`{"field":"dni"}`, `{"fields":["dni_nie"]}`): T7's `member.update`
+  details must follow that shape. The free-text reason is not scanned.
+- Errors: `audit:forbidden` 42501; `audit:action_not_allowed`, `audit:invalid_target`,
+  `audit:invalid_details`, `audit:reason_required` 22023; `audit:sensitive_details`,
+  `audit:append_only` 23514. Unknown keys passed to `audit_write()` fail on the CHECK (23514).
+- Tests: superadmin cases live in `roles.test.ts` (the only file allowed to create superadmins,
+  it asserts the global count). New helper `runSqlAsPostgres()` (`tests/helpers/supabase.ts`)
+  runs one statement as `postgres` through the local postgres-meta `/pg/query` endpoint (service
+  role key), used to prove the trigger stops the owner and to insert a backdated row. Audit rows
+  written by tests cannot be deleted, so they stay until `db:reset`; tests filter by own ids.
+
 ## Next step
 
-T3.
+T4.

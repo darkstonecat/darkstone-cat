@@ -120,6 +120,33 @@ export function createServiceClientAs(userId: string) {
 }
 
 /**
+ * Run one SQL statement as the `postgres` role (the owner of the public schema) through the
+ * local stack's postgres-meta endpoint (`/pg/query`, behind the service role key). Only for
+ * tests that must reach past the API roles, e.g. to prove that a trigger also stops the
+ * owner. Pass values through `parameters` ($1, $2, …), never by string interpolation.
+ */
+export async function runSqlAsPostgres<T = Record<string, unknown>>(
+  query: string,
+  parameters: unknown[] = []
+): Promise<{ data: T[] | null; error: { code?: string; message: string } | null }> {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/pg/query`, {
+    method: 'POST',
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query, parameters }),
+  })
+  const body = await res.json()
+  if (!res.ok) {
+    return { data: null, error: { code: body?.code, message: String(body?.message ?? body?.error) } }
+  }
+  return { data: body as T[], error: null }
+}
+
+/**
  * Delete a test user — removes the members row first (a former member's row
  * survives deleting the auth user), then deletes the auth.users entry.
  */
