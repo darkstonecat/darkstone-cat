@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 
 // Admin client — bypasses RLS, full access.
@@ -77,6 +78,45 @@ export async function createAuthenticatedClient(
   const { error } = await client.auth.signInWithPassword({ email, password })
   if (error) throw error
   return client
+}
+
+// JWT secret of the local Supabase CLI stack (the demo keys in .github/workflows/ci.yml are
+// signed with it). SUPABASE_JWT_SECRET overrides it for a stack with a custom secret.
+const LOCAL_JWT_SECRET =
+  process.env.SUPABASE_JWT_SECRET ?? 'super-secret-jwt-token-with-at-least-32-characters-long'
+
+function signHs256(headerAndPayload: string) {
+  return createHmac('sha256', LOCAL_JWT_SECRET).update(headerAndPayload).digest('base64url')
+}
+
+/**
+ * A client that runs as `service_role` (full privileges, no RLS) while `auth.uid()` returns
+ * `userId`. It stands in for a SECURITY DEFINER function called by that user: the database
+ * code runs with elevated privileges but still sees who the caller is. Only for database
+ * guards that key on `auth.uid()` (e.g. the role guard, BR-11).
+ */
+export function createServiceClientAs(userId: string) {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  const [header, payload, signature] = serviceKey.split('.')
+  if (!signature || signHs256(`${header}.${payload}`) !== signature) {
+    throw new Error(
+      'createServiceClientAs: SUPABASE_SERVICE_ROLE_KEY is not signed with the local JWT secret; set SUPABASE_JWT_SECRET'
+    )
+  }
+
+  const claims = {
+    iss: 'supabase-demo',
+    role: 'service_role',
+    sub: userId,
+    exp: Math.floor(Date.now() / 1000) + 3600,
+  }
+  const body = Buffer.from(JSON.stringify(claims)).toString('base64url')
+  const token = `${header}.${body}.${signHs256(`${header}.${body}`)}`
+
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  })
 }
 
 /**

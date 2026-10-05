@@ -48,12 +48,13 @@ first, then the server layer, then the screens.
 
 ## Delivery
 
-- Strategy: `ask-on-risk`. Forecast ~10,000 authored lines, so the chain strategy
-  (`stacked-to-main` or `feature-branch-chain`) is pending the user's choice before any PR.
+- Strategy: `exception-ok`. Forecast ~10,000 authored lines; the user chose (2026-10-05) to
+  keep everything on `develop-users` with no chained PR slicing.
 - Work-unit commits on `develop-users` (not the default branch). Push, PR and merge are the
   user's decisions.
 - RDD: off (global). Verification per task follows the writer's reported commands plus one
-  parent spot check.
+  parent spot check; `gentle-ai review assess` tier `high` adds an independent read-only
+  verifier.
 
 ## Tasks
 
@@ -62,7 +63,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 ### Data model and database functions
 
 - [x] T1 — M1 `membership_state`: membership columns + backfill, NOT VALID CHECKs, `card_issued_at`, column-level UPDATE grants, `members_update_own` blocks former members, drop `admins_update_all`, FK cascade replaced by an `auth.users` AFTER DELETE trigger that only deletes active members, state-aware `verify_card_token` and `is_email_confirmed`, `member_badges.awarded_by` — route: delegated (writer trigger: migration + 3+ test files)
-- [ ] T2 — M2 `roles_expand`: role CHECK widened (member/admin/board/superadmin), `role_since`, `role_rank`, `has_role`, `is_admin` on top of it, role-guard trigger for BR-10/11/12, existing guards switched to `has_role` — route: delegated
+- [x] T2 — M2 `roles_expand`: role CHECK widened (member/admin/board/superadmin), `role_since`, `role_rank`, `has_role`, `is_admin` on top of it, role-guard trigger for BR-10/11/12, existing guards switched to `has_role` — route: delegated
 - [ ] T3 — M3 `audit_log`: append-only table, RLS read for board, `audit_write()` internal, `log_admin_event()` whitelist — route: delegated
 - [ ] T4 — TypeScript role model: `requireRole()` guard, proxy `/admin` prefix, NavBar and `useAuthUser` with `isBoardRole()` — route: delegated
 - [ ] T5 — M4 read RPCs: `admin_list_members`, `admin_get_member`, `admin_stats`, `admin_list_activity` — route: delegated
@@ -106,6 +107,11 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
    code ships: no current code path writes a column that loses its UPDATE grant. Must be
    applied before T6+ code is deployed (leave/rejoin functions use its columns). After applying,
    check that profile edit, the gaming-account link/unlink and the newsletter switch still save.
+2. `supabase/migrations/20261005100100_roles_expand.sql` (T2). Safe to apply before any code
+   ships: `admin` keeps every permission (`is_admin()` = `has_role('board')`, and `admin` ranks
+   like `board`), and no current code path writes `role`. After applying, an admin should still
+   open `/admin`, see the member list and regenerate a card. From then on a superadmin can only
+   be demoted while two others remain (BR-10): promote the replacement first.
 
 ## Progress
 
@@ -126,6 +132,38 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   `scripts/migrate-members.mjs` sets `membership_start_date` only, so a future import would
   get `current_joined_on` = import day; existing rows are backfilled.
 
+### T2 — done (route: delegated)
+
+- Commit: `feat(db): Add board and superadmin roles with a role guard` on `develop-users`
+  (hash in `git log -- supabase/migrations/20261005100100_roles_expand.sql`).
+- Test-first: RED observed with the new `tests/integration/roles.test.ts` before the migration
+  (suite failed in setup: `members_role_check` rejected `board`); GREEN after `npm run db:reset`
+  (28/28).
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 61 files / 684 tests passed; `npm run test:integration` 16 files /
+  160 tests passed (run twice, both green).
+- Role guard errors (SQLSTATE 23514, message prefix for the app): `role_guard:self_role_change`
+  (BR-11), `role_guard:last_superadmin` (BR-10), `role_guard:former_member_role` (BR-12). The
+  trigger fires on `UPDATE OF role, left_on`, so a leave of a member who holds a role gets the
+  BR-12 message too; the `members_former_member_no_role` CHECK (NOT VALID) is the backstop.
+- BR-10 follows the spec wording ("if that would leave fewer than two"): a demotion is blocked
+  whenever fewer than two OTHER active superadmins remain, also with only one superadmin today.
+  Promotions are always allowed, so the bootstrap (0 → 1 → 2) works. Concurrent demotions are
+  serialised by a transaction advisory lock. BR-10 applies to the service role too.
+- BR-11 is tested with `createServiceClientAs(userId)` (`tests/helpers/supabase.ts`): an HS256
+  JWT with `role=service_role` and `sub=userId`, signed with the local Supabase secret, so the
+  update runs with elevated privileges while `auth.uid()` is the user, as the T8 SECURITY
+  DEFINER functions will. T8 still tests BR-11 through its real function.
+- `role_since`: backfilled with `created_at` for existing non-member roles (the real grant date
+  was never recorded), NULL for members. The trigger stamps `now()` when the rank changes, NULL
+  on `member`, and keeps it when the rank stays (admin → board in M7).
+- `has_role()` is EXECUTE for `authenticated` only (revoked from PUBLIC, anon, service_role).
+  RLS policies that anon can reach must call `is_admin()` (PUBLIC grant kept) or be scoped
+  `TO authenticated` (relevant for the T3 audit_log policy). `is_admin()` now also requires an
+  active membership.
+- Not guarded: DELETE of a superadmin row (account deletion cascades through
+  `handle_deleted_user`); T8/T26 must block a superadmin's self-deletion/leave per BR-10/BR-12.
+
 ## Next step
 
-T2.
+T3.
