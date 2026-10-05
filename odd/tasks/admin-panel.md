@@ -80,7 +80,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T9a — Export functions + routes: members CSV, member data (A-10, A-11) — route: delegated (writer trigger: migration + lib + 2 routes + 6 test files)
 - [ ] T9b — Export functions + routes: e-mail lists, llibre de socis (A-16, S-4) — route: delegated
 - [ ] T10 — Mail module (`src/lib/mail/`) + leave/rejoin actions + templates — route: delegated
-- [ ] T11a — Server actions A-4, A-5, A-8, A-9 — route: delegated
+- [x] T11a — Server actions A-4, A-5, A-8, A-9 — route: delegated (writer trigger: actions + error module + 3 test files)
 - [ ] T11b — Server actions A-15, roles (S-1, S-2), anonymise (S-3) — route: delegated
 - [ ] T12 — `run_retention()` + `/api/cron/retention` + workflow (dry run first) — route: delegated
 - [ ] T13 — `ops_job_runs` + refresh action (A-14), cron route records automatic runs — route: delegated
@@ -775,6 +775,17 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Prod risks: runbook 8 (apply and deploy together; re-encrypt; legacy fallback until then). A
   legacy ciphertext copied between rows before this migration still decrypts for the copier
   until the script runs; the script reports it as `duplicate_ciphertext` instead of binding it.
+- Independent read-only verification (tier `high`): PASS, no blocking defects (a board session
+  sees 0 other rows/badges; no views or realtime publications; the only ciphertext path is the
+  audited `admin_reveal_sensitive`; crypto, trigger, script and detector v3 sound). Follow-ups
+  (folded into T9b):
+  - `scripts/reencrypt-member-secrets.mjs` exits 0 when `duplicates>0`; a duplicate is evidence
+    of the T7 exploit, so exit non-zero.
+  - Runbook 8: `duplicates=0` is not proof that no copy happened (a victim who changed their
+    value since breaks the match); rolling back to pre-T7b code after v2 values exist breaks every
+    DNI/phone read and write.
+  - Detector misses compound keys (`telefono_movil`, `nie_number`, `dni_hash`); low risk because
+    audit keys are set in code.
 
 ### T9a — done (route: delegated)
 
@@ -873,6 +884,81 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Prod risks: runbook 9. PostgREST `max_rows` 1000 caps the CSV (the route refuses a partial
   file; prod has ~190 rows). The A-11 function locks the member row for the length of the call.
 
+### T11a — done (route: delegated)
+
+- Commit: `feat(admin): Add server actions to edit, reveal, badge and reissue cards` on
+  `develop-users` (hash in `git log -- src/lib/admin/member-actions.ts`).
+- Test-first: RED observed with `tests/lib/admin-action-errors.test.ts` and
+  `tests/server/actions/admin-member-actions.test.ts` before the code (both files failed to
+  import the missing modules); GREEN after (136/136). `tests/integration/admin-member-actions.test.ts`
+  was written right after the code and passed on its first run (10/10).
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 70 files /
+  949 tests passed; `npm run test:integration` 24 files / 454 tests passed.
+- `src/lib/admin/member-actions.ts` (`"use server"`). Every action: `getAdminAccess('board')`
+  first (`unauthenticated` / `forbidden`), then the member id must be a UUID string (else
+  `invalid`, lower-cased before use), then input validation, then the DB function with the
+  user's SESSION client (never the service role). Logs only `[admin-member] <action> failed
+  code=<Postgres code | encrypt | decrypt | unknown>`; never a DB message, value, name or reason.
+  - `updateMember(memberId: string, input: MemberUpdateInput): Promise<{ changed: string[] } |
+    { error }>` (A-4). `MemberUpdateInput = { first_name, last_name, postal_code?,
+    ludoya_username?, bgg_username?, phone?, dni? }`. Names always required (trimmed, 1..100,
+    as `updateMemberProfile`). Optional keys are patched only when present and not `undefined`;
+    `""`/`null` clears; postal code / usernames / phone / DNI use the profile rules and helpers
+    (`isValidPostalCode`, `normalizeUsername`, `isValidPhone`, `isValidDniNie`). DNI/phone are
+    encrypted with `encrypt(plain, memberId)` (the TARGET id) and sent only when present: the
+    UI must send them only if the admin edited the field. Other keys (e-mail, role, …) are
+    ignored. Returns the DB's changed audit field names (`first_name, last_name, postal_code,
+    ludoya_username, bgg_username, phone, dni`); empty for a no-op. Revalidates
+    `/[locale]/admin/members` and `/[locale]/admin/members/[number]` (`page`) only when
+    something changed.
+  - `revealSensitive(memberId: string, field: 'dni' | 'phone', reason?: string | null):
+    Promise<{ value: string } | { error }>` (A-5). Reason trimmed, blank → null, > 500 code
+    points → `reason_too_long` before the DB; the 10-character minimum for a former member's DNI
+    is left to the DB (`reason_required`, D-E). Decrypts with `decrypt(value, memberId)`; a
+    value bound to another member → `failed`. No revalidation (value shown on that screen only;
+    the member file's activity list refreshes on the next navigation).
+  - `awardBadge(memberId: string, badgeKey: string, note?: string | null): Promise<{ ok: true;
+    awardedAt: string | null } | { error }>`, `revokeBadge(memberId: string, badgeKey: string,
+    reason?: string | null): Promise<{ ok: true } | { error }>` (A-8). Key must match
+    `^[a-z0-9_]{1,64}$` (else `invalid_badge`, no DB call); the catalogue is checked by the DB
+    (`admin:invalid_argument` → `invalid_badge`). Note/reason as the reveal reason. Revalidate
+    both pages.
+  - `regenerateCard(memberId: string): Promise<{ ok: true } | { error }>` (A-9). Never returns
+    or logs the token. Revalidates both pages.
+- `src/lib/admin/action-errors.ts` (pure): `AdminActionError`, `adminDbErrorCode(error)`,
+  `isMemberId(value)`. Full code list (T19/T21 map these to texts): `unauthenticated`,
+  `forbidden`, `invalid`, `not_found`, `not_active`, `invalid_name`, `invalid_phone`,
+  `invalid_dni`, `invalid_postal_code`, `invalid_username`, `reason_required`,
+  `reason_too_long`, `no_value`, `badge_held`, `badge_not_held`, `invalid_badge`, `failed`.
+  Mapping (prefix read from the start of `error.message` only): `admin:forbidden`,
+  `audit:forbidden`, bare SQLSTATE 42501 → `forbidden`; `admin:not_found` → `not_found`;
+  `admin:not_active` → `not_active`; `admin:invalid_argument` → `invalid` (badge actions:
+  `invalid_badge`); `admin:invalid_value: <key>` → `first_name`/`last_name` `invalid_name`,
+  `postal_code` `invalid_postal_code`, `*_username` `invalid_username`, `phone_encrypted`
+  `invalid_phone`, `dni_nie_encrypted` `invalid_dni`, other keys `invalid`; `admin:no_value`,
+  `admin:reason_required`, `admin:reason_too_long`, `admin:badge_held`, `admin:badge_not_held`
+  → same name; `audit:sensitive_details` → `invalid_name` (names are the only free text these
+  actions put in audit details); anything else (`members:ciphertext_unbound`, `admin:isolation`,
+  network, unknown prefixes) → `failed`.
+- Codes per action: update `unauthenticated, forbidden, invalid, invalid_name, invalid_phone,
+  invalid_dni, invalid_postal_code, invalid_username, not_found, not_active, failed`; reveal
+  `unauthenticated, forbidden, invalid, reason_required, reason_too_long, no_value, not_found,
+  failed`; award/revoke `unauthenticated, forbidden, invalid, invalid_badge, reason_too_long,
+  badge_held | badge_not_held, not_found, not_active, failed`; regenerate `unauthenticated,
+  forbidden, invalid, not_found, not_active, failed`.
+- Tests: unit (guard denial paths for all five; validation without DB call; non-string input;
+  real AES-GCM round-trip with the target id and failure with another id; DNI/phone/optional
+  keys omitted when absent; error mapping per prefix; console spied for values, reasons, names
+  and DB messages; token never returned). Integration with real board / member session clients
+  (only `createClient` and `revalidatePath` mocked): encrypted DNI/phone accepted by
+  `members_ciphertext_guard` and decrypt to the original; no-op keeps ciphertext and writes no
+  entry; reveal returns the plaintext and its audit entry holds only `{field}` + reason; badges
+  held/not held/catalogue/former; card token rotates. No superadmin (former-member DNI reveal by
+  a superadmin stays covered by `roles.test.ts`).
+- Deviations: a malformed member id answers `invalid` (not `not_found`); `awardBadge` also
+  returns `awardedAt` (the A-8 dialog shows "Ja la té des del …"). No i18n texts added.
+- Prod risk: none beyond runbooks 6 and 8 (functions and ciphertext guard must be live).
+
 ## Next step
 
-T9b.
+T10 / T11b (T9b waits for D-B).
