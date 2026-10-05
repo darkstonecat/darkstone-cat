@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useLenis } from "./SmoothScroll";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuthUser } from "@/hooks/useAuthUser";
+import { isBoardRole } from "@/lib/auth/roles";
 import { signOutCurrentSession } from "@/lib/supabase/session-actions";
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -378,7 +379,7 @@ export default function NavBar() {
                       >
                         {t("profile")}
                       </Link>
-                      {role === "admin" && (
+                      {isBoardRole(role) && (
                         <Link
                           href="/admin"
                           onClick={() => setDropdownOpen(false)}
@@ -532,7 +533,7 @@ export default function NavBar() {
                   >
                     {t("profile")}
                   </Link>
-                  {role === "admin" && (
+                  {isBoardRole(role) && (
                     <Link
                       href="/admin"
                       onClick={closeMobileMenu}

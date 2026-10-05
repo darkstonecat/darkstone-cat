@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
-import { isAdmin } from "@/lib/supabase/auth";
+import { requireRole } from "@/lib/admin/guard";
 import { getAllMembers } from "@/lib/admin/actions";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -39,12 +39,12 @@ export default async function AdminPage({
 }) {
   const { locale } = await params;
 
-  const admin = await isAdmin();
+  // Board members and superadmins only; anyone else gets the 404 page.
+  await requireRole("board");
 
-  const [tNav, tMeta, tAdmin] = await Promise.all([
+  const [tNav, tMeta] = await Promise.all([
     getTranslations({ locale, namespace: "nav" }),
     getTranslations({ locale, namespace: "metadata" }),
-    getTranslations({ locale, namespace: "admin" }),
   ]);
 
   const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
@@ -57,22 +57,19 @@ export default async function AdminPage({
     tMeta("admin_description"),
   );
 
-  // Compute stats only if admin
   let stats = { total: 0, newThisMonth: 0, newsletter: 0 };
-  if (admin) {
-    const { data: members } = await getAllMembers();
-    if (members) {
-      const now = new Date();
-      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      stats = {
-        total: members.length,
-        newThisMonth: members.filter((m) => {
-          if (!m.created_at) return false;
-          return new Date(m.created_at) >= firstOfMonth;
-        }).length,
-        newsletter: members.filter((m) => m.newsletter_accepted).length,
-      };
-    }
+  const { data: members } = await getAllMembers();
+  if (members) {
+    const now = new Date();
+    const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    stats = {
+      total: members.length,
+      newThisMonth: members.filter((m) => {
+        if (!m.created_at) return false;
+        return new Date(m.created_at) >= firstOfMonth;
+      }).length,
+      newsletter: members.filter((m) => m.newsletter_accepted).length,
+    };
   }
 
   return (
@@ -86,14 +83,7 @@ export default async function AdminPage({
 
       <section className="flex-1 bg-brand-beige pb-20">
         <div className="container mx-auto max-w-4xl px-6 pt-16">
-          {admin ? (
-            <AdminDashboard stats={stats} />
-          ) : (
-            <div className="rounded-2xl border border-stone-custom/10 bg-brand-white p-8 text-center">
-              <h2 className="text-xl font-bold text-stone-custom">{tAdmin("unauthorized_title")}</h2>
-              <p className="mt-2 text-stone-custom/70">{tAdmin("unauthorized_message")}</p>
-            </div>
-          )}
+          <AdminDashboard stats={stats} />
         </div>
       </section>
 

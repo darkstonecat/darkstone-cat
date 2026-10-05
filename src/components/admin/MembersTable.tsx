@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { MdSearch, MdFileDownload, MdArrowUpward, MdArrowDownward } from "react-icons/md";
 import ExportConfirmDialog from "./ExportConfirmDialog";
+import { cn } from "@/lib/utils";
+import { isBoardRole, isSuperadmin, roleLabelKey, roleRank, type Role } from "@/lib/auth/roles";
 
 export type MemberRow = {
   memberNumber: string;
@@ -14,7 +16,7 @@ export type MemberRow = {
   phoneMasked: string | null;
   dniMasked: string | null;
   postalCode: string | null;
-  role: "member" | "admin";
+  role: Role;
   membershipStartDate: string | null;
 };
 
@@ -22,6 +24,13 @@ type SortColumn = "memberNumber" | "name" | "email" | "role" | "membershipStartD
 type SortDirection = "asc" | "desc";
 
 const PAGE_SIZE = 15;
+
+// Role chips (docs/mockups/admin-panel/README.md): "Junta" orange, "Superadmin" dark.
+function roleChipClass(role: Role): string {
+  return isSuperadmin(role)
+    ? "bg-stone-custom text-brand-white"
+    : "bg-brand-orange/10 text-brand-orange-text";
+}
 
 type MembersTableProps = {
   members: MemberRow[];
@@ -64,7 +73,7 @@ export default function MembersTable({ members }: MembersTableProps) {
           cmp = a.email.localeCompare(b.email);
           break;
         case "role":
-          cmp = a.role.localeCompare(b.role);
+          cmp = (roleRank(a.role) ?? 0) - (roleRank(b.role) ?? 0);
           break;
         case "membershipStartDate": {
           const da = a.membershipStartDate ?? "";
@@ -177,8 +186,8 @@ export default function MembersTable({ members }: MembersTableProps) {
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-stone-custom/60">{m.phoneMasked ?? t("not_provided")}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-stone-custom/60">{m.dniMasked ?? t("not_provided")}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm">
-                    {m.role === "admin" ? (
-                      <span className="rounded-full bg-brand-orange/10 px-2.5 py-0.5 text-xs font-semibold text-brand-orange-text">{t("role_admin")}</span>
+                    {isBoardRole(m.role) ? (
+                      <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", roleChipClass(m.role))}>{t(roleLabelKey(m.role))}</span>
                     ) : (
                       <span className="text-stone-custom/70">{t("role_member")}</span>
                     )}
@@ -203,8 +212,8 @@ export default function MembersTable({ members }: MembersTableProps) {
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-sm font-medium text-stone-custom">#{m.memberNumber}</span>
                 <div className="flex items-center gap-2">
-                  {m.role === "admin" && (
-                    <span className="rounded-full bg-brand-orange/10 px-2 py-0.5 text-xs font-semibold text-brand-orange-text">{t("role_admin")}</span>
+                  {isBoardRole(m.role) && (
+                    <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", roleChipClass(m.role))}>{t(roleLabelKey(m.role))}</span>
                   )}
                 </div>
               </div>

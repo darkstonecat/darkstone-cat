@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { motion, AnimatePresence } from "motion/react";
 import { updateMemberProfile, type ProfileUpdateError } from "@/lib/profile/actions";
+import { roleLabelKey, type Role } from "@/lib/auth/roles";
 
 type ProfileEditFormProps = {
   email: string;
@@ -16,7 +17,7 @@ type ProfileEditFormProps = {
   ludoyaUsername: string | null;
   bggUsername: string | null;
   memberNumber: string;
-  role: "member" | "admin";
+  role: Role;
   newsletterAccepted: boolean;
 };
 
@@ -256,7 +257,7 @@ export default function ProfileEditForm({
                   {t("label_role")}
                 </label>
                 <div className={readOnlyClass}>
-                  {role === "admin" ? t("role_admin") : t("role_member")}
+                  {t(roleLabelKey(role))}
                 </div>
               </div>
 

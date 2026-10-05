@@ -20,16 +20,16 @@ test.describe('Admin dashboard', () => {
     await expect(membersLink).toBeVisible()
   })
 
-  test('member (non-admin) sees unauthorized or redirect', async ({ memberPage: page }) => {
-    await page.goto(PAGES.admin)
-    // Middleware redirects non-admin authenticated users to login,
-    // or the page itself shows an unauthorized message
-    const url = page.url()
-    const isRedirected = url.includes('/login')
-    const hasUnauthorized = await page.getByText(/no autoritzat|no tens permís|unauthorized/i).count() > 0
-    const isOnAdmin = url.includes('/admin')
-    // Either redirected or showing unauthorized message (member IS authenticated,
-    // middleware only checks for auth not role — the page checks role)
-    expect(isRedirected || hasUnauthorized || isOnAdmin).toBeTruthy()
+  test('member (no board role) gets the 404 page', async ({ memberPage: page }) => {
+    // The proxy only requires a session; the page guard (requireRole) hides the
+    // panel from anyone without a board role.
+    const response = await page.goto(PAGES.admin)
+    expect(response?.status()).toBe(404)
+    await expect(page.getByRole('heading', { name: 'Pàgina no trobada' })).toBeVisible()
+  })
+
+  test('member gets the 404 page on the members list too', async ({ memberPage: page }) => {
+    const response = await page.goto(PAGES.adminMembers)
+    expect(response?.status()).toBe(404)
   })
 })

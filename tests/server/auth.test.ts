@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest'
 import {
   getCurrentUser,
   getCurrentMember,
-  isAdmin,
   getProfileData,
 } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
@@ -22,7 +21,7 @@ const mockMember = {
   first_name: 'Test',
   last_name: 'User',
   member_number: 'DS-001',
-  role: 'member' as 'member' | 'admin',
+  role: 'member' as 'member' | 'admin' | 'board' | 'superadmin',
   phone_encrypted: null,
   dni_nie_encrypted: null,
   postal_code: null,
@@ -87,23 +86,6 @@ describe('getCurrentMember', () => {
   it('returns null when member row not found', async () => {
     setupMock({ user: mockUser, member: null })
     expect(await getCurrentMember()).toBeNull()
-  })
-})
-
-describe('isAdmin', () => {
-  it('returns true for admin role', async () => {
-    setupMock({ user: mockUser, member: { ...mockMember, role: 'admin' } })
-    expect(await isAdmin()).toBe(true)
-  })
-
-  it('returns false for member role', async () => {
-    setupMock({ user: mockUser, member: mockMember })
-    expect(await isAdmin()).toBe(false)
-  })
-
-  it('returns false when not authenticated', async () => {
-    setupMock({ user: null })
-    expect(await isAdmin()).toBe(false)
   })
 })
 

@@ -65,7 +65,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T1 — M1 `membership_state`: membership columns + backfill, NOT VALID CHECKs, `card_issued_at`, column-level UPDATE grants, `members_update_own` blocks former members, drop `admins_update_all`, FK cascade replaced by an `auth.users` AFTER DELETE trigger that only deletes active members, state-aware `verify_card_token` and `is_email_confirmed`, `member_badges.awarded_by` — route: delegated (writer trigger: migration + 3+ test files)
 - [x] T2 — M2 `roles_expand`: role CHECK widened (member/admin/board/superadmin), `role_since`, `role_rank`, `has_role`, `is_admin` on top of it, role-guard trigger for BR-10/11/12, existing guards switched to `has_role` — route: delegated
 - [x] T3 — M3 `audit_log`: append-only table, RLS read for board, `audit_write()` internal, `log_admin_event()` whitelist — route: delegated
-- [ ] T4 — TypeScript role model: `requireRole()` guard, proxy `/admin` prefix, NavBar and `useAuthUser` with `isBoardRole()` — route: delegated
+- [x] T4 — TypeScript role model: `requireRole()` guard, proxy `/admin` prefix, NavBar and `useAuthUser` with `isBoardRole()` — route: delegated
 - [ ] T5 — M4 read RPCs: `admin_list_members`, `admin_get_member`, `admin_stats`, `admin_list_activity` — route: delegated
 - [ ] T6 — Leave and rejoin functions (ban, sessions, card token) — route: delegated
 - [ ] T7 — Update, reveal, badge and card functions — route: delegated
@@ -179,6 +179,19 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   active membership.
 - Not guarded: DELETE of a superadmin row (account deletion cascades through
   `handle_deleted_user`); T8/T26 must block a superadmin's self-deletion/leave per BR-10/BR-12.
+- Independent read-only verification (tier `high`): PASS, no defects (probed in rolled-back
+  transactions: no escalation, BR-10 holds for multi-row and concurrent demotions). Follow-ups:
+  - T8: add a `BEFORE DELETE` branch to the role guard so deleting an active superadmin row
+    respects BR-10 in the database (BR-16), not only in app code.
+  - T11b: call the T8 role functions with the user's session client, never the service role;
+    without a JWT `sub` BR-11 does not apply. T8 functions must not use REPEATABLE READ (BR-10
+    relies on READ COMMITTED snapshots).
+  - T4: TypeScript role checks to migrate: `src/lib/supabase/auth.ts:47`,
+    `src/app/api/admin/members/export/route.ts:24`, `src/components/NavBar.tsx:381,535`,
+    `src/components/admin/MembersTable.tsx:180,206`, `src/components/profile/ProfileEditForm.tsx:259`,
+    `src/hooks/useAuthUser.ts:9,95`.
+  - Test gaps in `roles.test.ts` (add when the file is next touched): a superadmin leaving via
+    `role` + `left_on` in one UPDATE, multi-row demotion, concurrency.
 
 ### T3 — done (route: delegated)
 
@@ -222,6 +235,42 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   role key), used to prove the trigger stops the owner and to insert a backdated row. Audit rows
   written by tests cannot be deleted, so they stay until `db:reset`; tests filter by own ids.
 
+### T4 — done (route: delegated)
+
+- Commit: `feat(auth): Recognise board and superadmin roles in the app` on `develop-users`
+  (hash in `git log -- src/lib/auth/roles.ts`).
+- Test-first: RED observed with the new/changed tests before the code (roles and guard suites
+  failed to import; 12 failing in event-image-routes, members-export, useAuthUser, NavBar admin
+  link, MembersTable roles); GREEN after (9 files / 106 tests). The new proxy test passed on the
+  old code too: `matchesRoute` already matched by prefix, so the list was only simplified.
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 66 files /
+  753 tests passed; `npm run test:integration` 17 files / 187 tests passed;
+  `npx playwright test e2e/admin e2e/navigation` 47 passed, 1 failed:
+  `locale-routing.spec.ts` "language switcher is visible" (pre-existing: it looks for a
+  `button`/`select`, the switcher renders links since bdec996; untouched by T4).
+- `src/lib/auth/roles.ts` (pure, client + server): `Role`, `ROLES`, `toRole`, `roleRank`,
+  `hasRoleAtLeast`, `isBoardRole`, `isSuperadmin`, `roleLabelKey`. Ranks mirror `role_rank()`;
+  unknown values have no rank and never pass.
+- `src/lib/admin/guard.ts` (`server-only`): `getAdminAccess(min)` returns `ok` + actor
+  (`{ id, role }`), `unauthenticated` or `forbidden` for API routes (401/403); `requireRole(min)`
+  for pages redirects to the localized `/login` without a session and calls `notFound()` for
+  anyone else. Both read `role, left_on` with the session client: `left_on` set, an unknown role
+  or an unreadable row is forbidden (same rule as `has_role()`).
+- `isAdmin()` removed from `src/lib/supabase/auth.ts`; every caller migrated (`/admin`,
+  `/admin/members`, `/events/images`, the event image API, the members export). `Member.role`
+  is `Role`.
+- Behaviour change: a signed-in member without a board role now gets the 404 page on `/admin`,
+  `/admin/members` and `/events/images` instead of the "Accés restringit" card; the unused
+  `admin.unauthorized_*` keys were removed. The e2e dashboard spec asserts the 404.
+- Proxy: `ADMIN_ROUTES = ["/admin", "/events/images"]` (prefix, every locale); still session only.
+- Labels: `role_board` ("Junta" / "Junta" / "Board") and `role_superadmin` ("Superadmin") in the
+  `profile` and `admin` namespaces replace `role_admin`. The legacy `admin` role is labelled
+  as board. MembersTable chips: Junta orange, Superadmin dark (mockup README); sorting by role
+  uses the rank. NavBar shows the admin link for any board role; `useAuthUser` maps unknown
+  roles to null.
+- Follow-up for T14: `requireRole()` is not memoised per request; wrap it in `React.cache` if
+  the admin layout and the page both call it.
+
 ## Next step
 
-T4.
+T5.

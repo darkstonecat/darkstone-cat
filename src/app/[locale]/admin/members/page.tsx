@@ -1,7 +1,8 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
-import { isAdmin } from "@/lib/supabase/auth";
+import { requireRole } from "@/lib/admin/guard";
+import { toRole } from "@/lib/auth/roles";
 import { getAllMembers } from "@/lib/admin/actions";
 import { maskDni, maskPhone } from "@/lib/admin/utils";
 import { decrypt } from "@/lib/encryption";
@@ -41,12 +42,12 @@ export default async function AdminMembersPage({
 }) {
   const { locale } = await params;
 
-  const admin = await isAdmin();
+  // Board members and superadmins only; anyone else gets the 404 page.
+  await requireRole("board");
 
-  const [tNav, tMeta, tAdmin] = await Promise.all([
+  const [tNav, tMeta] = await Promise.all([
     getTranslations({ locale, namespace: "nav" }),
     getTranslations({ locale, namespace: "metadata" }),
-    getTranslations({ locale, namespace: "admin" }),
   ]);
 
   const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
@@ -61,42 +62,40 @@ export default async function AdminMembersPage({
   );
 
   let rows: MemberRow[] = [];
-  if (admin) {
-    const { data: members } = await getAllMembers();
-    if (members) {
-      rows = members.map((m) => {
-        let phoneMasked: string | null = null;
-        let dniMasked: string | null = null;
+  const { data: members } = await getAllMembers();
+  if (members) {
+    rows = members.map((m) => {
+      let phoneMasked: string | null = null;
+      let dniMasked: string | null = null;
 
-        if (m.phone_encrypted) {
-          try {
-            phoneMasked = maskPhone(decrypt(m.phone_encrypted));
-          } catch {
-            phoneMasked = null;
-          }
+      if (m.phone_encrypted) {
+        try {
+          phoneMasked = maskPhone(decrypt(m.phone_encrypted));
+        } catch {
+          phoneMasked = null;
         }
+      }
 
-        if (m.dni_nie_encrypted) {
-          try {
-            dniMasked = maskDni(decrypt(m.dni_nie_encrypted));
-          } catch {
-            dniMasked = null;
-          }
+      if (m.dni_nie_encrypted) {
+        try {
+          dniMasked = maskDni(decrypt(m.dni_nie_encrypted));
+        } catch {
+          dniMasked = null;
         }
+      }
 
-        return {
-          memberNumber: m.member_number,
-          firstName: m.first_name,
-          lastName: m.last_name,
-          email: m.email,
-          phoneMasked,
-          dniMasked,
-          postalCode: m.postal_code,
-          role: m.role as "member" | "admin",
-          membershipStartDate: m.membership_start_date,
-        };
-      });
-    }
+      return {
+        memberNumber: m.member_number,
+        firstName: m.first_name,
+        lastName: m.last_name,
+        email: m.email,
+        phoneMasked,
+        dniMasked,
+        postalCode: m.postal_code,
+        role: toRole(m.role) ?? "member",
+        membershipStartDate: m.membership_start_date,
+      };
+    });
   }
 
   return (
@@ -110,14 +109,7 @@ export default async function AdminMembersPage({
 
       <section className="flex-1 bg-brand-beige pb-20">
         <div className="container mx-auto max-w-6xl px-6 pt-16">
-          {admin ? (
-            <MembersTable members={rows} />
-          ) : (
-            <div className="rounded-2xl border border-stone-custom/10 bg-brand-white p-8 text-center">
-              <h2 className="text-xl font-bold text-stone-custom">{tAdmin("unauthorized_title")}</h2>
-              <p className="mt-2 text-stone-custom/70">{tAdmin("unauthorized_message")}</p>
-            </div>
-          )}
+          <MembersTable members={rows} />
         </div>
       </section>
 

@@ -6,7 +6,10 @@ import { updateSession } from "./lib/supabase/middleware";
 const intlMiddleware = createMiddleware(routing);
 
 const PROTECTED_ROUTES = ["/profile", "/profile/details", "/profile/edit", "/profile/card", "/reset-password"];
-const ADMIN_ROUTES = ["/admin", "/admin/members", "/events/images"];
+// Prefix match (see matchesRoute): "/admin" covers every admin page in every locale.
+// The proxy only requires a session; pages and API routes check the role with
+// requireRole() / getAdminAccess() from "@/lib/admin/guard".
+const ADMIN_ROUTES = ["/admin", "/events/images"];
 const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
 
 function stripLocale(pathname: string): string {

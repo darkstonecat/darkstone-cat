@@ -1,38 +1,30 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAdminAccess } from "@/lib/admin/guard";
 import { decrypt } from "@/lib/encryption";
 import { escapeCsv } from "@/lib/csv";
 import type { AdminMember } from "@/lib/supabase/auth";
 
 export async function GET() {
-  // 1. Auth check
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // 1. Auth and role check: an active board member or superadmin
+  const access = await getAdminAccess("board");
 
-  if (!user) {
+  if (access.status === "unauthenticated") {
     return new Response("Unauthorized", { status: 401 });
   }
-
-  // 2. Admin check
-  const { data: member } = await supabase
-    .from("members")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (!member || member.role !== "admin") {
+  if (access.status !== "ok") {
     return new Response("Forbidden", { status: 403 });
   }
+  const user = access.actor;
 
-  // 3. Fetch all members via RPC
+  // 2. Fetch all members via RPC
+  const supabase = await createClient();
   const { data: members, error } = await supabase.rpc("get_all_members_for_admin");
 
   if (error || !members) {
     return new Response("Internal Server Error", { status: 500 });
   }
 
-  // 4. Build CSV
+  // 3. Build CSV
   const headers = [
     "Número",
     "Nom",

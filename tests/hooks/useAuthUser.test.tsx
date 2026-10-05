@@ -98,6 +98,31 @@ describe('useAuthUser', () => {
     await waitFor(() => expect(result.current.role).toBe('admin'))
   })
 
+  it.each(['board', 'superadmin'])('exposes the %s role', async (role) => {
+    const session = { user: { id: 'u5', email: 'a@b.com' } }
+    document.cookie = `sb-127-auth-token=${encodeURIComponent(
+      JSON.stringify(session)
+    )}`
+    mockRoleQuery.mockResolvedValue({ data: { role }, error: null })
+
+    const { result } = renderHook(() => useAuthUser())
+    await waitFor(() => expect(result.current.role).toBe(role))
+  })
+
+  it('maps an unknown role to null', async () => {
+    const session = { user: { id: 'u6', email: 'a@b.com' } }
+    document.cookie = `sb-127-auth-token=${encodeURIComponent(
+      JSON.stringify(session)
+    )}`
+    mockRoleQuery.mockResolvedValue({ data: { role: 'owner' }, error: null })
+
+    const { result } = renderHook(() => useAuthUser())
+    await waitFor(() => expect(mockRoleQuery).toHaveBeenCalled())
+    await new Promise((r) => setTimeout(r, 0))
+    expect(result.current.user?.id).toBe('u6')
+    expect(result.current.role).toBeNull()
+  })
+
   it('handles malformed cookie gracefully', async () => {
     document.cookie = `sb-127-auth-token=${encodeURIComponent('not-json{{{')}`
 

@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { toRole, type Role } from "@/lib/auth/roles";
 
 type AuthState = {
   user: User | null;
-  role: "member" | "admin" | null;
+  /** Unknown values from the database are null. Display only: the server enforces access. */
+  role: Role | null;
   loading: boolean;
 };
 
@@ -84,7 +86,7 @@ export function useAuthUser(): AuthState {
     // ── Async helpers ──
     async function fetchRole(
       userId: string
-    ): Promise<"member" | "admin" | null> {
+    ): Promise<Role | null> {
       try {
         const { data, error } = await supabase
           .from("members")
@@ -92,7 +94,7 @@ export function useAuthUser(): AuthState {
           .eq("id", userId)
           .single();
         if (error) return null;
-        return (data?.role as "member" | "admin") ?? null;
+        return toRole(data?.role);
       } catch {
         return null;
       }

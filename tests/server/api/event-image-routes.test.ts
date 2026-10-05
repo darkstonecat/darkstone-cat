@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-const auth = vi.hoisted(() => ({
-  getCurrentUser: vi.fn(),
-  isAdmin: vi.fn(),
+const guard = vi.hoisted(() => ({
+  getAdminAccess: vi.fn(),
 }))
 const gen = vi.hoisted(() => ({
   fetchUpcomingEvents: vi.fn(),
@@ -11,7 +10,7 @@ const gen = vi.hoisted(() => ({
   composeEventImage: vi.fn(),
 }))
 
-vi.mock('@/lib/supabase/auth', () => auth)
+vi.mock('@/lib/admin/guard', () => guard)
 vi.mock('@/lib/ludoya', () => ({ fetchUpcomingEvents: gen.fetchUpcomingEvents }))
 vi.mock('@/lib/bgg', () => ({ fetchBggCollection: gen.fetchBggCollection }))
 vi.mock('@/lib/event-image/generator', () => ({ generateEventImage: gen.generateEventImage }))
@@ -36,34 +35,37 @@ describe('GET /api/events/[eventId]/image', () => {
   })
 
   it('returns 401 without a session and does no work', async () => {
-    auth.getCurrentUser.mockResolvedValue(null)
+    guard.getAdminAccess.mockResolvedValue({ status: 'unauthenticated' })
     const res = await getEventImage(req, eventCtx('e1'))
     expect(res.status).toBe(401)
     expect(res.headers.get('Cache-Control')).toBe('no-store')
     expect(gen.fetchUpcomingEvents).not.toHaveBeenCalled()
   })
 
-  it('returns 403 for a signed-in non-admin and does no work', async () => {
-    auth.getCurrentUser.mockResolvedValue({ id: 'u1' })
-    auth.isAdmin.mockResolvedValue(false)
+  it('returns 403 for a signed-in non-board member and does no work', async () => {
+    guard.getAdminAccess.mockResolvedValue({ status: 'forbidden' })
     const res = await getEventImage(req, eventCtx('e1'))
     expect(res.status).toBe(403)
     expect(res.headers.get('Cache-Control')).toBe('no-store')
     expect(gen.generateEventImage).not.toHaveBeenCalled()
   })
 
-  it('renders the image for an admin', async () => {
-    auth.getCurrentUser.mockResolvedValue({ id: 'u1' })
-    auth.isAdmin.mockResolvedValue(true)
+  it('renders the image for a board member', async () => {
+    guard.getAdminAccess.mockResolvedValue({ status: 'ok', actor: { id: 'u1', role: 'board' } })
     const res = await getEventImage(req, eventCtx('e1'))
     expect(res.status).toBe(200)
     expect(res.headers.get('Cache-Control')).toBe('no-store')
     expect(gen.generateEventImage).toHaveBeenCalledTimes(1)
   })
 
-  it('returns 404 for an unknown event (admin)', async () => {
-    auth.getCurrentUser.mockResolvedValue({ id: 'u1' })
-    auth.isAdmin.mockResolvedValue(true)
+  it('asks the guard for the board level', async () => {
+    guard.getAdminAccess.mockResolvedValue({ status: 'forbidden' })
+    await getEventImage(req, eventCtx('e1'))
+    expect(guard.getAdminAccess).toHaveBeenCalledWith('board')
+  })
+
+  it('returns 404 for an unknown event (board)', async () => {
+    guard.getAdminAccess.mockResolvedValue({ status: 'ok', actor: { id: 'u1', role: 'superadmin' } })
     expect((await getEventImage(req, eventCtx('nope'))).status).toBe(404)
   })
 })

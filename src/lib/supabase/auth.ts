@@ -1,5 +1,6 @@
 import { createClient } from "./server";
 import type { User } from "@supabase/supabase-js";
+import type { Role } from "@/lib/auth/roles";
 
 export type AdminMember = Member & { email: string };
 
@@ -13,7 +14,7 @@ export type Member = {
   postal_code: string | null;
   ludoya_username: string | null;
   bgg_username: string | null;
-  role: "member" | "admin";
+  role: Role;
   card_token: string;
   newsletter_accepted: boolean;
   membership_start_date: string | null;
@@ -40,11 +41,6 @@ export async function getCurrentMember(): Promise<Member | null> {
     .single();
 
   return data as Member | null;
-}
-
-export async function isAdmin(): Promise<boolean> {
-  const member = await getCurrentMember();
-  return member?.role === "admin";
 }
 
 export async function getProfileData(): Promise<{

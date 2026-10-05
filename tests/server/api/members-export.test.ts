@@ -14,7 +14,7 @@ import { GET } from '@/app/api/admin/members/export/route'
 
 function setupMock(opts: {
   user?: { id: string } | null
-  member?: { role: string } | null
+  member?: { role: string; left_on?: string | null } | null
   rpcData?: unknown[] | null
   rpcError?: { message: string } | null
 }) {
@@ -69,9 +69,24 @@ describe('GET /api/admin/members/export', () => {
     expect((await GET()).status).toBe(401)
   })
 
-  it('returns 403 when user is not admin', async () => {
-    setupMock({ user: { id: 'u1' }, member: { role: 'member' } })
+  it('returns 403 when user is not a board member', async () => {
+    setupMock({ user: { id: 'u1' }, member: { role: 'member', left_on: null } })
     expect((await GET()).status).toBe(403)
+  })
+
+  it('returns 403 for a former member who still holds a role', async () => {
+    setupMock({ user: { id: 'u1' }, member: { role: 'board', left_on: '2026-09-01' }, rpcData: [] })
+    expect((await GET()).status).toBe(403)
+  })
+
+  it('returns 403 for an unknown role', async () => {
+    setupMock({ user: { id: 'u1' }, member: { role: 'owner', left_on: null }, rpcData: [] })
+    expect((await GET()).status).toBe(403)
+  })
+
+  it.each(['board', 'superadmin', 'admin'])('exports for an active %s', async (role) => {
+    setupMock({ user: { id: 'u1' }, member: { role, left_on: null }, rpcData: [fakeMember] })
+    expect((await GET()).status).toBe(200)
   })
 
   it('returns CSV with BOM and correct headers for admin', async () => {

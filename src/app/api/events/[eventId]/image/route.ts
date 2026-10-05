@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { fetchUpcomingEvents } from "@/lib/ludoya";
 import { fetchBggCollection } from "@/lib/bgg";
 import { generateEventImage } from "@/lib/event-image/generator";
-import { getCurrentUser, isAdmin } from "@/lib/supabase/auth";
+import { getAdminAccess } from "@/lib/admin/guard";
 
 // Allow up to 30s for image generation (BGG image fetches can be slow)
 export const maxDuration = 30;
@@ -13,14 +13,14 @@ export async function GET(
 ) {
   // Only the admin tool `/events/images` uses this route. Rendering is expensive
   // (BGG and Ludoya fetches + Satori), so it must not be open to anonymous traffic.
-  const user = await getCurrentUser();
-  if (!user) {
+  const access = await getAdminAccess("board");
+  if (access.status === "unauthenticated") {
     return NextResponse.json(
       { error: "unauthorized" },
       { status: 401, headers: { "Cache-Control": "no-store" } }
     );
   }
-  if (!(await isAdmin())) {
+  if (access.status !== "ok") {
     return NextResponse.json(
       { error: "forbidden" },
       { status: 403, headers: { "Cache-Control": "no-store" } }

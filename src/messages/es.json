@@ -732,7 +732,8 @@
     "label_role": "Rol",
     "not_provided": "No proporcionado",
     "role_member": "Socio",
-    "role_admin": "Administrador",
+    "role_board": "Junta",
+    "role_superadmin": "Superadmin",
 
     "section_personal": "Datos personales",
     "section_gaming": "Perfiles de juego",
@@ -942,9 +943,6 @@
     "title": "Administración",
     "subtitle": "Panel de administración de Darkstone Catalunya",
 
-    "unauthorized_title": "Acceso restringido",
-    "unauthorized_message": "Necesitas permisos de administrador para acceder a esta página.",
-
     "stat_total": "Total socios",
     "stat_new_month": "Nuevos este mes",
     "stat_newsletter": "Boletín",
@@ -969,7 +967,8 @@
     "col_since": "Desde",
 
     "role_member": "Socio",
-    "role_admin": "Admin",
+    "role_board": "Junta",
+    "role_superadmin": "Superadmin",
     "not_provided": "—",
 
     "export_button": "Exportar CSV",
