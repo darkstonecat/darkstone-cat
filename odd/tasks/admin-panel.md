@@ -66,7 +66,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T2 — M2 `roles_expand`: role CHECK widened (member/admin/board/superadmin), `role_since`, `role_rank`, `has_role`, `is_admin` on top of it, role-guard trigger for BR-10/11/12, existing guards switched to `has_role` — route: delegated
 - [x] T3 — M3 `audit_log`: append-only table, RLS read for board, `audit_write()` internal, `log_admin_event()` whitelist — route: delegated
 - [x] T4 — TypeScript role model: `requireRole()` guard, proxy `/admin` prefix, NavBar and `useAuthUser` with `isBoardRole()` — route: delegated
-- [ ] T5 — M4 read RPCs: `admin_list_members`, `admin_get_member`, `admin_stats`, `admin_list_activity` — route: delegated
+- [x] T5 — M4 read RPCs: `admin_list_members`, `admin_get_member`, `admin_stats`, `admin_list_activity` — route: delegated
 - [ ] T6 — Leave and rejoin functions (ban, sessions, card token) — route: delegated
 - [ ] T7 — Update, reveal, badge and card functions — route: delegated
 - [ ] T8 — Role and anonymise functions — route: delegated
@@ -117,6 +117,12 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
    them yet. Must be applied before T5+ code is deployed (every admin function and action
    writes an entry). After applying, `select count(*) from public.audit_log` as an admin works
    and an UPDATE on the table fails with `audit:append_only`.
+4. `supabase/migrations/20261005100300_admin_read_rpcs.sql` (T5). Safe to apply before any
+   code ships: it only adds read-only functions; nothing calls them yet and
+   `get_all_members_for_admin` is untouched. Needs M1–M3 (columns, `has_role`, `audit_log`).
+   Must be applied before T16+ screens are deployed. After applying, as an admin
+   `select * from public.admin_stats()` returns one row, and as a plain member every
+   `admin_*` function fails with `admin:forbidden`.
 
 ## Progress
 
@@ -234,6 +240,20 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   runs one statement as `postgres` through the local postgres-meta `/pg/query` endpoint (service
   role key), used to prove the trigger stops the owner and to insert a backdated row. Audit rows
   written by tests cannot be deleted, so they stay until `db:reset`; tests filter by own ids.
+- Independent read-only verification (tier `high`): PASS, no blocking defects (no forgery,
+  alteration or deletion path; whitelist matches spec §5.1; owner stopped). Follow-ups for T7,
+  whose migration can redefine `audit_details_leak()`:
+  - False positives: any 9–15 digit string (`{"rows":"123456789"}`, Ludoya/BGG ids, a numeric
+    username) is rejected and would roll back the admin action. Send counts/ids as JSON numbers,
+    record username changes as field names only, and/or narrow the phone pattern.
+  - Misses: phones as JSON numbers, values with surrounding whitespace/newlines, `12.345.678-Z`,
+    `DNI 12345678Z`, `(+34) 612345678`, keys `telefono`/`movil`/`dniNie`. btrim values and scan
+    numbers too.
+  - App-logged events (exports, reveal) must call `log_admin_event` BEFORE serving the data so
+    they fail closed. The target checks accept unconfirmed accounts; the app filters them (BR-22).
+  - Weak tests (only `error` not null): "audit_write() is internal", "reason capped at 1000",
+    anon calling `log_admin_event`. Add a test that legitimate values (member numbers, dates,
+    UUIDs) pass the guard.
 
 ### T4 — done (route: delegated)
 
@@ -271,6 +291,69 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Follow-up for T14: `requireRole()` is not memoised per request; wrap it in `React.cache` if
   the admin layout and the page both call it.
 
+### T5 — done (route: delegated)
+
+- Commit: `feat(db): Add admin read functions for members, stats and activity` on `develop-users`
+  (hash in `git log -- supabase/migrations/20261005100300_admin_read_rpcs.sql`).
+- Test-first: RED observed with the new `tests/integration/admin-read-rpcs.test.ts` before the
+  migration (37/37 failing, functions not found); GREEN after `npm run db:reset` (37/37).
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 66 files / 753 tests passed; `npm run test:integration` 18 files /
+  224 tests passed (run twice, both green).
+- All four: SECURITY DEFINER, `search_path ''`, STABLE, guarded by `has_role('board')`
+  (internal `admin_assert_board()`), EXECUTE for `authenticated` only. Errors:
+  `admin:forbidden` 42501; `admin:invalid_argument` 22023 (unknown state, role, sort or actor
+  kind). anon and service_role get Postgres "permission denied" (42501). Never return DNI/phone
+  values or ciphertext; never list or show unconfirmed sign-ups (BR-22) or purged stubs.
+  Internal helper `admin_search_fold(text)`: lower case + Catalan/Spanish accents folded + `·`
+  dropped (no `unaccent` extension).
+- `admin_list_members(p_state text = 'active', p_role text = NULL, p_q text = NULL,
+  p_sort text = 'number_asc', p_limit int = 50, p_offset int = 0)` RETURNS TABLE
+  `(id uuid, member_number, first_name, last_name, email text|null, has_login bool,
+  state 'active'|'former', role, membership_start_date date, current_joined_on date,
+  left_on date|null, total_count int)`. State NULL → active; role NULL/'all' | member | board
+  (includes legacy admin) | superadmin. Search (first 100 chars, accent/case-insensitive,
+  `%`/`_` literal) over "first last", member number, e-mail, Ludoya and BGG usernames. Sort:
+  number/name/joined/left × asc/desc (left: active last), tie → member number. Limit clamped
+  1..200; `total_count` = rows matching the filters (no rows past the end). E-mail via LEFT
+  JOIN, so anonymised stubs without a login are listed (email NULL, has_login false).
+- `admin_get_member(p_member_number text)` RETURNS TABLE, one row or none (unknown, purged,
+  unconfirmed → "not found"): `id, member_number, state, first_name, last_name, email,
+  has_login, role, role_since, postal_code, ludoya_username, bgg_username, newsletter_accepted,
+  has_dni, has_phone, membership_start_date, current_joined_on, left_on, left_by, leave_reason,
+  purge_on (left_on + 3 years), anonymised_at, card_valid (= active), card_issued_at,
+  created_at, badges jsonb [{badge_key, awarded_at, awarded_by, awarded_by_name}]`. Former
+  member: postal_code, usernames, newsletter_accepted and has_phone are NULL whatever the row
+  holds (BR-20/21); has_dni stays. "Membre {year}" is not in badges (app derives it, BR-6).
+  Masked DNI/phone tails need decryption: T7/T18 (the reveal path), not here.
+- `admin_stats(p_reference_date date = NULL)` RETURNS TABLE one row: `active_members,
+  former_members (not purged), joined_this_month (primera alta in the month, purged stubs
+  included), left_this_month, left_this_month_self, left_this_month_board,
+  rejoined_this_year (membership.rejoin audit entries in the year), newsletter_members,
+  board_members (board + admin + superadmin), superadmins` (all int). Periods are Europe/Madrid
+  calendar months/years of `p_reference_date` (default today in Madrid); the parameter moves
+  only the period counters (added for tests and past periods). Cache refresh results wait for
+  T13 (`ops_job_runs`); the newsletter percentage is computed by the app.
+- `admin_list_activity(p_action text = NULL, p_actor uuid = NULL, p_target uuid = NULL,
+  p_from timestamptz = NULL, p_to timestamptz = NULL, p_limit int = 25, p_before_id bigint =
+  NULL, p_actor_kind text = NULL, p_target_number text = NULL)` RETURNS TABLE `(id bigint,
+  created_at, actor_id, actor_role, actor_member_number, actor_name, action, target_member_id,
+  target_member_number, target_name, details jsonb, reason, total_count int)`. Newest first,
+  keyset on (created_at DESC, id DESC) via the last row's id (a vanished id → no rows).
+  `p_action` = key or group `'badge.*'` / `'role.*'`; `p_actor_kind` = `'system'` (no actor) |
+  `'self'` (actor = target) for the V-4 "Sistema" / "Soci (ell mateix)" choices;
+  `p_target_number` filters by the snapshot (works after a purge); dates half-open
+  `[p_from, p_to)`. Limit clamped 1..200; `total_count` ignores the cursor. Names are current
+  names; NULL once purged, and the target's also once anonymised (spec §5.3).
+- Deviations from the planned signatures: `admin_stats` takes an optional reference date;
+  `admin_list_activity` has two extra trailing optional filters (`p_actor_kind`,
+  `p_target_number`). Unknown sort/state/role values are rejected (22023), not ignored: T16
+  must sanitise URL params before calling.
+- Tests: the "now" stats are measured as deltas around changes to the file's own users, retried
+  up to 4 times when another file lands in the window; period stats use 1999 (untouched by other
+  files) and the 1999 audit entries are deleted in `afterAll` (older than 3 years, so the
+  append-only trigger allows it).
+
 ## Next step
 
-T5.
+T6.
