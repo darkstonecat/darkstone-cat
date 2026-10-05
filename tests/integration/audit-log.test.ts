@@ -81,7 +81,7 @@ beforeAll(async () => {
   clients.board = await createAuthenticatedClient(emails.board, password)
   clients.legacy = await createAuthenticatedClient(emails.legacy, password)
 
-  const { data, error } = await logEvent(clients.board, 'export.member_data', users.target.id)
+  const { data, error } = await logEvent(clients.board, 'member.send_access_link', users.target.id)
   expect(error).toBeNull()
   boardEntryId = data as number
 })
@@ -92,7 +92,7 @@ describe('log_admin_event()', () => {
   it('records a whitelisted event and snapshots actor and target', async () => {
     const row = await entry(boardEntryId)
     expect(row).toMatchObject({
-      action: 'export.member_data',
+      action: 'member.send_access_link',
       actor_id: users.board.id,
       actor_role: 'board',
       actor_member_number: users.board.member_number,
@@ -112,7 +112,6 @@ describe('log_admin_event()', () => {
 
   it('accepts every event the app logs directly, with the details it needs', async () => {
     const ok: [string, string | null, Record<string, unknown>][] = [
-      ['export.members_csv', null, { filter: { state: 'active' }, rows: 3 }],
       ['export.emails', null, { list: 'newsletter', count: 2 }],
       ['ops.cache_refresh', null, { jobs: ['ludoya'], result: 'ok', duration_ms: 2100 }],
     ]
@@ -124,9 +123,11 @@ describe('log_admin_event()', () => {
   })
 
   it('rejects the actions that only database functions may write', async () => {
-    // member.reveal_sensitive left the whitelist in 20261005100500 (admin_reveal_sensitive logs it)
+    // member.reveal_sensitive left the whitelist in 20261005100500 (admin_reveal_sensitive logs
+    // it); export.members_csv and export.member_data in 20261005100800 (admin_export_* log them)
     for (const action of [
       'member.update', 'member.reveal_sensitive', 'membership.leave', 'role.grant', 'member.purge', 'badge.award',
+      'export.members_csv', 'export.member_data',
     ]) {
       const { error } = await logEvent(clients.board, action, users.target.id)
       expect(error?.message, action).toContain('audit:action_not_allowed')
@@ -145,22 +146,22 @@ describe('log_admin_event()', () => {
   })
 
   it('rejects a plain member and an anonymous caller', async () => {
-    const asMember = await logEvent(clients.member, 'export.member_data', users.target.id)
+    const asMember = await logEvent(clients.member, 'member.send_access_link', users.target.id)
     expect(asMember.error?.message).toContain('audit:forbidden')
 
-    const asAnon = await logEvent(anon, 'export.member_data', users.target.id)
+    const asAnon = await logEvent(anon, 'member.send_access_link', users.target.id)
     expect(asAnon.error?.code).toBe('42501')
     expect(asAnon.data).toBeNull()
   })
 
   it('requires a target where the event has one, and none where it has not', async () => {
-    const missing = await logEvent(clients.board, 'export.member_data', null)
+    const missing = await logEvent(clients.board, 'member.send_access_link', null)
     expect(missing.error?.message).toContain('audit:invalid_target')
 
-    const unknown = await logEvent(clients.board, 'export.member_data', '00000000-0000-0000-0000-000000000000')
+    const unknown = await logEvent(clients.board, 'member.send_access_link', '00000000-0000-0000-0000-000000000000')
     expect(unknown.error?.message).toContain('audit:invalid_target')
 
-    const extra = await logEvent(clients.board, 'export.members_csv', users.target.id, { rows: 1 })
+    const extra = await logEvent(clients.board, 'export.emails', users.target.id, { list: 'association', count: 1 })
     expect(extra.error?.message).toContain('audit:invalid_target')
   })
 
@@ -189,14 +190,14 @@ describe('log_admin_event()', () => {
       { field: 'phone', shown: '+34 612 345 678' },
     ]
     for (const details of leaks) {
-      const { error } = await logEvent(clients.board, 'export.member_data', users.target.id, details)
+      const { error } = await logEvent(clients.board, 'member.send_access_link', users.target.id, details)
       expect(error?.code, JSON.stringify(details)).toBe('23514')
       expect(error?.message).toContain('audit:sensitive_details')
     }
   })
 
   it('a reason is capped at 1000 characters', async () => {
-    const { error } = await logEvent(clients.board, 'export.member_data', users.target.id, {}, 'x'.repeat(1001))
+    const { error } = await logEvent(clients.board, 'member.send_access_link', users.target.id, {}, 'x'.repeat(1001))
     expect(error?.code).toBe('23514')
     expect(error?.message).toContain('audit_log_reason_length')
   })
@@ -218,7 +219,7 @@ describe('reading the audit log', () => {
   it.each(['board', 'legacy'] as const)('%s reads the entries', async (key) => {
     const { data, error } = await clients[key].from('audit_log').select('id, action').eq('id', boardEntryId)
     expect(error).toBeNull()
-    expect(data).toEqual([{ id: boardEntryId, action: 'export.member_data' }])
+    expect(data).toEqual([{ id: boardEntryId, action: 'member.send_access_link' }])
   })
 
   it('a plain member reads nothing, not even entries about themselves', async () => {

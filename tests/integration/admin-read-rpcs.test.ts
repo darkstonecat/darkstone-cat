@@ -595,32 +595,33 @@ describe('admin_stats()', () => {
 })
 
 describe('admin_list_activity()', () => {
-  const written: number[] = []
-
-  async function log(client: SupabaseClient, action: string, target: string | null, details = {}) {
-    const { data, error } = await client.rpc('log_admin_event', {
-      p_action: action,
-      p_target: target,
-      p_details: details,
-      p_reason: null,
-    })
+  // A-11 export of an active member: admin_export_member_data() (20261005100800) logs it.
+  async function exportData(client: SupabaseClient, target: string) {
+    const { error } = await client.rpc('admin_export_member_data', { p_member_id: target })
     expect(error).toBeNull()
-    written.push(data as number)
-    return data as number
   }
 
   beforeAll(async () => {
-    await log(clients.board, 'export.member_data', users.angel.id)
-    await log(clients.board, 'export.member_data', users.angel.id)
+    await exportData(clients.board, users.angel.id)
+    await exportData(clients.board, users.angel.id)
     // The reveal is logged by admin_reveal_sensitive() (20261005100500), not log_admin_event()
     expect(
       (await supabaseAdmin.from('members').update({ dni_nie_encrypted: bound(users.angel.id, DNI_CIPHER) }).eq('id', users.angel.id)).error
     ).toBeNull()
     const reveal = await clients.board.rpc('admin_reveal_sensitive', { p_member_id: users.angel.id, p_field: 'dni' })
     expect(reveal.error).toBeNull()
-    await log(clients.board, 'export.member_data', users.angel.id)
-    await log(clients.legacy, 'export.member_data', users.bruna.id)
-    await log(clients.board, 'export.member_data', users.former.id)
+    await exportData(clients.board, users.angel.id)
+    await exportData(clients.legacy, users.bruna.id)
+    // An entry about a former member written by the board: A-11 on a former member is
+    // superadmin only (D-D), so it is inserted directly.
+    {
+      const { error } = await runSqlAsPostgres(
+        `insert into public.audit_log (actor_id, actor_role, action, target_member_id, target_member_number)
+         values ($1::uuid, 'board', 'export.member_data', $2::uuid, $3)`,
+        [users.board.id, users.former.id, users.former.member_number]
+      )
+      expect(error).toBeNull()
+    }
 
     // A system entry and a member acting on themselves, backdated so they can be deleted later
     for (const [at, actor, action] of [

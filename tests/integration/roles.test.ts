@@ -677,6 +677,69 @@ describe('admin_anonymise_member (S-3)', () => {
   })
 })
 
+// A-11 on a former member (20261005100800_admin_exports.sql): superadmin only (D-D, provisional).
+// The board refusal and the active-member cases are in admin-exports.test.ts. superA is still an
+// active superadmin here; `erased` is anonymised and its login account deleted by now.
+describe('admin_export_member_data on a former member (A-11, D-D)', () => {
+  const exportAs = async (key: Key, target: string) => {
+    const client = await createAuthenticatedClient(emails[key], password)
+    return client.rpc('admin_export_member_data', { p_member_id: target })
+  }
+  const exportEntries = async (target: string) =>
+    (
+      await supabaseAdmin
+        .from('audit_log')
+        .select('actor_id, actor_role, details')
+        .eq('target_member_id', target)
+        .eq('action', 'export.member_data')
+        .order('id')
+    ).data!
+
+  it("a superadmin exports a former member's data, logged with the state", async () => {
+    const { data: row } = await supabaseAdmin
+      .from('members')
+      .select('member_number, dni_nie_encrypted')
+      .eq('id', users.former.id)
+      .single()
+    const { data, error } = await exportAs('superA', users.former.id)
+    expect(error).toBeNull()
+    expect(data).toEqual([
+      expect.objectContaining({
+        id: users.former.id,
+        member_number: row!.member_number,
+        state: 'former',
+        email: emails.former,
+        dni_nie_encrypted: row!.dni_nie_encrypted,
+        phone_encrypted: null,
+        left_on: '2026-10-01',
+        left_by: 'self',
+        badges: [],
+      }),
+    ])
+    expect(await exportEntries(users.former.id)).toEqual([
+      { actor_id: users.superA.id, actor_role: 'superadmin', details: { state: 'former' } },
+    ])
+  })
+
+  it('also an anonymised former member without a login account: whatever is still held', async () => {
+    const { data, error } = await exportAs('superA', users.erased.id)
+    expect(error).toBeNull()
+    expect(data).toEqual([
+      expect.objectContaining({
+        id: users.erased.id,
+        state: 'former',
+        email: null,
+        first_name: 'erased',
+        left_by: 'board',
+        leave_reason: 'Sol·licitud de supressió',
+        ludoya_username: null,
+        badges: [],
+      }),
+    ])
+    expect(await exportEntries(users.erased.id)).toHaveLength(1)
+  })
+})
+
 async function getRowNumber(id: string) {
   const { data, error } = await supabaseAdmin.from('members').select('member_number').eq('id', id).single()
   expect(error).toBeNull()

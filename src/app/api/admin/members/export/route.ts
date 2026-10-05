@@ -1,101 +1,57 @@
 import { getAdminAccess } from "@/lib/admin/guard";
-import { listAllMembersForAdmin } from "@/lib/admin/members";
-import { decrypt } from "@/lib/encryption";
-import { escapeCsv } from "@/lib/csv";
-import type { AdminMember } from "@/lib/supabase/auth";
+import { createClient } from "@/lib/supabase/server";
+import {
+  buildMembersCsv,
+  exportErrorResponse,
+  exportErrorStatus,
+  parseMembersExportFilter,
+  type MembersExportRow,
+} from "@/lib/admin/exports";
 
-export async function GET() {
+/**
+ * A-10: the member list as CSV (active members only, BR-21). `admin_export_members()` checks
+ * the role and writes `export.members_csv` in the same transaction as the read, so a file is
+ * never served without its audit entry. Optional `?role=all|member|board|superadmin`.
+ */
+export async function GET(request: Request) {
   // 1. Auth and role check: an active board member or superadmin
   const access = await getAdminAccess("board");
-
-  if (access.status === "unauthenticated") {
-    return new Response("Unauthorized", { status: 401 });
-  }
-  if (access.status !== "ok") {
-    return new Response("Forbidden", { status: 403 });
-  }
+  if (access.status === "unauthenticated") return exportErrorResponse(401);
+  if (access.status !== "ok") return exportErrorResponse(403);
   const user = access.actor;
 
-  // 2. Fetch all members (service-role RPC, only after the role check above)
-  const { data: members, error } = await listAllMembersForAdmin(user);
+  // 2. Filters: whitelist only
+  const filter = parseMembersExportFilter(new URL(request.url).searchParams);
+  if (!filter) return exportErrorResponse(400, "invalid_filter");
 
-  if (error || !members) {
-    return new Response("Internal Server Error", { status: 500 });
+  // 3. Read + audit, with the user's session client (the function takes the actor from it)
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("admin_export_members", { p_role: filter.role });
+
+  if (error) {
+    // Postgres code only: messages can echo values.
+    console.error("[admin-export] members failed code=%s", error.code ?? "unknown");
+    return exportErrorResponse(exportErrorStatus(error));
   }
 
-  // 3. Build CSV
-  const headers = [
-    "Número",
-    "Nom",
-    "Cognoms",
-    "Email",
-    "Telèfon",
-    "DNI/NIE",
-    "CP",
-    "Ludoya",
-    "BGG",
-    "Rol",
-    "Newsletter",
-    "Data alta",
-    "Creat",
-  ];
+  const rows = (data ?? []) as MembersExportRow[];
+  if (rows.length > 0 && rows[0].total_rows !== rows.length) {
+    // PostgREST capped the response (max_rows): never serve a partial list.
+    console.error("[admin-export] members truncated rows=%d expected=%d", rows.length, rows[0].total_rows);
+    return exportErrorResponse(500);
+  }
 
-  const rows = members.map((m: AdminMember) => {
-    let phone = "";
-    let dni = "";
-
-    if (m.phone_encrypted) {
-      try {
-        phone = decrypt(m.phone_encrypted, m.id);
-      } catch {
-        phone = "";
-      }
-    }
-
-    if (m.dni_nie_encrypted) {
-      try {
-        dni = decrypt(m.dni_nie_encrypted, m.id);
-      } catch {
-        dni = "";
-      }
-    }
-
-    return [
-      m.member_number,
-      m.first_name,
-      m.last_name,
-      m.email,
-      phone,
-      dni,
-      m.postal_code ?? "",
-      m.ludoya_username ?? "",
-      m.bgg_username ?? "",
-      m.role,
-      m.newsletter_accepted ? "Sí" : "No",
-      m.membership_start_date ?? "",
-      m.created_at ?? "",
-    ];
-  });
-
-  // Audit trail: who exported and how many rows (user id only, no personal data).
+  // Server log: who exported and how many rows (user id only, no personal data).
   console.info("[admin-export] user=%s rows=%d", user.id, rows.length);
 
-  const csvLines = [
-    headers.map(escapeCsv).join(","),
-    ...rows.map((row) => row.map(escapeCsv).join(",")),
-  ];
-
-  // BOM for UTF-8 Excel compatibility
-  const bom = "\uFEFF";
-  const csv = bom + csvLines.join("\n");
-
   const today = new Date().toISOString().slice(0, 10);
+  const name = filter.role === "all" ? `darkstone_members_${today}` : `darkstone_members_${filter.role}_${today}`;
 
-  return new Response(csv, {
+  return new Response(buildMembersCsv(rows), {
     status: 200,
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="darkstone_members_${today}.csv"`,
+      "Content-Disposition": `attachment; filename="${name}.csv"`,
       "Cache-Control": "no-store",
     },
   });

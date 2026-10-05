@@ -40,7 +40,8 @@ first, then the server layer, then the screens.
 - D-A: which current admins become the two superadmins (needed by T27 runbook).
 - D-B: fields of the llibre de socis export, DNI or not (T9b).
 - D-C: language of the leave/rejoin e-mails; no locale is stored (T10).
-- D-D: A-11 on a former member; proposal superadmin only (T7/T9a).
+- D-D: A-11 on a former member; proposal superadmin only (T7/T9a). T9a enforces the proposal,
+  provisionally, in one place: `admin_member_data_former_min_role()` = `'superadmin'`.
 - D-E: confirm A-7 checklist and minimum reason lengths, 5 for leave and 10 for reveal (T6/T7).
   T6 enforces 5 for a board leave (`membership_leave_reason_min_length()`, provisional); T7
   enforces 10 for a former member's DNI reveal (`admin_reveal_reason_min_length()`, provisional;
@@ -76,7 +77,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T7 — Update, reveal, badge and card functions — route: delegated
 - [x] T8 — Role and anonymise functions — route: delegated
 - [x] T7b — Lock down DNI/phone ciphertext (correction from the T7 verification): drop `admins_select_all` and `member_badges_admins_select_all`, `get_all_members_for_admin` service-role only (guarded server callers use the admin client), remove the public `getAllMembers` action, bind ciphertext to its member with AES-GCM AAD (`v2:` format, legacy fallback until prod is re-encrypted) + re-encryption script, BR-15 detector v3, e2e teardown demotes before deleting — route: delegated (writer trigger: migration + encryption module + 6+ callers and tests)
-- [ ] T9a — Export functions + routes: members CSV, member data (A-10, A-11) — route: delegated
+- [x] T9a — Export functions + routes: members CSV, member data (A-10, A-11) — route: delegated (writer trigger: migration + lib + 2 routes + 6 test files)
 - [ ] T9b — Export functions + routes: e-mail lists, llibre de socis (A-16, S-4) — route: delegated
 - [ ] T10 — Mail module (`src/lib/mail/`) + leave/rejoin actions + templates — route: delegated
 - [ ] T11a — Server actions A-4, A-5, A-8, A-9 — route: delegated
@@ -184,6 +185,21 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
       `/profile/edit` still shows their own values.
    5. Follow-up (T27): once step 3 shows `legacy=0` on prod, remove the legacy decrypt
       fallback from `src/lib/encryption.ts` (and its tests).
+
+9. `supabase/migrations/20261005100800_admin_exports.sql` (T9a). Apply after item 8 (needs
+   M1–M8: the BR-15 detector v3 and `members_ciphertext_guard`) and deploy the T9a code right
+   after: it removes `export.members_csv` / `export.member_data` from `log_admin_event()`, but
+   no shipped code logs them (the pre-T9a CSV route only writes a server log line), so applying
+   it before the deploy breaks nothing; the pre-T9a route keeps working through the
+   service-role `get_all_members_for_admin()` until the T9a code replaces it. Adds
+   `admin_export_members`, `admin_export_member_data` and the internal
+   `admin_member_data_former_min_role()`. After applying, as a plain member
+   `select * from public.admin_export_members()` fails with `admin:forbidden`; after the
+   deploy, an export from `/admin/members` leaves one `export.members_csv` entry
+   (`select details from audit_log where action = 'export.members_csv' order by id desc
+   limit 1` shows `{"filter":{"state":"active","role":"all"},"rows":<n>}`), and n equals the
+   CSV's data lines. More than 1000 active members would hit PostgREST `max_rows`: the route
+   then answers 500 instead of a partial file (raise `max_rows` or page the export first).
 
 ## Progress
 
@@ -760,6 +776,103 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   legacy ciphertext copied between rows before this migration still decrypts for the copier
   until the script runs; the script reports it as `duplicate_ciphertext` instead of binding it.
 
+### T9a — done (route: delegated)
+
+- Commit: `feat(admin): Add audited member and member-data exports` on `develop-users`
+  (hash in `git log -- supabase/migrations/20261005100800_admin_exports.sql`).
+- Test-first: RED observed before the code: `tests/server/api/members-export.test.ts` +
+  `member-data-export.test.ts` 31 failing / 3 passing (route still on the admin client, A-11
+  route missing); `tests/integration/admin-exports.test.ts` + `audit-log.test.ts` 13 failing /
+  22 passing (functions missing, whitelist still open). GREEN after the migration
+  (`npm run db:reset`) and the code: 124/124 in admin-exports, audit-log, admin-read-rpcs,
+  roles; 51/51 in the two route files.
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 68 files / 813 tests passed; `npm run test:integration` 23 files / 444
+  tests passed; `npx playwright test e2e/admin` 17 passed (incl. the new `exports.spec.ts`).
+- Signatures (SECURITY DEFINER, `search_path ''`, VOLATILE, EXECUTE for `authenticated` only;
+  anon and service_role get "permission denied"; board+ via `admin_assert_board()`):
+  - `admin_export_members(p_role text = NULL)` RETURNS TABLE `(id, member_number, first_name,
+    last_name, email, phone_encrypted, dni_nie_encrypted, postal_code, ludoya_username,
+    bgg_username, role, newsletter_accepted, membership_start_date, current_joined_on,
+    created_at, total_rows int)`. Active members only (BR-21), confirmed (BR-22), not purged,
+    LEFT JOIN `auth.users`; ordered by member number. `p_role` NULL/'all' | member | board
+    (incl. legacy admin) | superadmin, otherwise `admin:invalid_argument` (22023, no entry).
+    Writes `export.members_csv` with details `{"filter":{"state":"active","role":…},"rows":n}`
+    (n = rows returned, a JSON number) after `RETURN QUERY` and before the function returns:
+    the rows reach the caller only if the entry was written. `total_rows` lets the route detect
+    a response capped by PostgREST `max_rows` (1000).
+  - `admin_export_member_data(p_member_id uuid)` RETURNS TABLE, one row `(id, member_number,
+    state, email, first_name, last_name, phone_encrypted, dni_nie_encrypted, postal_code,
+    ludoya_username, bgg_username, role, newsletter_accepted, membership_start_date,
+    current_joined_on, left_on, left_by, leave_reason, created_at, badges jsonb [{key,
+    awarded_at}])`, as stored. Locks the row (`admin_lock_member`: unknown, purged, unconfirmed →
+    `admin:not_found` 22023). Former member: `has_role(admin_member_data_former_min_role())`,
+    else `admin:forbidden` 42501 (D-D provisional, superadmin). Writes `export.member_data`
+    (target the member, details `{"state":"active"|"former"}`) before the read.
+  - Internal: `admin_member_data_former_min_role()` = `'superadmin'` (no API grant).
+  - `log_admin_event()` whitelist now: `export.member_register`, `export.emails`,
+    `member.send_access_link`, `ops.cache_refresh` (rest of the body unchanged).
+- EXECUTE model (documented in the migration header): EXECUTE for `authenticated`, role checked
+  inside, actor = `auth.uid()`; the routes call with the user's SESSION client after
+  `getAdminAccess('board')`. Not service_role + actor parameter: the audit actor would be
+  whatever the server passes and `auth.uid()` is NULL without a user JWT. Ciphertext reaching
+  the route handler is fine (server; plain values only in the response body). A board session
+  calling the RPC from the browser gets only AAD-bound v2 ciphertext it cannot decrypt (key is
+  server-only) and cannot copy into its own row (`members_ciphertext_guard`), and the call is
+  audited like a download; only the ciphertext length leaks.
+- Routes:
+  - `GET /api/admin/members/export` (`src/app/api/admin/members/export/route.ts`): 401/403 from
+    `getAdminAccess('board')` before anything; query whitelist `role=all|member|board|superadmin`
+    and `state=active` only (anything else, repeated keys, `state=former` → 400
+    `{"error":"invalid_filter"}`); `admin_export_members` with the session client (no more
+    `listAllMembersForAdmin` / service role here); DB 42501 → 403, other errors → 500 (log
+    the code only); truncated response → 500. CSV: UTF-8 BOM, `escapeCsv` on every cell,
+    columns `Número, Nom, Cognoms, Email, Telèfon, DNI/NIE, CP, Ludoya, BGG, Rol, Newsletter,
+    Primera alta, Alta actual, Creat` (the old "Data alta" = membership_start_date is now
+    "Primera alta"), DNI/phone decrypted with the row id (failure → empty cell), filename
+    `darkstone_members_<YYYY-MM-DD>.csv` (`darkstone_members_<role>_<date>.csv` when filtered),
+    `no-store`, one `[admin-export] user=<uuid> rows=<n>` line. Errors are JSON `{"error"}` with
+    `no-store` (was plain text; `ExportConfirmDialog` only checks `res.ok`).
+  - `GET /api/admin/members/<number>/data` (`src/app/api/admin/members/[number]/data/route.ts`,
+    the V-3 URL shape) for A-11: 401/403; a number outside `[0-9A-Za-z-]{1,32}` → 404 without a DB
+    call; `admin_get_member` resolves number → id (no row → 404), then
+    `admin_export_member_data` (42501 → 403, `admin:not_found` → 404, `admin:invalid_argument`
+    → 400, else 500). JSON attachment `darkstone-data-<number>.json` (same name as the member's
+    own download), `application/json; charset=utf-8`, `no-store`, log line
+    `[admin-export] user=<uuid> member_data=<member uuid>`.
+  - Shared builders and error mapping: `src/lib/admin/exports.ts` (`server-only`):
+    `parseMembersExportFilter`, `buildMembersCsv`, `buildMemberDataJson`, `exportErrorStatus`,
+    `exportErrorResponse`, `MEMBERS_CSV_HEADERS`.
+- Spec interpretations: A-10 "gains two columns" → the existing columns stay (Rol and Creat
+  too, though the mockup's column list omits them) plus Primera alta / Alta actual. A-10 has no
+  filter in the spec or the dialog; §5.1 records "filter used", so the only filter is the V-2
+  role filter, and the state is always `active` (search and sort are not export filters). A-11
+  "the same JSON the member can download themselves" → the exact keys of `exportProfileData`
+  plus `current_joined_on`, `left_on`, `left_by`, `leave_reason` (data the association holds
+  that the member's own download predates); no audit history and no role history (not personal
+  data of the member's file in the spec's JSON). A former member's export returns the row as
+  stored, so a legacy row that still holds a phone/postal code exports it (it is held).
+- Deviations: none from the task, except that the A-11 route needs two RPCs (number → id via
+  `admin_get_member`, then the export by id) because the task fixed the function signature to
+  `p_member_id uuid` and the route to `[number]`.
+- Tests adapted (why): `audit-log.test.ts` uses `member.send_access_link` / `export.emails`
+  where it used the two removed keys, and asserts they are now refused;
+  `admin-read-rpcs.test.ts` writes its A-11 activity fixture through `admin_export_member_data`
+  (the former-member entry is inserted as `postgres`: board can no longer export a former
+  member); `roles.test.ts` gains the superadmin A-11 cases (former member; anonymised former
+  member without a login: email null, badges []).
+- `/admin` and `/admin/members` still read through `listAllMembersForAdmin` (T16/T24 replace it;
+  T27 drops `get_all_members_for_admin`).
+- Follow-ups: T17 (A-10 dialog) passes `?role=` only if the dialog offers the filter; the
+  dialog count "N socis actius" can come from `admin_stats`. T21 (A-11 action) calls
+  `/api/admin/members/<number>/data` and hides "Exporta dades" for a board member on a former
+  member (D-D). T27: CLAUDE.md export-route paragraph (now via `admin_export_members`, new A-11
+  route; outside this task's surface because CLAUDE.md holds another feature's WIP). If D-D is
+  decided as board, change `admin_member_data_former_min_role()` only (and the roles/exports
+  tests).
+- Prod risks: runbook 9. PostgREST `max_rows` 1000 caps the CSV (the route refuses a partial
+  file; prod has ~190 rows). The A-11 function locks the member row for the length of the call.
+
 ## Next step
 
-T9a.
+T9b.
