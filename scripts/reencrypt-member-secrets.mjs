@@ -22,6 +22,15 @@
 //
 // Needs migration 20261005100700_lock_down_member_secrets.sql (its trigger only accepts v2
 // values bound to the row, which is what this writes).
+//
+// Exit codes (also in the prod runbook, item 8):
+//   0  clean: no errors and no duplicates
+//   1  errors (decrypt or write failures, or the run itself failed)
+//   2  usage or environment (conflicting flags, a missing variable)
+//   3  duplicates found and no errors: a legacy ciphertext stored in more than one place is
+//      evidence of the T7 exploit; resolve each `duplicate_ciphertext` line before re-running.
+//      `duplicates=0` is not proof that no copy happened: a victim who changed the value since
+//      breaks the match.
 
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -168,6 +177,15 @@ async function fetchRows(supabase) {
   }
 }
 
+export const EXIT_CODES = Object.freeze({ ok: 0, errors: 1, usage: 2, duplicates: 3 });
+
+/** The process exit code for a run's counts: errors win over duplicates. */
+export function exitCodeFor(counts) {
+  if (counts.errors > 0) return EXIT_CODES.errors;
+  if (counts.duplicates > 0) return EXIT_CODES.duplicates;
+  return EXIT_CODES.ok;
+}
+
 export async function run({ supabase, key, apply, log = console.log }) {
   const rows = await fetchRows(supabase);
   const { updates, findings, counts } = planReencryption(rows, key);
@@ -225,14 +243,14 @@ async function main() {
   const apply = args.includes("--apply");
   if (apply && args.includes("--dry-run")) {
     console.error("Choose one of --dry-run (default) and --apply.");
-    process.exit(2);
+    process.exit(EXIT_CODES.usage);
   }
 
   loadEnv(path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."));
   for (const v of ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "ENCRYPTION_KEY"]) {
     if (!process.env[v]) {
       console.error(`Missing environment variable: ${v}`);
-      process.exit(2);
+      process.exit(EXIT_CODES.usage);
     }
   }
 
@@ -241,13 +259,13 @@ async function main() {
   });
   console.log(`Re-encrypting member secrets (${apply ? "APPLY" : "DRY RUN"}) on ${new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).host}`);
   const result = await run({ supabase, key: parseKey(process.env.ENCRYPTION_KEY), apply });
-  process.exit(result.counts.errors > 0 ? 1 : 0);
+  process.exit(exitCodeFor(result.counts));
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   main().catch((err) => {
     // Never print the error object: a driver error could echo a value.
     console.error(`Failed: ${err instanceof Error ? err.message.slice(0, 120) : "unknown error"}`);
-    process.exit(1);
+    process.exit(EXIT_CODES.errors);
   });
 }

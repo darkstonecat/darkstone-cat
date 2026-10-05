@@ -38,7 +38,8 @@ first, then the server layer, then the screens.
 ## Open decisions (owner: user)
 
 - D-A: which current admins become the two superadmins (needed by T27 runbook).
-- D-B: fields of the llibre de socis export, DNI or not (T9b).
+- D-B: fields of the llibre de socis export, DNI or not (T9b). **Decided 2026-10-05 by the user:
+  with DNI** (member number, names, DNI/NIE, first sign-up, current sign-up, leave date, left by).
 - D-C: language of the leave/rejoin e-mails; no locale is stored (T10).
 - D-D: A-11 on a former member; proposal superadmin only (T7/T9a). T9a enforces the proposal,
   provisionally, in one place: `admin_member_data_former_min_role()` = `'superadmin'`.
@@ -78,7 +79,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T8 — Role and anonymise functions — route: delegated
 - [x] T7b — Lock down DNI/phone ciphertext (correction from the T7 verification): drop `admins_select_all` and `member_badges_admins_select_all`, `get_all_members_for_admin` service-role only (guarded server callers use the admin client), remove the public `getAllMembers` action, bind ciphertext to its member with AES-GCM AAD (`v2:` format, legacy fallback until prod is re-encrypted) + re-encryption script, BR-15 detector v3, e2e teardown demotes before deleting — route: delegated (writer trigger: migration + encryption module + 6+ callers and tests)
 - [x] T9a — Export functions + routes: members CSV, member data (A-10, A-11) — route: delegated (writer trigger: migration + lib + 2 routes + 6 test files)
-- [ ] T9b — Export functions + routes: e-mail lists, llibre de socis (A-16, S-4) — route: delegated
+- [x] T9b — Export functions + routes: e-mail lists, llibre de socis (A-16, S-4), A-11 reason for a former member (T9a verification), POST + Origin for every export, T7b follow-ups — route: delegated (writer trigger: migration + lib + 4 routes + 10 test files)
 - [ ] T10 — Mail module (`src/lib/mail/`) + leave/rejoin actions + templates — route: delegated
 - [x] T11a — Server actions A-4, A-5, A-8, A-9 — route: delegated (writer trigger: actions + error module + 3 test files)
 - [ ] T11b — Server actions A-15, roles (S-1, S-2), anonymise (S-3) — route: delegated
@@ -185,6 +186,13 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
       `/profile/edit` still shows their own values.
    5. Follow-up (T27): once step 3 shows `legacy=0` on prod, remove the legacy decrypt
       fallback from `src/lib/encryption.ts` (and its tests).
+   6. Script exit codes (T9b): 0 clean, 1 errors, 2 usage/environment, 3 duplicates found (and
+      no errors). Exit 3 is evidence of the T7 exploit: resolve every `duplicate_ciphertext`
+      line before re-running. `duplicates=0` is **not** proof that no copy happened: a victim
+      who changed their value since the copy breaks the match.
+   7. No rollback to pre-T7b code once v2 values exist: the old code cannot read `v2:` values
+      and the trigger refuses its legacy writes, so every DNI/phone read and write breaks. Roll
+      forward instead.
 
 9. `supabase/migrations/20261005100800_admin_exports.sql` (T9a). Apply after item 8 (needs
    M1–M8: the BR-15 detector v3 and `members_ciphertext_guard`) and deploy the T9a code right
@@ -200,6 +208,25 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
    limit 1` shows `{"filter":{"state":"active","role":"all"},"rows":<n>}`), and n equals the
    CSV's data lines. More than 1000 active members would hit PostgREST `max_rows`: the route
    then answers 500 instead of a partial file (raise `max_rows` or page the export first).
+   (T9b adjusts the checks: the export is now `POST /api/admin/members/export` with a
+   same-origin Origin header; the check after the deploy is a download from `/admin/members`.)
+
+10. `supabase/migrations/20261005100900_admin_exports_more.sql` (T9b). Apply after item 9 and
+    deploy the T9b code right after. Changes: `admin_export_member_data(uuid)` is dropped and
+    replaced by `admin_export_member_data(uuid, text default null)` (a former member now needs
+    a reason of 10+ characters; the T9a route calls it with one argument and keeps working for
+    active members, so the gap between apply and deploy only refuses a superadmin's former-member
+    export); adds `admin_export_emails` (A-16) and `admin_export_register` (S-4); removes
+    `export.emails` and `export.member_register` from `log_admin_event()` (no shipped code logs
+    them). The T9b code makes every export POST + same-origin Origin (`darkstone.cat`,
+    `www.darkstone.cat`; localhost outside production only): exports never work on
+    `*.vercel.app` previews, and the list in `src/lib/http/origin.ts` must change with the
+    domain. After applying, as a plain member `select * from public.admin_export_emails('association')`
+    fails with `admin:forbidden`, and as a board member `select * from
+    public.admin_export_register('Requeriment de prova')` fails with `admin:forbidden`. After the
+    deploy: a CSV export from `/admin/members` still downloads (the dialog now POSTs), and
+    `curl -X POST https://www.darkstone.cat/api/admin/members/export` without an Origin answers
+    403 `forbidden_origin`. A-16/S-4 have no UI until T17.
 
 ## Progress
 
@@ -883,6 +910,132 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   tests).
 - Prod risks: runbook 9. PostgREST `max_rows` 1000 caps the CSV (the route refuses a partial
   file; prod has ~190 rows). The A-11 function locks the member row for the length of the call.
+- Independent read-only verification (tier `high`): FAIL on one MEDIUM spec defect, corrected in
+  T9b: A-11 lets a superadmin download a former member's DNI without the written reason BR-21
+  requires (probe: `export.member_data | {"state":"former"} | reason=NULL`), bypassing A-5's
+  reason rule. Fix: for a former member require `p_reason` (same minimum as the reveal) and store
+  it in the audit entry; make A-11 a POST with the reason in the body (never in a URL or log).
+  Confirmed correct: audit-before-data (a forced `audit_write` failure returns no rows for both
+  functions), data scope (BR-21/BR-22), route security, `log_admin_event` diff. Notes: add a
+  fail-closed test (rolled-back trigger forcing the audit write to fail); CSV tests never check a
+  purged stub; e2e has no successful A-11 download; GET exports can be triggered cross-site (file
+  not readable by the attacker, entry written in the board member's name); never enable
+  PostgREST `db-tx-end` overrides (`Prefer: tx=rollback` would drop the audit entry).
+
+### T9b — done (route: delegated)
+
+- Commit: `feat(admin): Add e-mail and register exports and require a reason for former members`
+  on `develop-users` (hash in `git log -- supabase/migrations/20261005100900_admin_exports_more.sql`).
+- Test-first: RED observed before the code: unit/route files (`tests/lib/http-origin.test.ts`,
+  the two new route files, the POST rewrites of the A-10/A-11 route tests, the script exit-code
+  cases) 82 failing + 3 suites failing to import; integration (`admin-exports`, `audit-log`,
+  `roles`) 22 failing / 83 passing. The two fail-closed cases on the T9a functions passed at
+  once (they pin existing behaviour). GREEN after the migration (`npm run db:reset`) and the
+  code: 105/105 in the three integration files, 513/513 in `tests/lib` + `tests/server/api` +
+  the dialog test.
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 74 files / 1048 tests passed; `npm run test:integration` 24 files / 472
+  tests passed; `npx playwright test e2e/admin e2e/forms/contact.spec.ts` 29 passed (contact
+  spec lives in `e2e/forms/`).
+- Signatures (migration 20261005100900; SECURITY DEFINER, `search_path ''`, EXECUTE for
+  `authenticated` only, anon/service_role "permission denied", audit before rows, fail closed):
+  - `admin_export_member_data(p_member_id uuid, p_reason text = NULL)` (the one-argument
+    version is dropped so no reasonless overload survives). Board+; reason trimmed, > 500 →
+    `admin:reason_too_long`; former member: `admin_member_data_former_min_role()` (still
+    superadmin, D-D) checked first (42501), then a reason of `admin_reveal_reason_min_length()`
+    (10) characters or `admin:reason_required` (22023), no entry. The reason goes into the
+    entry's `reason` column (active members: optional, stored when given). Same columns.
+  - `admin_export_emails(p_list text)` RETURNS TABLE `(first_name, last_name, email,
+    total_rows int)`. Board+. `association` = active (`left_on IS NULL`), not purged, confirmed
+    login with an e-mail; `newsletter` = those with `newsletter_accepted IS TRUE` (BR-23);
+    unknown/NULL list → `admin:invalid_argument`, no entry. Ordered by member number. Entry
+    `export.emails`, no target, details `{"list":<list>,"rows":<n>}`.
+  - `admin_export_register(p_reason text = NULL)` RETURNS TABLE `(id, member_number,
+    first_name, last_name, dni_nie_encrypted, membership_start_date, current_joined_on,
+    left_on, left_by, total_rows int)`. `has_role('superadmin')` first (`admin:forbidden`
+    42501, so board never learns the reason rule), then reason length rules as above. Every
+    member not purged whose login is absent or confirmed (BR-22), active and former
+    (anonymised former members too). Entry `export.member_register`, no target, details
+    `{"rows":<n>}` (§5.1 "row count"), reason in the reason column.
+  - `log_admin_event()` whitelist now only `member.send_access_link`, `ops.cache_refresh`
+    (the superadmin branch for the register key is gone with the key).
+- Routes (all exports are now POST + same-origin Origin; GET answers 405 `method_not_allowed`
+  with `Allow: POST`; order: origin 403 `{"error":"forbidden_origin"}` → session/role 401/403 →
+  body (JSON object, empty = `{}`, > 4096 bytes 413 `payload_too_large`, otherwise 400) → DB;
+  every response `no-store`; DB errors log the Postgres code only):
+  - `POST /api/admin/members/export` (A-10): body `{ role?, state?: "active" }`, any other key
+    or value, or a query string → 400 `invalid_filter`. CSV unchanged.
+  - `POST /api/admin/members/<number>/data` (A-11): body `{ reason?: string | null }` (other
+    keys or a non-string → 400 `invalid_request`); `admin:reason_required` / `reason_too_long`
+    → 400 with that code. The reason is never logged.
+  - `POST /api/admin/members/emails` (A-16, new): body `{ list: "association" | "newsletter",
+    format?: "csv" | "json" }` (else 400 `invalid_request`). `csv` (default): BOM, `Nom,Cognoms,
+    Email`, escapeCsv, `darkstone_emails_<list>_<date>.csv`. `json`: `{ list, count, addresses
+    }` for "Copia les adreces" (no attachment). Log `[admin-export] user=<uuid> emails
+    list=<list> rows=<n>`. Truncated response → 500.
+  - `POST /api/admin/members/register` (S-4, new): `getAdminAccess('superadmin')`; body
+    `{ reason }` (missing/blank → 400 `reason_required` without a DB call; non-string or other
+    keys → 400 `invalid_request`). CSV: BOM, `Número,Nom,Cognoms,DNI/NIE,Primera alta,Alta
+    actual,Data de baixa,Baixa per` (D-B), DNI decrypted with the row id (failure → empty),
+    `Baixa per` `self` → `Soci`, `board` → `Junta`, `darkstone_llibre_socis_<date>.csv`. Log
+    `[admin-export] user=<uuid> register rows=<n>`. Truncated response → 500.
+  - Shared: `src/lib/http/origin.ts` `isAllowedOrigin(origin, { localhostPorts?,
+    allowLocalhostEnv? })` + `SITE_ORIGINS`. The contact route uses it with `{ localhostPorts:
+    [3000], allowLocalhostEnv: "CONTACT_ALLOW_LOCALHOST" }` (behaviour identical; its tests are
+    unchanged and pass). The exports use the defaults: production origins, plus any
+    `http://localhost:<port>` outside production (e2e runs on 3100), no production override.
+    `src/lib/admin/exports.ts` gained `exportOriginError`, `exportMethodNotAllowed`,
+    `readExportBody`, `parseMemberDataBody`, `parseRegisterBody`, `parseEmailsExportBody`,
+    `exportDbErrorResponse`, `isTruncated`, `csvResponse`, `buildEmailsCsv`,
+    `buildRegisterCsv`; `parseMembersExportFilter` now takes the body object;
+    `exportErrorStatus` matches `admin:<code>` only up to `:`/space/end.
+  - `ExportConfirmDialog` POSTs `{}` with `Content-Type: application/json` (new component test).
+- Spec interpretations: A-16 lists = the two of BR-23 (`association`, `newsletter`), board+
+  (spec table); former members, purged stubs and unconfirmed sign-ups never (BR-22/23); the two
+  outputs map to `format` csv/json, each call audited (both expose the addresses). S-4 = every
+  member except purged stubs (spec S-4) and unconfirmed sign-ups (BR-22: not members); a
+  reason is required (10+), because the mockup's "legal purpose" checkbox predates D-B and the
+  file now carries former members' DNI, which BR-21 reason-gates; the T17 dialog needs a
+  reason textarea (and may keep the checkbox). Audit details of S-4 hold the row count only
+  (§5.1); an active/former split was dropped because a second count would run on a different
+  snapshot.
+- T7b follow-ups closed: `scripts/reencrypt-member-secrets.mjs` exits 3 on duplicates (errors
+  win with 1; 2 stays usage/env), `EXIT_CODES` / `exitCodeFor` exported and tested, header and
+  runbook 8 document the codes; runbook 8 now says `duplicates=0` is no proof and that rolling
+  back to pre-T7b code after v2 values exist breaks every DNI/phone read and write.
+- T9a verification notes closed: fail-closed tests (one DO block as `postgres` with
+  `auth.uid()` = a board member, a throwaway `BEFORE INSERT` trigger on `audit_log` that raises,
+  the export in a sub-block, a final RAISE that reports `rows=-1` and rolls everything back) for
+  `admin_export_members`, `admin_export_emails` and `admin_export_member_data`, plus a control
+  probe that returns rows without the trigger; purged stub excluded from A-10, A-11 (404),
+  A-16 and S-4; e2e successful A-11 download (board on e2e-member); GET exports are gone
+  (cross-site trigger closed by POST + Origin).
+- T11a verification notes (parent request, `src/lib/admin/action-errors.ts`): the prefix regex
+  now needs `:`, whitespace or the end after the code (`admin:forbidden-x`, `admin:not_foundX`
+  → `failed`) and the invalid_value key must end at a word boundary; both tables are read with
+  `Object.hasOwn` (`__proto__`, `constructor`, `toString` → `invalid`). RED 6 failing first,
+  then GREEN (47 cases).
+- Tests adapted (why): `audit-log.test.ts` uses `ops.cache_refresh` where it used
+  `export.emails` and expects both export keys refused; `roles.test.ts` asserts a superadmin can
+  no longer log `export.member_register` directly, passes a reason to the former-member A-11
+  cases and gains a purged member and an unconfirmed sign-up for S-4; the A-10/A-11 route
+  tests moved to POST (shared helper `tests/helpers/admin-route.ts`).
+- Deviations: exit code 3 (not 2) for duplicates, because 2 already meant usage/environment.
+  The A-10 route refuses a query string instead of ignoring it (an old `?role=` link must not
+  silently export everything). No i18n texts (no UI in this task).
+- Follow-ups: T17 (A-16/S-4 dialogs) POSTs to the new routes; the counts in the dialogs
+  ("168 adreces", "191 files") should come from a read RPC, not from an audited export call.
+  T21 (A-11 action) adds the reason textarea for a former member. T27: CLAUDE.md export-route
+  paragraphs (POST + Origin, new routes; outside this task's surface). Detector misses compound
+  keys (T7b note) stay open, low risk.
+- Size: about 2,300 authored lines without this document (tests + e2e ~1,360, migration ~340 of
+  which ~150 are the copied `log_admin_event` / A-11 bodies, lib + routes + dialog ~610, script
+  ~25); over the 400-line heuristic because the task bundles a correction, the CSRF change across
+  all exports, two new exports and their tests; not split.
+- Prod risks: runbook 10 (apply then deploy; exports refuse previews and any non-listed
+  origin; a superadmin's former-member A-11 is refused between apply and deploy). The register
+  file holds decrypted DNI of former members: the route never logs it, but the downloaded file
+  is the most sensitive artefact of the panel (dialog warning in T17).
 
 ### T11a — done (route: delegated)
 
@@ -961,4 +1114,4 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 
 ## Next step
 
-T10 / T11b (T9b waits for D-B).
+T10 / T11b.

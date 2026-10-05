@@ -30,6 +30,7 @@ const emails = {
   alias: 'roles-alias@test.local',
   target: 'roles-target@test.local',
   erased: 'roles-erased@test.local',
+  purged: 'roles-purged@test.local',
 }
 type Key = keyof typeof emails
 const users = {} as Record<Key, { id: string }>
@@ -101,6 +102,12 @@ beforeAll(async () => {
     })
     .eq('id', users.erased.id)
   expect(erased.error).toBeNull()
+  // A purged stub (§4.5): never in the llibre de socis (S-4).
+  const purged = await supabaseAdmin
+    .from('members')
+    .update({ left_on: '2022-03-01', left_by: 'self', purged_at: '2025-03-02T03:00:00Z' })
+    .eq('id', users.purged.id)
+  expect(purged.error).toBeNull()
   const badges = await supabaseAdmin.from('member_badges').insert([
     { member_id: users.erased.id, badge_key: 'ludoteca_donor' },
     { member_id: users.erased.id, badge_key: 'volunteer_egara_joga' },
@@ -335,24 +342,17 @@ describe('BR-10: at least two superadmins', () => {
 // because this is the only file allowed to create superadmins; the rest is in audit-log.test.ts.
 // At this point superA and superB are the two active superadmins.
 describe('audit log as a superadmin', () => {
-  it('a superadmin logs the register export (superadmin only) and reads the log', async () => {
+  it('not even a superadmin can log the register export directly (admin_export_register logs it)', async () => {
     const client = await createAuthenticatedClient(emails.superA, password)
-    const { data: id, error } = await client.rpc('log_admin_event', {
+    const { data, error } = await client.rpc('log_admin_event', {
       p_action: 'export.member_register',
       p_target: null,
       p_details: { rows: 12 },
       p_reason: null,
     })
-    expect(error).toBeNull()
-
-    const { data, error: readError } = await client
-      .from('audit_log')
-      .select('action, actor_id, actor_role, details')
-      .eq('id', id)
-    expect(readError).toBeNull()
-    expect(data).toEqual([
-      { action: 'export.member_register', actor_id: users.superA.id, actor_role: 'superadmin', details: { rows: 12 } },
-    ])
+    expect(error?.code).toBe('22023')
+    expect(error?.message).toContain('audit:action_not_allowed')
+    expect(data).toBeNull()
   })
 
   // admin_reveal_sensitive() (20261005100500_member_admin_mutations.sql): the rest of A-5 is in
@@ -680,22 +680,43 @@ describe('admin_anonymise_member (S-3)', () => {
 // A-11 on a former member (20261005100800_admin_exports.sql): superadmin only (D-D, provisional).
 // The board refusal and the active-member cases are in admin-exports.test.ts. superA is still an
 // active superadmin here; `erased` is anonymised and its login account deleted by now.
-describe('admin_export_member_data on a former member (A-11, D-D)', () => {
-  const exportAs = async (key: Key, target: string) => {
+// A former member's file holds the blocked DNI, so the export needs the same written reason as
+// revealing it (BR-21, 20261005100900): at least admin_reveal_reason_min_length() characters.
+describe('admin_export_member_data on a former member (A-11, D-D, BR-21)', () => {
+  const REASON = 'Petició d\'accés per correu'
+  const exportAs = async (key: Key, target: string, reason: string | null = REASON) => {
     const client = await createAuthenticatedClient(emails[key], password)
-    return client.rpc('admin_export_member_data', { p_member_id: target })
+    return client.rpc('admin_export_member_data', { p_member_id: target, p_reason: reason })
   }
   const exportEntries = async (target: string) =>
     (
       await supabaseAdmin
         .from('audit_log')
-        .select('actor_id, actor_role, details')
+        .select('actor_id, actor_role, details, reason')
         .eq('target_member_id', target)
         .eq('action', 'export.member_data')
         .order('id')
     ).data!
 
-  it("a superadmin exports a former member's data, logged with the state", async () => {
+  it('a superadmin without a reason, or with one under 10 characters, is refused and nothing is logged', async () => {
+    const client = await createAuthenticatedClient(emails.superA, password)
+    const noReasonArg = await client.rpc('admin_export_member_data', { p_member_id: users.former.id })
+    expect(noReasonArg.error?.code).toBe('22023')
+    expect(noReasonArg.error?.message).toContain('admin:reason_required')
+    expect(noReasonArg.data).toBeNull()
+
+    for (const reason of [null, '', '   ', '  123456789  ']) {
+      const { data, error } = await exportAs('superA', users.former.id, reason)
+      expect(error?.code, String(reason)).toBe('22023')
+      expect(error?.message).toContain('admin:reason_required')
+      expect(data).toBeNull()
+    }
+    const long = await exportAs('superA', users.former.id, 'x'.repeat(501))
+    expect(long.error?.message).toContain('admin:reason_too_long')
+    expect(await exportEntries(users.former.id)).toEqual([])
+  })
+
+  it("a superadmin exports a former member's data with a reason, logged with the state and the reason", async () => {
     const { data: row } = await supabaseAdmin
       .from('members')
       .select('member_number, dni_nie_encrypted')
@@ -717,7 +738,7 @@ describe('admin_export_member_data on a former member (A-11, D-D)', () => {
       }),
     ])
     expect(await exportEntries(users.former.id)).toEqual([
-      { actor_id: users.superA.id, actor_role: 'superadmin', details: { state: 'former' } },
+      { actor_id: users.superA.id, actor_role: 'superadmin', details: { state: 'former' }, reason: REASON },
     ])
   })
 
@@ -737,6 +758,138 @@ describe('admin_export_member_data on a former member (A-11, D-D)', () => {
       }),
     ])
     expect(await exportEntries(users.erased.id)).toHaveLength(1)
+  })
+})
+
+// S-4, the llibre de socis (20261005100900): superadmin only, every member active or former
+// (blocked records included, BR-21's one exception), never a purged stub or an unconfirmed
+// sign-up, with the D-B fields and the DNI as stored ciphertext; a written reason is required
+// (it carries former members' DNI). Board and member refusals are in admin-exports.test.ts.
+// superA is an active superadmin here; `erased` is anonymised without a login account.
+describe('admin_export_register (S-4)', () => {
+  type Row = {
+    id: string
+    member_number: string
+    first_name: string | null
+    last_name: string | null
+    dni_nie_encrypted: string | null
+    membership_start_date: string | null
+    current_joined_on: string | null
+    left_on: string | null
+    left_by: string | null
+    total_rows: number
+  }
+  const REASON = 'Requeriment del Registre d\'Associacions'
+  let unconfirmedId: string
+
+  beforeAll(async () => {
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email: 'roles-unconfirmed@test.local',
+      password,
+      email_confirm: false,
+      user_metadata: { first_name: 'Pendent', last_name: 'Roles' },
+    })
+    expect(error).toBeNull()
+    unconfirmedId = data.user!.id
+    userIds.push(unconfirmedId)
+  })
+
+  const exportAs = async (key: Key, reason: string | null) => {
+    const client = await createAuthenticatedClient(emails[key], password)
+    return client.rpc('admin_export_register', { p_reason: reason })
+  }
+  const registerEntries = async (actor: string) =>
+    (
+      await supabaseAdmin
+        .from('audit_log')
+        .select('id, actor_role, target_member_id, details, reason')
+        .eq('actor_id', actor)
+        .eq('action', 'export.member_register')
+        .order('id')
+    ).data!
+
+  it('refuses a missing, blank, short or too long reason and logs nothing', async () => {
+    const before = await registerEntries(users.superA.id)
+    const client = await createAuthenticatedClient(emails.superA, password)
+    const noArg = await client.rpc('admin_export_register', {})
+    expect(noArg.error?.code).toBe('22023')
+    expect(noArg.error?.message).toContain('admin:reason_required')
+
+    for (const reason of [null, '', '   ', '  123456789  ']) {
+      const { data, error } = await exportAs('superA', reason)
+      expect(error?.code, String(reason)).toBe('22023')
+      expect(error?.message).toContain('admin:reason_required')
+      expect(data).toBeNull()
+    }
+    const long = await exportAs('superA', 'x'.repeat(501))
+    expect(long.error?.message).toContain('admin:reason_too_long')
+    expect(await registerEntries(users.superA.id)).toHaveLength(before.length)
+  })
+
+  it('returns active and former members with the D-B fields, never a purged stub or an unconfirmed sign-up', async () => {
+    const { data, error } = await exportAs('superA', REASON)
+    expect(error).toBeNull()
+    const rows = data as Row[]
+    const ids = rows.map((r) => r.id)
+
+    for (const key of ['member', 'board', 'legacy', 'superA', 'superB', 'former', 'erased'] as const) {
+      expect(ids, key).toContain(users[key].id)
+    }
+    expect(ids).not.toContain(users.purged.id)
+    expect(ids).not.toContain(unconfirmedId)
+
+    const { data: former } = await supabaseAdmin
+      .from('members')
+      .select('member_number, dni_nie_encrypted, membership_start_date, current_joined_on')
+      .eq('id', users.former.id)
+      .single()
+    expect(former!.dni_nie_encrypted).toMatch(/^v2:/)
+    expect(rows.find((r) => r.id === users.former.id)).toEqual({
+      id: users.former.id,
+      member_number: former!.member_number,
+      first_name: 'former',
+      last_name: 'Roles',
+      dni_nie_encrypted: former!.dni_nie_encrypted,
+      membership_start_date: former!.membership_start_date,
+      current_joined_on: former!.current_joined_on,
+      left_on: '2026-10-01',
+      left_by: 'self',
+      total_rows: rows.length,
+    })
+    // anonymised: login account gone, name and DNI still held until the purge
+    expect(rows.find((r) => r.id === users.erased.id)).toMatchObject({
+      first_name: 'erased',
+      left_on: '2026-09-15',
+      left_by: 'board',
+      dni_nie_encrypted: expect.stringMatching(/^v2:/),
+    })
+    expect(rows.find((r) => r.id === users.member.id)).toMatchObject({ left_on: null, left_by: null })
+    expect(rows.every((r) => r.total_rows === rows.length)).toBe(true)
+    const numbers = rows.map((r) => r.member_number)
+    expect(numbers).toEqual([...numbers].sort())
+  })
+
+  it('writes one export.member_register entry with the row count and the reason, readable by the superadmin', async () => {
+    const before = await registerEntries(users.superA.id)
+    const { data, error } = await exportAs('superA', `  ${REASON}  `)
+    expect(error).toBeNull()
+    const rows = data as Row[]
+
+    const added = (await registerEntries(users.superA.id)).slice(before.length)
+    expect(added).toEqual([
+      {
+        id: expect.any(Number),
+        actor_role: 'superadmin',
+        target_member_id: null,
+        details: { rows: rows.length },
+        reason: REASON,
+      },
+    ])
+
+    const client = await createAuthenticatedClient(emails.superA, password)
+    const read = await client.from('audit_log').select('action, details').eq('id', added[0].id)
+    expect(read.error).toBeNull()
+    expect(read.data).toEqual([{ action: 'export.member_register', details: added[0].details }])
   })
 })
 

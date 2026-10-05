@@ -6,6 +6,8 @@ import {
   planReencryption,
   run,
   encryptForMember,
+  exitCodeFor,
+  EXIT_CODES,
 } from '../../scripts/reencrypt-member-secrets.mjs'
 
 const KEY_HEX = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
@@ -144,5 +146,41 @@ describe('run', () => {
     const result = await run({ supabase, key, apply: true, log: vi.fn() })
     expect(result.written).toBe(0)
     expect(result.findings).toEqual([{ id: A, column: 'dni_nie_encrypted', reason: 'changed_concurrently' }])
+  })
+})
+
+// Exit codes (script header, runbook 8): 0 clean, 1 errors, 2 usage/environment, 3 duplicates.
+// A duplicate is evidence of the T7 exploit (a ciphertext copied between rows), so a run that
+// finds one must not look successful to a shell or CI step.
+describe('exitCodeFor', () => {
+  it('is 0 only when there are neither errors nor duplicates', () => {
+    expect(exitCodeFor({ errors: 0, duplicates: 0 })).toBe(0)
+    expect(EXIT_CODES).toEqual({ ok: 0, errors: 1, usage: 2, duplicates: 3 })
+  })
+
+  it('is 3 when duplicates were found, in dry run and apply alike', () => {
+    expect(exitCodeFor({ errors: 0, duplicates: 1 })).toBe(3)
+  })
+
+  it('errors win over duplicates', () => {
+    expect(exitCodeFor({ errors: 2, duplicates: 4 })).toBe(1)
+  })
+
+  it('a run with a copied legacy value ends with the duplicates code', async () => {
+    const value = legacy('12345678Z')
+    const rows = [
+      { id: A, dni_nie_encrypted: value, phone_encrypted: null },
+      { id: B, dni_nie_encrypted: value, phone_encrypted: null },
+    ]
+    const supabase = {
+      from: () => ({
+        select: () => ({
+          or: () => ({ order: () => ({ range: async () => ({ data: rows, error: null }) }) }),
+        }),
+      }),
+    }
+    const result = await run({ supabase, key, apply: false, log: vi.fn() })
+    expect(result.counts.duplicates).toBe(2)
+    expect(exitCodeFor(result.counts)).toBe(3)
   })
 })

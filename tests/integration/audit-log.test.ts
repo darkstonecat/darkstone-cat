@@ -112,7 +112,6 @@ describe('log_admin_event()', () => {
 
   it('accepts every event the app logs directly, with the details it needs', async () => {
     const ok: [string, string | null, Record<string, unknown>][] = [
-      ['export.emails', null, { list: 'newsletter', count: 2 }],
       ['ops.cache_refresh', null, { jobs: ['ludoya'], result: 'ok', duration_ms: 2100 }],
     ]
     for (const [action, target, details] of ok) {
@@ -124,10 +123,11 @@ describe('log_admin_event()', () => {
 
   it('rejects the actions that only database functions may write', async () => {
     // member.reveal_sensitive left the whitelist in 20261005100500 (admin_reveal_sensitive logs
-    // it); export.members_csv and export.member_data in 20261005100800 (admin_export_* log them)
+    // it); export.members_csv and export.member_data in 20261005100800, export.emails and
+    // export.member_register in 20261005100900 (admin_export_* log them)
     for (const action of [
       'member.update', 'member.reveal_sensitive', 'membership.leave', 'role.grant', 'member.purge', 'badge.award',
-      'export.members_csv', 'export.member_data',
+      'export.members_csv', 'export.member_data', 'export.emails', 'export.member_register',
     ]) {
       const { error } = await logEvent(clients.board, action, users.target.id)
       expect(error?.message, action).toContain('audit:action_not_allowed')
@@ -139,10 +139,10 @@ describe('log_admin_event()', () => {
     expect(error?.message).toContain('audit:action_not_allowed')
   })
 
-  it('rejects the superadmin-only register export for a board member', async () => {
+  it('rejects the register export, which only admin_export_register() logs (20261005100900)', async () => {
     const { error } = await logEvent(clients.board, 'export.member_register', null, { rows: 10 })
-    expect(error?.code).toBe('42501')
-    expect(error?.message).toContain('audit:forbidden')
+    expect(error?.code).toBe('22023')
+    expect(error?.message).toContain('audit:action_not_allowed')
   })
 
   it('rejects a plain member and an anonymous caller', async () => {
@@ -161,7 +161,7 @@ describe('log_admin_event()', () => {
     const unknown = await logEvent(clients.board, 'member.send_access_link', '00000000-0000-0000-0000-000000000000')
     expect(unknown.error?.message).toContain('audit:invalid_target')
 
-    const extra = await logEvent(clients.board, 'export.emails', users.target.id, { list: 'association', count: 1 })
+    const extra = await logEvent(clients.board, 'ops.cache_refresh', users.target.id, { jobs: ['ludoya'], result: 'ok' })
     expect(extra.error?.message).toContain('audit:invalid_target')
   })
 
@@ -172,9 +172,9 @@ describe('log_admin_event()', () => {
 
   it('details must be a JSON object', async () => {
     const { error } = await clients.board.rpc('log_admin_event', {
-      p_action: 'export.emails',
+      p_action: 'ops.cache_refresh',
       p_target: null,
-      p_details: ['newsletter'],
+      p_details: ['ludoya'],
       p_reason: null,
     })
     expect(error?.message).toContain('audit:invalid_details')

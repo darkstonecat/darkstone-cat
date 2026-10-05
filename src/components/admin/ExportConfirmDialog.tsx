@@ -19,7 +19,12 @@ export default function ExportConfirmDialog({ open, onClose }: ExportConfirmDial
     setError("");
 
     try {
-      const res = await fetch("/api/admin/members/export");
+      // POST + JSON body: the export routes refuse GET and check the Origin header (CSRF).
+      const res = await fetch("/api/admin/members/export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
 
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);

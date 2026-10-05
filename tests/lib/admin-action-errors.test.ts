@@ -67,6 +67,31 @@ describe('adminDbErrorCode', () => {
   it('only matches the prefix at the start of the message', () => {
     expect(adminDbErrorCode(err('wrapped: admin:not_found: unknown member'))).toBe('failed')
   })
+
+  it.each([
+    ['admin:forbidden-x: lookalike', '22023'],
+    ['admin:not_foundX unknown member', '22023'],
+    ['admin:reason_required2: lookalike', '22023'],
+    ['audit:forbidden_extra: lookalike', '22023'],
+  ])('needs a boundary after the code: %s is failed', (message, code) => {
+    expect(adminDbErrorCode(err(message, code))).toBe('failed')
+  })
+
+  it('still maps a known code followed by the end of the message or a space', () => {
+    expect(adminDbErrorCode(err('admin:not_found'))).toBe('not_found')
+    expect(adminDbErrorCode(err('admin:not_found unknown member'))).toBe('not_found')
+  })
+
+  it.each(['__proto__', 'constructor', 'toString', 'hasOwnProperty'])(
+    'never resolves admin:invalid_value: %s through the object prototype',
+    (key) => {
+      expect(adminDbErrorCode(err(`admin:invalid_value: ${key} is not a column`))).toBe('invalid')
+    }
+  )
+
+  it('needs a word boundary after the invalid_value key', () => {
+    expect(adminDbErrorCode(err('admin:invalid_value: first_name2 must have 1 to 100 characters'))).toBe('invalid')
+  })
 })
 
 describe('isMemberId', () => {

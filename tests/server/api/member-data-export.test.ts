@@ -9,10 +9,13 @@ vi.mock('@/lib/encryption', () => ({
   decrypt: vi.fn((text: string) => `decrypted:${text}`),
 }))
 
-import { GET } from '@/app/api/admin/members/[number]/data/route'
+import { GET, POST } from '@/app/api/admin/members/[number]/data/route'
+import { postJson } from '../../helpers/admin-route'
 
-// A-11: GET /api/admin/members/<number>/data. Resolves the number with admin_get_member, then
-// reads through admin_export_member_data (which writes export.member_data in the same
+// A-11: POST /api/admin/members/<number>/data with a JSON body `{ reason? }` (T9b: the reason a
+// former member's export needs travels in the body, never in the URL; same-origin Origin
+// header required; GET is 405). Resolves the number with admin_get_member, then reads through
+// admin_export_member_data (which checks the reason and writes export.member_data in the same
 // transaction), both with the session client.
 
 const MEMBER_ID = '11111111-2222-4333-8444-555555555555'
@@ -69,12 +72,11 @@ function setupMock(opts: {
 }
 
 const board = { user: { id: 'u1' }, member: { role: 'board', left_on: null } }
-const call = (number = '000-203') =>
-  GET(new Request(`http://localhost:3000/api/admin/members/${number}/data`), {
-    params: Promise.resolve({ number }),
-  })
+const urlOf = (number: string) => `http://localhost:3000/api/admin/members/${number}/data`
+const call = (number = '000-203', body: unknown = {}, opts?: Parameters<typeof postJson>[2]) =>
+  POST(postJson(urlOf(number), body, opts), { params: Promise.resolve({ number }) })
 
-describe('GET /api/admin/members/[number]/data', () => {
+describe('POST /api/admin/members/[number]/data', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(decrypt).mockImplementation((t: string) => `decrypted:${t}`)
@@ -82,6 +84,72 @@ describe('GET /api/admin/members/[number]/data', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
   })
   afterEach(() => vi.restoreAllMocks())
+
+  describe('method and origin', () => {
+    it('answers GET with 405', async () => {
+      const { client } = setupMock(board)
+      const res = await GET()
+      expect(res.status).toBe(405)
+      expect(res.headers.get('Allow')).toBe('POST')
+      expect(client.auth.getUser).not.toHaveBeenCalled()
+    })
+
+    it.each([null, 'https://evil.com'])('refuses Origin %j with 403 forbidden_origin and calls nothing', async (origin) => {
+      const { client, rpc } = setupMock(board)
+      const res = await call('000-203', {}, { origin })
+      expect(res.status).toBe(403)
+      expect(await res.json()).toEqual({ error: 'forbidden_origin' })
+      expect(client.auth.getUser).not.toHaveBeenCalled()
+      expect(rpc).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('reason', () => {
+    it('passes no reason as null', async () => {
+      const { rpc } = setupMock(board)
+      expect((await call()).status).toBe(200)
+      expect(rpc).toHaveBeenNthCalledWith(2, 'admin_export_member_data', { p_member_id: MEMBER_ID, p_reason: null })
+    })
+
+    it('passes the reason from the body to the database, which stores it in the audit entry', async () => {
+      const { rpc } = setupMock(board)
+      expect((await call('000-203', { reason: 'Petició d\'accés per correu' })).status).toBe(200)
+      expect(rpc).toHaveBeenNthCalledWith(2, 'admin_export_member_data', {
+        p_member_id: MEMBER_ID,
+        p_reason: "Petició d'accés per correu",
+      })
+    })
+
+    it.each([[{ reason: 42 }], [{ reason: ['x'] }], [{ reason: 'ok', extra: 1 }]])(
+      'rejects the body %j with 400 invalid_request before the database',
+      async (body) => {
+        const { rpc } = setupMock(board)
+        const res = await call('000-203', body)
+        expect(res.status).toBe(400)
+        expect(await res.json()).toEqual({ error: 'invalid_request' })
+        expect(rpc).not.toHaveBeenCalled()
+      }
+    )
+
+    it.each([
+      ['admin:reason_required: exporting a former member\'s data needs a reason of at least 10 characters', 'reason_required'],
+      ['admin:reason_too_long: at most 500 characters', 'reason_too_long'],
+    ])('maps %s to 400 %s', async (message, expected) => {
+      setupMock({ ...board, exported: { data: null, error: { code: '22023', message } } })
+      const res = await call('000-203', { reason: 'short' })
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ error: expected })
+    })
+
+    it('never logs the reason', async () => {
+      const spies = (['info', 'log', 'warn', 'error'] as const).map((m) => vi.spyOn(console, m).mockImplementation(() => {}))
+      setupMock({ ...board, exported: { data: null, error: { code: '22023', message: 'admin:reason_required: x' } } })
+      await call('000-203', { reason: 'Requeriment secret 123' })
+      setupMock(board)
+      await call('000-203', { reason: 'Requeriment secret 123' })
+      expect(JSON.stringify(spies.map((s) => s.mock.calls))).not.toContain('Requeriment secret')
+    })
+  })
 
   describe('access', () => {
     it('returns 401 without a session and calls nothing', async () => {
@@ -112,7 +180,7 @@ describe('GET /api/admin/members/[number]/data', () => {
       const { rpc } = setupMock(board)
       expect((await call()).status).toBe(200)
       expect(rpc).toHaveBeenNthCalledWith(1, 'admin_get_member', { p_member_number: '000-203' })
-      expect(rpc).toHaveBeenNthCalledWith(2, 'admin_export_member_data', { p_member_id: MEMBER_ID })
+      expect(rpc).toHaveBeenNthCalledWith(2, 'admin_export_member_data', { p_member_id: MEMBER_ID, p_reason: null })
       expect(createAdminClient).not.toHaveBeenCalled()
     })
 

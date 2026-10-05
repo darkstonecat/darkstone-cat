@@ -54,7 +54,17 @@ const PREFIXED_CODES: Record<string, AdminActionError> = {
   "audit:sensitive_details": "invalid_name",
 };
 
-const PREFIX_RE = /^([a-z_]+:[a-z_]+)(?::\s*([a-z_]+))?/;
+/**
+ * `<prefix>:<code>` at the start of the message, ending at `:`, whitespace or the end (so
+ * `admin:forbidden-x` or `admin:not_foundX` never match a known code), then optionally the
+ * invalid_value key as a whole word.
+ */
+const PREFIX_RE = /^([a-z_]+:[a-z_]+)(?=:|\s|$)(?::\s*([a-z_]+)\b)?/;
+
+/** Own keys only: `__proto__` / `constructor` must never resolve through the prototype. */
+function lookup<T>(table: Record<string, T>, key: string | undefined): T | undefined {
+  return key !== undefined && Object.hasOwn(table, key) ? table[key] : undefined;
+}
 
 type DbError = { code?: string | null; message?: string | null } | null | undefined;
 
@@ -66,9 +76,9 @@ export function adminDbErrorCode(error: DbError): AdminActionError {
 
   if (match) {
     if (match[1] === "admin:invalid_value") {
-      return (match[2] && INVALID_VALUE_CODES[match[2]]) || "invalid";
+      return lookup(INVALID_VALUE_CODES, match[2]) ?? "invalid";
     }
-    const code = PREFIXED_CODES[match[1]];
+    const code = lookup(PREFIXED_CODES, match[1]);
     if (code) return code;
   }
 

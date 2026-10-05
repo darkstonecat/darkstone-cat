@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 import { getClientIp } from "@/lib/client-ip";
+import { isAllowedOrigin } from "@/lib/http/origin";
 import { allowRequestShared } from "@/lib/rate-limit";
 
 // Google Workspace SMTP. SMTP_PASSWORD is an app password of SMTP_USER.
@@ -43,24 +44,15 @@ const NO_CACHE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate",
 } as const;
 
-const ALLOWED_ORIGINS = new Set([
-  "https://darkstone.cat",
-  "https://www.darkstone.cat",
-]);
-const LOCALHOST_ORIGIN = "http://localhost:3000";
-
 /**
- * localhost is accepted outside production, or when CONTACT_ALLOW_LOCALHOST=1 is set
- * (testing the form against a local production build). Never set it in Vercel.
+ * CSRF guard (src/lib/http/origin.ts): the production origins, and http://localhost:3000
+ * outside production, or when CONTACT_ALLOW_LOCALHOST=1 is set (testing the form against a
+ * local production build). Never set it in Vercel.
  */
-function isAllowedOrigin(origin: string): boolean {
-  if (ALLOWED_ORIGINS.has(origin)) return true;
-  return (
-    origin === LOCALHOST_ORIGIN &&
-    (process.env.NODE_ENV !== "production" ||
-      process.env.CONTACT_ALLOW_LOCALHOST === "1")
-  );
-}
+const CONTACT_ORIGIN_OPTIONS = {
+  localhostPorts: [3000],
+  allowLocalhostEnv: "CONTACT_ALLOW_LOCALHOST",
+} as const;
 
 const EMAIL_PATTERN =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
@@ -120,8 +112,9 @@ function readField(
 
 export async function POST(request: Request) {
   // CSRF protection: validate Origin header
-  const origin = request.headers.get("origin");
-  if (!origin || !isAllowedOrigin(origin)) return fail("forbidden", 403);
+  if (!isAllowedOrigin(request.headers.get("origin"), CONTACT_ORIGIN_OPTIONS)) {
+    return fail("forbidden", 403);
+  }
 
   const parsed = await readJsonObject(request);
   if ("response" in parsed) return parsed.response;
