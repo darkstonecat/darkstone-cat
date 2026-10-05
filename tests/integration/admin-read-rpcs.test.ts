@@ -523,8 +523,11 @@ describe('admin_stats()', () => {
     let delta: Record<string, number> = {}
     let pending: string | null = null
 
-    // Other files create and delete users in parallel; retry when they land inside the window.
-    for (let attempt = 0; attempt < 4; attempt++) {
+    // Other files create, delete, leave and rejoin users in parallel; retry when they land
+    // inside the window. The growing pause spreads the attempts past a burst of setup work
+    // (several files run their beforeAll at the same time).
+    for (let attempt = 0; attempt < 8; attempt++) {
+      if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 250 * attempt))
       const before = await stats()
       await update(users.flip1.id, { newsletter_accepted: true })
       await update(users.flip2.id, { role: 'board' })
@@ -546,7 +549,7 @@ describe('admin_stats()', () => {
       if (keys.every((k) => delta[k] === expected[k as keyof typeof expected])) break
     }
     expect(delta).toEqual(expected)
-  })
+  }, 30_000)
 
   it('counts joins, leaves and rejoins of the reference month and year (Madrid time)', async () => {
     const reference = '1999-07-15'

@@ -328,3 +328,32 @@ describe('audit log as a superadmin', () => {
     expect(data).toEqual({ target_member_id: users.former.id, reason: 'Requeriment escrit' })
   })
 })
+
+// Leave cases that need a superadmin (migration 20261005100400_membership_lifecycle.sql). The
+// rest is in membership-lifecycle.test.ts. superA and superB are still the two active
+// superadmins here.
+describe('a superadmin cannot leave (BR-10, BR-12)', () => {
+  it('dropping the role and leaving in one UPDATE is blocked by BR-10', async () => {
+    expect(await countActiveSuperadmins()).toBe(2)
+    const { error } = await supabaseAdmin
+      .from('members')
+      .update({ role: 'member', left_on: '2026-10-01', left_by: 'self' })
+      .eq('id', users.superB.id)
+    expect(error?.code).toBe('23514')
+    expect(error?.message).toContain('role_guard:last_superadmin')
+    expect(await getRow(users.superB.id)).toMatchObject({ role: 'superadmin', left_on: null })
+  })
+
+  it('member_leave_self and admin_member_leave refuse a superadmin (role_held)', async () => {
+    const superB = await createAuthenticatedClient(emails.superB, password)
+    const self = await superB.rpc('member_leave_self', { p_reason: null })
+    expect(self.error?.message).toContain('membership:role_held')
+
+    const superA = await createAuthenticatedClient(emails.superA, password)
+    const other = await superA.rpc('admin_member_leave', { p_member_id: users.superB.id, p_reason: 'Decisió de la junta' })
+    expect(other.error?.message).toContain('membership:role_held')
+
+    expect(await getRow(users.superB.id)).toMatchObject({ role: 'superadmin', left_on: null })
+    expect(await countActiveSuperadmins()).toBe(2)
+  })
+})

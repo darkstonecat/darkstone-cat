@@ -42,9 +42,12 @@ first, then the server layer, then the screens.
 - D-C: language of the leave/rejoin e-mails; no locale is stored (T10).
 - D-D: A-11 on a former member; proposal superadmin only (T7/T9a).
 - D-E: confirm A-7 checklist and minimum reason lengths, 5 for leave and 10 for reveal (T6/T7).
+  T6 enforces 5 for a board leave (`membership_leave_reason_min_length()`, provisional).
 - D-F: what runs the retention job: GitHub Actions, pg_cron or Vercel cron (T12).
 - D-G: path `/admin/tools/event-images` (T25).
 - D-H: does a backdated leave move the purge date; proposal purge = `left_on` + 3 years (T6/T12).
+  T6 also limits a board leave to at most 365 days back (`membership_leave_max_backdate_days()`,
+  provisional; the spec only says "never in the future"), and never before the current alta.
 
 ## Delivery
 
@@ -67,7 +70,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T3 — M3 `audit_log`: append-only table, RLS read for board, `audit_write()` internal, `log_admin_event()` whitelist — route: delegated
 - [x] T4 — TypeScript role model: `requireRole()` guard, proxy `/admin` prefix, NavBar and `useAuthUser` with `isBoardRole()` — route: delegated
 - [x] T5 — M4 read RPCs: `admin_list_members`, `admin_get_member`, `admin_stats`, `admin_list_activity` — route: delegated
-- [ ] T6 — Leave and rejoin functions (ban, sessions, card token) — route: delegated
+- [x] T6 — Leave and rejoin functions (ban, sessions, card token) — route: delegated
 - [ ] T7 — Update, reveal, badge and card functions — route: delegated
 - [ ] T8 — Role and anonymise functions — route: delegated
 - [ ] T9a — Export functions + routes: members CSV, member data (A-10, A-11) — route: delegated
@@ -123,6 +126,17 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
    Must be applied before T16+ screens are deployed. After applying, as an admin
    `select * from public.admin_stats()` returns one row, and as a plain member every
    `admin_*` function fails with `admin:forbidden`.
+5. `supabase/migrations/20261005100400_membership_lifecycle.sql` (T6). Safe to apply before any
+   code ships: it adds the leave/rejoin functions (nothing calls them yet) and only narrows the
+   `admin_list_members` search. Needs M1–M4. Must be applied before T10/T20/T26 code is
+   deployed. Before applying, confirm on prod that `postgres` may write the Auth tables the
+   functions touch (in a transaction you roll back: `update auth.users set banned_until =
+   banned_until where false; delete from auth.sessions where false; delete from
+   auth.refresh_tokens where false;`); locally it holds INSERT/UPDATE/DELETE on all three. If
+   it does not, the functions fail atomically (no half-done leave) and T10 must ban through
+   `auth.admin.updateUserById` instead. After applying, as a plain member
+   `select public.admin_member_leave(gen_random_uuid(), 'xxxxx')` fails with
+   `membership:forbidden`.
 
 ## Progress
 
@@ -290,6 +304,16 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   roles to null.
 - Follow-up for T14: `requireRole()` is not memoised per request; wrap it in `React.cache` if
   the admin layout and the page both call it.
+- Independent read-only verification (tier `high`): PASS, no defects (every admin surface
+  guarded; guard uses the session client and fails closed; prefix matching safe). Follow-ups:
+  - T16: `src/lib/admin/actions.ts:10` `getAllMembers` is a public `"use server"` action with
+    only a session check (the RPC's `has_role` protects it) that returns the raw
+    `error.message`; remove it with the V-2 rewrite or guard it with `getAdminAccess`.
+  - T14: when the session expired between proxy and page, `requireRole` redirects to `/login`
+    without a `redirect` param; pass the current path.
+  - T27: `CLAUDE.md` (~line 217) and `docs/mockups/admin-panel/README.md` (~line 88) still
+    mention `isAdmin()`.
+  - Guard tests never exercise a `getUser` call that returns an error object.
 
 ### T5 — done (route: delegated)
 
@@ -354,6 +378,81 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   files) and the 1999 audit entries are deleted in `afterAll` (older than 3 years, so the
   append-only trigger allows it).
 
+### T6 — done (route: delegated)
+
+- Commit: `feat(db): Add leave and rejoin functions for memberships` on `develop-users`
+  (hash in `git log -- supabase/migrations/20261005100400_membership_lifecycle.sql`).
+- Test-first: RED observed with the new `tests/integration/membership-lifecycle.test.ts` and
+  the new superadmin block in `roles.test.ts` before the migration (18 failing: functions not
+  found, username search and ŀ fold); GREEN after `npm run db:reset` (50/50 in those two
+  files). The "role + left_on in one UPDATE" superadmin case (T2 gap) passed already: it pins
+  existing role-guard behaviour.
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 66 files / 753 tests passed; `npm run test:integration` 19 files /
+  244 tests passed (3 consecutive green runs after the stats-test fix below).
+- Signatures (SECURITY DEFINER, `search_path ''`, EXECUTE for `authenticated` only; anon and
+  service_role get "permission denied"):
+  - `admin_member_leave(p_member_id uuid, p_reason text, p_left_on date = NULL)` RETURNS TABLE
+    `(member_number, email, first_name, left_on)`: board+ (A-6). `p_left_on` NULL = today in
+    Europe/Madrid (deviation from `DEFAULT current_date`, which is UTC in Supabase).
+  - `member_leave_self(p_reason text = NULL)` RETURNS TABLE `(member_number, left_on)`: the
+    caller leaves today (M-1); the reason is optional and stored like a board one.
+  - `admin_member_rejoin(p_member_id uuid, p_channel text, p_note text = NULL)` RETURNS TABLE
+    `(member_number, email, first_name, current_joined_on)`: board+ (A-7). Channels `form` |
+    `email` | `in_person` | `other`; the note goes to the audit `reason` column (max 500).
+  - Internal (no API grant): `membership_close()` (shared leave body),
+    `membership_leave_reason_min_length()` = 5, `membership_leave_max_backdate_days()` = 365,
+    `membership_today()` (Madrid date).
+- Leave (both paths): `left_on`, `left_by`, `leave_reason`; `phone_encrypted`, `postal_code`,
+  `ludoya_username`, `bgg_username` set to NULL and `newsletter_accepted` false (§4.2, BR-5,
+  BR-20); DNI, names, dates and badges kept; new `card_token` + `card_issued_at`. Board leave
+  date: not in the future, not before `current_joined_on`, at most 365 days back. Rejoin:
+  `left_*` cleared, `current_joined_on` = Madrid today, `membership_start_date` untouched, new
+  card token, newsletter stays off, ban lifted.
+- Sign-in block (BR-4/BR-18) is done in the database, in the same transaction: `postgres` (the
+  function owner, not a superuser) holds INSERT/UPDATE/DELETE on `auth.users`, `auth.sessions`
+  and `auth.refresh_tokens` locally (checked with `information_schema.role_table_grants` and a
+  rolled-back probe). Leave sets `auth.users.banned_until = now() + 100 years` and deletes the
+  user's sessions and refresh tokens; rejoin sets `banned_until = NULL`. Tested: after a leave
+  `signInWithPassword` fails with `user_banned`, the open session's `refreshSession()` fails,
+  its still-valid access token gets `has_role('member') = false` and cannot update the row,
+  `is_email_confirmed` is false and `verify_card_token` is invalid; after rejoin the old
+  password works again and the new card is valid. No flag is returned (nothing left for T10
+  to ban).
+- Audit (one entry per call, same transaction): `membership.leave` details
+  `{"left_by":"board"|"self","left_on":"YYYY-MM-DD"}`, reason = motiu (NULL for a self leave
+  without one), actor = target for M-1; `membership.rejoin` details `{"channel":…,
+  "previous_left_on":"YYYY-MM-DD","previous_left_by":…}`, reason = note.
+- Errors (message prefix): `membership:forbidden` 42501; `membership:role_held` 23514 (BR-12,
+  checked before the role guard; also stops every superadmin, so BR-10 never comes into play);
+  22023 for `membership:not_found` (unknown or unconfirmed sign-up), `membership:self_target`
+  (board leave on oneself: use M-1), `membership:not_active`, `membership:reason_required`
+  (< 5 after trim), `membership:reason_too_long` (> 500), `membership:invalid_date`,
+  `membership:not_former`, `membership:register_closed` (anonymised or purged),
+  `membership:no_login`, `membership:invalid_channel`, `membership:note_too_long`.
+- Rejoin without a login account: refused with `membership:no_login`. The spec keeps the old
+  password on return (§4.3) and `members` stores no e-mail, so a former member whose account is
+  gone cannot be matched to a new sign-up: that person signs up again (new row and number) and
+  the board resolves the duplicate (P-1 step 4). `handle_new_user` unchanged. While the account
+  exists (banned), GoTrue does not create a second user for the same e-mail.
+- T5 verification follow-up fixed here: `admin_list_members` matches Ludoya/BGG usernames only
+  on active rows (a former member's leftover username can no longer be confirmed through
+  search; BR-20/21), and `admin_search_fold` folds ŀ/Ŀ (U+0140/U+013F) to l. Tested in the
+  lifecycle file (former member not found by username, still found by name and number).
+- Test fix: the "now" stats test in `admin-read-rpcs.test.ts` failed 2 of 3 runs once this
+  file added more membership churn; its retry loop now makes up to 8 attempts with a growing
+  pause (250 ms × attempt) and a 30 s timeout.
+- For T10: send the baixa e-mail with the reason (BR-8) using the returned e-mail/first name,
+  and the "Tornes a ser soci" e-mail after rejoin; no Auth admin calls are needed for the ban.
+  Map `membership:*` prefixes to translated texts (role_held → the BR-12 message of A-6/M-1).
+- For T26: after `member_leave_self`, sign the browser out (wipe cookies) and redirect with the
+  notice; map `user_banned` on login to the same generic error as a wrong password (§4.4).
+  Protected member pages must check `left_on`, because an access token issued before the
+  leave stays valid for up to an hour.
+- Prod risk: whether prod's `postgres` may write `auth.users`/`auth.sessions` (see runbook 5).
+  Supabase-managed Auth columns could change shape in a future GoTrue release; the functions
+  only touch `banned_until`, `updated_at`, `sessions.user_id` and `refresh_tokens.user_id`.
+
 ## Next step
 
-T6.
+T7.
