@@ -115,8 +115,6 @@ describe('log_admin_event()', () => {
       ['export.members_csv', null, { filter: { state: 'active' }, rows: 3 }],
       ['export.emails', null, { list: 'newsletter', count: 2 }],
       ['ops.cache_refresh', null, { jobs: ['ludoya'], result: 'ok', duration_ms: 2100 }],
-      ['member.reveal_sensitive', users.target.id, { field: 'dni' }],
-      ['member.reveal_sensitive', users.target.id, { field: 'phone' }],
     ]
     for (const [action, target, details] of ok) {
       const { data, error } = await logEvent(clients.board, action, target, details)
@@ -126,7 +124,10 @@ describe('log_admin_event()', () => {
   })
 
   it('rejects the actions that only database functions may write', async () => {
-    for (const action of ['member.update', 'membership.leave', 'role.grant', 'member.purge', 'badge.award']) {
+    // member.reveal_sensitive left the whitelist in 20261005100500 (admin_reveal_sensitive logs it)
+    for (const action of [
+      'member.update', 'member.reveal_sensitive', 'membership.leave', 'role.grant', 'member.purge', 'badge.award',
+    ]) {
       const { error } = await logEvent(clients.board, action, users.target.id)
       expect(error?.message, action).toContain('audit:action_not_allowed')
     }
@@ -148,7 +149,8 @@ describe('log_admin_event()', () => {
     expect(asMember.error?.message).toContain('audit:forbidden')
 
     const asAnon = await logEvent(anon, 'export.member_data', users.target.id)
-    expect(asAnon.error).not.toBeNull()
+    expect(asAnon.error?.code).toBe('42501')
+    expect(asAnon.data).toBeNull()
   })
 
   it('requires a target where the event has one, and none where it has not', async () => {
@@ -165,18 +167,6 @@ describe('log_admin_event()', () => {
   it('sends an access link only to an active member', async () => {
     const { error } = await logEvent(clients.board, 'member.send_access_link', users.former.id)
     expect(error?.message).toContain('audit:invalid_target')
-  })
-
-  it('a reveal names the field, and only DNI or phone', async () => {
-    for (const details of [{}, { field: 'email' }]) {
-      const { error } = await logEvent(clients.board, 'member.reveal_sensitive', users.target.id, details)
-      expect(error?.message).toContain('audit:invalid_details')
-    }
-  })
-
-  it('a board member cannot reveal the DNI of a former member (BR-21)', async () => {
-    const { error } = await logEvent(clients.board, 'member.reveal_sensitive', users.former.id, { field: 'dni' }, 'Requeriment escrit')
-    expect(error?.message).toContain('audit:forbidden')
   })
 
   it('details must be a JSON object', async () => {
@@ -207,7 +197,8 @@ describe('log_admin_event()', () => {
 
   it('a reason is capped at 1000 characters', async () => {
     const { error } = await logEvent(clients.board, 'export.member_data', users.target.id, {}, 'x'.repeat(1001))
-    expect(error).not.toBeNull()
+    expect(error?.code).toBe('23514')
+    expect(error?.message).toContain('audit_log_reason_length')
   })
 })
 
@@ -217,7 +208,8 @@ describe('audit_write() is internal', () => {
   it('cannot be executed by anon, authenticated or the service role', async () => {
     for (const client of [anon, clients.board, clients.member, supabaseAdmin]) {
       const { error } = await client.rpc('audit_write', args)
-      expect(error).not.toBeNull()
+      expect(error?.code).toBe('42501')
+      expect(error?.message).toContain('permission denied for function audit_write')
     }
   })
 })

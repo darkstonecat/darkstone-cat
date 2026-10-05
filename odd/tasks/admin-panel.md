@@ -42,7 +42,9 @@ first, then the server layer, then the screens.
 - D-C: language of the leave/rejoin e-mails; no locale is stored (T10).
 - D-D: A-11 on a former member; proposal superadmin only (T7/T9a).
 - D-E: confirm A-7 checklist and minimum reason lengths, 5 for leave and 10 for reveal (T6/T7).
-  T6 enforces 5 for a board leave (`membership_leave_reason_min_length()`, provisional).
+  T6 enforces 5 for a board leave (`membership_leave_reason_min_length()`, provisional); T7
+  enforces 10 for a former member's DNI reveal (`admin_reveal_reason_min_length()`, provisional;
+  an active member's reveal takes an optional reason).
 - D-F: what runs the retention job: GitHub Actions, pg_cron or Vercel cron (T12).
 - D-G: path `/admin/tools/event-images` (T25).
 - D-H: does a backdated leave move the purge date; proposal purge = `left_on` + 3 years (T6/T12).
@@ -71,7 +73,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T4 — TypeScript role model: `requireRole()` guard, proxy `/admin` prefix, NavBar and `useAuthUser` with `isBoardRole()` — route: delegated
 - [x] T5 — M4 read RPCs: `admin_list_members`, `admin_get_member`, `admin_stats`, `admin_list_activity` — route: delegated
 - [x] T6 — Leave and rejoin functions (ban, sessions, card token) — route: delegated
-- [ ] T7 — Update, reveal, badge and card functions — route: delegated
+- [x] T7 — Update, reveal, badge and card functions — route: delegated
 - [ ] T8 — Role and anonymise functions — route: delegated
 - [ ] T9a — Export functions + routes: members CSV, member data (A-10, A-11) — route: delegated
 - [ ] T9b — Export functions + routes: e-mail lists, llibre de socis (A-16, S-4) — route: delegated
@@ -137,6 +139,15 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
    `auth.admin.updateUserById` instead. After applying, as a plain member
    `select public.admin_member_leave(gen_random_uuid(), 'xxxxx')` fails with
    `membership:forbidden`.
+6. `supabase/migrations/20261005100500_member_admin_mutations.sql` (T7). Safe to apply before any
+   code ships: nothing in `src/` calls the new functions or `regenerate_card_token`; it removes
+   `member.reveal_sensitive` from `log_admin_event()` (no shipped code logs it) and replaces
+   `audit_details_leak()` (the audit_log CHECK is not re-checked on existing rows; prod has
+   none). Needs M1–M5. Must be applied before T11a/T19/T21 code is deployed. After applying, as
+   `postgres` `select public.audit_details_leak('{"v":"612 345 678"}')` returns true and
+   `select public.audit_details_leak('{"rows":"123456789"}')` false, and as a plain member every
+   `admin_*` mutation and `regenerate_card_token` fail with `admin:forbidden` (no state change). `regenerate_card_token` errors change from `Unauthorized: admin role
+   required` / `Member not found` to `admin:forbidden` / `admin:not_found`.
 
 ## Progress
 
@@ -377,6 +388,15 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   up to 4 times when another file lands in the window; period stats use 1999 (untouched by other
   files) and the 1999 audit entries are deleted in `afterAll` (older than 3 years, so the
   append-only trigger allows it).
+- Independent read-only verification (tier `high`): PASS with one low defect, fixed in T6
+  (search matched former members' Ludoya/BGG usernames, an existence oracle against
+  BR-20/21). Other notes:
+  - T7: `member.update` details must record only field names for postal code and usernames,
+    otherwise old values survive in V-3 "Activitat" after a leave (BR-20).
+  - `actor_name` still shows an anonymised actor's name (spec §5.3 only covers the target);
+    `admin_list_activity` can show `target_name` for an unconfirmed sign-up target.
+  - Test gaps: joined/left sort order not asserted, page-size cap tests trivial with < 200
+    rows, keyset tie-break on equal `created_at` never exercised.
 
 ### T6 — done (route: delegated)
 
@@ -453,6 +473,86 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   Supabase-managed Auth columns could change shape in a future GoTrue release; the functions
   only touch `banned_until`, `updated_at`, `sessions.user_id` and `refresh_tokens.user_id`.
 
+### T7 — done (route: delegated)
+
+- Commit: `feat(db): Add admin edit, reveal, badge and card functions` on `develop-users`
+  (hash in `git log -- supabase/migrations/20261005100500_member_admin_mutations.sql`).
+- Test-first: RED observed with the new `tests/integration/member-admin-mutations.test.ts`
+  before the migration (55 of 93 failing: functions missing, old detector's misses and false
+  positives); GREEN after the migration (93/93). Adjusted existing tests to the new contract:
+  `audit-log.test.ts` (reveal out of the whitelist; the 3 weak T3 tests now assert 42501 /
+  23514 + constraint name), `roles.test.ts` (superadmin reveal through `admin_reveal_sensitive`,
+  new card error prefix), `rls.test.ts` (card error prefixes), `admin-read-rpcs.test.ts` (the
+  activity fixture reveals through the new function).
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 66 files / 753 tests passed; `npm run test:integration` 20 files /
+  335 tests passed (run twice, both green).
+- Signatures (SECURITY DEFINER, `search_path ''`, EXECUTE for `authenticated` only; anon and
+  service_role get "permission denied"; board+ via `admin_assert_board()`):
+  - `admin_update_member(p_member_id uuid, p_patch jsonb)` RETURNS `text[]` (changed audit field
+    names, sorted). Whitelist (A-4): `first_name`, `last_name` (trimmed, 1..100), `postal_code`
+    (5 digits or null/""), `ludoya_username`, `bgg_username` (normalised like
+    `normalizeUsername`, `[[:alnum:]_. -]{1,64}`, null/"" clears), `phone_encrypted`,
+    `dni_nie_encrypted` (ciphertext shape `iv:tag:data` with 12-byte IV and 16-byte tag, ≤ 512,
+    or null). Newsletter is not editable (not in A-4). Active, confirmed targets only. No-op
+    patch (empty or equal values) → returns an empty array, no UPDATE, no audit entry. A new
+    ciphertext always differs (random IV): T11a must send DNI/phone only when the plain value
+    changed.
+    Audit `member.update` details `{"fields":[...], "changes":{"first_name":{"from","to"},
+    "last_name":{...}}}`; field names `first_name, last_name, postal_code, ludoya_username,
+    bgg_username, phone, dni`; before/after only for names (never DNI/phone, BR-15; never postal
+    code/usernames, BR-20).
+  - `admin_reveal_sensitive(p_member_id uuid, p_field text, p_reason text = NULL)` RETURNS
+    `text` (the ciphertext; T11a decrypts). Writes `member.reveal_sensitive` `{"field"}` + reason
+    BEFORE returning. Active member: board, optional reason. Former member: superadmin, `dni`
+    only, reason ≥ 10 after trim (`admin_reveal_reason_min_length()`, D-E provisional). Reason
+    ≤ 500. Nothing stored → `admin:no_value`, no entry. `member.reveal_sensitive` removed from
+    the `log_admin_event()` whitelist (rest of that function unchanged).
+  - `admin_award_badge(p_member_id uuid, p_badge_key text, p_note text = NULL)` RETURNS
+    `timestamptz` (awarded_at); `admin_revoke_badge(p_member_id uuid, p_badge_key text,
+    p_reason text = NULL)` RETURNS void. Catalogue `admin_badge_keys()` =
+    `volunteer_egara_joga`, `ludoteca_donor` (= the table CHECK; "Membre {year}" is derived and
+    never awardable). Active members only (a former member's badges are frozen, BR-7). Not
+    idempotent: `admin:badge_held` / `admin:badge_not_held`, no entry. `awarded_by` = caller.
+    Details: award `{"badge"}`, revoke `{"badge","awarded_on":"YYYY-MM-DD"}`; note/reason → audit
+    reason (≤ 500).
+  - `regenerate_card_token(target_member_id uuid)` RETURNS `text` (unchanged signature): board+,
+    active members only, `card_issued_at = now()`, `card.regenerate` with details `{}` (the token
+    is never logged). No member self-service (the spec has none). Errors now use the `admin:`
+    prefixes (was `Unauthorized: admin role required` / `Member not found`); no `src/` caller.
+  - Internal (no API grant): `admin_lock_member()` (confirmed, not purged, `FOR UPDATE`),
+    `admin_reason_max_length()` = 500, `admin_assert_reason_length()`, `admin_badge_keys()`,
+    `admin_reveal_reason_min_length()` = 10, `audit_value_is_sensitive()`.
+- Errors (prefix, SQLSTATE): `admin:forbidden` 42501 (also a board member revealing a former
+  member's DNI); 22023 for `admin:not_found` (unknown, purged, unconfirmed), `admin:not_active`,
+  `admin:invalid_argument` (patch not an object, key outside the whitelist, reveal field, phone
+  of a former member, badge key), `admin:invalid_value: <patch key> …`, `admin:no_value`,
+  `admin:reason_required`, `admin:reason_too_long`, `admin:badge_held`, `admin:badge_not_held`;
+  `audit:sensitive_details` 23514 can still surface from `audit_write` (e.g. a name shaped like
+  a phone).
+- BR-15 detector v2 (`audit_details_leak()`, same signature, still the CHECK and the
+  `audit_write` guard). Leak when, at any depth: (1) a key, lower-cased, accents folded and
+  `_ - space` removed, is one of dni, nie, nif, dninie, dniencrypted, dninieencrypted, phone,
+  phonenumber, phoneencrypted, telefon, telefono, telephone, telefonnumber, mobile, mobil, movil,
+  mobilephone; (2) a string, trimmed (incl. newlines/tabs), with one leading label (dni, nie,
+  nif, tel, telf, telefon, telèfon, telefono, teléfono, phone, mobile, mobil, mòbil, movil, móvil
+  + optional `: . #`) dropped and separators `space . - / ( )` removed, matches DNI
+  `^[0-9]{8}[A-Za-z]$`, NIE `^[XYZxyz][0-9]{7}[A-Za-z]$`, `^\+[0-9]{9,15}$` or Spanish phone
+  `^(0034|34)?[6-9][0-9]{8}$`; (3) a JSON number matching `^(34)?[6-9][0-9]{8}$`. Lets through
+  member numbers, dates, timestamps, UUIDs, card tokens, counts and ids like 123456789,
+  123456789012, 512345678. Residuals: a 9-digit id starting 6–9 (or 11 digits 346–349…) is
+  treated as a phone and makes the write fail; values inside longer sentences are not scanned;
+  the free-text reason column is not scanned.
+- T3 follow-ups closed: detector misses and false positives; reveal logged before serving
+  (inside the DB function); weak tests strengthened. T1 follow-up closed: card_issued_at.
+- For T11a: map the `admin:*` prefixes above; `admin:invalid_value: <key>` → the profile edit's
+  `invalid_name` / `invalid_postal_code` / `invalid_username` / `invalid_phone` / `invalid_dni`
+  texts. Validate and encrypt first (as `updateMemberProfile`), then call with the session
+  client. Decrypt the reveal result in the action only, never log it.
+- Prod risk: none beyond runbook 6; the regex classes `[[:alnum:]]`/`[[:space:]]` depend on the
+  database ctype (local `en_US.UTF-8` matches accented letters and ŀ; Supabase prod uses the
+  same default).
+
 ## Next step
 
-T7.
+T8.

@@ -314,8 +314,8 @@ describe('regenerate_card_token()', () => {
       target_member_id: '00000000-0000-0000-0000-000000000000',
     })
 
-    expect(error).not.toBeNull()
-    expect(error!.message).toContain('Member not found')
+    expect(error?.code).toBe('22023')
+    expect(error!.message).toContain('admin:not_found')
   })
 
   it('non-admin cannot regenerate a token', async () => {
@@ -327,7 +327,7 @@ describe('regenerate_card_token()', () => {
       target_member_id: userB.id,
     })
 
-    expect(error).not.toBeNull()
-    expect(error!.message).toContain('admin role required')
+    expect(error?.code).toBe('42501')
+    expect(error!.message).toContain('admin:forbidden')
   })
 })

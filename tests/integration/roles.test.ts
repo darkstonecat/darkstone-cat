@@ -171,7 +171,8 @@ describe('is_admin() accepts board and superadmin', () => {
   it('a plain member still cannot regenerate a card', async () => {
     const client = await createAuthenticatedClient(emails.member, password)
     const { error } = await client.rpc('regenerate_card_token', { target_member_id: users.board.id })
-    expect(error?.message).toContain('admin role required')
+    expect(error?.code).toBe('42501')
+    expect(error?.message).toContain('admin:forbidden')
   })
 })
 
@@ -312,20 +313,42 @@ describe('audit log as a superadmin', () => {
     ])
   })
 
-  it('a superadmin reveals a former member\'s DNI only with a reason (BR-21)', async () => {
+  // admin_reveal_sensitive() (20261005100500_member_admin_mutations.sql): the rest of A-5 is in
+  // member-admin-mutations.test.ts.
+  it('a superadmin reveals a former member\'s DNI only with a reason of 10+ characters (BR-21)', async () => {
+    const cipher = 'AAAAAAAAAAAAAAAA:BBBBBBBBBBBBBBBBBBBBBB==:Q0lQSEVS'
+    expect((await supabaseAdmin.from('members').update({ dni_nie_encrypted: cipher }).eq('id', users.former.id)).error).toBeNull()
     const client = await createAuthenticatedClient(emails.superA, password)
-    const args = { p_action: 'member.reveal_sensitive', p_target: users.former.id, p_details: { field: 'dni' } }
+    const reveal = (field: string, reason: string | null) =>
+      client.rpc('admin_reveal_sensitive', { p_member_id: users.former.id, p_field: field, p_reason: reason })
+    const entries = async () =>
+      (
+        await supabaseAdmin
+          .from('audit_log')
+          .select('actor_id, actor_role, details, reason')
+          .eq('target_member_id', users.former.id)
+          .eq('action', 'member.reveal_sensitive')
+          .order('id')
+      ).data!
 
-    const noReason = await client.rpc('log_admin_event', { ...args, p_reason: '   ' })
-    expect(noReason.error?.message).toContain('audit:reason_required')
+    for (const reason of [null, '   ', '  123456789  ']) {
+      const { data, error } = await reveal('dni', reason)
+      expect(error?.code, String(reason)).toBe('22023')
+      expect(error?.message).toContain('admin:reason_required')
+      expect(data).toBeNull()
+    }
 
-    const phone = await client.rpc('log_admin_event', { ...args, p_details: { field: 'phone' }, p_reason: 'Requeriment escrit' })
-    expect(phone.error?.message).toContain('audit:invalid_details')
+    const phone = await reveal('phone', 'Requeriment escrit del jutjat')
+    expect(phone.error?.code).toBe('22023')
+    expect(phone.error?.message).toContain('admin:invalid_argument')
+    expect(await entries()).toEqual([])
 
-    const { data: id, error } = await client.rpc('log_admin_event', { ...args, p_reason: 'Requeriment escrit' })
+    const { data, error } = await reveal('dni', '  Requeriment escrit  ')
     expect(error).toBeNull()
-    const { data } = await supabaseAdmin.from('audit_log').select('target_member_id, reason').eq('id', id).single()
-    expect(data).toEqual({ target_member_id: users.former.id, reason: 'Requeriment escrit' })
+    expect(data).toBe(cipher)
+    expect(await entries()).toEqual([
+      { actor_id: users.superA.id, actor_role: 'superadmin', details: { field: 'dni' }, reason: 'Requeriment escrit' },
+    ])
   })
 })
 

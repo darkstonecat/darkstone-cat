@@ -610,7 +610,12 @@ describe('admin_list_activity()', () => {
   beforeAll(async () => {
     await log(clients.board, 'export.member_data', users.angel.id)
     await log(clients.board, 'export.member_data', users.angel.id)
-    await log(clients.board, 'member.reveal_sensitive', users.angel.id, { field: 'dni' })
+    // The reveal is logged by admin_reveal_sensitive() (20261005100500), not log_admin_event()
+    expect(
+      (await supabaseAdmin.from('members').update({ dni_nie_encrypted: 'AAAAAAAAAAAAAAAA:BBBBBBBBBBBBBBBBBBBBBB==:Q0lQSEVS' }).eq('id', users.angel.id)).error
+    ).toBeNull()
+    const reveal = await clients.board.rpc('admin_reveal_sensitive', { p_member_id: users.angel.id, p_field: 'dni' })
+    expect(reveal.error).toBeNull()
     await log(clients.board, 'export.member_data', users.angel.id)
     await log(clients.legacy, 'export.member_data', users.bruna.id)
     await log(clients.board, 'export.member_data', users.former.id)
