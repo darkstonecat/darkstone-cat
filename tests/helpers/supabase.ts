@@ -146,11 +146,44 @@ export async function runSqlAsPostgres<T = Record<string, unknown>>(
   return { data: body as T[], error: null }
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 /**
- * Delete a test user — removes the members row first (a former member's row
- * survives deleting the auth user), then deletes the auth.users entry.
+ * Test teardown only: make a member a plain member past the role guard. The last two
+ * superadmins can never lose the role through any guarded path (BR-10), so this disables the
+ * role guard inside one `DO` block run as `postgres` (the table owner). The block is a single
+ * transaction: other sessions wait on the table lock and never see the trigger disabled.
+ * `DO` takes no parameters, so the id is checked against a strict UUID pattern first.
+ */
+export async function forceDemoteForTests(userId: string) {
+  if (!UUID_PATTERN.test(userId)) throw new Error(`forceDemoteForTests: not a UUID: ${userId}`)
+  const { error } = await runSqlAsPostgres(
+    `DO $$
+     BEGIN
+       ALTER TABLE public.members DISABLE TRIGGER members_role_guard;
+       UPDATE public.members SET role = 'member', role_since = NULL WHERE id = '${userId}';
+       ALTER TABLE public.members ENABLE TRIGGER members_role_guard;
+     END
+     $$`
+  )
+  if (error) throw new Error(`forceDemoteForTests: ${error.message}`)
+}
+
+/**
+ * Delete a test user — drops any role first (the role guard refuses to delete a role holder's
+ * row, BR-12; the last two superadmins go through forceDemoteForTests), removes the members
+ * row (a former member's row survives deleting the auth user), then deletes the auth.users
+ * entry.
  */
 export async function deleteTestUser(userId: string) {
+  const demote = await supabaseAdmin
+    .from('members')
+    .update({ role: 'member' })
+    .eq('id', userId)
+    .neq('role', 'member')
+  if (demote.error?.message.includes('role_guard:last_superadmin')) {
+    await forceDemoteForTests(userId)
+  }
   await supabaseAdmin.from('members').delete().eq('id', userId)
   await supabaseAdmin.auth.admin.deleteUser(userId)
 }

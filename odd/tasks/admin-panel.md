@@ -74,7 +74,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T5 — M4 read RPCs: `admin_list_members`, `admin_get_member`, `admin_stats`, `admin_list_activity` — route: delegated
 - [x] T6 — Leave and rejoin functions (ban, sessions, card token) — route: delegated
 - [x] T7 — Update, reveal, badge and card functions — route: delegated
-- [ ] T8 — Role and anonymise functions — route: delegated
+- [x] T8 — Role and anonymise functions — route: delegated
 - [ ] T9a — Export functions + routes: members CSV, member data (A-10, A-11) — route: delegated
 - [ ] T9b — Export functions + routes: e-mail lists, llibre de socis (A-16, S-4) — route: delegated
 - [ ] T10 — Mail module (`src/lib/mail/`) + leave/rejoin actions + templates — route: delegated
@@ -148,6 +148,17 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
    `select public.audit_details_leak('{"rows":"123456789"}')` false, and as a plain member every
    `admin_*` mutation and `regenerate_card_token` fail with `admin:forbidden` (no state change). `regenerate_card_token` errors change from `Unauthorized: admin role
    required` / `Member not found` to `admin:forbidden` / `admin:not_found`.
+7. `supabase/migrations/20261005100600_roles_and_anonymise.sql` (T8). Safe to apply before any
+   code ships: nothing in `src/` calls `admin_set_role` or `admin_anonymise_member`. Needs M1–M6.
+   Must be applied before T11b/T22 code is deployed. One shipped behaviour changes: the new
+   `BEFORE DELETE` role guard makes the current `deleteAccount` (profile "Dona't de baixa") fail
+   with its generic error for anyone holding `admin`/`board`/`superadmin` (BR-12), and an
+   operator can no longer delete a role holder's account in the dashboard without removing the
+   role first. Before applying, check that the people who must keep their role do not need to
+   delete their account. After applying, as `postgres` in a transaction you roll back,
+   `delete from public.members where role <> 'member' and left_on is null` fails with
+   `role_guard:` (or touches no row), and as a board member
+   `select public.admin_set_role(gen_random_uuid(), 'board')` fails with `admin:forbidden`.
 
 ## Progress
 
@@ -472,6 +483,17 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Prod risk: whether prod's `postgres` may write `auth.users`/`auth.sessions` (see runbook 5).
   Supabase-managed Auth columns could change shape in a future GoTrue release; the functions
   only touch `banned_until`, `updated_at`, `sessions.user_id` and `refresh_tokens.user_id`.
+- Independent read-only verification (tier `high`): PASS, no defects (authorization, single
+  transaction, BR-4/5/8/12/20/22 and the Madrid date probed; the `admin_list_members` redefinition
+  differs from T5 only in the two username predicates). Notes:
+  - T26: add a test that a magic link and a recovery link are refused after a leave (relies on
+    GoTrue's ban check and `is_email_confirmed`; untested today).
+  - The audit `reason` column is never scanned for sensitive values: the dialogs (T19–T22) must
+    tell people not to type a DNI or phone in reasons.
+  - `current_joined_on DEFAULT CURRENT_DATE` (T1) is the UTC date, while T6 uses the Madrid date.
+  - Test gaps: tests depend on running in order; not covered: BR-22 `not_found`, a legacy
+    `admin`-role target, `reason_too_long` on a self-leave, phone/postal code still null after
+    rejoin.
 
 ### T7 — done (route: delegated)
 
@@ -553,6 +575,76 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   database ctype (local `en_US.UTF-8` matches accented letters and ŀ; Supabase prod uses the
   same default).
 
+### T8 — done (route: delegated)
+
+- Commit: `feat(db): Add role management and anonymisation functions` on `develop-users`
+  (hash in `git log -- supabase/migrations/20261005100600_roles_and_anonymise.sql`).
+- Test-first: RED observed with the new T8 blocks in `roles.test.ts` and the new
+  `tests/integration/roles-and-anonymise.test.ts` before the migration (27 of 62 failing:
+  functions missing, deletions of role holders not refused); GREEN after `npm run db:reset`
+  (62/62).
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 66 files / 753 tests passed; `npm run test:integration` 21 files /
+  365 tests passed (run twice, both green; no role holder left in `members` afterwards).
+- Signatures (SECURITY DEFINER, `search_path ''`, EXECUTE for `authenticated` only; anon and
+  service_role get "permission denied"; superadmin only via the internal
+  `admin_assert_superadmin()`):
+  - `admin_set_role(p_member_id uuid, p_role text, p_reason text = NULL)` RETURNS TABLE
+    `(action text, role text, role_since timestamptz)`. `p_role` ∈ member | board | superadmin
+    (never the legacy `admin`). Compared by rank: up → `role.grant`, down → `role.revoke`,
+    details `{"from","to"}`, reason optional (the S-1/S-2 dialogs ask for none, ≤ 500). Same
+    rank (incl. legacy admin → board) → `admin:role_unchanged`, no UPDATE, no entry (not a
+    silent no-op, like the badges: a stale screen learns its state was out of date). BR-10/11/12
+    are left to `members_role_guard` (the UPDATE raises `role_guard:*`, the call rolls back with
+    no entry). Refuses to run outside READ COMMITTED (`admin:isolation`, 25000).
+  - `admin_anonymise_member(p_member_id uuid, p_confirm_number text, p_reason text = NULL)`
+    RETURNS TABLE `(member_number text, purge_on date)`. Superadmin only; target a former
+    member, not purged (`admin_lock_member`); typed member number compared after trim. Deletes
+    the badges, clears any leftover phone/postal code/usernames/newsletter (legacy rows; a
+    leave already cleared them), rotates `card_token`, sets `anonymised_at`. Keeps names, DNI
+    ciphertext, member number, all dates, `left_by` and `leave_reason` until the purge (spec
+    §4.5 / S-3 dialog: "Queda bloquejat: el nom, el DNI, les dates"; the motiu goes with the
+    purge, and `members_board_leave_has_reason` needs it until then). Audit `member.anonymise`
+    details `{"badges_deleted": n, "purge_on": "YYYY-MM-DD"}`, reason optional. Second call →
+    `admin:already_anonymised`, no entry (retry path). Tested: deleting the auth user afterwards
+    keeps the stub (`on_auth_user_deleted` only deletes active rows), and the retry still answers
+    `already_anonymised` without a login account.
+- Role guard on DELETE: new trigger `members_role_delete_guard` (BEFORE DELETE on `members`,
+  sibling of `members_role_guard`, same advisory lock). Former and plain members pass. An
+  active role holder is refused: a superadmin with fewer than two other active superadmins →
+  `role_guard:last_superadmin`; any other role holder (board, superadmin, legacy admin) →
+  `role_guard:role_held` (23514). It fires inside `handle_deleted_user`, so
+  `auth.admin.deleteUser` of a role holder fails as a whole (GoTrue answers 500 "Database error
+  deleting user"; the auth user stays — tested); only a direct DELETE carries the prefix. No
+  bypass for service role or owner. Unconfirmed sign-ups (prepareSignup, `account.purge_unconfirmed`),
+  plain active members and former members delete as before (tested).
+- Errors: `admin:forbidden` 42501; 22023 for `admin:not_found`, `admin:invalid_argument`,
+  `admin:role_unchanged`, `admin:reason_too_long`, `admin:not_former`, `admin:confirm_mismatch`,
+  `admin:already_anonymised`; `admin:isolation` 25000; `role_guard:self_role_change`,
+  `role_guard:last_superadmin`, `role_guard:former_member_role`, `role_guard:role_held` 23514.
+- Test fixtures: `deleteTestUser` (`tests/helpers/supabase.ts`) now removes the role before
+  deleting; for the last two superadmins it calls the new `forceDemoteForTests(userId)`, a single
+  `DO` block run as `postgres` that disables `members_role_guard` only inside its own
+  transaction (the id is checked against a strict UUID pattern; `DO` takes no parameters). The
+  T2 "single superadmin" test now reaches that state through it, and a new test proves that
+  deleting a superadmin's account with two left is refused.
+- For T11b: call both functions with the session client. Map `admin:*` and `role_guard:*`
+  prefixes (`last_superadmin` → "Calen almenys dos superadmins…", `self_role_change` → "No pots
+  canviar el teu propi rol.", `former_member_role` → BR-12 text, `role_unchanged` → refresh the
+  screen). Anonymise flow: call `admin_anonymise_member`; on success OR
+  `admin:already_anonymised`, call `auth.admin.deleteUser(id)` (service role) and treat a 404 as
+  done; if the deletion fails, report it and let the superadmin retry the same action. The
+  dialog's purge date comes from the returned `purge_on`.
+- For T26: account self-deletion of a role holder is now refused by the database too
+  (`deleteAccount` returns "failed"); `member_leave_self` returns `membership:role_held` first.
+- Follow-up outside this task's surface: `e2e/helpers/supabase-admin.ts` `deleteTestUser` deletes
+  the `e2e-admin` user (role `admin`) without removing the role first, so the e2e global
+  teardown now logs "Could not delete user" and leaves that user; global setup reuses an
+  existing user, so the next run still works. Demote before deleting there (T14 or the next task
+  touching e2e helpers).
+- Prod risk: runbook 7 (role holders can no longer delete their account until they lose the
+  role). Concurrent role changes rely on READ COMMITTED (checked in `admin_set_role`).
+
 ## Next step
 
-T8.
+T9a.

@@ -6,13 +6,13 @@ import {
   createAuthenticatedClient,
   createServiceClientAs,
   cleanupUsers,
-  deleteTestUser,
+  forceDemoteForTests,
 } from '../helpers/supabase'
 
 // Migration 20261005100100_roles_expand.sql: board/superadmin roles, role_since, role_rank(),
 // has_role(), is_admin() on top of has_role('board'), and the role guard (BR-10, BR-11, BR-12).
-// Role changes are written with the service role: authenticated users have no UPDATE grant on
-// `role` (T1), and the audited role functions arrive in T8.
+// Fixture role changes are written with the service role: authenticated users have no UPDATE
+// grant on `role` (T1). The audited role functions (T8) are tested at the end of the file.
 //
 // This file is the only one that creates superadmins, so the superadmin count it asserts is
 // stable while the other integration files run in parallel.
@@ -27,6 +27,8 @@ const emails = {
   superC: 'roles-super-c@test.local',
   former: 'roles-former@test.local',
   alias: 'roles-alias@test.local',
+  target: 'roles-target@test.local',
+  erased: 'roles-erased@test.local',
 }
 type Key = keyof typeof emails
 const users = {} as Record<Key, { id: string }>
@@ -84,6 +86,25 @@ beforeAll(async () => {
     .update({ left_on: '2026-10-01', left_by: 'self' })
     .eq('id', users.former.id)
   expect(error).toBeNull()
+
+  // A former member who asked for erasure (S-3): board leave with a reason, a DNI, badges and a
+  // leftover username (a legacy row; a leave normally clears it).
+  const erased = await supabaseAdmin
+    .from('members')
+    .update({
+      left_on: '2026-09-15',
+      left_by: 'board',
+      leave_reason: 'Sol·licitud de supressió',
+      dni_nie_encrypted: 'AAAAAAAAAAAAAAAA:BBBBBBBBBBBBBBBBBBBBBB==:RVJBU0VE',
+      ludoya_username: 'erased_player',
+    })
+    .eq('id', users.erased.id)
+  expect(erased.error).toBeNull()
+  const badges = await supabaseAdmin.from('member_badges').insert([
+    { member_id: users.erased.id, badge_key: 'ludoteca_donor' },
+    { member_id: users.erased.id, badge_key: 'volunteer_egara_joga' },
+  ])
+  expect(badges.error).toBeNull()
 })
 
 afterAll(() => cleanupUsers(userIds))
@@ -276,8 +297,27 @@ describe('BR-10: at least two superadmins', () => {
     expect(await countActiveSuperadmins()).toBe(2)
   })
 
+  // Migration 20261005100600_roles_and_anonymise.sql: the role guard also covers DELETE (BR-10,
+  // BR-12, BR-16). superB and superC are the two active superadmins here.
+  it('deleting a superadmin\'s account is blocked while it would leave fewer than two', async () => {
+    expect(await countActiveSuperadmins()).toBe(2)
+
+    const viaAuth = await supabaseAdmin.auth.admin.deleteUser(users.superC.id)
+    expect(viaAuth.error).not.toBeNull()
+    // the whole auth.users DELETE rolled back with the member row
+    expect((await supabaseAdmin.auth.admin.getUserById(users.superC.id)).data.user?.id).toBe(users.superC.id)
+
+    const direct = await supabaseAdmin.from('members').delete().eq('id', users.superC.id)
+    expect(direct.error?.code).toBe('23514')
+    expect(direct.error?.message).toContain('role_guard:last_superadmin')
+
+    expect(await getRow(users.superC.id)).toMatchObject({ role: 'superadmin', left_on: null })
+    expect(await countActiveSuperadmins()).toBe(2)
+  })
+
   it('with a single superadmin, demoting them is blocked too (it would leave fewer than two)', async () => {
-    await deleteTestUser(users.superC.id)
+    // No guarded path leaves fewer than two superadmins, so the test fixture forces it.
+    await forceDemoteForTests(users.superC.id)
     expect(await countActiveSuperadmins()).toBe(1)
 
     const { error } = await setRole(users.superB.id, 'member')
@@ -380,3 +420,263 @@ describe('a superadmin cannot leave (BR-10, BR-12)', () => {
     expect(await countActiveSuperadmins()).toBe(2)
   })
 })
+
+// Role management (S-1, S-2) and anonymisation (S-3) through the audited functions of
+// 20261005100600_roles_and_anonymise.sql, called with a real superadmin session so auth.uid()
+// is the caller. Board/member callers and the delete guard for non-superadmins are in
+// roles-and-anonymise.test.ts. superA and superB are the two active superadmins here.
+async function roleEntries(target: string) {
+  const { data, error } = await supabaseAdmin
+    .from('audit_log')
+    .select('actor_id, actor_role, action, details, reason')
+    .eq('target_member_id', target)
+    .in('action', ['role.grant', 'role.revoke'])
+    .order('id')
+  expect(error).toBeNull()
+  return data!
+}
+
+describe('admin_set_role (S-1, S-2)', () => {
+  const setRoleAs = async (key: Key, target: string, role: string, reason: string | null = null) => {
+    const client = await createAuthenticatedClient(emails[key], password)
+    return client.rpc('admin_set_role', { p_member_id: target, p_role: role, p_reason: reason })
+  }
+
+  it('a superadmin grants board and the grant is logged once', async () => {
+    const { data, error } = await setRoleAs('superA', users.target.id, 'board', '  Elegida a l\'assemblea  ')
+    expect(error).toBeNull()
+    expect(data).toEqual([{ action: 'role.grant', role: 'board', role_since: expect.any(String) }])
+    expect(await getRow(users.target.id)).toMatchObject({ role: 'board', role_since: data![0].role_since })
+    expect(await roleEntries(users.target.id)).toEqual([
+      {
+        actor_id: users.superA.id,
+        actor_role: 'superadmin',
+        action: 'role.grant',
+        details: { from: 'member', to: 'board' },
+        reason: 'Elegida a l\'assemblea',
+      },
+    ])
+  })
+
+  it('granting the role the member already holds is refused and logs nothing', async () => {
+    const { data, error } = await setRoleAs('superA', users.target.id, 'board')
+    expect(error?.code).toBe('22023')
+    expect(error?.message).toContain('admin:role_unchanged')
+    expect(data).toBeNull()
+    expect(await roleEntries(users.target.id)).toHaveLength(1)
+  })
+
+  it('the legacy admin role ranks like board, so admin → board is unchanged too', async () => {
+    const { error } = await setRoleAs('superA', users.legacy.id, 'board')
+    expect(error?.message).toContain('admin:role_unchanged')
+    expect((await getRow(users.legacy.id)).role).toBe('admin')
+  })
+
+  it('only member, board and superadmin can be assigned (never the legacy admin)', async () => {
+    for (const role of ['admin', 'owner', '']) {
+      const { error } = await setRoleAs('superA', users.member.id, role)
+      expect(error?.code, role).toBe('22023')
+      expect(error?.message).toContain('admin:invalid_argument')
+    }
+    expect((await getRow(users.member.id)).role).toBe('member')
+  })
+
+  it('refuses an unknown member and a reason over 500 characters', async () => {
+    const unknown = await setRoleAs('superA', '00000000-0000-0000-0000-000000000000', 'board')
+    expect(unknown.error?.message).toContain('admin:not_found')
+
+    const long = await setRoleAs('superA', users.member.id, 'board', 'x'.repeat(501))
+    expect(long.error?.message).toContain('admin:reason_too_long')
+    expect((await getRow(users.member.id)).role).toBe('member')
+  })
+
+  it('a superadmin promotes board to superadmin (role.grant)', async () => {
+    const { data, error } = await setRoleAs('superB', users.target.id, 'superadmin')
+    expect(error).toBeNull()
+    expect(data![0]).toMatchObject({ action: 'role.grant', role: 'superadmin' })
+    expect(await countActiveSuperadmins()).toBe(3)
+    expect((await roleEntries(users.target.id)).at(-1)).toEqual({
+      actor_id: users.superB.id,
+      actor_role: 'superadmin',
+      action: 'role.grant',
+      details: { from: 'board', to: 'superadmin' },
+      reason: null,
+    })
+  })
+
+  it('a role holder\'s account cannot be deleted while they hold the role (BR-12)', async () => {
+    // three superadmins: BR-10 would allow it, BR-12 does not
+    const viaAuth = await supabaseAdmin.auth.admin.deleteUser(users.target.id)
+    expect(viaAuth.error).not.toBeNull()
+    expect((await supabaseAdmin.auth.admin.getUserById(users.target.id)).data.user?.id).toBe(users.target.id)
+
+    const direct = await supabaseAdmin.from('members').delete().eq('id', users.target.id)
+    expect(direct.error?.code).toBe('23514')
+    expect(direct.error?.message).toContain('role_guard:role_held')
+    expect((await getRow(users.target.id)).role).toBe('superadmin')
+  })
+
+  it('with three superadmins one can be revoked straight to member (role.revoke)', async () => {
+    const { data, error } = await setRoleAs('superA', users.target.id, 'member', 'Deixa la junta')
+    expect(error).toBeNull()
+    expect(data).toEqual([{ action: 'role.revoke', role: 'member', role_since: null }])
+    expect(await getRow(users.target.id)).toMatchObject({ role: 'member', role_since: null })
+    expect(await countActiveSuperadmins()).toBe(2)
+    expect((await roleEntries(users.target.id)).at(-1)).toEqual({
+      actor_id: users.superA.id,
+      actor_role: 'superadmin',
+      action: 'role.revoke',
+      details: { from: 'superadmin', to: 'member' },
+      reason: 'Deixa la junta',
+    })
+  })
+
+  it('BR-10: revoking one of the last two superadmins is refused and logs nothing', async () => {
+    for (const role of ['board', 'member']) {
+      const { error } = await setRoleAs('superA', users.superB.id, role)
+      expect(error?.code).toBe('23514')
+      expect(error?.message).toContain('role_guard:last_superadmin')
+    }
+    expect((await getRow(users.superB.id)).role).toBe('superadmin')
+    expect(await roleEntries(users.superB.id)).toEqual([])
+  })
+
+  it('BR-11: a superadmin cannot change their own role', async () => {
+    const { error } = await setRoleAs('superA', users.superA.id, 'board')
+    expect(error?.code).toBe('23514')
+    expect(error?.message).toContain('role_guard:self_role_change')
+    expect((await getRow(users.superA.id)).role).toBe('superadmin')
+    expect(await roleEntries(users.superA.id)).toEqual([])
+  })
+
+  it('BR-12: a former member cannot be granted a role', async () => {
+    const { error } = await setRoleAs('superA', users.former.id, 'board')
+    expect(error?.code).toBe('23514')
+    expect(error?.message).toContain('role_guard:former_member_role')
+    expect((await getRow(users.former.id)).role).toBe('member')
+    expect(await roleEntries(users.former.id)).toEqual([])
+  })
+
+  it('revoking board and the legacy admin role is a role.revoke', async () => {
+    for (const key of ['board', 'legacy'] as const) {
+      const from = (await getRow(users[key].id)).role
+      const { error } = await setRoleAs('superB', users[key].id, 'member')
+      expect(error, key).toBeNull()
+      expect((await getRow(users[key].id)).role).toBe('member')
+      expect((await roleEntries(users[key].id)).at(-1)).toMatchObject({
+        action: 'role.revoke',
+        details: { from, to: 'member' },
+      })
+    }
+  })
+})
+
+describe('admin_anonymise_member (S-3)', () => {
+  const anonymiseAs = async (key: Key, target: string, confirm: string, reason: string | null = null) => {
+    const client = await createAuthenticatedClient(emails[key], password)
+    return client.rpc('admin_anonymise_member', { p_member_id: target, p_confirm_number: confirm, p_reason: reason })
+  }
+  const anonymiseEntries = async (target: string) =>
+    (
+      await supabaseAdmin
+        .from('audit_log')
+        .select('actor_id, actor_role, details, reason, target_member_number')
+        .eq('target_member_id', target)
+        .eq('action', 'member.anonymise')
+        .order('id')
+    ).data!
+
+  it('refuses an active member (erasure of an active member starts with the baixa)', async () => {
+    const number = (await supabaseAdmin.from('members').select('member_number').eq('id', users.member.id).single()).data!.member_number
+    const { error } = await anonymiseAs('superA', users.member.id, number)
+    expect(error?.code).toBe('22023')
+    expect(error?.message).toContain('admin:not_former')
+    expect((await getRow(users.member.id)).left_on).toBeNull()
+    expect(await anonymiseEntries(users.member.id)).toEqual([])
+  })
+
+  it('refuses a confirmation that is not the member number', async () => {
+    for (const confirm of ['', '000-000', 'erased']) {
+      const { error } = await anonymiseAs('superA', users.erased.id, confirm)
+      expect(error?.code, confirm).toBe('22023')
+      expect(error?.message).toContain('admin:confirm_mismatch')
+    }
+    const { data: badges } = await supabaseAdmin.from('member_badges').select('badge_key').eq('member_id', users.erased.id)
+    expect(badges).toHaveLength(2)
+    expect(await anonymiseEntries(users.erased.id)).toEqual([])
+  })
+
+  it('anonymises a former member: badges go, the blocked register stays, one entry', async () => {
+    const { data: before } = await supabaseAdmin.from('members').select('*').eq('id', users.erased.id).single()
+    const { data, error } = await anonymiseAs('superA', users.erased.id, `  ${before!.member_number} `, 'Petició per correu')
+    expect(error).toBeNull()
+    expect(data).toEqual([{ member_number: before!.member_number, purge_on: '2029-09-15' }])
+
+    const { data: after } = await supabaseAdmin.from('members').select('*').eq('id', users.erased.id).single()
+    expect(after!.anonymised_at).not.toBeNull()
+    // kept until the purge (spec §4.5): register fields
+    expect(after).toMatchObject({
+      member_number: before!.member_number,
+      first_name: before!.first_name,
+      last_name: before!.last_name,
+      dni_nie_encrypted: before!.dni_nie_encrypted,
+      membership_start_date: before!.membership_start_date,
+      current_joined_on: before!.current_joined_on,
+      left_on: '2026-09-15',
+      left_by: 'board',
+      leave_reason: 'Sol·licitud de supressió',
+      role: 'member',
+    })
+    // deleted now: badges, any leftover contact/profile data; the old card token is gone
+    expect(after).toMatchObject({
+      phone_encrypted: null,
+      postal_code: null,
+      ludoya_username: null,
+      bgg_username: null,
+      newsletter_accepted: false,
+    })
+    expect(after!.card_token).not.toBe(before!.card_token)
+    const { data: badges } = await supabaseAdmin.from('member_badges').select('badge_key').eq('member_id', users.erased.id)
+    expect(badges).toEqual([])
+
+    expect(await anonymiseEntries(users.erased.id)).toEqual([
+      {
+        actor_id: users.superA.id,
+        actor_role: 'superadmin',
+        details: { badges_deleted: 2, purge_on: '2029-09-15' },
+        reason: 'Petició per correu',
+        target_member_number: before!.member_number,
+      },
+    ])
+  })
+
+  it('a second call answers admin:already_anonymised and logs nothing (retry path)', async () => {
+    const number = (await getRowNumber(users.erased.id))
+    const { error } = await anonymiseAs('superB', users.erased.id, number)
+    expect(error?.code).toBe('22023')
+    expect(error?.message).toContain('admin:already_anonymised')
+    expect(await anonymiseEntries(users.erased.id)).toHaveLength(1)
+  })
+
+  it('deleting the login account afterwards keeps the anonymised stub', async () => {
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(users.erased.id)
+    expect(error).toBeNull()
+    const { data } = await supabaseAdmin
+      .from('members')
+      .select('id, left_on, anonymised_at, first_name')
+      .eq('id', users.erased.id)
+      .single()
+    expect(data).toMatchObject({ id: users.erased.id, left_on: '2026-09-15', first_name: 'erased' })
+    expect(data!.anonymised_at).not.toBeNull()
+
+    // still refused, without a login account too
+    const again = await anonymiseAs('superA', users.erased.id, await getRowNumber(users.erased.id))
+    expect(again.error?.message).toContain('admin:already_anonymised')
+  })
+})
+
+async function getRowNumber(id: string) {
+  const { data, error } = await supabaseAdmin.from('members').select('member_number').eq('id', id).single()
+  expect(error).toBeNull()
+  return data!.member_number as string
+}
