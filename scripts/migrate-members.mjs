@@ -76,9 +76,9 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import crypto from "crypto";
 import { parse } from "csv-parse/sync";
 import { createClient } from "@supabase/supabase-js";
+import { encryptForMember, parseKey } from "./reencrypt-member-secrets.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -110,41 +110,15 @@ function loadEnv() {
 }
 
 // ---------------------------------------------------------------------------
-// Encryption (replicates src/lib/encryption.ts — AES-256-GCM)
+// Encryption: v2 of src/lib/encryption.ts (AES-256-GCM, AAD "member:<uuid>"), bound to the
+// member's row. The database only accepts that shape (members_ciphertext_guard).
 // ---------------------------------------------------------------------------
-
-const ALGORITHM = "aes-256-gcm";
-const IV_LENGTH = 12;
-const AUTH_TAG_LENGTH = 16;
 
 let encryptionKey = null;
 
-function getKey() {
-  if (encryptionKey) return encryptionKey;
-  const hex = process.env.ENCRYPTION_KEY;
-  if (!hex || hex.length !== 64) {
-    throw new Error("ENCRYPTION_KEY must be a 64-character hex string (32 bytes)");
-  }
-  encryptionKey = Buffer.from(hex, "hex");
-  return encryptionKey;
-}
-
-function encrypt(plainText) {
-  const key = getKey();
-  const iv = crypto.randomBytes(IV_LENGTH);
-  const cipher = crypto.createCipheriv(ALGORITHM, key, iv, {
-    authTagLength: AUTH_TAG_LENGTH,
-  });
-  const encrypted = Buffer.concat([
-    cipher.update(plainText, "utf8"),
-    cipher.final(),
-  ]);
-  const authTag = cipher.getAuthTag();
-  return [
-    iv.toString("base64"),
-    authTag.toString("base64"),
-    encrypted.toString("base64"),
-  ].join(":");
+function encrypt(plainText, memberId) {
+  encryptionKey ??= parseKey(process.env.ENCRYPTION_KEY);
+  return encryptForMember(plainText, memberId, encryptionKey);
 }
 
 // ---------------------------------------------------------------------------
@@ -419,10 +393,10 @@ async function importMember(supabase, member, existingUsers) {
 
   // Only encrypt and set DNI/phone if they have values
   if (member.dni) {
-    updateData.dni_nie_encrypted = encrypt(member.dni);
+    updateData.dni_nie_encrypted = encrypt(member.dni, userId);
   }
   if (member.phone) {
-    updateData.phone_encrypted = encrypt(member.phone);
+    updateData.phone_encrypted = encrypt(member.phone, userId);
   }
 
   const { error: updateError } = await supabase

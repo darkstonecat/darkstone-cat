@@ -72,18 +72,17 @@ describe('SELECT policies', () => {
     expect(other).toHaveLength(0)
   })
 
-  it('admin sees all members', async () => {
+  // T7b dropped admins_select_all: an admin reads only its own row directly, like any member
+  // (board screens use SECURITY DEFINER functions or the service role after a role check).
+  it('admin sees only its own row', async () => {
     const client = await createAuthenticatedClient(
       'rls-admin@test.local',
       'password123'
     )
-    const { data } = await client.from('members').select('id')
+    const { data, error } = await client.from('members').select('id')
 
-    expect(data!.length).toBeGreaterThanOrEqual(3)
-    const ids = data!.map((m) => m.id)
-    expect(ids).toContain(userA.id)
-    expect(ids).toContain(userB.id)
-    expect(ids).toContain(admin.id)
+    expect(error).toBeNull()
+    expect(data).toEqual([{ id: admin.id }])
   })
 
   it('anonymous client sees nothing', async () => {

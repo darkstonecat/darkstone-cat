@@ -1,4 +1,3 @@
-import { randomBytes } from 'node:crypto'
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import {
@@ -8,6 +7,7 @@ import {
   cleanupUsers,
   runSqlAsPostgres,
 } from '../helpers/supabase'
+import { fakeMemberCipher } from '../helpers/cipher'
 
 // Migration 20261005100500_member_admin_mutations.sql: edit a member (A-4,
 // admin_update_member), reveal DNI/phone (A-5, admin_reveal_sensitive), award and revoke
@@ -43,10 +43,8 @@ const anon = createClient(
 
 const UNKNOWN_ID = '00000000-0000-0000-0000-000000000000'
 
-/** A value with the shape of src/lib/encryption.ts output (iv:tag:data, base64). Never decrypted here. */
-function fakeCipher() {
-  return [randomBytes(12), randomBytes(16), randomBytes(10)].map((b) => b.toString('base64')).join(':')
-}
+/** A value with the shape of src/lib/encryption.ts output, bound to `id`. Never decrypted here. */
+const fakeCipher = (id: string) => fakeMemberCipher(id)
 
 async function update(id: string, values: Record<string, unknown>) {
   const { error } = await supabaseAdmin.from('members').update(values).eq('id', id)
@@ -90,12 +88,12 @@ beforeAll(async () => {
     postal_code: '08221',
     ludoya_username: 'vella_ludoya',
     bgg_username: 'vella_bgg',
-    phone_encrypted: fakeCipher(),
+    phone_encrypted: fakeCipher(users.target.id),
   })
   await update(users.former.id, {
     left_on: '2026-10-01',
     left_by: 'self',
-    dni_nie_encrypted: fakeCipher(),
+    dni_nie_encrypted: fakeCipher(users.former.id),
   })
   // A badge kept while the register is blocked (BR-7)
   expect(
@@ -115,8 +113,8 @@ describe('admin_update_member() (A-4)', () => {
 
   it('updates the whitelisted fields and writes one member.update entry', async () => {
     const before = await getRow(users.target.id)
-    const newPhone = fakeCipher()
-    const newDni = fakeCipher()
+    const newPhone = fakeCipher(users.target.id)
+    const newDni = fakeCipher(users.target.id)
     const { data, error } = await editUpdate(board, users.target.id, {
       first_name: '  Laia ',
       last_name: 'Serra',
@@ -222,7 +220,10 @@ describe('admin_update_member() (A-4)', () => {
       [{ bgg_username: 'x'.repeat(65) }, 'bgg_username'],
       [{ phone_encrypted: '612345678' }, 'phone_encrypted'],
       [{ dni_nie_encrypted: '12345678Z' }, 'dni_nie_encrypted'],
-      [{ dni_nie_encrypted: `${fakeCipher()}:extra` }, 'dni_nie_encrypted'],
+      [{ dni_nie_encrypted: `${fakeCipher(users.target.id)}:extra` }, 'dni_nie_encrypted'],
+      // T7b: legacy iv:tag:data and ciphertext bound to another member are refused
+      [{ dni_nie_encrypted: fakeCipher(users.target.id).split(':').slice(2).join(':') }, 'dni_nie_encrypted'],
+      [{ phone_encrypted: fakeCipher(users.member.id) }, 'phone_encrypted'],
     ]
     for (const [patch, field] of cases) {
       const { error } = await editUpdate(board, users.target.id, patch)
@@ -263,8 +264,8 @@ describe('admin_reveal_sensitive() (A-5)', () => {
   let phoneCipher: string
 
   beforeAll(async () => {
-    dniCipher = fakeCipher()
-    phoneCipher = fakeCipher()
+    dniCipher = fakeCipher(users.reveal.id)
+    phoneCipher = fakeCipher(users.reveal.id)
     await update(users.reveal.id, { dni_nie_encrypted: dniCipher, phone_encrypted: phoneCipher })
   })
 

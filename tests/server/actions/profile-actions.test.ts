@@ -25,7 +25,8 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
 vi.mock("@/lib/supabase/auth", () => ({ getProfileData: vi.fn() }));
 vi.mock("@/lib/encryption", () => ({
-  encrypt: (v: string) => `enc(${v})`,
+  // Records the member id the value is bound to (AAD, T7b): always the caller's own row.
+  encrypt: (v: string, memberId: string) => `enc(${v}|${memberId})`,
   decrypt: (v: string) => v,
 }));
 
@@ -59,8 +60,8 @@ describe("updateMemberProfile", () => {
       ludoya_username: "laia_serra",
       bgg_username: "laia",
       newsletter_accepted: true,
-      phone_encrypted: "enc(+34 600 123 456)",
-      dni_nie_encrypted: "enc(12345678Z)",
+      phone_encrypted: "enc(+34 600 123 456|user-1)",
+      dni_nie_encrypted: "enc(12345678Z|user-1)",
     });
     expect(db.eq).toHaveBeenCalledWith("id", "user-1");
     expect(db.updateUser).toHaveBeenCalledWith({ data: { first_name: "Laia", last_name: "Serra" } });

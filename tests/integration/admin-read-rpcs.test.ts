@@ -55,8 +55,10 @@ const userIds: string[] = []
 let unconfirmed: { id: string; member_number: string }
 
 // Fake ciphertexts: they must never come back from any of these functions.
-const DNI_CIPHER = 'aaaa1111:bbbb2222:cccc3333dni'
-const PHONE_CIPHER = 'dddd4444:eeee5555:ffff6666phone'
+// iv:tag:data parts of a ciphertext; stored as v2 bound to the row (members_ciphertext_guard).
+const DNI_CIPHER = 'ZG5pZG5pZG5pZG5p:ZG5pZG5pZG5pZG5pZG5pZA==:RE5JRE5J'
+const PHONE_CIPHER = 'cGhvbmVwaG9uZXBo:cGhvbmVwaG9uZXBob25lcA==:UEhPTkVQ'
+const bound = (id: string, parts: string) => `v2:${id}:${parts}`
 
 const anon = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -177,8 +179,8 @@ beforeAll(async () => {
     ludoya_username: 'carlesq',
     bgg_username: 'carlesbgg',
     newsletter_accepted: true,
-    dni_nie_encrypted: DNI_CIPHER,
-    phone_encrypted: PHONE_CIPHER,
+    dni_nie_encrypted: bound(users.member.id, DNI_CIPHER),
+    phone_encrypted: bound(users.member.id, PHONE_CIPHER),
   })
   // A former member whose leave left data behind (the leave function of T6 deletes it): the
   // admin file must still not show it (BR-20, BR-21).
@@ -188,8 +190,8 @@ beforeAll(async () => {
     leave_reason: 'Compte duplicat',
     postal_code: '08222',
     ludoya_username: 'finaq',
-    dni_nie_encrypted: DNI_CIPHER,
-    phone_encrypted: PHONE_CIPHER,
+    dni_nie_encrypted: bound(users.former.id, DNI_CIPHER),
+    phone_encrypted: bound(users.former.id, PHONE_CIPHER),
   })
   // A former member whose login account was deleted (anonymisation): the stub survives.
   await update(users.stub.id, { left_on: '2026-08-01', left_by: 'self', anonymised_at: new Date().toISOString() })
@@ -612,7 +614,7 @@ describe('admin_list_activity()', () => {
     await log(clients.board, 'export.member_data', users.angel.id)
     // The reveal is logged by admin_reveal_sensitive() (20261005100500), not log_admin_event()
     expect(
-      (await supabaseAdmin.from('members').update({ dni_nie_encrypted: 'AAAAAAAAAAAAAAAA:BBBBBBBBBBBBBBBBBBBBBB==:Q0lQSEVS' }).eq('id', users.angel.id)).error
+      (await supabaseAdmin.from('members').update({ dni_nie_encrypted: bound(users.angel.id, DNI_CIPHER) }).eq('id', users.angel.id)).error
     ).toBeNull()
     const reveal = await clients.board.rpc('admin_reveal_sensitive', { p_member_id: users.angel.id, p_field: 'dni' })
     expect(reveal.error).toBeNull()

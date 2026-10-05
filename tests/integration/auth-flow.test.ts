@@ -74,8 +74,9 @@ describe('updateMemberAfterSignup with real DB', () => {
     // Encrypted fields — stored encrypted, decryptable
     expect(data!.phone_encrypted).not.toBe('612345678')
     expect(data!.dni_nie_encrypted).not.toBe('12345678A')
-    expect(decrypt(data!.phone_encrypted!)).toBe('612345678')
-    expect(decrypt(data!.dni_nie_encrypted!)).toBe('12345678A')
+    expect(data!.dni_nie_encrypted).toMatch(new RegExp(`^v2:${user.id}:`))
+    expect(decrypt(data!.phone_encrypted!, user.id)).toBe('612345678')
+    expect(decrypt(data!.dni_nie_encrypted!, user.id)).toBe('12345678A')
   })
 })
 
@@ -121,7 +122,7 @@ describe('encrypt → DB → decrypt roundtrip', () => {
     userIds.push(user.id)
 
     const originalPhone = '+34 612 345 678'
-    const encrypted = encrypt(originalPhone)
+    const encrypted = encrypt(originalPhone, user.id)
 
     await supabaseAdmin
       .from('members')
@@ -134,6 +135,6 @@ describe('encrypt → DB → decrypt roundtrip', () => {
       .eq('id', user.id)
       .single()
 
-    expect(decrypt(data!.phone_encrypted!)).toBe(originalPhone)
+    expect(decrypt(data!.phone_encrypted!, user.id)).toBe(originalPhone)
   })
 })

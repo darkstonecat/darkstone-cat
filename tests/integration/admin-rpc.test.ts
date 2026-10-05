@@ -24,19 +24,17 @@ beforeAll(async () => {
   // Set encrypted phone on member for later verification
   await supabaseAdmin
     .from('members')
-    .update({ phone_encrypted: encrypt('612345678') })
+    .update({ phone_encrypted: encrypt('612345678', member.id) })
     .eq('id', member.id)
 })
 
 afterAll(() => cleanupUsers(userIds))
 
+// Since 20261005100700_lock_down_member_secrets.sql the function is executable by the service
+// role only: the admin screens call it through the admin client after checking the role.
 describe('get_all_members_for_admin()', () => {
-  it('admin gets all members with emails', async () => {
-    const client = await createAuthenticatedClient(
-      'rpc-admin@test.local',
-      'password123'
-    )
-    const { data, error } = await client.rpc('get_all_members_for_admin')
+  it('the service role gets all members with emails', async () => {
+    const { data, error } = await supabaseAdmin.rpc('get_all_members_for_admin')
 
     expect(error).toBeNull()
     expect(data!.length).toBeGreaterThanOrEqual(2)
@@ -47,15 +45,25 @@ describe('get_all_members_for_admin()', () => {
     expect(memberRow!.first_name).toBe('RPCMember')
   })
 
-  it('non-admin gets exception', async () => {
+  it('an admin session gets permission denied', async () => {
+    const client = await createAuthenticatedClient(
+      'rpc-admin@test.local',
+      'password123'
+    )
+    const { data, error } = await client.rpc('get_all_members_for_admin')
+
+    expect(error?.code).toBe('42501')
+    expect(data).toBeNull()
+  })
+
+  it('a non-admin session gets permission denied', async () => {
     const client = await createAuthenticatedClient(
       'rpc-member@test.local',
       'password123'
     )
     const { error } = await client.rpc('get_all_members_for_admin')
 
-    expect(error).not.toBeNull()
-    expect(error!.message).toContain('admin role required')
+    expect(error?.code).toBe('42501')
   })
 
   it('anonymous client gets exception', async () => {
@@ -66,15 +74,11 @@ describe('get_all_members_for_admin()', () => {
     )
     const { error } = await anon.rpc('get_all_members_for_admin')
 
-    expect(error).not.toBeNull()
+    expect(error?.code).toBe('42501')
   })
 
   it('returns encrypted fields as-is (not decrypted by DB)', async () => {
-    const client = await createAuthenticatedClient(
-      'rpc-admin@test.local',
-      'password123'
-    )
-    const { data } = await client.rpc('get_all_members_for_admin')
+    const { data } = await supabaseAdmin.rpc('get_all_members_for_admin')
 
     const row = data!.find((m: { id: string }) => m.id === member.id)
     expect(row!.phone_encrypted).toBeTruthy()

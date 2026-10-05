@@ -75,6 +75,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T6 — Leave and rejoin functions (ban, sessions, card token) — route: delegated
 - [x] T7 — Update, reveal, badge and card functions — route: delegated
 - [x] T8 — Role and anonymise functions — route: delegated
+- [x] T7b — Lock down DNI/phone ciphertext (correction from the T7 verification): drop `admins_select_all` and `member_badges_admins_select_all`, `get_all_members_for_admin` service-role only (guarded server callers use the admin client), remove the public `getAllMembers` action, bind ciphertext to its member with AES-GCM AAD (`v2:` format, legacy fallback until prod is re-encrypted) + re-encryption script, BR-15 detector v3, e2e teardown demotes before deleting — route: delegated (writer trigger: migration + encryption module + 6+ callers and tests)
 - [ ] T9a — Export functions + routes: members CSV, member data (A-10, A-11) — route: delegated
 - [ ] T9b — Export functions + routes: e-mail lists, llibre de socis (A-16, S-4) — route: delegated
 - [ ] T10 — Mail module (`src/lib/mail/`) + leave/rejoin actions + templates — route: delegated
@@ -159,6 +160,30 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
    `delete from public.members where role <> 'member' and left_on is null` fails with
    `role_guard:` (or touches no row), and as a board member
    `select public.admin_set_role(gen_random_uuid(), 'board')` fails with `admin:forbidden`.
+
+8. `supabase/migrations/20261005100700_lock_down_member_secrets.sql` (T7b). Apply it and deploy
+   the T7b code right after: the trigger `members_ciphertext_guard` refuses the legacy
+   `iv:tag:data` writes of the code before T7b (sign-up details, profile edit fail until the
+   deploy); reads of legacy values keep working on both versions. It also drops
+   `admins_select_all` / `member_badges_admins_select_all` (the old `/admin` pages read
+   through `get_all_members_for_admin()` with the session client, which now answers 42501, so
+   the old `/admin` list and CSV export are empty/500 until the deploy), makes
+   `get_all_members_for_admin()` service-role only, revokes TRUNCATE on `members` and
+   `member_badges` from `service_role`, and replaces the BR-15 detector (v3) and
+   `admin_update_member()`. Needs M1–M7. Steps:
+   1. Apply the migration; deploy the T7b code at once.
+   2. With the prod `ENCRYPTION_KEY` and service-role key in the environment (never in the
+      repo): `node scripts/reencrypt-member-secrets.mjs --dry-run`. Expect `errors=0` and
+      `duplicates=0`; any `! member=<id> column=<c> reason=<r>` line needs a look first
+      (`duplicate_ciphertext` = a value copied between rows: decide which row owns it before
+      touching it; `decrypt_failed` = wrong key or corrupt value).
+   3. `node scripts/reencrypt-member-secrets.mjs --apply`, then `--dry-run` again: expect
+      `legacy=0`.
+   4. Check: as a board member, `select dni_nie_encrypted from members where id <> auth.uid()`
+      returns no rows; `/admin/members` still shows masked DNI/phone; a member's
+      `/profile/edit` still shows their own values.
+   5. Follow-up (T27): once step 3 shows `legacy=0` on prod, remove the legacy decrypt
+      fallback from `src/lib/encryption.ts` (and its tests).
 
 ## Progress
 
@@ -574,6 +599,19 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Prod risk: none beyond runbook 6; the regex classes `[[:alnum:]]`/`[[:space:]]` depend on the
   database ctype (local `en_US.UTF-8` matches accented letters and ŀ; Supabase prod uses the
   same default).
+- Independent read-only verification (tier `high`): FAIL. The T7 code is sound, but a
+  pre-existing HIGH defect breaks A-5/BR-16/BR-21: the RLS policy `admins_select_all`
+  (`is_admin()`) plus table-wide SELECT lets any board session read every member's
+  `dni_nie_encrypted`/`phone_encrypted` through PostgREST (confirmed by the parent in
+  `pg_policies`); `get_all_members_for_admin()` (EXECUTE for authenticated) returns them too.
+  Because AES-GCM is used without AAD, the ciphertext copied into the caller's own row
+  (`members_update_own` grants those columns) decrypts on `/profile/edit`, with no audit entry.
+  Second finding (LOW): BR-15 detector v2 misses `Telf.: 93 123 45 67`, `tel.:612345678`,
+  `DNI/NIE: X1234567L`, `N.I.E. X1234567L`, `12,345,678Z`, `612_345_678`, non-integer numbers,
+  keys `DNI/NIE`, `phone_no`, `mobile_number`. Both are corrected in T7b. The user chose
+  (2026-10-05) to also bind ciphertext to its member with AAD in T7b.
+  Notes: database locale dependence (prod ctype not verified); NBSP-only names pass the DB trim;
+  test gaps (BR-22/purged targets, former-board caller, service_role denial).
 
 ### T8 — done (route: delegated)
 
@@ -644,6 +682,83 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   touching e2e helpers).
 - Prod risk: runbook 7 (role holders can no longer delete their account until they lose the
   role). Concurrent role changes rely on READ COMMITTED (checked in `admin_set_role`).
+
+### T7b — done (route: delegated)
+
+- Commit: `fix(security): Stop board sessions from reading member secrets` on `develop-users`
+  (hash in `git log -- supabase/migrations/20261005100700_lock_down_member_secrets.sql`).
+- Test-first: RED observed before the code: `tests/unit/encryption.test.ts` 10 of 30 failing
+  (no v2 / AAD), `tests/lib/masked-field.test.ts` 3 of 6, new
+  `tests/integration/member-secrets-lockdown.test.ts` 38 of 64 (board reads, RPC grant, trigger,
+  TRUNCATE, detector v3 misses); GREEN after the module and the migration. The script test
+  (`tests/lib/reencrypt-member-secrets.test.ts`, 7) was written right after the script.
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 67 files / 778 tests passed; `npm run test:integration` 22 files / 430
+  tests passed; `npx playwright test e2e/admin e2e/profile e2e/auth` 80 passed (teardown left no
+  `e2e-*` user, so e2e-admin is deleted again); `node --env-file=.env.test.local
+  scripts/reencrypt-member-secrets.mjs --dry-run` → `Summary: mode=dry-run rows=0 already_v2=0
+  legacy=0 would_reencrypt=0 duplicates=0 errors=0` (empty local DB). Extra local smoke run: a
+  legacy row went dry-run `would_reencrypt=1` → `--apply` `reencrypted=1` → dry-run
+  `already_v2=1 legacy=0`.
+- Encryption (`src/lib/encryption.ts`, still `server-only`): `encrypt(plain, memberId)` →
+  `v2:<member uuid>:<iv>:<tag>:<data>` (AES-256-GCM, 12-byte IV, 16-byte tag, AAD
+  `member:<uuid>`, uuid lower-cased); `decrypt(value, memberId)`: v2 needs the embedded owner
+  to equal `memberId` and the AAD to verify; legacy `iv:tag:data` decrypts without AAD
+  (transitional, removed in T27); anything else → `Invalid ciphertext…` (no value in errors).
+  `ciphertextOwner(value)` returns a v2 value's owner. Every caller passes the row owner:
+  sign-up `data.userId`, profile edit/export `user.id` / `member.id`, admin list/export `m.id`.
+  Longest value ~120 chars (CHECK 512 fits).
+- Deviation (format): the owner uuid is embedded in clear. Reason: `/profile/details`
+  (`src/app/[locale]/profile/details/page.tsx`, uncommitted WIP of `zona-socis-mockups-v2`)
+  calls `maskEncryptedField(value, mask, field)` without the member id and could not be edited.
+  `maskEncryptedField` gained an optional 4th `memberId`; without it, it decrypts with the owner
+  the value names, which is safe because the new trigger guarantees a stored v2 value names its
+  own row and rewriting the owner breaks the tag. Follow-up for `zona-socis-mockups-v2`: pass
+  `member.id` as the 4th argument on lines 64–65 of the details page.
+- Database (migration 20261005100700): policies `admins_select_all` and
+  `member_badges_admins_select_all` dropped. Evidence that nothing needed them: every
+  session-client read in `src/` is own-row (`useAuthUser.ts:92`, `api/members/card/route.ts:28`,
+  `api/profile/calendar/route.ts:22`, `admin/guard.ts:39`, `supabase/auth.ts:38,64`,
+  `supabase/badges.ts:47-48`, `profile/details-actions.ts:29`, `profile/actions.ts:103,160`, all
+  `.eq("id"|"member_id", user.id)`); the sign-up read uses the admin client; board reads go
+  through SECURITY DEFINER `admin_*` functions or, until T27, the service-role
+  `get_all_members_for_admin()`. That function: EXECUTE revoked from PUBLIC/anon/authenticated,
+  granted to service_role; guard `auth.role() = 'service_role'` (also refuses the owner without
+  that JWT), body unchanged. TRUNCATE on `members`/`member_badges` revoked from service_role,
+  anon, authenticated (nothing in `src/`, `scripts/`, `tests/` truncates them; T8 verification).
+  New trigger `members_ciphertext_guard` (BEFORE INSERT/UPDATE OF the two columns or id,
+  SECURITY DEFINER) + `member_ciphertext_is_bound(text, uuid)`: a changed value must be NULL or
+  v2 naming the row id (`members:ciphertext_unbound: <column>`, 23514), for every role; rows
+  still holding legacy values update other columns normally. `admin_update_member()` checks the
+  same rule plus ≤ 512 (`admin:invalid_value: <key> must be ciphertext bound to the member`).
+  BR-15 detector v3 as documented in the migration header (every T7-verification miss is a test
+  case; the v2 safe cases still pass).
+- App: public server action `getAllMembers` (`src/lib/admin/actions.ts`) removed; new
+  `src/lib/admin/members.ts` `listAllMembersForAdmin(actor)` (`server-only`, admin client, needs
+  the actor returned by `requireRole`/`getAdminAccess`). `/admin`, `/admin/members` and the CSV
+  export use it after their role check.
+- Scripts: `scripts/reencrypt-member-secrets.mjs` (dry run by default, `--apply`; idempotent;
+  compare-and-set per value; duplicate legacy ciphertext reported and skipped; per-value
+  findings with id/column/reason only; exit 1 on errors). `scripts/migrate-members.mjs` now
+  writes v2 through it. No npm script added (the runbook calls it directly).
+- Tests adapted (why): fixtures that stored fake legacy ciphertext now store v2 bound to the row
+  (`tests/helpers/cipher.ts`; admin-read-rpcs, membership-lifecycle, membership-state, roles,
+  member-admin-mutations, which also gained legacy / other-member cases); admin-rpc, roles,
+  rls, member-badges now assert that board sessions get 42501 / only their own row and badges;
+  member-data-hardening reaches the length CHECK with a v2-shaped value; auth-flow,
+  profile-update, signup, profile-actions, members-export pass/assert the member id; the export
+  test asserts the admin client is used only after the role check.
+- E2E helpers (T8 follow-up closed): `deleteTestUser` and `deleteTestUserById` demote to
+  `member` with the service role before deleting.
+- WIP files: none of the files modified by `zona-socis-mockups-v2` was edited (API kept
+  backward-compatible, see Deviation).
+- Size: about 1,800 authored lines without this document (tests ~910, migration ~375 of which
+  ~145 are the copied `admin_update_member` body, scripts ~295, app ~240); over the 400-line
+  heuristic because the fix only holds as a whole (policies, RPC grant, trigger and AAD land
+  together, and every ciphertext fixture had to move to v2); not split.
+- Prod risks: runbook 8 (apply and deploy together; re-encrypt; legacy fallback until then). A
+  legacy ciphertext copied between rows before this migration still decrypts for the copier
+  until the script runs; the script reports it as `duplicate_ciphertext` instead of binding it.
 
 ## Next step
 

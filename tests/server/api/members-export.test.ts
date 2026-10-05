@@ -1,9 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { decrypt } from '@/lib/encryption'
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(),
+}))
+
+// get_all_members_for_admin() is service-role only (T7b): the route calls it through the admin
+// client, after the role check made with the session client.
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: vi.fn(),
 }))
 
 vi.mock('@/lib/encryption', () => ({
@@ -33,16 +40,21 @@ function setupMock(opts: {
         }),
       }),
     }),
+    rpc: vi.fn(),
+  }
+  const admin = {
     rpc: vi.fn().mockResolvedValue({
       data: opts.rpcData ?? null,
       error: opts.rpcError ?? null,
     }),
   }
   vi.mocked(createClient).mockResolvedValue(client as any)
-  return client
+  vi.mocked(createAdminClient).mockReturnValue(admin as any)
+  return { client, admin }
 }
 
 const fakeMember = {
+  id: '11111111-2222-4333-8444-555555555555',
   member_number: 'DS-001',
   first_name: 'Test',
   last_name: 'User',
@@ -69,9 +81,25 @@ describe('GET /api/admin/members/export', () => {
     expect((await GET()).status).toBe(401)
   })
 
-  it('returns 403 when user is not a board member', async () => {
-    setupMock({ user: { id: 'u1' }, member: { role: 'member', left_on: null } })
+  it('returns 403 when user is not a board member, without calling the member list', async () => {
+    const { admin } = setupMock({ user: { id: 'u1' }, member: { role: 'member', left_on: null } })
     expect((await GET()).status).toBe(403)
+    expect(createAdminClient).not.toHaveBeenCalled()
+    expect(admin.rpc).not.toHaveBeenCalled()
+  })
+
+  it('lists members through the admin client, never the session client', async () => {
+    const { client, admin } = setupMock({ user: { id: 'u1' }, member: { role: 'board' }, rpcData: [fakeMember] })
+    expect((await GET()).status).toBe(200)
+    expect(admin.rpc).toHaveBeenCalledWith('get_all_members_for_admin')
+    expect(client.rpc).not.toHaveBeenCalled()
+  })
+
+  it("decrypts each value with the row's own member id", async () => {
+    setupMock({ user: { id: 'u1' }, member: { role: 'board' }, rpcData: [fakeMember] })
+    await GET()
+    expect(decrypt).toHaveBeenCalledWith('enc_phone', fakeMember.id)
+    expect(decrypt).toHaveBeenCalledWith('enc_dni', fakeMember.id)
   })
 
   it('returns 403 for a former member who still holds a role', async () => {
@@ -184,6 +212,7 @@ describe('GET /api/admin/members/export', () => {
   })
 
   it('returns 500 on RPC error', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
     setupMock({
       user: { id: 'u1' },
       member: { role: 'admin' },

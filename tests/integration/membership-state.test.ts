@@ -5,6 +5,7 @@ import {
   createAuthenticatedClient,
   cleanupUsers,
 } from '../helpers/supabase'
+import { fakeMemberCipher } from '../helpers/cipher'
 
 // Migration 20261005100000_membership_state.sql: membership columns, column-level UPDATE
 // grants on members, and former members (left_on set) locked out of their own row.
@@ -116,8 +117,8 @@ describe('column-level UPDATE for members', () => {
         ludoya_username: 'active_ludoya',
         bgg_username: 'active_bgg',
         newsletter_accepted: true,
-        phone_encrypted: 'aXY=:dGFn:ZGF0YQ==',
-        dni_nie_encrypted: 'aXY=:dGFn:ZGF0YQ==',
+        phone_encrypted: fakeMemberCipher(active.id),
+        dni_nie_encrypted: fakeMemberCipher(active.id),
       })
       .eq('id', active.id)
       .select('first_name, postal_code, newsletter_accepted')

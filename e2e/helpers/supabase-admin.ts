@@ -71,6 +71,20 @@ export async function createTestUser(opts: {
 }
 
 /**
+ * Drop any role first: the database refuses to delete a role holder's row (BR-12,
+ * members_role_delete_guard), and e2e-admin holds the legacy role 'admin'. E2E never creates
+ * superadmins, so the last-superadmin rule never applies here.
+ */
+async function demoteToMember(supabase: ReturnType<typeof getAdminClient>, userId: string) {
+  const { error } = await supabase
+    .from('members')
+    .update({ role: 'member' })
+    .eq('id', userId)
+    .neq('role', 'member')
+  if (error) console.warn(`Warning: Could not remove the role of ${userId}: ${error.message}`)
+}
+
+/**
  * Delete a test user and its member row.
  * The member row is auto-deleted by the trigger (or we delete manually).
  */
@@ -81,6 +95,8 @@ export async function deleteTestUser(email: string) {
   const { data: list } = await supabase.auth.admin.listUsers()
   const user = list?.users?.find((u) => u.email === email)
   if (!user) return
+
+  await demoteToMember(supabase, user.id)
 
   // Delete member row first (FK constraint)
   await supabase.from('members').delete().eq('id', user.id)
@@ -97,6 +113,7 @@ export async function deleteTestUser(email: string) {
  */
 export async function deleteTestUserById(userId: string) {
   const supabase = getAdminClient()
+  await demoteToMember(supabase, userId)
   await supabase.from('members').delete().eq('id', userId)
   await supabase.auth.admin.deleteUser(userId)
 }

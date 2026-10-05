@@ -58,7 +58,8 @@ describe('updateMemberAfterSignup', () => {
 
   it('encrypts phone when provided', async () => {
     await updateMemberAfterSignup({ ...baseData, phone: '612345678' })
-    expect(encrypt).toHaveBeenCalledWith('612345678')
+    // Bound to the row being completed (AAD member:<id>, T7b)
+    expect(encrypt).toHaveBeenCalledWith('612345678', 'user-1')
     expect(mockUpdatePayload.mock.calls[0][0].phone_encrypted).toBe('encrypted:612345678')
   })
 

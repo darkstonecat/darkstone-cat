@@ -73,7 +73,16 @@ describe('members length constraints (members_update_own)', () => {
     ['phone_encrypted', 513, 'members_phone_encrypted_length'],
     ['dni_nie_encrypted', 513, 'members_dni_nie_encrypted_length'],
   ])('rejects an oversized %s', async (column, length, constraint) => {
-    const { error } = await patch({ [column]: 'a'.repeat(length) })
+    // Ciphertext columns only take v2 values bound to the row (members_ciphertext_guard, T7b),
+    // so the oversized value has that shape and reaches the length CHECK.
+    const client = await createAuthenticatedClient(email, password)
+    const { data: me } = await client.auth.getUser()
+    const prefix = `v2:${me.user!.id}:${'A'.repeat(16)}:${'B'.repeat(22)}==:`
+    const value = column.endsWith('_encrypted')
+      ? prefix + 'C'.repeat(length - prefix.length)
+      : 'a'.repeat(length)
+    expect(value).toHaveLength(length)
+    const { error } = await patch({ [column]: value })
     expect(error?.code).toBe('23514')
     expect(error?.message).toContain(constraint)
   })

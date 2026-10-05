@@ -2,7 +2,7 @@ import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { requireRole } from "@/lib/admin/guard";
-import { getAllMembers } from "@/lib/admin/actions";
+import { listAllMembersForAdmin } from "@/lib/admin/members";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -40,7 +40,7 @@ export default async function AdminPage({
   const { locale } = await params;
 
   // Board members and superadmins only; anyone else gets the 404 page.
-  await requireRole("board");
+  const actor = await requireRole("board");
 
   const [tNav, tMeta] = await Promise.all([
     getTranslations({ locale, namespace: "nav" }),
@@ -58,7 +58,7 @@ export default async function AdminPage({
   );
 
   let stats = { total: 0, newThisMonth: 0, newsletter: 0 };
-  const { data: members } = await getAllMembers();
+  const { data: members } = await listAllMembersForAdmin(actor);
   if (members) {
     const now = new Date();
     const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);

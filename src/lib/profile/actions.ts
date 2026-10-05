@@ -95,8 +95,9 @@ export async function updateMemberProfile(
     ludoya_username: ludoya,
     bgg_username: bgg,
     newsletter_accepted: data.newsletter_accepted,
-    phone_encrypted: phone ? encrypt(phone) : null,
-    dni_nie_encrypted: dni ? encrypt(dni) : null,
+    // Bound to the caller's own row (the only row this action writes).
+    phone_encrypted: phone ? encrypt(phone, user.id) : null,
+    dni_nie_encrypted: dni ? encrypt(dni, user.id) : null,
   };
 
   const { error } = await supabase
@@ -141,7 +142,7 @@ export async function exportProfileData(): Promise<{
 
   if (member.phone_encrypted) {
     try {
-      phone = decrypt(member.phone_encrypted);
+      phone = decrypt(member.phone_encrypted, member.id);
     } catch {
       phone = null;
     }
@@ -149,7 +150,7 @@ export async function exportProfileData(): Promise<{
 
   if (member.dni_nie_encrypted) {
     try {
-      dni = decrypt(member.dni_nie_encrypted);
+      dni = decrypt(member.dni_nie_encrypted, member.id);
     } catch {
       dni = null;
     }

@@ -47,7 +47,7 @@ describe('profile update via authenticated client (RLS enforced)', () => {
       'profile-upd@test.local',
       'password123'
     )
-    const encryptedPhone = encrypt('612345678')
+    const encryptedPhone = encrypt('612345678', user.id)
     await client
       .from('members')
       .update({ phone_encrypted: encryptedPhone })
@@ -60,7 +60,7 @@ describe('profile update via authenticated client (RLS enforced)', () => {
       .single()
 
     expect(data!.phone_encrypted).not.toBe('612345678')
-    expect(decrypt(data!.phone_encrypted!)).toBe('612345678')
+    expect(decrypt(data!.phone_encrypted!, user.id)).toBe('612345678')
   })
 
   it('stores encrypted DNI, decryptable after read', async () => {
@@ -68,7 +68,7 @@ describe('profile update via authenticated client (RLS enforced)', () => {
       'profile-upd@test.local',
       'password123'
     )
-    const encryptedDni = encrypt('12345678A')
+    const encryptedDni = encrypt('12345678A', user.id)
     await client
       .from('members')
       .update({ dni_nie_encrypted: encryptedDni })
@@ -80,7 +80,7 @@ describe('profile update via authenticated client (RLS enforced)', () => {
       .eq('id', user.id)
       .single()
 
-    expect(decrypt(data!.dni_nie_encrypted!)).toBe('12345678A')
+    expect(decrypt(data!.dni_nie_encrypted!, user.id)).toBe('12345678A')
   })
 
   it('clears phone by setting null', async () => {

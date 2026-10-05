@@ -67,13 +67,16 @@ describe('member_badges RLS', () => {
     expect(data![0].badge_key).toBe('volunteer_egara_joga')
   })
 
-  it('admin sees all badges', async () => {
+  // T7b dropped member_badges_admins_select_all: board screens read badges through SECURITY
+  // DEFINER functions, never directly.
+  it("admin no longer reads other members' badges directly", async () => {
     const client = await createAuthenticatedClient('badge-admin@test.local', 'password123')
-    const { data } = await client.from('member_badges').select('member_id')
+    const { data, error } = await client.from('member_badges').select('member_id')
 
+    expect(error).toBeNull()
     const ids = data!.map((b) => b.member_id)
-    expect(ids).toContain(userA.id)
-    expect(ids).toContain(userB.id)
+    expect(ids).not.toContain(userA.id)
+    expect(ids).not.toContain(userB.id)
   })
 
   it('member cannot insert a badge for themselves', async () => {

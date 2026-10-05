@@ -8,6 +8,7 @@ import {
   cleanupUsers,
   forceDemoteForTests,
 } from '../helpers/supabase'
+import { fakeMemberCipher } from '../helpers/cipher'
 
 // Migration 20261005100100_roles_expand.sql: board/superadmin roles, role_since, role_rank(),
 // has_role(), is_admin() on top of has_role('board'), and the role guard (BR-10, BR-11, BR-12).
@@ -95,7 +96,7 @@ beforeAll(async () => {
       left_on: '2026-09-15',
       left_by: 'board',
       leave_reason: 'Sol·licitud de supressió',
-      dni_nie_encrypted: 'AAAAAAAAAAAAAAAA:BBBBBBBBBBBBBBBBBBBBBB==:RVJBU0VE',
+      dni_nie_encrypted: fakeMemberCipher(users.erased.id),
       ludoya_username: 'erased_player',
     })
     .eq('id', users.erased.id)
@@ -160,13 +161,15 @@ describe('has_role()', () => {
 })
 
 describe('is_admin() accepts board and superadmin', () => {
-  it.each(['board', 'superA', 'legacy'] as const)('%s is admin and reads other members', async (key) => {
+  // T7b: being admin no longer opens other members' rows to direct reads (admins_select_all is
+  // gone); board screens read through SECURITY DEFINER functions.
+  it.each(['board', 'superA', 'legacy'] as const)('%s is admin but reads only its own row directly', async (key) => {
     const client = await createAuthenticatedClient(emails[key], password)
     expect((await client.rpc('is_admin')).data).toBe(true)
 
     const { data, error } = await client.from('members').select('id').eq('id', users.member.id)
     expect(error).toBeNull()
-    expect(data).toEqual([{ id: users.member.id }])
+    expect(data).toEqual([])
   })
 
   it('a plain member is not admin and reads only their own row', async () => {
@@ -177,12 +180,11 @@ describe('is_admin() accepts board and superadmin', () => {
     expect(data ?? []).toHaveLength(0)
   })
 
-  it.each(['board', 'superA'] as const)('%s can list members and regenerate a card', async (key) => {
+  it.each(['board', 'superA'] as const)('%s can regenerate a card but not call the service-role member list', async (key) => {
     const client = await createAuthenticatedClient(emails[key], password)
 
     const list = await client.rpc('get_all_members_for_admin')
-    expect(list.error).toBeNull()
-    expect(list.data!.some((m: { id: string }) => m.id === users.member.id)).toBe(true)
+    expect(list.error?.code).toBe('42501')
 
     const card = await client.rpc('regenerate_card_token', { target_member_id: users.member.id })
     expect(card.error).toBeNull()
@@ -356,7 +358,7 @@ describe('audit log as a superadmin', () => {
   // admin_reveal_sensitive() (20261005100500_member_admin_mutations.sql): the rest of A-5 is in
   // member-admin-mutations.test.ts.
   it('a superadmin reveals a former member\'s DNI only with a reason of 10+ characters (BR-21)', async () => {
-    const cipher = 'AAAAAAAAAAAAAAAA:BBBBBBBBBBBBBBBBBBBBBB==:Q0lQSEVS'
+    const cipher = fakeMemberCipher(users.former.id)
     expect((await supabaseAdmin.from('members').update({ dni_nie_encrypted: cipher }).eq('id', users.former.id)).error).toBeNull()
     const client = await createAuthenticatedClient(emails.superA, password)
     const reveal = (field: string, reason: string | null) =>

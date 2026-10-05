@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
 import { getAdminAccess } from "@/lib/admin/guard";
+import { listAllMembersForAdmin } from "@/lib/admin/members";
 import { decrypt } from "@/lib/encryption";
 import { escapeCsv } from "@/lib/csv";
 import type { AdminMember } from "@/lib/supabase/auth";
@@ -16,9 +16,8 @@ export async function GET() {
   }
   const user = access.actor;
 
-  // 2. Fetch all members via RPC
-  const supabase = await createClient();
-  const { data: members, error } = await supabase.rpc("get_all_members_for_admin");
+  // 2. Fetch all members (service-role RPC, only after the role check above)
+  const { data: members, error } = await listAllMembersForAdmin(user);
 
   if (error || !members) {
     return new Response("Internal Server Error", { status: 500 });
@@ -41,13 +40,13 @@ export async function GET() {
     "Creat",
   ];
 
-  const rows = (members as AdminMember[]).map((m) => {
+  const rows = members.map((m: AdminMember) => {
     let phone = "";
     let dni = "";
 
     if (m.phone_encrypted) {
       try {
-        phone = decrypt(m.phone_encrypted);
+        phone = decrypt(m.phone_encrypted, m.id);
       } catch {
         phone = "";
       }
@@ -55,7 +54,7 @@ export async function GET() {
 
     if (m.dni_nie_encrypted) {
       try {
-        dni = decrypt(m.dni_nie_encrypted);
+        dni = decrypt(m.dni_nie_encrypted, m.id);
       } catch {
         dni = "";
       }

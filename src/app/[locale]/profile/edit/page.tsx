@@ -74,7 +74,7 @@ export default async function ProfileEditPage({
 
   if (member.phone_encrypted) {
     try {
-      phone = decrypt(member.phone_encrypted);
+      phone = decrypt(member.phone_encrypted, member.id);
     } catch {
       phone = null;
     }
@@ -82,7 +82,7 @@ export default async function ProfileEditPage({
 
   if (member.dni_nie_encrypted) {
     try {
-      dni = decrypt(member.dni_nie_encrypted);
+      dni = decrypt(member.dni_nie_encrypted, member.id);
     } catch {
       dni = null;
     }

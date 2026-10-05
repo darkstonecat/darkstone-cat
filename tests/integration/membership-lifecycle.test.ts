@@ -40,8 +40,10 @@ const anon = createClient(
 )
 
 // Fake ciphertexts: shapes only, never decrypted here.
-const DNI_CIPHER = 'aaaa1111:bbbb2222:cccc3333dni'
-const PHONE_CIPHER = 'dddd4444:eeee5555:ffff6666phone'
+// iv:tag:data parts of a ciphertext; stored as v2 bound to the row (members_ciphertext_guard).
+const DNI_CIPHER = 'ZG5pZG5pZG5pZG5p:ZG5pZG5pZG5pZG5pZG5pZA==:RE5JRE5J'
+const PHONE_CIPHER = 'cGhvbmVwaG9uZXBo:cGhvbmVwaG9uZXBob25lcA==:UEhPTkVQ'
+const bound = (id: string, parts: string) => `v2:${id}:${parts}`
 
 function madridDate(offsetDays = 0) {
   const d = new Date(Date.now() + offsetDays * 86_400_000)
@@ -84,8 +86,8 @@ async function auditEntries(target: string, action: string) {
 
 function profileFields(id: string) {
   return update(id, {
-    phone_encrypted: PHONE_CIPHER,
-    dni_nie_encrypted: DNI_CIPHER,
+    phone_encrypted: bound(id, PHONE_CIPHER),
+    dni_nie_encrypted: bound(id, DNI_CIPHER),
     postal_code: '08221',
     ludoya_username: 'lc_ludoya',
     bgg_username: 'lc_bgg',
@@ -229,7 +231,7 @@ describe('A-6: the board gives a member baixa', () => {
       bgg_username: null,
       newsletter_accepted: false,
       // the register stays, blocked (§4.2)
-      dni_nie_encrypted: DNI_CIPHER,
+      dni_nie_encrypted: bound(users.leaver.id, DNI_CIPHER),
       first_name: 'leaver',
       member_number: before.member_number,
       membership_start_date: before.membership_start_date,

@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { requireRole } from "@/lib/admin/guard";
 import { toRole } from "@/lib/auth/roles";
-import { getAllMembers } from "@/lib/admin/actions";
+import { listAllMembersForAdmin } from "@/lib/admin/members";
 import { maskDni, maskPhone } from "@/lib/admin/utils";
 import { decrypt } from "@/lib/encryption";
 import NavBar from "@/components/NavBar";
@@ -43,7 +43,7 @@ export default async function AdminMembersPage({
   const { locale } = await params;
 
   // Board members and superadmins only; anyone else gets the 404 page.
-  await requireRole("board");
+  const actor = await requireRole("board");
 
   const [tNav, tMeta] = await Promise.all([
     getTranslations({ locale, namespace: "nav" }),
@@ -62,7 +62,7 @@ export default async function AdminMembersPage({
   );
 
   let rows: MemberRow[] = [];
-  const { data: members } = await getAllMembers();
+  const { data: members } = await listAllMembersForAdmin(actor);
   if (members) {
     rows = members.map((m) => {
       let phoneMasked: string | null = null;
@@ -70,7 +70,7 @@ export default async function AdminMembersPage({
 
       if (m.phone_encrypted) {
         try {
-          phoneMasked = maskPhone(decrypt(m.phone_encrypted));
+          phoneMasked = maskPhone(decrypt(m.phone_encrypted, m.id));
         } catch {
           phoneMasked = null;
         }
@@ -78,7 +78,7 @@ export default async function AdminMembersPage({
 
       if (m.dni_nie_encrypted) {
         try {
-          dniMasked = maskDni(decrypt(m.dni_nie_encrypted));
+          dniMasked = maskDni(decrypt(m.dni_nie_encrypted, m.id));
         } catch {
           dniMasked = null;
         }

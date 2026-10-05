@@ -98,8 +98,8 @@ export async function updateMemberAfterSignup(
     const updatePayload: Record<string, unknown> = {
       newsletter_accepted: data.newsletter_accepted === true,
     };
-    if (phone) updatePayload.phone_encrypted = encrypt(phone);
-    if (dni) updatePayload.dni_nie_encrypted = encrypt(dni);
+    if (phone) updatePayload.phone_encrypted = encrypt(phone, data.userId);
+    if (dni) updatePayload.dni_nie_encrypted = encrypt(dni, data.userId);
     if (postalCode) updatePayload.postal_code = postalCode;
     if (ludoyaClean) updatePayload.ludoya_username = ludoyaClean;
     if (bggClean) updatePayload.bgg_username = bggClean;
