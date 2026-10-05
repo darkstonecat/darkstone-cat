@@ -81,6 +81,22 @@ describe('verify_card_token', () => {
     expect(data).toEqual([{ valid: false, member_number: null }])
   })
 
+  it('reports the card of a former member as not valid (BR-4)', async () => {
+    const leaver = await createTestUser('verify-card-former@test.local', 'password123')
+    userIds.push(leaver.id)
+    const { data: row } = await supabaseAdmin.from('members').select('card_token').eq('id', leaver.id).single()
+
+    const { error: leaveError } = await supabaseAdmin
+      .from('members')
+      .update({ left_on: '2026-10-01', left_by: 'self' })
+      .eq('id', leaver.id)
+    expect(leaveError).toBeNull()
+
+    const { data, error } = await anon.rpc('verify_card_token', { p_token: row!.card_token })
+    expect(error).toBeNull()
+    expect(data).toEqual([{ valid: false, member_number: null }])
+  })
+
   it('stops verifying the old token after an admin regenerates it', async () => {
     const admin = await createTestUser('verify-card-admin@test.local', 'password123')
     userIds.push(admin.id)

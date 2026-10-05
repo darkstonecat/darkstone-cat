@@ -80,8 +80,8 @@ export async function createAuthenticatedClient(
 }
 
 /**
- * Delete a test user — removes members row first (FK constraint),
- * then deletes auth.users entry.
+ * Delete a test user — removes the members row first (a former member's row
+ * survives deleting the auth user), then deletes the auth.users entry.
  */
 export async function deleteTestUser(userId: string) {
   await supabaseAdmin.from('members').delete().eq('id', userId)

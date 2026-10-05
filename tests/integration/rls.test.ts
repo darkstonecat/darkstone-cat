@@ -208,7 +208,7 @@ describe('UPDATE policies', () => {
     expect(data ?? []).toHaveLength(0)
   })
 
-  it('admin cannot set a malformed card_token directly', async () => {
+  it('admin cannot set a card_token directly', async () => {
     const client = await createAuthenticatedClient(
       'rls-admin@test.local',
       'password123'
@@ -221,17 +221,46 @@ describe('UPDATE policies', () => {
     expect(error).not.toBeNull()
   })
 
-  it('admin can update any member profile', async () => {
+  // admins_update_all was dropped (20261005100000_membership_state.sql): board changes to
+  // another member go through audited SECURITY DEFINER functions, never a direct UPDATE.
+  it('admin can no longer update another member through PostgREST', async () => {
+    const client = await createAuthenticatedClient(
+      'rls-admin@test.local',
+      'password123'
+    )
+    const { data, error } = await client
+      .from('members')
+      .update({ postal_code: '08001' })
+      .eq('id', userA.id)
+      .select('id')
+
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+    const { data: row } = await supabaseAdmin
+      .from('members')
+      .select('postal_code')
+      .eq('id', userA.id)
+      .single()
+    expect(row!.postal_code).not.toBe('08001')
+  })
+
+  it('admin cannot change another member\'s role', async () => {
     const client = await createAuthenticatedClient(
       'rls-admin@test.local',
       'password123'
     )
     const { error } = await client
       .from('members')
-      .update({ postal_code: '08001' })
+      .update({ role: 'admin' })
       .eq('id', userA.id)
 
-    expect(error).toBeNull()
+    expect(error).not.toBeNull()
+    const { data: row } = await supabaseAdmin
+      .from('members')
+      .select('role')
+      .eq('id', userA.id)
+      .single()
+    expect(row!.role).toBe('member')
   })
 })
 

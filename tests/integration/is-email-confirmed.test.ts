@@ -38,6 +38,22 @@ describe('public.is_email_confirmed()', () => {
     expect(data).toBe(false)
   })
 
+  it('is false for a former member (no magic link for a closed membership)', async () => {
+    const user = await createTestUser('is-confirmed-former@test.local', 'password123')
+    userIds.push(user.id)
+    const { error: leaveError } = await supabaseAdmin
+      .from('members')
+      .update({ left_on: '2026-10-01', left_by: 'self' })
+      .eq('id', user.id)
+    expect(leaveError).toBeNull()
+
+    const { data, error } = await supabaseAdmin.rpc('is_email_confirmed', {
+      p_email: 'is-confirmed-former@test.local',
+    })
+    expect(error).toBeNull()
+    expect(data).toBe(false)
+  })
+
   it('is false for an unknown email', async () => {
     const { data, error } = await supabaseAdmin.rpc('is_email_confirmed', {
       p_email: 'nobody-here@test.local',

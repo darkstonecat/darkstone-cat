@@ -124,7 +124,7 @@ export async function discardUnconfirmedSignup(userId: string): Promise<{ discar
     if (!(await isFreshUnconfirmedUser(supabase, userId, DISCARD_WINDOW_MS))) {
       return { discarded: false };
     }
-    // The members row (and its badges) goes with the auth user: members.id is ON DELETE CASCADE.
+    // The members row (and its badges) goes with the auth user: the on_auth_user_deleted trigger deletes active rows.
     const { error } = await supabase.auth.admin.deleteUser(userId);
     return { discarded: !error };
   } catch {
@@ -172,7 +172,7 @@ export async function prepareSignup(email: string): Promise<{ ok: true }> {
     }
     if (typeof staleId !== "string" || !staleId) return { ok: true };
 
-    // The members row (and its badges) goes with the auth user: members.id is ON DELETE CASCADE.
+    // The members row (and its badges) goes with the auth user: the on_auth_user_deleted trigger deletes active rows.
     const { error } = await supabase.auth.admin.deleteUser(staleId);
     if (error) console.error("[signup] prepare delete failed status=%s", error.status ?? "unknown");
   } catch {
