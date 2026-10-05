@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
 import { createClient } from '@supabase/supabase-js'
 import {
   supabaseAdmin,
@@ -9,6 +9,14 @@ import {
   forceDemoteForTests,
 } from '../helpers/supabase'
 import { fakeMemberCipher } from '../helpers/cipher'
+
+// The T11b server actions run here too (they need superadmins): only the session client factory
+// and next/cache are mocked, so the actions call the T8 functions with a real user JWT.
+const session = vi.hoisted(() => ({ client: null as unknown }))
+vi.mock('@/lib/supabase/server', () => ({ createClient: async () => session.client }))
+vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+
+import { anonymiseMember, setMemberRole } from '@/lib/admin/superadmin-actions'
 
 // Migration 20261005100100_roles_expand.sql: board/superadmin roles, role_since, role_rank(),
 // has_role(), is_admin() on top of has_role('board'), and the role guard (BR-10, BR-11, BR-12).
@@ -31,6 +39,9 @@ const emails = {
   target: 'roles-target@test.local',
   erased: 'roles-erased@test.local',
   purged: 'roles-purged@test.local',
+  actBoard: 'roles-action-board@test.local',
+  actTarget: 'roles-action-target@test.local',
+  actFormer: 'roles-action-former@test.local',
 }
 type Key = keyof typeof emails
 const users = {} as Record<Key, { id: string }>
@@ -898,3 +909,127 @@ async function getRowNumber(id: string) {
   expect(error).toBeNull()
   return data!.member_number as string
 }
+
+// T11b · setMemberRole / anonymiseMember (src/lib/admin/superadmin-actions.ts) with real session
+// clients. superA and superB are the only two active superadmins here.
+describe('superadmin actions (S-1, S-2, S-3)', () => {
+  const as = async (key: Key) => {
+    session.client = await createAuthenticatedClient(emails[key], password)
+  }
+  const auditFor = async (target: string, actions: string[]) =>
+    (
+      await supabaseAdmin
+        .from('audit_log')
+        .select('actor_id, action, details')
+        .eq('target_member_id', target)
+        .in('action', actions)
+        .order('id')
+    ).data!
+
+  beforeAll(async () => {
+    expect((await setRole(users.actBoard.id, 'board')).error).toBeNull()
+    const former = await supabaseAdmin
+      .from('members')
+      .update({ left_on: '2026-09-20', left_by: 'board', leave_reason: 'Sol·licitud de supressió' })
+      .eq('id', users.actFormer.id)
+    expect(former.error).toBeNull()
+    expect((await supabaseAdmin.from('member_badges').insert({ member_id: users.actFormer.id, badge_key: 'ludoteca_donor' })).error).toBeNull()
+  })
+
+  it('a board session can neither set roles nor anonymise', async () => {
+    await as('actBoard')
+    expect(await setMemberRole(users.actTarget.id, 'board')).toEqual({ error: 'forbidden' })
+    expect(await anonymiseMember(users.actFormer.id, await getRowNumber(users.actFormer.id))).toEqual({ error: 'forbidden' })
+    expect((await getRow(users.actTarget.id)).role).toBe('member')
+    expect((await supabaseAdmin.auth.admin.getUserById(users.actFormer.id)).data.user?.id).toBe(users.actFormer.id)
+  })
+
+  it('a superadmin grants board and revokes it; one entry each, with the superadmin as actor', async () => {
+    await as('superA')
+    expect(await setMemberRole(users.actTarget.id, 'board')).toEqual({
+      ok: true,
+      action: 'role.grant',
+      role: 'board',
+      roleSince: expect.any(String),
+    })
+    expect((await getRow(users.actTarget.id)).role).toBe('board')
+    expect(await setMemberRole(users.actTarget.id, 'board')).toEqual({ error: 'role_unchanged' })
+
+    expect(await setMemberRole(users.actTarget.id, 'member', 'Deixa la junta')).toEqual({
+      ok: true,
+      action: 'role.revoke',
+      role: 'member',
+      roleSince: null,
+    })
+    expect(await auditFor(users.actTarget.id, ['role.grant', 'role.revoke'])).toEqual([
+      { actor_id: users.superA.id, action: 'role.grant', details: { from: 'member', to: 'board' } },
+      { actor_id: users.superA.id, action: 'role.revoke', details: { from: 'board', to: 'member' } },
+    ])
+  })
+
+  it('BR-11 through the real JWT: a superadmin cannot change their own role', async () => {
+    await as('superA')
+    expect(await setMemberRole(users.superA.id, 'board')).toEqual({ error: 'self_role_change' })
+    expect((await getRow(users.superA.id)).role).toBe('superadmin')
+  })
+
+  it('BR-10: revoking one of the last two superadmins is last_superadmin', async () => {
+    expect(await countActiveSuperadmins()).toBe(2)
+    await as('superA')
+    expect(await setMemberRole(users.superB.id, 'member')).toEqual({ error: 'last_superadmin' })
+    expect(await countActiveSuperadmins()).toBe(2)
+  })
+
+  it('BR-12: a former member cannot be granted a role', async () => {
+    await as('superB')
+    expect(await setMemberRole(users.former.id, 'board')).toEqual({ error: 'former_member_role' })
+    expect((await getRow(users.former.id)).role).toBe('member')
+  })
+
+  it('anonymise refuses an active member and a wrong confirmation, touching nothing', async () => {
+    await as('superA')
+    expect(await anonymiseMember(users.actTarget.id, await getRowNumber(users.actTarget.id))).toEqual({ error: 'not_former' })
+    expect(await anonymiseMember(users.actFormer.id, '999-999')).toEqual({ error: 'confirm_mismatch' })
+    expect(await auditFor(users.actFormer.id, ['member.anonymise'])).toEqual([])
+    expect((await supabaseAdmin.auth.admin.getUserById(users.actFormer.id)).data.user?.id).toBe(users.actFormer.id)
+  })
+
+  it('anonymises a former member: login account deleted, stub kept, one entry', async () => {
+    await as('superA')
+    const number = await getRowNumber(users.actFormer.id)
+    expect(await anonymiseMember(users.actFormer.id, ` ${number} `, 'Petició per correu')).toEqual({
+      ok: true,
+      accountDeleted: true,
+      alreadyAnonymised: false,
+      purgeOn: '2029-09-20',
+    })
+
+    const { data: user } = await supabaseAdmin.auth.admin.getUserById(users.actFormer.id)
+    expect(user.user).toBeNull()
+    const { data: stub } = await supabaseAdmin
+      .from('members')
+      .select('member_number, first_name, left_on, anonymised_at')
+      .eq('id', users.actFormer.id)
+      .single()
+    expect(stub).toMatchObject({ member_number: number, first_name: 'actFormer', left_on: '2026-09-20' })
+    expect(stub!.anonymised_at).not.toBeNull()
+    const { data: badges } = await supabaseAdmin.from('member_badges').select('badge_key').eq('member_id', users.actFormer.id)
+    expect(badges).toEqual([])
+    expect(await auditFor(users.actFormer.id, ['member.anonymise'])).toEqual([
+      { actor_id: users.superA.id, action: 'member.anonymise', details: { badges_deleted: 1, purge_on: '2029-09-20' } },
+    ])
+  })
+
+  it('a retry is idempotent: ok, already anonymised, account counted as deleted, no new entry', async () => {
+    await as('superB')
+    expect(await anonymiseMember(users.actFormer.id, await getRowNumber(users.actFormer.id))).toEqual({
+      ok: true,
+      accountDeleted: true,
+      alreadyAnonymised: true,
+      purgeOn: null,
+    })
+    expect(await auditFor(users.actFormer.id, ['member.anonymise'])).toHaveLength(1)
+    // the confirmation is still checked on a retry
+    expect(await anonymiseMember(users.actFormer.id, '999-999')).toEqual({ error: 'confirm_mismatch' })
+  })
+})

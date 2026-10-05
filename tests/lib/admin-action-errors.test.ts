@@ -139,6 +139,35 @@ describe('adminDbErrorCode · membership prefixes', () => {
   })
 })
 
+describe('adminDbErrorCode · roles, anonymise and access link prefixes (T8, T3)', () => {
+  it.each([
+    ['role_guard:self_role_change: nobody can change their own role', '23514', 'self_role_change'],
+    ['role_guard:last_superadmin: at least two superadmins must remain', '23514', 'last_superadmin'],
+    ['role_guard:former_member_role: a former member cannot hold a role', '23514', 'former_member_role'],
+    ['role_guard:role_held: remove the role first', '23514', 'role_held'],
+    ['admin:role_unchanged: the member already holds this role', '22023', 'role_unchanged'],
+    ['admin:confirm_mismatch: type the member number to confirm', '22023', 'confirm_mismatch'],
+    ['admin:not_former: only a former member can be anonymised; give the baixa first', '22023', 'not_former'],
+    ['admin:already_anonymised: this record was anonymised already', '22023', 'already_anonymised'],
+    ['admin:isolation: role changes need READ COMMITTED', '25000', 'failed'],
+    ['audit:invalid_target: an access link goes to active members only', '22023', 'not_active'],
+    ['audit:action_not_allowed: x cannot be logged directly', '22023', 'failed'],
+  ])('maps %s to %s', (message, code, expected) => {
+    expect(adminDbErrorCode(err(message, code))).toBe(expected)
+  })
+
+  it.each([
+    ['role_guard:last_superadmins: lookalike', '23514'],
+    ['role_guard:self_role_changeX: lookalike', '23514'],
+    ['role_guard:__proto__: lookalike', '23514'],
+    ['role_guard:something_new: added later', '23514'],
+    ['admin:already_anonymised2: lookalike', '22023'],
+    ['wrapped: role_guard:last_superadmin: lookalike', '23514'],
+  ])('keeps the boundary and own-key rules: %s is failed', (message, code) => {
+    expect(adminDbErrorCode(err(message, code))).toBe('failed')
+  })
+})
+
 describe('isMemberId', () => {
   it('accepts a UUID in either case', () => {
     expect(isMemberId('0b7c1f2e-3a4d-4e5f-8a9b-0c1d2e3f4a5b')).toBe(true)

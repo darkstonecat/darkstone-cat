@@ -1,8 +1,8 @@
 "use server";
 
 import { headers } from "next/headers";
-import { createClient } from "@supabase/supabase-js";
 import { createAdminClient } from "./admin";
+import { sendMagicLinkOtp } from "./magic-link";
 import { getClientIp } from "@/lib/client-ip";
 import { allowRequestShared } from "@/lib/rate-limit";
 
@@ -49,24 +49,11 @@ export async function requestMagicLink(email: string): Promise<{ error: "failed"
     }
     if (confirmed !== true) return { error: null };
 
-    // Cookie-less client: nothing to persist on the server, the member signs in from the link.
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
-    );
-    const { error } = await supabase.auth.signInWithOtp({
-      email: clean,
-      options: { shouldCreateUser: false },
-    });
+    const sent = await sendMagicLinkOtp(clean);
 
     // Rate limits on the GoTrue side (and a race with a deleted account) look sent too.
-    const neutral =
-      error?.code === "otp_disabled" ||
-      error?.status === 429 ||
-      error?.code === "over_email_send_rate_limit";
-    if (error && !neutral) {
-      console.error("[magic-link] send failed code=%s status=%s", error.code ?? "unknown", error.status ?? "unknown");
+    if (!sent.ok && !sent.throttled && sent.code !== "otp_disabled") {
+      console.error("[magic-link] send failed code=%s status=%s", sent.code ?? "unknown", sent.status ?? "unknown");
       return { error: "failed" };
     }
     return { error: null };

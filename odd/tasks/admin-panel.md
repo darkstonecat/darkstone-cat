@@ -83,7 +83,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T9b — Export functions + routes: e-mail lists, llibre de socis (A-16, S-4), A-11 reason for a former member (T9a verification), POST + Origin for every export, T7b follow-ups — route: delegated (writer trigger: migration + lib + 4 routes + 10 test files)
 - [x] T10 — Mail module (`src/lib/mail/`) + leave/rejoin actions + templates — route: delegated (writer trigger: mail module + templates + 2 action files + contact refactor + 6 test files)
 - [x] T11a — Server actions A-4, A-5, A-8, A-9 — route: delegated (writer trigger: actions + error module + 3 test files)
-- [ ] T11b — Server actions A-15, roles (S-1, S-2), anonymise (S-3) — route: delegated
+- [x] T11b — Server actions A-15, roles (S-1, S-2), anonymise (S-3) — route: delegated (writer trigger: 2 action files + sender extraction + error module + 5 test files)
 - [ ] T12 — `run_retention()` + `/api/cron/retention` + workflow (dry run first) — route: delegated
 - [ ] T13 — `ops_job_runs` + refresh action (A-14), cron route records automatic runs — route: delegated
 
@@ -1241,6 +1241,102 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   set for the contact form). The "Si no recordes la contrasenya" line relies on recovery
   working for a reinstated member (T26 neutral reset must allow active members).
 
+### T11b — done (route: delegated)
+
+- Commit: `feat(admin): Add access link, role and anonymise actions` on `develop-users` (hash in
+  `git log -- src/lib/admin/superadmin-actions.ts`).
+- Test-first: RED observed with the new block in `tests/lib/admin-action-errors.test.ts` (9
+  failing) and `tests/server/actions/access-link-actions.test.ts` /
+  `tests/server/actions/superadmin-actions.test.ts` (both failed to import the missing modules);
+  GREEN after (12 files / 412 tests in `tests/lib/admin-action-errors.test.ts` +
+  `tests/server/actions/`). The integration tests (`tests/integration/access-link-action.test.ts`,
+  new block in `roles.test.ts`) were written right after the code and passed on their first run.
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 80 files /
+  1237 tests passed; `npm run test:integration` 26 files / 493 tests passed (twice, after
+  `npm run db:reset`; see the environment note below).
+- `src/lib/supabase/magic-link.ts` (`server-only`): `sendMagicLinkOtp(email): Promise<{ ok: true }
+  | { ok: false; throttled; code; status }>`, the sender moved out of `requestMagicLink`
+  (cookie-less publishable client, `signInWithOtp({ email, options: { shouldCreateUser: false } })`,
+  same "Magic link" template). `requestMagicLink` uses it with unchanged behaviour (its tests pass
+  untouched). Callers must have checked the account is confirmed.
+- `src/lib/admin/action-context.ts`: new `authoriseOnMember(min, memberId)` (`authoriseBoardOnMember`
+  is now a wrapper) and `revalidateRolePages()` (`/[locale]/admin/roles`, `page`).
+- `src/lib/admin/access-actions.ts` (`"use server"`): `sendAccessLink(memberId: string):
+  Promise<{ ok: true } | { error: 'rate_limited'; retryAfter: number | null } | { error }>` (A-15).
+  Steps: `getAdminAccess('board')` + UUID → id → member number with the service role (one column;
+  since T7b a board session cannot read other rows) → `admin_get_member` with the SESSION client
+  (no row: purged or unconfirmed sign-up, BR-22 → `not_found`) → `state` must be active
+  (`not_active`), `has_login` and a non-blank e-mail (`no_login`) → shared limiter
+  `allowRequestShared('access-link:<member uuid>', null, 1, 10 min)` (bucket = that literal
+  string, no HMAC: a member id, not an IP) → `log_admin_event('member.send_access_link', target,
+  {}, null)` with the SESSION client, fail closed (no entry, no mail) → send to the account
+  e-mail. Never takes, returns or logs the address. `retryAfter` = seconds left from the last
+  `member.send_access_link` entry for the member (board reads `audit_log`), null when unknown.
+  The bucket is consumed before the entry is written, so a refused attempt never leaves an entry
+  claiming a send; the cost is that a failed audit write blocks that member for 10 minutes. A
+  sender failure after the entry → `send_failed` (entry kept as the record of the attempt);
+  GoTrue's own throttle → `rate_limited` with `retryAfter: null`. Codes: `unauthenticated,
+  forbidden, invalid, not_found, not_active, no_login, rate_limited, send_failed, failed`.
+- `src/lib/admin/superadmin-actions.ts` (`"use server"`), `getAdminAccess('superadmin')` first,
+  SESSION client for both T8 functions (the admin client is used only for `deleteUser`):
+  - `setMemberRole(memberId: string, role: 'member' | 'board' | 'superadmin', reason?: string |
+    null): Promise<{ ok: true; action: 'role.grant' | 'role.revoke'; role; roleSince: string |
+    null } | { error }>` (S-1, S-2). Role checked before the DB (`invalid_role`, also for the
+    legacy `admin`); reason trimmed, blank → null, > 500 → `reason_too_long`, not a string →
+    `invalid`. Revalidates the member pages and `/[locale]/admin/roles`. Codes: `unauthenticated,
+    forbidden, invalid, invalid_role, reason_too_long, not_found, role_unchanged (refresh the
+    screen), self_role_change, last_superadmin, former_member_role, role_held, failed`
+    (`admin:isolation` → `failed`).
+  - `anonymiseMember(memberId: string, confirmNumber: string, reason?: string | null):
+    Promise<{ ok: true; accountDeleted: boolean; alreadyAnonymised: boolean; purgeOn: string |
+    null } | { error }>` (S-3). Confirmation trimmed; blank or > 32 characters →
+    `confirm_mismatch` without a DB call; not a string → `invalid`. Then `admin_anonymise_member`,
+    then `createAdminClient().auth.admin.deleteUser(id)`; 404 / `user_not_found` counts as deleted;
+    any other failure → `{ ok: true, accountDeleted: false }` and logs only
+    `[admin-member] anonymise_delete_account failed code=<code>`. Codes: `unauthenticated,
+    forbidden, invalid, confirm_mismatch, reason_too_long, not_found, not_former, failed`.
+  - Retry semantics (idempotent): `admin:already_anonymised` is not returned as an error. The DB
+    raises it only after the superadmin, former-member and confirmation checks (a retry with a
+    wrong number is still `confirm_mismatch`), so the action deletes the account again and answers
+    `{ ok: true, alreadyAnonymised: true, purgeOn: null }`. T22: when `accountDeleted` is false,
+    say the record is anonymised but the login account is not deleted yet and offer the same
+    action again; the purge date comes from `purgeOn` (or the member file on a retry).
+- `src/lib/admin/action-errors.ts`: new codes `rate_limited, send_failed, invalid_role,
+  role_unchanged, self_role_change, last_superadmin, former_member_role, confirm_mismatch,
+  already_anonymised`; prefixes `role_guard:{self_role_change,last_superadmin,former_member_role,
+  role_held}`, `admin:{role_unchanged,confirm_mismatch,not_former,already_anonymised}` map to
+  the same names; `audit:invalid_target` → `not_active` (only the access link logs with a
+  target); `admin:isolation` stays `failed` (tested). Boundary and own-key rules tested for
+  `role_guard:` (`role_guard:__proto__`, `role_guard:last_superadmins` → `failed`).
+- Tests: unit (guard denial incl. board refused for both superadmin actions; validation without
+  DB call; the session client used for `admin_get_member`, `log_admin_event`, `admin_set_role`,
+  `admin_anonymise_member` and the admin client's `rpc` never called; exact step order limit →
+  entry → send; fail closed on an audit error; limiter path with `retryAfter` from the last
+  entry; former / no login / unconfirmed refusals; address never returned or logged; anonymise
+  retry and deletion failure). Integration: `access-link-action.test.ts` (real board session;
+  member refused; former → `not_active`, unconfirmed → `not_found`; one entry with the board
+  actor and `{}` details; one `rate_limit_hits` row in bucket `access-link:<uuid>`; second call
+  `rate_limited` with ~600 s; limit is per member). `roles.test.ts` new block "superadmin actions
+  (S-1, S-2, S-3)" with real superadmin JWTs: board refused; grant/revoke with one entry each;
+  `role_unchanged`; `self_role_change`; `last_superadmin` (count stays 2);
+  `former_member_role`; anonymise `not_former` / `confirm_mismatch` / success (auth user gone,
+  stub kept, badges gone, one entry) / idempotent retry.
+- Environment note: the first `test:integration` runs failed in `createTestUser` with "Database
+  error creating new user": the local `member_number_seq` had passed 999 after many test runs, and
+  `generate_member_number()` uses `lpad(nextval, 3, '0')`, which TRUNCATES longer values
+  (`1196` → `119`), so new numbers collided with `members_member_number_key`. `npm run db:reset`
+  fixed it locally. **Prod risk (not in this task's surface)**: the same function will collide
+  once the association reaches member 1000; fix it in a migration (e.g. no truncation past 3
+  digits) before then (T27 or a separate fix).
+- Deviations: the member id is resolved to a number with the service role (one column) because
+  `admin_get_member` takes a member number; `retryAfter` is derived from the audit log (the shared
+  limiter only answers allowed/refused); `anonymiseMember` also returns `alreadyAnonymised` and
+  `purgeOn`; an unconfirmed sign-up is `not_found` (hidden by BR-22), not a separate code.
+  No i18n texts added (T21/T22).
+- Prod risk: needs runbooks 3, 4 and 7 (`log_admin_event`, `admin_get_member`, T8 functions)
+  and the shared limiter migration (`20261001100000`); without the limiter table the per-member
+  limit falls back to one instance's memory.
+
 ## Next step
 
-T11b.
+T12.

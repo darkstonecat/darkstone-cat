@@ -1,10 +1,11 @@
 /**
  * Stable error codes of the admin server actions (`src/lib/admin/member-actions.ts`,
- * `src/lib/admin/membership-actions.ts`) and the mapping from the database errors behind them.
+ * `src/lib/admin/membership-actions.ts`, `src/lib/admin/access-actions.ts`,
+ * `src/lib/admin/superadmin-actions.ts`) and the mapping from the database errors behind them.
  * Pure, so client and server can import it.
  *
- * The admin functions raise `<prefix>:<code>: <text>` (migrations 20261005100400,
- * 20261005100500, 20261005100700, 20261005100800); supabase-js returns that text as `error.message` and the
+ * The admin functions raise `<prefix>:<code>: <text>` (migrations 20261005100200, 20261005100400,
+ * 20261005100500, 20261005100600, 20261005100700, 20261005100800); supabase-js returns that text as `error.message` and the
  * SQLSTATE as `error.code`. Only the prefix and code are read: the text can echo values, so it
  * is never returned to the browser or logged.
  */
@@ -35,6 +36,17 @@ export type AdminActionError =
   | "no_login"
   | "invalid_channel"
   | "note_too_long"
+  // Access link (A-15).
+  | "rate_limited"
+  | "send_failed"
+  // Roles (S-1, S-2) and anonymisation (S-3).
+  | "invalid_role"
+  | "role_unchanged"
+  | "self_role_change"
+  | "last_superadmin"
+  | "former_member_role"
+  | "confirm_mismatch"
+  | "already_anonymised"
   | "failed";
 
 /** `admin:invalid_value: <patch key> …` → the profile edit's code for that field. */
@@ -76,6 +88,20 @@ const PREFIXED_CODES: Record<string, AdminActionError> = {
   "membership:no_login": "no_login",
   "membership:invalid_channel": "invalid_channel",
   "membership:note_too_long": "note_too_long",
+  // Role functions and the role guard (20261005100100_roles_expand.sql, 20261005100600). BR-11,
+  // BR-10, BR-12 (grant to a former member) and BR-12 (deleting a role holder's row).
+  "role_guard:self_role_change": "self_role_change",
+  "role_guard:last_superadmin": "last_superadmin",
+  "role_guard:former_member_role": "former_member_role",
+  "role_guard:role_held": "role_held",
+  "admin:role_unchanged": "role_unchanged",
+  // Anonymisation (S-3). `admin:isolation` is deliberately absent: it maps to `failed`.
+  "admin:confirm_mismatch": "confirm_mismatch",
+  "admin:not_former": "not_former",
+  "admin:already_anonymised": "already_anonymised",
+  // `log_admin_event` refusing the target: only the access link (A-15) logs with a target, and
+  // its target must be an active, not purged member (20261005100200_audit_log.sql).
+  "audit:invalid_target": "not_active",
 };
 
 /**
