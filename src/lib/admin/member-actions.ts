@@ -1,9 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getAdminAccess } from "@/lib/admin/guard";
-import { adminDbErrorCode, isMemberId, type AdminActionError } from "@/lib/admin/action-errors";
+import { adminDbErrorCode, type AdminActionError } from "@/lib/admin/action-errors";
+import {
+  authoriseBoardOnMember as authorise,
+  logAdminFailure as logFailure,
+  revalidateMemberPages,
+} from "@/lib/admin/action-context";
 import { decrypt, encrypt } from "@/lib/encryption";
 import { normalizeUsername } from "@/lib/profile/username-pattern";
 import { isValidDniNie, isValidPhone, isValidPostalCode } from "@/lib/validation/member-fields";
@@ -57,23 +60,6 @@ function optionalReason(value: unknown): { value: string | null } | Fail {
   if (text === null) return { error: "invalid" };
   if ([...text].length > MAX_REASON_LENGTH) return { error: "reason_too_long" };
   return { value: text || null };
-}
-
-/** Role check first, then the member id. Returns the canonical (lower-case) id. */
-async function authorise(memberId: unknown): Promise<{ id: string } | Fail> {
-  const access = await getAdminAccess("board");
-  if (access.status !== "ok") return { error: access.status };
-  if (!isMemberId(memberId)) return { error: "invalid" };
-  return { id: memberId.toLowerCase() };
-}
-
-function logFailure(action: string, code: string | null | undefined): void {
-  console.error("[admin-member] %s failed code=%s", action, code || "unknown");
-}
-
-function revalidateMemberPages(): void {
-  revalidatePath("/[locale]/admin/members", "page");
-  revalidatePath("/[locale]/admin/members/[number]", "page");
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -1,9 +1,10 @@
 /**
- * Stable error codes of the admin server actions (`src/lib/admin/member-actions.ts`) and the
- * mapping from the database errors behind them. Pure, so client and server can import it.
+ * Stable error codes of the admin server actions (`src/lib/admin/member-actions.ts`,
+ * `src/lib/admin/membership-actions.ts`) and the mapping from the database errors behind them.
+ * Pure, so client and server can import it.
  *
- * The admin functions raise `<prefix>:<code>: <text>` (migrations 20261005100500,
- * 20261005100700, 20261005100800); supabase-js returns that text as `error.message` and the
+ * The admin functions raise `<prefix>:<code>: <text>` (migrations 20261005100400,
+ * 20261005100500, 20261005100700, 20261005100800); supabase-js returns that text as `error.message` and the
  * SQLSTATE as `error.code`. Only the prefix and code are read: the text can echo values, so it
  * is never returned to the browser or logged.
  */
@@ -25,6 +26,15 @@ export type AdminActionError =
   | "badge_held"
   | "badge_not_held"
   | "invalid_badge"
+  // Leave and rejoin (A-6, A-7, M-1).
+  | "self_target"
+  | "role_held"
+  | "invalid_date"
+  | "not_former"
+  | "register_closed"
+  | "no_login"
+  | "invalid_channel"
+  | "note_too_long"
   | "failed";
 
 /** `admin:invalid_value: <patch key> …` → the profile edit's code for that field. */
@@ -52,6 +62,20 @@ const PREFIXED_CODES: Record<string, AdminActionError> = {
   // The BR-15 detector refusing the audit details: the only free text an A-4..A-9 action puts
   // there is a name (member.update before/after), e.g. a name shaped like a phone.
   "audit:sensitive_details": "invalid_name",
+  // Leave and rejoin functions (20261005100400_membership_lifecycle.sql).
+  "membership:forbidden": "forbidden",
+  "membership:not_found": "not_found",
+  "membership:self_target": "self_target",
+  "membership:not_active": "not_active",
+  "membership:role_held": "role_held",
+  "membership:reason_required": "reason_required",
+  "membership:reason_too_long": "reason_too_long",
+  "membership:invalid_date": "invalid_date",
+  "membership:not_former": "not_former",
+  "membership:register_closed": "register_closed",
+  "membership:no_login": "no_login",
+  "membership:invalid_channel": "invalid_channel",
+  "membership:note_too_long": "note_too_long",
 };
 
 /**

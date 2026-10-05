@@ -40,7 +40,8 @@ first, then the server layer, then the screens.
 - D-A: which current admins become the two superadmins (needed by T27 runbook).
 - D-B: fields of the llibre de socis export, DNI or not (T9b). **Decided 2026-10-05 by the user:
   with DNI** (member number, names, DNI/NIE, first sign-up, current sign-up, leave date, left by).
-- D-C: language of the leave/rejoin e-mails; no locale is stored (T10).
+- D-C: language of the leave/rejoin e-mails; no locale is stored (T10). **Decided 2026-10-05 by
+  the user: always Catalan** (no `preferred_locale` column).
 - D-D: A-11 on a former member; proposal superadmin only (T7/T9a). T9a enforces the proposal,
   provisionally, in one place: `admin_member_data_former_min_role()` = `'superadmin'`.
 - D-E: confirm A-7 checklist and minimum reason lengths, 5 for leave and 10 for reveal (T6/T7).
@@ -80,7 +81,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T7b — Lock down DNI/phone ciphertext (correction from the T7 verification): drop `admins_select_all` and `member_badges_admins_select_all`, `get_all_members_for_admin` service-role only (guarded server callers use the admin client), remove the public `getAllMembers` action, bind ciphertext to its member with AES-GCM AAD (`v2:` format, legacy fallback until prod is re-encrypted) + re-encryption script, BR-15 detector v3, e2e teardown demotes before deleting — route: delegated (writer trigger: migration + encryption module + 6+ callers and tests)
 - [x] T9a — Export functions + routes: members CSV, member data (A-10, A-11) — route: delegated (writer trigger: migration + lib + 2 routes + 6 test files)
 - [x] T9b — Export functions + routes: e-mail lists, llibre de socis (A-16, S-4), A-11 reason for a former member (T9a verification), POST + Origin for every export, T7b follow-ups — route: delegated (writer trigger: migration + lib + 4 routes + 10 test files)
-- [ ] T10 — Mail module (`src/lib/mail/`) + leave/rejoin actions + templates — route: delegated
+- [x] T10 — Mail module (`src/lib/mail/`) + leave/rejoin actions + templates — route: delegated (writer trigger: mail module + templates + 2 action files + contact refactor + 6 test files)
 - [x] T11a — Server actions A-4, A-5, A-8, A-9 — route: delegated (writer trigger: actions + error module + 3 test files)
 - [ ] T11b — Server actions A-15, roles (S-1, S-2), anonymise (S-3) — route: delegated
 - [ ] T12 — `run_retention()` + `/api/cron/retention` + workflow (dry run first) — route: delegated
@@ -1112,6 +1113,134 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   returns `awardedAt` (the A-8 dialog shows "Ja la té des del …"). No i18n texts added.
 - Prod risk: none beyond runbooks 6 and 8 (functions and ciphertext guard must be live).
 
+### T10 — done (route: delegated)
+
+- Commit: `feat(admin): Add leave and rejoin actions with membership e-mails` on `develop-users`
+  (hash in `git log -- src/lib/admin/membership-actions.ts`).
+- Test-first: RED observed with `tests/lib/admin-action-errors.test.ts` (new membership block,
+  14 failing), `tests/lib/mail.test.ts`, `tests/lib/mail-membership-templates.test.ts`,
+  `tests/server/actions/membership-actions.test.ts` and `tests/server/actions/leave-actions.test.ts`
+  (all four failed to import the missing modules); GREEN after (296/296 with the contact and
+  T11a action tests). `tests/integration/membership-actions.test.ts` was written right after the
+  code and passed on its first run (8/8).
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 78 files /
+  1152 tests passed; `npm run test:integration` 25 files / 480 tests passed;
+  `npx playwright test e2e/forms/contact.spec.ts` 10 passed (incl. setup/teardown).
+- `src/lib/mail/` (`server-only`): `index.ts` holds the Workspace SMTP transport (moved verbatim
+  from the contact route: `smtp.gmail.com:465`, TLS, timeouts 5 s / 5 s / 15 s, created once at
+  import), `SENDER_EMAIL`, `CONTACT_EMAIL` and `sendMail(message, { logTag }): Promise<{ ok: true }
+  | { ok: false; code: string | null }>`; `message = { to, subject, text?, html?, replyTo?,
+  fromName? }` (text or html required; sender `"<fromName>" <no-reply@darkstone.cat>`, default
+  name "Darkstone Catalunya"). Never throws; on failure logs only `[<logTag>] SMTP error { code,
+  responseCode, command }`. `html.ts`: `escapeHtml` (same function the route had).
+- Contact route refactor: uses `sendMail` with `fromName: "Web [darkstone.cat]"`, `logTag:
+  "contact"` and the shared `escapeHtml`; same message, same `[contact] SMTP error` log, same
+  500 `send_failed`. `tests/server/api/contact.test.ts` passes unchanged (its `nodemailer` mock
+  applies to the module the route now imports). Only difference: a thrown non-object (string,
+  null) no longer crashes the catch block.
+- `src/lib/mail/templates/membership.ts` (pure): `boardLeaveEmail({ firstName, memberNumber,
+  leftOn, reason })`, `rejoinEmail({ firstName, memberNumber })` → `{ subject, text, html }`.
+  Catalan only (D-C). Every interpolation is HTML-escaped; the reason keeps its line breaks
+  (`<br />`). No DNI/phone input. **No self-leave e-mail**: the spec (M-1) defines none.
+- `src/lib/admin/membership-actions.ts` (`"use server"`), same pattern as T11a
+  (`getAdminAccess('board')` first, UUID check → `invalid`, session client only, logs only
+  `[admin-member] <action> failed code=<Postgres code>`; the e-mail address, name and reason are
+  never logged):
+  - `leaveMember(memberId: string, reason: string, leftOn?: string | null): Promise<{ ok: true;
+    emailSent: boolean } | { error }>` (A-6). Reason trimmed: missing/blank → `reason_required`,
+    not a string → `invalid`, > 500 code points → `reason_too_long`, all before the DB; the
+    minimum (5) is left to the DB. `leftOn` omitted/null/"" → NULL (Madrid today in the DB); a
+    real `YYYY-MM-DD` date otherwise, else `invalid_date` (no DB call). Codes: `unauthenticated,
+    forbidden, invalid, reason_required, reason_too_long, invalid_date, not_found, self_target,
+    not_active, role_held, failed`.
+  - `rejoinMember(memberId: string, channel: 'form' | 'email' | 'in_person' | 'other', note?:
+    string | null): Promise<{ ok: true; emailSent: boolean } | { error }>` (A-7). Unknown channel
+    → `invalid_channel`, note > 500 → `note_too_long`, not a string → `invalid` (no DB call). The
+    note is not in the e-mail. Codes: `unauthenticated, forbidden, invalid, invalid_channel,
+    note_too_long, not_found, not_former, register_closed, no_login, failed`.
+  - Both: after the DB call succeeds, revalidate `/[locale]/admin/members` and
+    `/[locale]/admin/members/[number]` (`page`), then e-mail the returned address (skipped when
+    NULL/empty → `emailSent: false`). An SMTP failure returns `{ ok: true, emailSent: false }`
+    and logs only `[membership-mail] SMTP error { code, responseCode, command }`: the change is
+    never rolled back or hidden. T20 must show a "the e-mail could not be sent" notice when
+    `emailSent` is false (the board then writes to the member by hand).
+- `src/lib/admin/action-context.ts` (`server-only`, not a server action): the guard + UUID step,
+  the failure log and the revalidation, shared by `member-actions.ts` (T11a, now imports them;
+  behaviour unchanged, its tests pass untouched) and `membership-actions.ts`.
+- `src/lib/profile/leave-actions.ts` (`"use server"`): `leaveAssociation(reason?: string | null):
+  Promise<{ ok: true } | { error: 'unauthenticated' | 'invalid' | 'role_held' | 'not_active' |
+  'reason_too_long' | 'failed' }>` (M-1). Signed-in user required (`getUser`), optional reason
+  (trimmed, > 500 → `reason_too_long`), `member_leave_self`, then `signOutCurrentSession()`
+  (reused unchanged; its result is ignored because the DB already deleted every session, and
+  supabase-js still clears the cookies), then revalidates the admin member pages. No e-mail.
+  `membership:forbidden` → `unauthenticated`; other unexpected codes → `failed`. Logs only
+  `[member-leave] failed code=<Postgres code>`. No UI wired and `deleteAccount` untouched (T26).
+- `src/lib/admin/action-errors.ts`: new codes `self_target, role_held, invalid_date, not_former,
+  register_closed, no_login, invalid_channel, note_too_long`; every `membership:<code>` prefix of
+  T6 maps to the same name (`membership:forbidden` → `forbidden`). Boundary and own-key rules
+  unchanged and tested for the new prefix (`membership:__proto__`, `membership:role_heldX` →
+  `failed`).
+- Integration (`tests/integration/membership-actions.test.ts`, only `createClient`,
+  `revalidatePath` and `@/lib/mail` mocked): member session refused; DB rules mapped
+  (`reason_required`, `invalid_date`, `self_target`, `not_active`, `not_former`); a board leave
+  sets `left_on` = Madrid today / `left_by` board / trimmed reason, writes one `membership.leave`
+  entry with the board actor, e-mails the account address with the reason and the member
+  number, and the password stops working; rejoin with a failing SMTP answers `emailSent: false`,
+  restores the row (same number, new card token), writes one `membership.rejoin` entry with the
+  channel and note, and the old password works again; M-1 refuses a role holder (`role_held`),
+  closes the caller's row with `left_by` self and actor = target, clears the client session and
+  sends nothing.
+- E-mail copy (Catalan, **for the user to review**; the mockups mark both templates as missing,
+  only the rejoin subject comes from the spec). Text version; the HTML version has the same
+  wording with the reason in a blockquote and links for `hola@darkstone.cat`, the profile and
+  the site:
+  - A-6 · subject "Baixa de Darkstone Catalunya":
+    > Hola, {nom}:
+    >
+    > La junta de Darkstone Catalunya t'ha donat de baixa com a soci (número {número}) amb data
+    > {d/m/aaaa}.
+    >
+    > Motiu de la baixa:
+    > {motiu}
+    >
+    > Des d'ara ja no pots entrar a la zona de socis i el teu carnet deixa de ser vàlid. Hem
+    > esborrat el teu telèfon, el codi postal i els usuaris de joc. El registre de soci es
+    > conserva bloquejat durant 3 anys i després es destrueix.
+    >
+    > Si tens dubtes sobre aquesta decisió o vols tornar a ser soci, escriu-nos a
+    > hola@darkstone.cat.
+    >
+    > Darkstone Catalunya
+    > https://www.darkstone.cat
+  - A-7 · subject "Tornes a ser soci de Darkstone Catalunya":
+    > Hola, {nom}:
+    >
+    > Ens alegra tornar-te a tenir amb nosaltres. La junta t'ha reincorporat com a soci de
+    > Darkstone Catalunya i mantens el mateix número de soci, {número}.
+    >
+    > Pots entrar a la zona de socis amb el mateix correu i la mateixa contrasenya que tenies:
+    > https://www.darkstone.cat/profile
+    >
+    > - Tens un carnet nou a l'apartat «Carnet». L'anterior ja no funciona.
+    > - El butlletí està desactivat. Si el vols rebre, activa'l des del teu perfil.
+    > - El telèfon, el codi postal i els usuaris de joc es van esborrar amb la baixa. Els pots
+    >   tornar a afegir des de «Completa el perfil».
+    >
+    > Si no recordes la contrasenya, la pots recuperar des de la pàgina d'inici de sessió.
+    >
+    > Per a qualsevol dubte, escriu-nos a hola@darkstone.cat.
+    >
+    > Darkstone Catalunya
+    > https://www.darkstone.cat
+- Size: ~1,414 authored lines (about 560 code, 850 tests), over the 400 heuristic; delivery
+  strategy `exception-ok`.
+- Deviations: no self-leave e-mail (spec defines none); blank leave reason refused before the DB
+  (`reason_required`), length minimum still DB-only; the leave/rejoin returns `emailSent` and
+  the M-1 action returns only `{ ok: true }`.
+- Prod risk: needs runbook 5 (T6 functions) and `SMTP_USER`/`SMTP_PASSWORD` in Vercel (already
+  set for the contact form). The "Si no recordes la contrasenya" line relies on recovery
+  working for a reinstated member (T26 neutral reset must allow active members).
+
 ## Next step
 
-T10 / T11b.
+T11b.

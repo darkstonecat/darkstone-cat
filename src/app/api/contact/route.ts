@@ -1,27 +1,8 @@
-import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 import { getClientIp } from "@/lib/client-ip";
 import { isAllowedOrigin } from "@/lib/http/origin";
+import { CONTACT_EMAIL, escapeHtml, sendMail } from "@/lib/mail";
 import { allowRequestShared } from "@/lib/rate-limit";
-
-// Google Workspace SMTP. SMTP_PASSWORD is an app password of SMTP_USER.
-// Timeouts keep a stalled SMTP server from holding the function open: connect and
-// greeting must finish quickly, and the socket may stay idle for at most 15 s.
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-  connectionTimeout: 5_000,
-  greetingTimeout: 5_000,
-  socketTimeout: 15_000,
-});
-
-const SENDER_EMAIL = "no-reply@darkstone.cat";
-const CONTACT_EMAIL = "hola@darkstone.cat";
 
 // --- Limits ---
 const MAX_NAME = 100;
@@ -162,9 +143,10 @@ export async function POST(request: Request) {
     return fail("rate_limited", 429);
   }
 
-  try {
-    await transporter.sendMail({
-      from: `"Web [darkstone.cat]" <${SENDER_EMAIL}>`,
+  // Google Workspace SMTP (src/lib/mail): never throws, logs only code/responseCode/command.
+  const sent = await sendMail(
+    {
+      fromName: "Web [darkstone.cat]",
       to: CONTACT_EMAIL,
       replyTo: email.value,
       subject: `[Formulari Web] ${subject.value}`,
@@ -176,27 +158,10 @@ export async function POST(request: Request) {
         <hr />
         <p>${escapeHtml(message.value).replace(/\n/g, "<br />")}</p>
       `,
-    });
-  } catch (smtpError) {
-    // Log only the diagnostic fields: the error object can carry the recipient, the
-    // sender's address and the full SMTP transcript.
-    const { code, responseCode, command } = smtpError as {
-      code?: unknown;
-      responseCode?: unknown;
-      command?: unknown;
-    };
-    console.error("[contact] SMTP error", { code, responseCode, command });
-    return fail("send_failed", 500);
-  }
+    },
+    { logTag: "contact" }
+  );
+  if (!sent.ok) return fail("send_failed", 500);
 
   return succeed();
-}
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }

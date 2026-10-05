@@ -94,6 +94,51 @@ describe('adminDbErrorCode', () => {
   })
 })
 
+// The T6 leave/rejoin functions (20261005100400_membership_lifecycle.sql) raise `membership:*`.
+describe('adminDbErrorCode · membership prefixes', () => {
+  it.each([
+    ['membership:forbidden: board role required', '42501', 'forbidden'],
+    ['membership:forbidden: a signed-in member is required', '42501', 'forbidden'],
+    ['membership:not_found: unknown member', '22023', 'not_found'],
+    ['membership:self_target: use member_leave_self to leave yourself', '22023', 'self_target'],
+    ['membership:not_active: the member has already left', '22023', 'not_active'],
+    ['membership:role_held: a superadmin must revoke the role before the baixa', '23514', 'role_held'],
+    [
+      'membership:reason_required: a baixa given by the board needs a reason of at least 5 characters',
+      '22023',
+      'reason_required',
+    ],
+    ['membership:reason_too_long: at most 500 characters', '22023', 'reason_too_long'],
+    [
+      'membership:invalid_date: the date cannot be in the future, before the current alta or more than 365 days back',
+      '22023',
+      'invalid_date',
+    ],
+    ['membership:not_former: the member is active', '22023', 'not_former'],
+    [
+      'membership:register_closed: an anonymised or purged record cannot return; the person signs up again',
+      '22023',
+      'register_closed',
+    ],
+    ['membership:no_login: the login account no longer exists; the person signs up again', '22023', 'no_login'],
+    ['membership:invalid_channel: form, email, in_person or other', '22023', 'invalid_channel'],
+    ['membership:note_too_long: at most 500 characters', '22023', 'note_too_long'],
+  ])('maps %s to %s', (message, code, expected) => {
+    expect(adminDbErrorCode(err(message, code))).toBe(expected)
+  })
+
+  it.each([
+    ['membership:not_former2: lookalike', '22023'],
+    ['membership:role_heldX: lookalike', '23514'],
+    ['membership:something_new: added later', '22023'],
+    ['membership:__proto__: lookalike', '22023'],
+    ['membership:constructor: lookalike', '22023'],
+    ['wrapped: membership:no_login: lookalike', '22023'],
+  ])('keeps the boundary and own-key rules: %s is failed', (message, code) => {
+    expect(adminDbErrorCode(err(message, code))).toBe('failed')
+  })
+})
+
 describe('isMemberId', () => {
   it('accepts a UUID in either case', () => {
     expect(isMemberId('0b7c1f2e-3a4d-4e5f-8a9b-0c1d2e3f4a5b')).toBe(true)
