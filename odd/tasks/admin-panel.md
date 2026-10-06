@@ -37,7 +37,9 @@ first, then the server layer, then the screens.
 
 ## Open decisions (owner: user)
 
-- D-A: which current admins become the two superadmins. **Still open**: the runbook (phase 6)
+- D-A: which current admins become the two superadmins. **Decided 2026-10-06 by the user:
+  Rubén Codina and Alba López (president)**; applied on the develop-users database (see
+  "Rollout to the develop-users Supabase project"). Original note: the runbook (phase 6)
   carries placeholders for the two member numbers; M7 cannot be applied until it is decided.
 - D-B: fields of the llibre de socis export, DNI or not (T9b). **Decided 2026-10-05 by the user:
   with DNI** (member number, names, DNI/NIE, first sign-up, current sign-up, leave date, left by).
@@ -2502,10 +2504,19 @@ was Ready before the migrations.
   `member_number_format(1000)` = `000-1000`; migrations head `20261006100400`.
 - Retention dry run (`run_retention(true)`): 0 members to purge, 0 unconfirmed accounts, 0 audit
   rows. `RETENTION_APPLY` not set (the workflow only runs from `main` anyway).
-- Pending: superadmin bootstrap (D-A) and M7 `20261007100000_roles_contract.sql`; the only role
-  holder today is `000-168` (legacy `admin`, treated as board).
+- D-A decided by the user (2026-10-06): the superadmins are Rubén Codina (`000-168`, was legacy
+  `admin`) and Alba López Aliseda (`000-001`, president, was `member`); both active with a
+  confirmed login (unique name matches checked first).
+- Superadmin bootstrap: the phase 6 DO block (atomic) with `000-168`, `000-001` → both
+  `superadmin`, `role_since` stamped, two `role.grant` audit entries (actor Sistema, reason
+  "Superadmin bootstrap (prod runbook, D-A)").
+- M7: `supabase db push --linked` (dry run first) applied `20261007100000_roles_contract.sql`.
+  Check: roles `member=163`, `superadmin=2`, no `admin`; `role_rank('admin')` NULL;
+  `get_all_members_for_admin()` dropped; migrations head `20261007100000`.
+- The pulled Preview env file was deleted from the scratchpad after the re-encryption.
 
 ## Next step
 
-Decide D-A (two superadmins), then bootstrap them and apply M7 on `httvpxakxaycqbagybym`;
-production rollout follows the runbook after merging to `main`.
+The develop-users database is fully migrated. Remaining before production: merge to `main` and
+run the runbook against the production setup; after that, phase 8 (remove the legacy decrypt
+fallback and the `admin` alias in `src/lib/auth/roles.ts`) and apply the CLAUDE.md change list.
