@@ -9,8 +9,8 @@ import { GET } from '@/app/api/profile/calendar/route'
 import type { CalendarPayload } from '@/lib/member-home/month-grid'
 import type { LudoyaSession } from '@/lib/ludoya/types'
 
-function setupAuth(opts: { user?: { id: string } | null; member?: { id: string } | null }) {
-  const maybeSingle = vi.fn().mockResolvedValue({ data: opts.member ?? null })
+function setupAuth(opts: { user?: { id: string } | null; member?: { id: string; left_on?: string | null } | null }) {
+  const maybeSingle = vi.fn().mockResolvedValue({ data: opts.member ? { left_on: null, ...opts.member } : null })
   const eq = vi.fn().mockReturnValue({ maybeSingle })
   const select = vi.fn().mockReturnValue({ eq })
   vi.mocked(createClient).mockResolvedValue({
@@ -51,6 +51,14 @@ describe('GET /api/profile/calendar', () => {
 
     setupAuth({ user: { id: 'u' }, member: null })
     expect((await call('month=2026-10')).status).toBe(404)
+    expect(member.fetchMonthEvents).not.toHaveBeenCalled()
+  })
+
+  it('answers 404 to a former member (left_on set) without reading Ludoya', async () => {
+    setupAuth({ user: { id: 'u' }, member: { id: 'u', left_on: '2026-10-01' } })
+    const res = await call('month=2026-10')
+    expect(res.status).toBe(404)
+    expect(res.headers.get('cache-control')).toBe('no-store')
     expect(member.fetchMonthEvents).not.toHaveBeenCalled()
   })
 

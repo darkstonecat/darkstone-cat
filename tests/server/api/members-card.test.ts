@@ -39,6 +39,7 @@ const member = (token: string) => ({
   member_number: '000-042',
   membership_start_date: '2026-09-14',
   card_token: token,
+  left_on: null,
 })
 
 async function pngSize(res: Response) {
@@ -65,6 +66,14 @@ describe('GET /api/members/card', () => {
     setupMock({ user: { id: 'u1' }, member: null })
     const res = await GET(new Request('http://localhost/api/members/card'))
     expect(res.status).toBe(404)
+  })
+
+  it('returns 404 for a former member (left_on set), without composing a card', async () => {
+    const { select } = setupMock({ user: { id: 'u1' }, member: { ...member(TOKEN_A), left_on: '2026-10-01' } })
+    const res = await GET(new Request('http://localhost/api/members/card'))
+    expect(select.mock.calls[0][0]).toContain('left_on')
+    expect(res.status).toBe(404)
+    expect(composeMemberCard).not.toHaveBeenCalled()
   })
 
   it('reads the card token of the signed-in member and returns a 1011x639 PNG download', async () => {

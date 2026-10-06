@@ -19,8 +19,9 @@ export async function GET(request: Request) {
   } = await supabase.auth.getUser();
   if (!user) return new NextResponse("Unauthorized", { status: 401, headers: noStore });
 
-  const { data: member } = await supabase.from("members").select("id").eq("id", user.id).maybeSingle();
-  if (!member) return new NextResponse("Member not found", { status: 404, headers: noStore });
+  // Former members (left_on set) are not members any more, even with a still-valid access token.
+  const { data: member } = await supabase.from("members").select("id, left_on").eq("id", user.id).maybeSingle();
+  if (!member || member.left_on !== null) return new NextResponse("Member not found", { status: 404, headers: noStore });
 
   const params = new URL(request.url).searchParams;
   const match = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(params.get("month") ?? "");

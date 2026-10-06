@@ -26,11 +26,13 @@ export async function GET(request: Request) {
 
   const { data: member } = await supabase
     .from("members")
-    .select("first_name, last_name, member_number, membership_start_date, card_token")
+    .select("first_name, last_name, member_number, membership_start_date, card_token, left_on")
     .eq("id", user.id)
     .single();
 
-  if (!member) {
+  // A former member has no valid card (BR-4). Their access token can outlive the leave by up to
+  // an hour, so the row's state decides, not the session.
+  if (!member || member.left_on !== null) {
     return new Response("Member not found", { status: 404 });
   }
 
