@@ -5,6 +5,7 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, values?: Record<string, unknown>) =>
     values ? `${key}:${JSON.stringify(values)}` : key,
 }))
+vi.mock('@/lib/admin/membership-actions', () => ({ leaveMember: vi.fn(), rejoinMember: vi.fn() }))
 vi.mock('@/lib/admin/member-actions', () => ({ updateMember: vi.fn(), revealSensitive: vi.fn() }))
 vi.mock('@/i18n/routing', () => ({
   useRouter: () => ({ refresh: vi.fn() }),
@@ -89,7 +90,7 @@ const entry = (over: Partial<AdminActivityRow> = {}): AdminActivityRow => ({
 })
 
 const render_ = (member: AdminMemberFileRow, over: Partial<React.ComponentProps<typeof MemberFile>> = {}) =>
-  render(<MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} {...over} />)
+  render(<MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} viewerId="viewer" {...over} />)
 
 describe('MemberFile, active member', () => {
   it('shows header, contact data, masked DNI and phone, badges and card', () => {
@@ -130,7 +131,7 @@ describe('MemberFile, active member', () => {
   it('renders the export button only when the viewer may export', () => {
     const { rerender } = render_(active)
     expect(screen.getByRole('button', { name: 'button' })).toBeInTheDocument()
-    rerender(<MemberFile member={active} activity={[]} backHref="/admin/members" canExportData={false} canRevealFormerDni={false} />)
+    rerender(<MemberFile member={active} activity={[]} backHref="/admin/members" canExportData={false} canRevealFormerDni={false} viewerId="viewer" />)
     expect(screen.queryByRole('button', { name: 'button' })).not.toBeInTheDocument()
   })
 
@@ -206,5 +207,15 @@ describe('MemberFile, former member', () => {
   it('has no edit button on a former member', () => {
     render_(former, { canRevealFormerDni: true })
     expect(screen.queryByRole('button', { name: 'open' })).not.toBeInTheDocument()
+  })
+
+  it('shows Reincorpora (not Dona de baixa) on a former member, and the reverse on an active one', () => {
+    const { unmount } = render_(former)
+    expect(screen.getByRole('button', { name: 'rejoin_button' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'leave_button' })).not.toBeInTheDocument()
+    unmount()
+    render_(active)
+    expect(screen.getByRole('button', { name: 'leave_button' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'rejoin_button' })).not.toBeInTheDocument()
   })
 })

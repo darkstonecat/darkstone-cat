@@ -89,6 +89,12 @@ describe('admin member file page', () => {
     expect(element.props.canExportData).toBe(true)
   })
 
+  it('passes the signed-in id so the file can block a self-baixa', async () => {
+    session({ member: [member()] })
+    const element: any = await render('000-203')
+    expect(element.props.viewerId).toBe('u1')
+  })
+
   it('lets only a superadmin reveal a former member\'s DNI', async () => {
     session({ member: [member({ state: 'former' })] })
     let element: any = await render('000-203')

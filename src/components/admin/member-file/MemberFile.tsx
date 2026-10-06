@@ -15,6 +15,7 @@ import Notice from "../Notice";
 import StatusChip from "../StatusChip";
 import { Field } from "./Field";
 import MemberDataExport from "./MemberDataExport";
+import MembershipActions from "./MembershipActions";
 import PersonalDataCard from "./PersonalDataCard";
 
 const NO_VALUE = "—";
@@ -28,6 +29,8 @@ type MemberFileProps = {
   canExportData: boolean;
   /** Former member's DNI can only be revealed by a superadmin (D-E, provisional). */
   canRevealFormerDni: boolean;
+  /** Id of the signed-in board member: their own file cannot be given a baixa (`self_target`). */
+  viewerId: string;
 };
 
 const CARD = "rounded-2xl bg-brand-white p-5 md:p-8";
@@ -35,10 +38,11 @@ const CARD = "rounded-2xl bg-brand-white p-5 md:p-8";
 /**
  * V-3 read-only member file. Active members show their contact data; for a former member the
  * RPC already nulls everything BR-20 deletes, and this component never renders a placeholder
- * for those fields. DNI and phone are only ever "present or not" (the reveal is T19+). The edit,
- * leave/rejoin, badge, card, role and access-link buttons are omitted until T19-T22 wire them.
+ * for those fields. DNI and phone are only ever "present or not" (revealed on demand). Edit and reveal
+ * live in `PersonalDataCard`, leave/rejoin in `MembershipActions`; the badge, card, role and
+ * access-link buttons are omitted until T21-T22 wire them.
  */
-export default function MemberFile({ member, activity, backHref, canExportData, canRevealFormerDni }: MemberFileProps) {
+export default function MemberFile({ member, activity, backHref, canExportData, canRevealFormerDni, viewerId }: MemberFileProps) {
   const t = useTranslations("admin.member_file");
   const tAdmin = useTranslations("admin");
   const former = member.state === "former";
@@ -86,6 +90,7 @@ export default function MemberFile({ member, activity, backHref, canExportData, 
             />
           )}
         </div>
+        <MembershipActions member={member} isSelf={viewerId === member.id} />
       </header>
 
       {former && (

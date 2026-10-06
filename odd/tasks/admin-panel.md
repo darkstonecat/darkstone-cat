@@ -97,7 +97,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T17 — V-2 dialogs (A-10, A-16, S-4) — route: delegated
 - [x] T18 — V-3 member file, read-only — route: delegated
 - [x] T19 — V-3 edit mode + reveal (A-4, A-5) — route: delegated
-- [ ] T20 — V-3 leave/rejoin dialogs (A-6, A-7) — route: delegated
+- [x] T20 — V-3 leave/rejoin dialogs (A-6, A-7) — route: delegated
 - [ ] T21 — V-3 badges, card, member data, access link (A-8, A-9, A-11, A-15) — route: delegated
 - [ ] T22 — V-3 role card + S-3, V-5 roles — route: delegated
 - [ ] T23 — Audit renderer + V-4 activity — route: delegated
@@ -1790,6 +1790,36 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Messages added under `admin.member_file`: `edit`, `reveal`, `errors`, `reveal_former_note`
   (T20 adds `leave`, `rejoin`).
 
+### T20 — done (route: delegated)
+
+- Commit: `feat(admin): Add the leave and rejoin dialogs` on `develop-users` (hash in
+  `git log -- src/components/admin/member-file/MembershipActions.tsx`).
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 99 files /
+  1466 tests passed; `npm run test:integration` 29 files / 521 tests passed;
+  `npx playwright test e2e/admin` 42 passed (incl. `member-membership.spec.ts`).
+- `MembershipActions` (client, in the file header): active member: "Dona de baixa" (danger
+  `ReasonButton`, disabled with visible text when the member holds a board role (`role_held`
+  rule, BR-12) or it is the signed-in member's own file (`viewerId`, `self_target`)); dialog:
+  P-2 link, `reason` slot (min 5, max 500, help "El soci el rebrà per correu"), "Què passarà"
+  list, date input defaulting to today in Madrid with `min`/`max` from `leaveDateBounds`
+  (`src/lib/admin/leave-dates.ts`: <= today, not before the current alta, <= 365 days back; an
+  out-of-range value disables the confirm; the DB validates too). Former member: "Reincorpora"
+  (primary `ReasonButton`, disabled for anonymised / no login); dialog: P-1 link, amber warning
+  with date and reason when the last baixa was given by the board, the 4-item checklist (all
+  required), channel radio group (form/email/in_person/other, required), optional note in a plain
+  textarea, "Què passarà" list. Outcome notice (`role=status`) lives in `MembershipActions`, so it
+  survives the `router.refresh()`; `emailSent === false` adds a warning telling the board to write
+  to the member by hand. Every code maps to `admin.member_file.errors.*`.
+- Deviations: the mockup's rejoin list says "avui (d/m/yyyy)" and the leave help names the
+  default date; both say only "avui" (no date formatting on the client); channel is a radio group
+  as in the mockup (the task text said select). The leave date input is always sent (pre-filled).
+- Tests: `MembershipActions.test.tsx` (disabled states with reasons, reason minimum, date bound,
+  checklist and channel gating, board-leave warning, `emailSent=false` notice, error mapping),
+  `admin-leave-dates.test.ts`, `MemberFile.test.tsx` (trigger per state),
+  `admin-member-page.test.ts` (`viewerId`), `e2e/admin/member-membership.spec.ts` (leave, then
+  rejoin a throwaway member; the file switches Actiu -> Baixa -> Actiu).
+- Messages added under `admin.member_file.membership` (ca/es/en).
+
 ## Next step
 
-T20.
+T21.
