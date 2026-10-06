@@ -2475,6 +2475,37 @@ delivery, no PR slicing):
   Findings: the two minor UX items in follow-up 7. Not covered manually: Safari clipboard,
   mobile layout, the member-side leave flow (covered by e2e).
 
+## Rollout to the develop-users Supabase project (2026-10-06)
+
+The user confirmed that `httvpxakxaycqbagybym` is not production (only `develop-users` uses it)
+and authorised applying everything autonomously with the existing Supabase CLI link and the
+Vercel Preview env. develop-users was pushed (`ba003f9..7b2211a`) and the Preview deployment
+was Ready before the migrations.
+
+- Phase 1 checks: `members_id_fkey` and `admins_update_all` present; `member_number_seq` 169 =
+  max member number `000-169`; 165 members (1 `admin`, 164 members); postgres holds
+  UPDATE/DELETE on `auth.users`/`auth.sessions`/`auth.refresh_tokens`; 164 legacy DNI + 164
+  legacy phone ciphertexts.
+- Migrations: `supabase db push --linked` (dry run first) applied the 15 files
+  `20261005100000` … `20261006100400` in order, each in its own transaction and recorded in
+  `supabase_migrations.schema_migrations`. M7 was held back (moved out of the folder for the
+  push and restored) because it needs two superadmins.
+- Re-encryption (`scripts/reencrypt-member-secrets.mjs` with the Preview env): dry run
+  `legacy=328 errors=0 duplicates=0` (exit 0) → apply `reencrypted=328` (exit 0) → dry run
+  `already_v2=328 legacy=0` (exit 0).
+- Post checks: policies `members_select_own`, `members_update_own`, `member_badges_select_own`,
+  `audit_log_board_select`; FK dropped; triggers `members_role_guard`, `members_role_delete_guard`,
+  `members_ciphertext_guard`, `audit_log_append_only`, `audit_log_no_truncate`,
+  `on_auth_user_created`, `on_auth_user_deleted`; authenticated cannot execute
+  `get_all_members_for_admin`, can execute `admin_list_members`; anon cannot execute
+  `run_retention`; authenticated UPDATE limited to the 8 profile columns; 0 unbound ciphertexts;
+  `member_number_format(1000)` = `000-1000`; migrations head `20261006100400`.
+- Retention dry run (`run_retention(true)`): 0 members to purge, 0 unconfirmed accounts, 0 audit
+  rows. `RETENTION_APPLY` not set (the workflow only runs from `main` anyway).
+- Pending: superadmin bootstrap (D-A) and M7 `20261007100000_roles_contract.sql`; the only role
+  holder today is `000-168` (legacy `admin`, treated as board).
+
 ## Next step
 
-Feature closed. Next: decide D-A, then run the prod runbook after merging to `main`.
+Decide D-A (two superadmins), then bootstrap them and apply M7 on `httvpxakxaycqbagybym`;
+production rollout follows the runbook after merging to `main`.
