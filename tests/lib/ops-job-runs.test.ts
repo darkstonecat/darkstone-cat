@@ -86,26 +86,31 @@ describe("recordAutomaticRuns", () => {
 });
 
 describe("recordManualRuns", () => {
-  it("records with the given session client through admin_record_job_run", async () => {
-    const sessionRpc = vi.fn().mockResolvedValue({ data: 1, error: null });
+  it("records with the service role and the verified actor through ops_record_manual_job_run", async () => {
+    await recordManualRuns("actor-id", results);
 
-    await recordManualRuns({ rpc: sessionRpc }, results);
-
-    expect(adminRpc).not.toHaveBeenCalled();
-    expect(sessionRpc).toHaveBeenCalledTimes(2);
-    expect(sessionRpc).toHaveBeenCalledWith("admin_record_job_run", {
+    expect(adminRpc).toHaveBeenCalledTimes(2);
+    expect(adminRpc).toHaveBeenCalledWith("ops_record_manual_job_run", {
       p_job: "bgg",
       p_ok: false,
       p_duration_ms: 30000,
       p_error_code: "timeout",
+      p_actor: "actor-id",
     });
   });
 
   it("never throws on a refused write", async () => {
-    const sessionRpc = vi.fn().mockResolvedValue({ data: null, error: { code: "42501", message: "ops:forbidden: board role required" } });
+    adminRpc.mockResolvedValue({ data: null, error: { code: "42501", message: "ops:forbidden: the actor must be an active board member" } });
 
-    await expect(recordManualRuns({ rpc: sessionRpc }, results)).resolves.toBeUndefined();
+    await expect(recordManualRuns("actor-id", results)).resolves.toBeUndefined();
     expect(output()).toContain("code=42501");
-    expect(output()).not.toContain("board role required");
+    expect(output()).not.toContain("active board member");
+  });
+
+  it("never throws when the client cannot be created", async () => {
+    adminRpc.mockRejectedValue(new Error("fetch failed"));
+
+    await expect(recordManualRuns("actor-id", results)).resolves.toBeUndefined();
+    expect(output()).toContain("code=exception");
   });
 });

@@ -47,12 +47,14 @@ const auto = (job: string, ok: boolean, duration: number | null, code: string | 
     p_error_code: code,
   })
 
-const manual = (client: SupabaseClient, job: string, ok: boolean, duration: number | null, code: string | null = null) =>
-  client.rpc('admin_record_job_run', {
+// Manual runs are recorded by the server: service role + the verified actor.
+const manual = (job: string, ok: boolean, duration: number | null, code: string | null = null, actor: string = users.board.id) =>
+  supabaseAdmin.rpc('ops_record_manual_job_run', {
     p_job: job,
     p_ok: ok,
     p_duration_ms: duration,
     p_error_code: code,
+    p_actor: actor,
   })
 
 async function status(client: SupabaseClient = clients.board) {
@@ -124,13 +126,29 @@ describe('ops_job_runs grants', () => {
     expect(await rows('ludoya')).toHaveLength(0)
   })
 
-  it('admin_record_job_run refuses anon, a member and the service role', async () => {
-    const asMember = await manual(clients.member, 'ludoya', true, 1)
+  it('a board member cannot record a run themselves any more', async () => {
+    // The old admin_record_job_run is gone; the new function is not executable by API users.
+    for (const client of [anon, clients.member, clients.board]) {
+      const old = await client.rpc('admin_record_job_run', { p_job: 'ludoya', p_ok: true, p_duration_ms: 1, p_error_code: null })
+      expect(old.error).not.toBeNull()
+      const fake = await client.rpc('ops_record_manual_job_run', {
+        p_job: 'ludoya',
+        p_ok: true,
+        p_duration_ms: 1,
+        p_error_code: null,
+        p_actor: users.board.id,
+      })
+      expect(fake.error?.code).toBe('42501')
+    }
+    expect(await rows('ludoya')).toHaveLength(0)
+  })
+
+  it('ops_record_manual_job_run refuses an actor that is not an active board member', async () => {
+    const asMember = await manual('ludoya', true, 1, null, users.member.id)
     expect(asMember.error?.code).toBe('42501')
     expect(asMember.error?.message).toMatch(/^ops:forbidden/)
-
-    expect((await manual(anon, 'ludoya', true, 1)).error?.code).toBe('42501')
-    expect((await manual(supabaseAdmin, 'ludoya', true, 1)).error?.code).toBe('42501')
+    const unknown = await manual('ludoya', true, 1, null, '00000000-0000-0000-0000-000000000000')
+    expect(unknown.error?.code).toBe('42501')
     expect(await rows('ludoya')).toHaveLength(0)
   })
 
@@ -158,7 +176,7 @@ describe('recording runs', () => {
       expect(error?.code, `${job} ${ok} ${duration} ${code}`).toBe('22023')
       expect(error?.message).toMatch(/^ops:invalid_argument/)
     }
-    const boardBad = await manual(clients.board, 'nope', true, 1)
+    const boardBad = await manual('nope', true, 1)
     expect(boardBad.error?.message).toMatch(/^ops:invalid_argument/)
     expect(await rows('ludoya')).toHaveLength(0)
   })
@@ -166,7 +184,7 @@ describe('recording runs', () => {
   it('an automatic run has no actor; a manual run records the caller', async () => {
     const a = await auto('ludoya', true, 2100)
     expect(a.error).toBeNull()
-    const m = await manual(clients.board, 'ludoya', false, 30000, 'timeout')
+    const m = await manual('ludoya', false, 30000, 'timeout')
     expect(m.error).toBeNull()
 
     const saved = await rows('ludoya')

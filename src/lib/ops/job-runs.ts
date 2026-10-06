@@ -4,8 +4,9 @@
 // One public.ops_job_runs row per job run (supabase/migrations/20261006100200_ops_job_runs.sql),
 // written only through its functions:
 //   - automatic runs (/api/cron/refresh): `ops_record_job_run` with the service role, no actor;
-//   - manual runs (A-14, `refreshCaches`): `admin_record_job_run` with the board member's
-//     SESSION client, so the database takes the actor from auth.uid().
+//   - manual runs (A-14, `refreshCaches`): `ops_record_manual_job_run` with the service role and
+//     the actor id that `getAdminAccess` verified (20261006100300: no API user can write the
+//     history themselves, and the database refuses an actor that is not an active board member).
 // Recording is best effort: it never throws and never changes the refresh outcome. A failure
 // logs one line with the job name and the Postgres code only.
 
@@ -34,12 +35,17 @@ function runArgs(result: RunResult) {
   return { p_job: result.name, p_ok: result.ok, p_duration_ms: duration, p_error_code: code };
 }
 
-async function recordRuns(client: RpcClient, fn: string, results: RunResult[]): Promise<void> {
+async function recordRuns(
+  client: RpcClient,
+  fn: string,
+  results: RunResult[],
+  extra: Record<string, unknown> = {}
+): Promise<void> {
   for (const result of results) {
     if (!RECORDED_JOBS.has(result.name)) continue;
     let code: string | null | undefined;
     try {
-      const { error } = await client.rpc(fn, runArgs(result));
+      const { error } = await client.rpc(fn, { ...runArgs(result), ...extra });
       if (!error) continue;
       code = error.code || "unknown";
     } catch {
@@ -58,7 +64,13 @@ export async function recordAutomaticRuns(results: RunResult[]): Promise<void> {
   }
 }
 
-/** Manual runs from the panel; `client` is the board member's session client. Never throws. */
-export async function recordManualRuns(client: RpcClient, results: RunResult[]): Promise<void> {
-  await recordRuns(client, "admin_record_job_run", results);
+/** Manual runs from the panel, attributed to `actorId` (verified by the caller). Never throws. */
+export async function recordManualRuns(actorId: string, results: RunResult[]): Promise<void> {
+  try {
+    await recordRuns(createAdminClient() as unknown as RpcClient, "ops_record_manual_job_run", results, {
+      p_actor: actorId,
+    });
+  } catch {
+    console.error("[ops] record_job_run failed job=all code=client");
+  }
 }

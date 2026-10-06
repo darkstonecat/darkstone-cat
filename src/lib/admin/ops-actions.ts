@@ -5,7 +5,7 @@ import { getAdminAccess } from "@/lib/admin/guard";
 import { createClient } from "@/lib/supabase/server";
 import { allowRequestShared } from "@/lib/rate-limit";
 import { REFRESH_JOBS, runRefreshJobs } from "@/lib/cache-refresh";
-import { recordManualRuns, type RpcClient } from "@/lib/ops/job-runs";
+import { recordManualRuns } from "@/lib/ops/job-runs";
 import type { AdminActionError } from "@/lib/admin/action-errors";
 
 /*
@@ -17,9 +17,10 @@ import type { AdminActionError } from "@/lib/admin/action-errors";
  *   3. One manual refresh per board member per minute, shared by every instance (bucket
  *      `cache-refresh:<actor uuid>`), so repeated clicks do not hammer Ludoya or BGG.
  *   4. Run the selected jobs (a failing job never stops the other).
- *   5. Record each run in ops_job_runs with the SESSION client (`admin_record_job_run`: the
- *      database takes the actor from auth.uid()). Best effort, logged only.
- *   6. One `ops.cache_refresh` audit entry with `{"jobs":[…],"ok":bool}` (job names and a
+ *   5. Record each run in ops_job_runs through the service role (`ops_record_manual_job_run`)
+ *      with the actor id verified in step 1: no API user can write the history themselves.
+ *      Best effort, logged only.
+ *   6. One `ops.cache_refresh` audit entry (SESSION client) with `{"jobs":[…],"ok":bool}` (job names and a
  *      boolean: BR-15-safe). It is written after the run because it records the result. If it
  *      fails, the refresh has already happened and is harmless, so the results are still
  *      returned and only the Postgres code is logged.
@@ -55,8 +56,9 @@ export async function refreshCaches(
   const selected = REFRESH_JOBS.filter((j) => job === "all" || j.name === job);
   const runs = await runRefreshJobs(selected);
 
+  await recordManualRuns(access.actor.id, runs);
+
   const supabase = await createClient();
-  await recordManualRuns(supabase as unknown as RpcClient, runs);
 
   const logged = await supabase.rpc("log_admin_event", {
     p_action: "ops.cache_refresh",

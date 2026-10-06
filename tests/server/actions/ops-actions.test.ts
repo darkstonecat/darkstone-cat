@@ -48,7 +48,7 @@ vi.mock('@/lib/cache-refresh', () => ({
   runRefreshJobs: async (jobs: { name: string }[]) => (db.steps.push('refresh'), db.runRefreshJobs(jobs)),
 }))
 vi.mock('@/lib/ops/job-runs', () => ({
-  recordManualRuns: async (client: unknown, results: unknown) => (db.steps.push('record'), db.recordManualRuns(client, results)),
+  recordManualRuns: async (actorId: unknown, results: unknown) => (db.steps.push('record'), db.recordManualRuns(actorId, results)),
 }))
 
 import { refreshCaches } from '@/lib/admin/ops-actions'
@@ -123,7 +123,7 @@ describe('refreshCaches run', () => {
     })
     expect(db.steps).toEqual(['guard', 'limit', 'refresh', 'record', 'session:log_admin_event'])
     expect(db.runRefreshJobs.mock.calls[0][0].map((j: { name: string }) => j.name)).toEqual(['ludoya', 'bgg'])
-    expect(db.recordManualRuns).toHaveBeenCalledWith(db.session, OK_RESULTS)
+    expect(db.recordManualRuns).toHaveBeenCalledWith('actor-id', OK_RESULTS)
     expect(db.sessionRpc).toHaveBeenCalledWith('log_admin_event', {
       p_action: 'ops.cache_refresh',
       p_target: null,
