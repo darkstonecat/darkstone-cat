@@ -22,7 +22,8 @@
     "admin_members": "Members",
     "admin_procedures": "Procedures",
     "admin_roles": "Roles",
-    "admin_activity": "Activity log"
+    "admin_activity": "Activity log",
+    "admin_tools": "Tools"
   },
   "hero": {
     "tagline": "Board Games & RPG in Terrassa",
@@ -394,6 +395,8 @@
     "admin_roles_description": "Who is on the board and who is a superadmin at Darkstone Catalunya.",
     "admin_activity_title": "Activity log — Administration",
     "admin_activity_description": "Activity log of the Darkstone Catalunya administration.",
+    "admin_tools_title": "Tools — Administration",
+    "admin_tools_description": "Event images and cache refresh.",
     "data_protection_title": "Data protection policy",
     "data_protection_description": "Personal data protection policy of Darkstone Catalunya. Information about the data controller, GDPR rights, legal basis and data communication."
   },
@@ -599,6 +602,7 @@
   "event_images": {
     "title": "Event Images",
     "subtitle": "Generate and download images to share for events.",
+    "back": "Back to Tools",
     "regular_title": "Regular Sessions",
     "special_title": "Special Events",
     "view_image": "View image",
@@ -1584,6 +1588,37 @@
         "ludoya": "Ludoya",
         "bgg": "BGG"
       }
+    },
+    "tools": {
+      "events_title": "Event images",
+      "events_text": "Generate and download the shareable images for upcoming events.",
+      "events_open": "Open the tool",
+      "cache_title": "Cache",
+      "cache_intro": "Ludoya and library data refresh on their own twice a day. Do it by hand if you have just changed something.",
+      "cache_footnote": "Every refresh is recorded in the activity log.",
+      "job_ludoya": "Ludoya (sessions and events)",
+      "job_bgg": "Library (BGG)",
+      "refresh_job": "Refresh now",
+      "refresh_all": "Refresh everything",
+      "refreshing": "Refreshing…",
+      "run_ok": "Success",
+      "run_failed": "Error",
+      "never_run": "Not run yet.",
+      "status_unavailable": "The status could not be loaded.",
+      "status_error": "The refresh status could not be loaded. You can still refresh.",
+      "run_automatic": "automatic",
+      "run_manual_unknown": "manual",
+      "duration": "{seconds} s",
+      "error_code": "code: {code}",
+      "last_success": "Last successful run:",
+      "no_success": "No successful run recorded.",
+      "result_title": "Refresh result",
+      "result_ok": "{job}: success ({seconds} s)",
+      "result_failed": "{job}: error ({code})",
+      "error_rate_limited": "You already refreshed less than a minute ago. Wait a moment and try again.",
+      "error_forbidden": "You are not allowed to do this.",
+      "error_unauthenticated": "Your session has expired. Sign in again.",
+      "error_generic": "The refresh failed. Try again."
     },
     "overview": {
       "figures_title": "Figures",

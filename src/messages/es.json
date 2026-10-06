@@ -22,7 +22,8 @@
     "admin_members": "Socios",
     "admin_procedures": "Procedimientos",
     "admin_roles": "Roles",
-    "admin_activity": "Registro de actividad"
+    "admin_activity": "Registro de actividad",
+    "admin_tools": "Herramientas"
   },
   "hero": {
     "tagline": "Juegos de Mesa y Rol en Terrassa",
@@ -394,6 +395,8 @@
     "admin_roles_description": "Quién es de la junta y quién es superadmin en Darkstone Catalunya.",
     "admin_activity_title": "Registro de actividad — Administración",
     "admin_activity_description": "Registro de actividad de la administración de Darkstone Catalunya.",
+    "admin_tools_title": "Herramientas — Administración",
+    "admin_tools_description": "Imágenes de eventos y actualización de la caché.",
     "data_protection_title": "Política de protección de datos",
     "data_protection_description": "Política de protección de datos personales de la Asociación Darkstone Catalunya. Información sobre el responsable del tratamiento, derechos RGPD, legitimidad y comunicación de datos."
   },
@@ -599,6 +602,7 @@
   "event_images": {
     "title": "Imágenes de eventos",
     "subtitle": "Genera y descarga imágenes para compartir en los eventos.",
+    "back": "Volver a Herramientas",
     "regular_title": "Sesiones regulares",
     "special_title": "Eventos especiales",
     "view_image": "Ver imagen",
@@ -1584,6 +1588,37 @@
         "ludoya": "Ludoya",
         "bgg": "BGG"
       }
+    },
+    "tools": {
+      "events_title": "Imágenes de eventos",
+      "events_text": "Genera y descarga las imágenes para compartir de los próximos eventos.",
+      "events_open": "Abrir la herramienta",
+      "cache_title": "Caché",
+      "cache_intro": "Los datos de Ludoya y de la ludoteca se actualizan solos dos veces al día. Hazlo a mano si acabas de cambiar algo.",
+      "cache_footnote": "Cada actualización queda en el registro de actividad.",
+      "job_ludoya": "Ludoya (sesiones y eventos)",
+      "job_bgg": "Ludoteca (BGG)",
+      "refresh_job": "Refrescar ahora",
+      "refresh_all": "Refrescarlo todo",
+      "refreshing": "Refrescando…",
+      "run_ok": "Correcto",
+      "run_failed": "Error",
+      "never_run": "Aún no se ha ejecutado.",
+      "status_unavailable": "No se ha podido cargar el estado.",
+      "status_error": "No se ha podido cargar el estado de las actualizaciones. Puedes refrescar igualmente.",
+      "run_automatic": "automática",
+      "run_manual_unknown": "manual",
+      "duration": "{seconds} s",
+      "error_code": "código: {code}",
+      "last_success": "Última ejecución correcta:",
+      "no_success": "Ninguna ejecución correcta registrada.",
+      "result_title": "Resultado de la actualización",
+      "result_ok": "{job}: correcto ({seconds} s)",
+      "result_failed": "{job}: error ({code})",
+      "error_rate_limited": "Ya has refrescado hace menos de un minuto. Espera un poco y vuelve a probar.",
+      "error_forbidden": "No tienes permiso para hacer esto.",
+      "error_unauthenticated": "La sesión ha caducado. Vuelve a entrar.",
+      "error_generic": "No se ha podido actualizar. Vuelve a probar."
     },
     "overview": {
       "figures_title": "Cifras",

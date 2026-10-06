@@ -52,7 +52,6 @@ const SUBPAGE_THEMES: Record<string, { text: string; bg: string }> = {
   "/cookies": { text: "#FAFAF9", bg: "#1C1917" },
   "/faq": { text: "#FAFAF9", bg: "#1C1917" },
   "/events": { text: "#FAFAF9", bg: "#1C1917" },
-  "/events/images": { text: "#FAFAF9", bg: "#1C1917" },
   "/login": { text: "#FAFAF9", bg: "#1C1917" },
   "/register": { text: "#FAFAF9", bg: "#1C1917" },
   "/forgot-password": { text: "#FAFAF9", bg: "#1C1917" },

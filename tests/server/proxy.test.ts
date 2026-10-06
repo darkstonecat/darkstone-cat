@@ -34,7 +34,7 @@ describe('proxy admin protection', () => {
     ['/admin/members/000-001', '/login'],
     ['/es/admin/activity', '/es/login'],
     ['/en/admin/tools/event-images', '/en/login'],
-    ['/events/images', '/login'],
+    ['/admin/tools', '/login'],
   ])('sends an anonymous visitor of %s to %s', async (path, login) => {
     const url = loginRedirect(await visit(path))
     expect(url?.pathname).toBe(login)

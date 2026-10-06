@@ -22,7 +22,8 @@
     "admin_members": "Socis",
     "admin_procedures": "Procediments",
     "admin_roles": "Rols",
-    "admin_activity": "Registre d'activitat"
+    "admin_activity": "Registre d'activitat",
+    "admin_tools": "Eines"
   },
   "hero": {
     "tagline": "Jocs de Taula i Rol a Terrassa",
@@ -394,6 +395,8 @@
     "admin_roles_description": "Qui és de la junta i qui és superadmin a Darkstone Catalunya.",
     "admin_activity_title": "Registre d'activitat — Administració",
     "admin_activity_description": "Registre d'activitat de l'administració de Darkstone Catalunya.",
+    "admin_tools_title": "Eines — Administració",
+    "admin_tools_description": "Imatges d'esdeveniments i actualització de la memòria cau.",
     "data_protection_title": "Política de protecció de dades",
     "data_protection_description": "Política de protecció de dades personals de l'Associació Darkstone Catalunya. Informació sobre el responsable del tractament, drets RGPD, legitimitat i comunicació de dades."
   },
@@ -599,6 +602,7 @@
   "event_images": {
     "title": "Imatges d'esdeveniments",
     "subtitle": "Genera i descarrega imatges per compartir als esdeveniments.",
+    "back": "Torna a Eines",
     "regular_title": "Sessions regulars",
     "special_title": "Esdeveniments especials",
     "view_image": "Veure imatge",
@@ -1584,6 +1588,37 @@
         "ludoya": "Ludoya",
         "bgg": "BGG"
       }
+    },
+    "tools": {
+      "events_title": "Imatges d'esdeveniments",
+      "events_text": "Genera i descarrega les imatges per compartir dels propers esdeveniments.",
+      "events_open": "Obre l'eina",
+      "cache_title": "Memòria cau",
+      "cache_intro": "Les dades de Ludoya i de la ludoteca s'actualitzen soles dues vegades al dia. Fes-ho a mà si acabes de canviar alguna cosa.",
+      "cache_footnote": "Cada actualització queda al registre d'activitat.",
+      "job_ludoya": "Ludoya (sessions i esdeveniments)",
+      "job_bgg": "Ludoteca (BGG)",
+      "refresh_job": "Refresca ara",
+      "refresh_all": "Refresca-ho tot",
+      "refreshing": "Refrescant…",
+      "run_ok": "Correcte",
+      "run_failed": "Error",
+      "never_run": "Encara no s'ha executat.",
+      "status_unavailable": "No s'ha pogut carregar l'estat.",
+      "status_error": "No s'ha pogut carregar l'estat de les actualitzacions. Pots refrescar igualment.",
+      "run_automatic": "automàtica",
+      "run_manual_unknown": "manual",
+      "duration": "{seconds} s",
+      "error_code": "codi: {code}",
+      "last_success": "Última execució correcta:",
+      "no_success": "Cap execució correcta registrada.",
+      "result_title": "Resultat de l'actualització",
+      "result_ok": "{job}: correcte ({seconds} s)",
+      "result_failed": "{job}: error ({code})",
+      "error_rate_limited": "Ja has refrescat fa menys d'un minut. Espera una mica i torna-ho a provar.",
+      "error_forbidden": "No tens permís per fer això.",
+      "error_unauthenticated": "La sessió ha caducat. Torna a entrar.",
+      "error_generic": "No s'ha pogut actualitzar. Torna-ho a provar."
     },
     "overview": {
       "figures_title": "Xifres",

@@ -9,7 +9,7 @@ const PROTECTED_ROUTES = ["/profile", "/profile/details", "/profile/edit", "/pro
 // Prefix match (see matchesRoute): "/admin" covers every admin page in every locale.
 // The proxy only requires a session; pages and API routes check the role with
 // requireRole() / getAdminAccess() from "@/lib/admin/guard".
-const ADMIN_ROUTES = ["/admin", "/events/images"];
+const ADMIN_ROUTES = ["/admin"];
 const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
 
 function stripLocale(pathname: string): string {

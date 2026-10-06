@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures'
 
-// The image route is used only by the admin tool /events/images.
+// The image route is used only by the admin tool /admin/tools/event-images.
 const ROUTE = '/api/events/does-not-exist/image'
 
 test.describe('Event image API access control', () => {

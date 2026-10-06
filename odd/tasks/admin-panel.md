@@ -51,7 +51,8 @@ first, then the server layer, then the screens.
 - D-F: what runs the retention job: GitHub Actions, pg_cron or Vercel cron (T12). **Decided
   2026-10-05 by the user: GitHub Actions** (daily workflow calling `/api/cron/retention` with
   `CRON_SECRET`, like the cache refresh).
-- D-G: path `/admin/tools/event-images` (T25).
+- D-G: path `/admin/tools/event-images` (T25). Implemented provisionally (T25); the redirect lives in
+  `next.config.ts`, so changing the path means editing the page folder, three redirects and the link.
 - D-H: does a backdated leave move the purge date; proposal purge = `left_on` + 3 years (T6/T12).
   T6 also limits a board leave to at most 365 days back (`membership_leave_max_backdate_days()`,
   provisional; the spec only says "never in the future"), and never before the current alta.
@@ -102,7 +103,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T22 — V-3 role card + S-3, V-5 roles — route: delegated
 - [x] T23 — Audit renderer + V-4 activity — route: delegated
 - [x] T24 — V-1 dashboard (replaces AdminDashboard) — route: delegated
-- [ ] T25 — V-6 tools + event images move + 308 redirect — route: delegated
+- [x] T25 — V-6 tools + event images move + 308 redirect — route: delegated
 - [ ] T26 — V-7 member side: M-1 leave dialog, login help, neutral password reset via server action — route: delegated
 - [ ] T27 — M7 `roles_contract` + prod runbook + CLAUDE.md/README — route: delegated
 
@@ -275,6 +276,21 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
     row per job (`select job, ran_at, ok, actor_id, duration_ms, error_code from
     ops_job_runs order by id desc limit 4`, as `postgres`, `actor_id` NULL), and as a board
     member `select * from public.admin_ops_status()` returns the `ludoya` and `bgg` rows.
+
+14. `supabase/migrations/20261006100300_ops_record_actor.sql` (T25, fix of T13). Needs item 13.
+    Apply before (or with) the T25 code: the new code records manual refreshes through
+    `ops_record_manual_job_run`, so without the migration they only log `[ops] record_job_run
+    failed`. It DROPS `admin_record_job_run` (a board member could call it directly with fake
+    ok/error rows) and adds the service-role-only `ops_record_manual_job_run(job, ok, duration_ms,
+    error_code, actor)`, which refuses an actor that is not an active board+ member. If the OLD
+    code is still deployed when you apply it, manual refreshes keep working but are not recorded
+    (the old code calls the dropped function) until the new code ships. After applying, as a board
+    member `select public.ops_record_manual_job_run('ludoya', true, 1, null, auth.uid())` fails
+    with permission denied.
+
+15. `supabase/migrations/20261006100400_activity_hide_names.sql` (T23 fix). Apply any time; it
+    only replaces `admin_list_activity`. After applying, a `member.update` entry about an
+    anonymised or purged member no longer carries `details.changes` (the old names).
 
 ## Progress
 
@@ -1943,6 +1959,19 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   member file tests adapted, `e2e/admin/activity.spec.ts` (A-11 export, "Veure tot" link, group filter,
   empty state, malformed params, member 404).
 
+#### T23 correction (T23/T24 verification, spec 5.3) — commit `fix(admin): Hide past names of anonymised members in the activity log`
+
+- `member.update` audit details keep `changes.first_name/last_name` from/to, and `admin_list_activity`
+  returned `details` verbatim, so the old names of an anonymised member showed in V-4, V-1 and V-3
+  (and any board session could read them from the RPC). Two layers: migration
+  `20261006100400_activity_hide_names.sql` returns `details - 'changes'` when the row has a target that
+  is anonymised, purged or gone; `describeKnown('member.update')` adds the name-change detail only when
+  `target_name !== null`. Tests: `tests/integration/activity-hide-names.test.ts` (active member shows
+  the change; after anonymising, the RPC drops `changes` and no old/new name appears),
+  `tests/lib/audit-format.test.ts` (target_name null, no `detail.change`).
+- Not done: the optional generic sentence for unknown badge keys (`badgeParam` still shows the raw
+  string, max 60 chars).
+
 ### T24 — done (route: delegated)
 
 - Commit: `feat(admin): Rebuild the admin dashboard on admin_stats` on `develop-users` (hash in
@@ -1971,7 +2000,37 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   flags), `e2e/admin/dashboard.spec.ts` rewritten (six figures with numbers, latest activity after an A-11
   export, shortcuts, guards), shared `e2e/helpers/admin-audit.ts`.
 
+### T25 — done (route: delegated)
+
+- Commits: `fix(db): Record manual cache refreshes only through the server`, `feat(admin): Add the tools
+  page and move the event images tool` (hashes in `git log -- supabase/migrations/20261006100300_ops_record_actor.sql`
+  and `git log -- src/components/admin/tools/ToolsContent.tsx`), plus the T23 correction above.
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0 (after deleting the
+  stale `.next-e2e/dev/types/validator.ts` that still imported the removed page); `npm run test:unit`
+  114 files / 1639 tests passed; `npm run test:integration` 30 files / 524 tests passed;
+  `npx playwright test e2e/admin` 56 passed.
+- DB fix: `admin_record_job_run` is dropped; `ops_record_manual_job_run(job, ok, duration_ms, error_code,
+  actor)` is service_role only and raises `ops:forbidden` (42501) for an actor that is not an active board+
+  member. `recordManualRuns(actorId, results)` now records through the service-role client with the actor id
+  `getAdminAccess` verified; `log_admin_event` still uses the SESSION client. `admin_ops_status` unchanged.
+- V-6 `/admin/tools` (`force-dynamic`, `requireRole('board', '/admin/tools')`): `admin_ops_status()` through
+  the SESSION client, parsed by `parseOpsStatus` (`src/lib/admin/ops-status.ts`); failure logs the code only and
+  shows a notice (buttons still work). `ToolsContent` (client): event images card with link, cache card with a
+  status line per job (chip, time via the audit time label, automatic or actor name/number, duration, short error
+  code, last success), "Refresca ara" per job and "Refresca-ho tot", busy state (all buttons disabled), results
+  notice per job, rate-limit/forbidden/unauthenticated/generic messages, `router.refresh()` on success.
+- Deviation from the mockup: buttons read "Refresca ara" / "Refresca-ho tot" (task text) instead of "Actualitza
+  Ludoya"; each is described by its job name. The mockup's design-note hint with the paths is not shipped.
+- Event images tool moved to `/admin/tools/event-images` (D-G, provisional) under the admin layout: new page,
+  old page and `EventImagesHero` deleted (the page renders a back link, `h2` and `EventImagesContent`). `next.config.ts`
+  has 308 redirects for `/events/images`, `/ca/events/images` and `/es|en/events/images`; `/events/images` was
+  removed from the proxy `ADMIN_ROUTES` (redirects run before the proxy) and from the NavBar themes (`/admin/` prefix
+  covers the new path). The image API route stays at `/api/events/[eventId]/image`.
+- Not touched (outside the allowed surface, for T27 docs/cleanup): `scripts/lighthouse/config.mjs` still audits
+  `/events/images` (now an auth redirect), the comment in `src/app/sitemap.ts`, CLAUDE.md and README pages tables.
+- E2E note: the manual refresh test cannot be retried within a minute (per-member limiter), so it has retries off.
+
 
 ## Next step
 
-T25.
+T26.
