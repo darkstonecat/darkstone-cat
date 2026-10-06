@@ -1,4 +1,6 @@
-# CLAUDE.md changes for the admin panel (ready to apply)
+# CLAUDE.md changes for the admin panel (APPLIED)
+
+> Applied to `CLAUDE.md` after re-verifying each item against the code at T28 + the member-header refactor. Adjustments: Lighthouse is 19 pages / 38 audits; e2e is 31 specs; `AdminDialog` and `expectHydrated` gotchas added (22, 23); `src/lib/ops/job-runs.ts` named; `/admin/members`, `/admin/tools/event-images` are `revalidate = false`, the others `force-dynamic` as listed; `resetPasswordForEmail` removed from the client auth-call list; develop-users DB (httvpxakxaycqbagybym) recorded as fully migrated incl. M7. Nothing skipped.
 
 `CLAUDE.md` holds uncommitted work of `zona-socis-mockups-v2`, so the admin panel (T1–T27)
 did not edit it. Apply the changes below once that work is committed. Each item names the
