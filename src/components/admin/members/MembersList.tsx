@@ -13,14 +13,18 @@ import {
   type MemberSortColumn,
   type MembersQuery,
 } from "@/lib/admin/members-list";
+import { listParamFor } from "@/lib/admin/member-file";
 import Notice from "../Notice";
 import StatusChip from "../StatusChip";
 import { adminButtonClass } from "../adminButtons";
 
 const NO_VALUE = "—";
 
-function memberHref(row: AdminMemberListRow) {
-  return `/admin/members/${encodeURIComponent(row.member_number)}`;
+/** Member file link; a non-default list view travels in `?list=` so "back" returns to it. */
+function memberHref(row: AdminMemberListRow, query: MembersQuery) {
+  const base = `/admin/members/${encodeURIComponent(row.member_number)}`;
+  const list = listParamFor(query);
+  return list ? `${base}?list=${encodeURIComponent(list)}` : base;
 }
 
 function fullName(row: AdminMemberListRow) {
@@ -96,7 +100,7 @@ export default function MembersList({ rows, total, query }: MembersListProps) {
             >
               <td className="px-4 py-3 font-mono text-[13px] text-stone-custom/65">
                 <Link
-                  href={memberHref(row)}
+                  href={memberHref(row, query)}
                   className="rounded after:absolute after:inset-0 focus-visible:outline-2 focus-visible:outline-brand-orange"
                 >
                   {row.member_number}
@@ -122,7 +126,7 @@ export default function MembersList({ rows, total, query }: MembersListProps) {
         {rows.map((row) => (
           <li key={row.id}>
             <Link
-              href={memberHref(row)}
+              href={memberHref(row, query)}
               className="flex min-h-11 items-center gap-3 rounded-2xl bg-brand-white p-4 focus-visible:outline-2 focus-visible:outline-brand-orange"
             >
               <div className="flex min-w-0 flex-1 flex-col gap-1.5">

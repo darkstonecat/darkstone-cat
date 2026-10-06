@@ -95,7 +95,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T15 — V-8 procedures — route: delegated
 - [x] T16 — V-2 members list (server search/pagination, mobile cards) — route: delegated
 - [x] T17 — V-2 dialogs (A-10, A-16, S-4) — route: delegated
-- [ ] T18 — V-3 member file, read-only — route: delegated
+- [x] T18 — V-3 member file, read-only — route: delegated
 - [ ] T19 — V-3 edit mode + reveal (A-4, A-5) — route: delegated
 - [ ] T20 — V-3 leave/rejoin dialogs (A-6, A-7) — route: delegated
 - [ ] T21 — V-3 badges, card, member data, access link (A-8, A-9, A-11, A-15) — route: delegated
@@ -1699,6 +1699,59 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   `waitForResponse` header assertions for both lists; S-4 button absent for board). No superadmin
   e2e fixture exists, so the S-4 happy path is covered by component and route tests only.
 
+### T18 — done (route: delegated)
+
+- Commit: `feat(admin): Add the read-only member file` on `develop-users` (hash in
+  `git log -- src/lib/admin/member-file.ts`).
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0 (after deleting two stale
+  generated, gitignored `.next/**/types/validator.ts` files that still pointed at the moved list
+  page); `npm run test:unit` 95 files / 1407 tests passed; `npm run test:integration` 29 files /
+  521 tests passed; `npx playwright test e2e/admin` 40 passed.
+- Route `/admin/members/[number]` (`src/app/[locale]/admin/members/[number]/page.tsx`,
+  `force-dynamic`, noindex, generic title without name or number): number checked with
+  `^[0-9A-Za-z-]{1,32}$` (`isValidMemberNumber`) BEFORE the guard or any DB call (else
+  `notFound()`) -> `requireRole('board', '/admin/members/<n>')` -> `admin_get_member` with the
+  SESSION client -> zero rows or an RPC error -> `notFound()` (error logs the Postgres code only)
+  -> `admin_list_activity({ p_target: id, p_limit: 5 })` (an activity failure logs the code and
+  renders an empty card). `canExportData` = active member, or superadmin (D-D provisional).
+- STRUCTURE CHANGE: the list page and its `loading.tsx` moved to the route group
+  `members/(list)/` (git mv). A `loading.tsx` at `members/` wrapped the `[number]` page in a
+  Suspense boundary, so the status was already committed and `notFound()` answered 200; now the
+  member file is a real 404. URLs are unchanged. CLAUDE.md's Pages table still lists
+  `admin/members/page.tsx` (not edited: WIP from another feature) - T27.
+- UI (`src/components/admin/member-file/`): `MemberFile` (server-compatible) renders, below the
+  layout header (which keeps the "Socis" h1), a card with back link, `h2` name, "Núm. de soci …
+  · Primera alta …", state chip ("Baixa des de d/m/yyyy" for former) and role; the blocked notice
+  "Dades bloquejades fins al {purge_on}" for former members; "Dades personals" (active: e-mail,
+  name, DNI/phone as "•••••• (oculta)" presence only, postal code, Ludoya, BGG, newsletter, login
+  yes/no) or "Dades del registre" (former: only e-mail when present, name, masked DNI, footnote that
+  phone/postal code/usernames were deleted: no placeholders for BR-20 fields); "Pertinença"
+  (primera alta, alta actual, data de baixa; former: baixa per, motiu, "es destrueix el …");
+  "Insígnies" ("Membre {year}" derived from primera alta, BR-6, plus awarded badges with date and
+  awarder); "Carnet" (valid/invalid chip, issued date; former text) with the current role and
+  `role_since` for board roles; "Activitat" (5 entries, link to `/admin/activity?target=<number>`,
+  which 404s until T23 builds V-4).
+- Activity sentences use a LOCAL map (`activityKeyOf` + `admin.member_file.activity.*`, ca/es/en;
+  unknown action -> "ha fet l'acció «key»"). T23 builds the shared renderer and should replace it.
+- Omitted (documented, not disabled): Edita, Accions menu (send access link, regenerate card,
+  leave/rejoin, anonymise), Mostra (reveal), Atorga/Retira insígnia, the Rol card and the Historial
+  timeline; T19-T22 add them. Not rendered either: the "Historial" of earlier cycles (needs the
+  audit rows with details, T23 renderer).
+- A-11 `MemberDataExport` (client): "Exporta dades" -> AdminDialog (P-3, mockup text and warning)
+  POST `/api/admin/members/<number>/data`; active member: optional reason textarea, body `{}` or
+  `{ reason }`; former member (superadmin only, chip "Només superadmins"): the dialog's `reason`
+  slot, min 10, body `{ reason }`; errors reuse `admin.members.export_errors.*`.
+- Back link: the list adds `?list=<its query string>` to each member link when the view is not the
+  default (`listParamFor`); the page rebuilds it through `parseMembersParams`/`buildMembersHref`
+  (`backToListHref`), so nothing but whitelisted list filters survives (no open redirect).
+- Tests: `tests/lib/admin-member-file.test.ts`, `tests/components/MemberFile.test.tsx` (active vs
+  former, no contact data, purge date, masked DNI, badges, card, back link, activity),
+  `MemberDataExport.test.tsx`, `tests/server/admin-member-page.test.ts` (number validation ->
+  notFound before guard/DB, zero rows, RPC error, export permission, back link),
+  `MembersList.test.tsx` (list param), `e2e/admin/member-file.spec.ts` (open from the list and back
+  to the same search, unknown and malformed number 404, plain member 404, A-11 download with
+  header and body assertions). No former-member e2e: it needs the leave action (T20).
+
 ## Next step
 
-T18.
+T19.

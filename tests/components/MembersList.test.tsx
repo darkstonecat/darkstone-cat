@@ -48,6 +48,12 @@ describe('MembersList', () => {
     expect(within(table).getAllByText('3/2/2019').length).toBe(2)
   })
 
+  it('carries a non-default list view to the member file so "back" returns to it', () => {
+    render(<MembersList rows={[row('000-001')]} total={1} query={query({ state: 'former', q: 'laia' })} />)
+    const href = within(screen.getByRole('table')).getByRole('link', { name: '000-001' }).getAttribute('href')
+    expect(href).toBe(`/admin/members/000-001?list=${encodeURIComponent('state=former&q=laia')}`)
+  })
+
   it('shows state and role chips; a plain member is text, never DNI or phone columns', () => {
     render(
       <MembersList
