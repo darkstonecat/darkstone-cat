@@ -43,31 +43,76 @@ export default function EmailsExportDialog({ open, onClose }: EmailsExportDialog
     onClose();
   }
 
+  /** Addresses of an `{ addresses }` export body (anything else reads as empty). */
+  async function readAddresses(res: Response): Promise<string[]> {
+    const body = (await res.json()) as { addresses?: unknown };
+    return Array.isArray(body.addresses) ? body.addresses.filter((a): a is string => typeof a === "string") : [];
+  }
+
+  /**
+   * Copy needs the clipboard write to start inside the click (Safari rejects it once the user
+   * activation expired while awaiting the POST): with ClipboardItem the write begins now and
+   * receives the blob as a promise. Without it, the old path (await, then writeText) is used.
+   */
+  async function copy(selected: EmailList) {
+    const request = postExport(ENDPOINT, { list: selected, format: "json" });
+    let count = 0;
+    let exportError: string | null = null;
+    const canStream =
+      typeof ClipboardItem !== "undefined" && typeof navigator !== "undefined" && Boolean(navigator.clipboard?.write);
+
+    if (canStream) {
+      const blob = request.then(async (res) => {
+        if (!res.ok) {
+          exportError = tErr(await classifyExportError(res));
+          throw new Error("export_failed");
+        }
+        const addresses = await readAddresses(res);
+        count = addresses.length;
+        return new Blob([addresses.join(", ")], { type: "text/plain" });
+      });
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ "text/plain": blob })]);
+      } catch {
+        setError(exportError ?? tErr("copy_failed"));
+        return;
+      }
+      setStatus(t("copied", { count }));
+      return;
+    }
+
+    const res = await request;
+    if (!res.ok) {
+      setError(tErr(await classifyExportError(res)));
+      return;
+    }
+    const addresses = await readAddresses(res);
+    try {
+      await navigator.clipboard.writeText(addresses.join(", "));
+    } catch {
+      setError(tErr("copy_failed"));
+      return;
+    }
+    setStatus(t("copied", { count: addresses.length }));
+  }
+
   async function run(kind: "copy" | "csv") {
     if (!list || busy) return;
     setBusy(kind);
     setError("");
     setStatus("");
     try {
-      const res = await postExport(ENDPOINT, { list, format: kind === "csv" ? "csv" : "json" });
+      if (kind === "copy") {
+        await copy(list);
+        return;
+      }
+      const res = await postExport(ENDPOINT, { list, format: "csv" });
       if (!res.ok) {
         setError(tErr(await classifyExportError(res)));
         return;
       }
-      if (kind === "csv") {
-        await saveResponseAsFile(res, `darkstone_emails_${list}.csv`);
-        setStatus(t("downloaded"));
-      } else {
-        const body = (await res.json()) as { addresses?: unknown };
-        const addresses = Array.isArray(body.addresses) ? body.addresses.filter((a): a is string => typeof a === "string") : [];
-        try {
-          await navigator.clipboard.writeText(addresses.join(", "));
-        } catch {
-          setError(tErr("copy_failed"));
-          return;
-        }
-        setStatus(t("copied", { count: addresses.length }));
-      }
+      await saveResponseAsFile(res, `darkstone_emails_${list}.csv`);
+      setStatus(t("downloaded"));
     } catch {
       setError(tErr("failed"));
     } finally {

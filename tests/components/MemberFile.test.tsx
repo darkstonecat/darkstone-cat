@@ -1,11 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, fireEvent } from '@testing-library/react'
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, values?: Record<string, unknown>) =>
     values ? `${key}:${JSON.stringify(values)}` : key,
 }))
+vi.mock('@/lib/admin/member-actions', () => ({ updateMember: vi.fn(), revealSensitive: vi.fn() }))
 vi.mock('@/i18n/routing', () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
   Link: ({ children, href, ...rest }: any) => (
     <a href={href} {...rest}>
       {children}
@@ -87,7 +89,7 @@ const entry = (over: Partial<AdminActivityRow> = {}): AdminActivityRow => ({
 })
 
 const render_ = (member: AdminMemberFileRow, over: Partial<React.ComponentProps<typeof MemberFile>> = {}) =>
-  render(<MemberFile member={member} activity={[]} backHref="/admin/members" canExportData {...over} />)
+  render(<MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} {...over} />)
 
 describe('MemberFile, active member', () => {
   it('shows header, contact data, masked DNI and phone, badges and card', () => {
@@ -100,9 +102,9 @@ describe('MemberFile, active member', () => {
     expect(screen.getByText('@laiaserra')).toBeInTheDocument()
     expect(screen.queryByText('blocked_title', { exact: false })).not.toBeInTheDocument()
 
-    // DNI and phone: presence only, never a value, no reveal button yet.
+    // DNI and phone: masked, never a value; each has its own reveal button.
     expect(screen.getAllByLabelText('masked_label')).toHaveLength(2)
-    expect(screen.queryByRole('button', { name: /show|mostra/i })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /button_label/ })).toHaveLength(2)
 
     expect(screen.getByText(/badge_member_year.*2026/)).toBeInTheDocument()
     expect(screen.getByText('badge_volunteer_egara_joga')).toBeInTheDocument()
@@ -128,7 +130,7 @@ describe('MemberFile, active member', () => {
   it('renders the export button only when the viewer may export', () => {
     const { rerender } = render_(active)
     expect(screen.getByRole('button', { name: 'button' })).toBeInTheDocument()
-    rerender(<MemberFile member={active} activity={[]} backHref="/admin/members" canExportData={false} />)
+    rerender(<MemberFile member={active} activity={[]} backHref="/admin/members" canExportData={false} canRevealFormerDni={false} />)
     expect(screen.queryByRole('button', { name: 'button' })).not.toBeInTheDocument()
   })
 
@@ -177,5 +179,32 @@ describe('MemberFile, former member', () => {
     render_({ ...former, email: null, has_login: false })
     expect(screen.queryByText('email')).not.toBeInTheDocument()
     expect(screen.getByText('login_no')).toBeInTheDocument()
+  })
+
+  it('board: no reveal button on a former member; superadmin: DNI only', () => {
+    const { unmount } = render_(former)
+    expect(screen.queryByRole('button', { name: /button_label/ })).not.toBeInTheDocument()
+    expect(screen.getByText('reveal_former_note')).toBeInTheDocument()
+    unmount()
+    render_(former, { canRevealFormerDni: true })
+    const buttons = screen.getAllByRole('button', { name: /button_label/ })
+    expect(buttons).toHaveLength(1)
+    expect(buttons[0]).toHaveTextContent('button_former')
+    expect(screen.queryByText('reveal_former_note')).not.toBeInTheDocument()
+  })
+
+  it('the active member has an edit button that opens the form and cancel closes it', () => {
+    render_(active)
+    fireEvent.click(screen.getByRole('button', { name: 'open' }))
+    expect(screen.getByRole('form', { name: 'form_label' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'open' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'cancel' }))
+    expect(screen.queryByRole('form')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'open' })).toBeInTheDocument()
+  })
+
+  it('has no edit button on a former member', () => {
+    render_(former, { canRevealFormerDni: true })
+    expect(screen.queryByRole('button', { name: 'open' })).not.toBeInTheDocument()
   })
 })

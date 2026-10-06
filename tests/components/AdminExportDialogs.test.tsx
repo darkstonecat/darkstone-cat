@@ -72,6 +72,52 @@ describe('EmailsExportDialog (A-16)', () => {
     expect(await screen.findByText('copied:{"count":2}')).toBeInTheDocument()
   })
 
+  it('starts the clipboard write inside the click with a ClipboardItem promise (Safari), one POST', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(Response.json({ addresses: ['a@x.cat', 'b@x.cat'] }))
+    vi.stubGlobal('fetch', fetchMock)
+    class FakeClipboardItem {
+      constructor(public items: Record<string, Promise<Blob>>) {}
+    }
+    vi.stubGlobal('ClipboardItem', FakeClipboardItem)
+    const write = vi.fn().mockImplementation(async (items: FakeClipboardItem[]) => {
+      await items[0].items['text/plain']
+    })
+    const writeText = vi.fn()
+    Object.defineProperty(navigator, 'clipboard', { value: { write, writeText }, configurable: true })
+    render(<EmailsExportDialog open onClose={vi.fn()} />)
+
+    fireEvent.click(screen.getByRole('radio', { name: /newsletter/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'copy' }))
+    // Synchronous with the click: the POST has not been awaited yet.
+    expect(write).toHaveBeenCalledTimes(1)
+
+    expect(await screen.findByText('copied:{"count":2}')).toBeInTheDocument()
+    const blob = await (write.mock.calls[0][0][0] as FakeClipboardItem).items['text/plain']
+    expect(await blob.text()).toBe('a@x.cat, b@x.cat')
+    expect(writeText).not.toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    vi.unstubAllGlobals()
+  })
+
+  it('shows the export error (not copy_failed) when the POST fails on the ClipboardItem path', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ error: 'x' }, { status: 403 })))
+    class FakeClipboardItem {
+      constructor(public items: Record<string, Promise<Blob>>) {}
+    }
+    vi.stubGlobal('ClipboardItem', FakeClipboardItem)
+    const write = vi.fn().mockImplementation(async (items: FakeClipboardItem[]) => {
+      await items[0].items['text/plain']
+    })
+    Object.defineProperty(navigator, 'clipboard', { value: { write }, configurable: true })
+    render(<EmailsExportDialog open onClose={vi.fn()} />)
+    fireEvent.click(screen.getByRole('radio', { name: /association/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'copy' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('forbidden')
+    vi.unstubAllGlobals()
+  })
+
   it('reports a clipboard failure without a success notice', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ addresses: ['a@x.cat'] })))
     Object.defineProperty(navigator, 'clipboard', {

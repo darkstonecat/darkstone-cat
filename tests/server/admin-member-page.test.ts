@@ -89,6 +89,17 @@ describe('admin member file page', () => {
     expect(element.props.canExportData).toBe(true)
   })
 
+  it('lets only a superadmin reveal a former member\'s DNI', async () => {
+    session({ member: [member({ state: 'former' })] })
+    let element: any = await render('000-203')
+    expect(element.props.canRevealFormerDni).toBe(false)
+
+    mocks.requireRole.mockResolvedValue({ id: 'u2', role: 'superadmin' })
+    element = await render('000-203')
+    expect(element.props.canRevealFormerDni).toBe(true)
+    mocks.requireRole.mockResolvedValue({ id: 'u1', role: 'board' })
+  })
+
   it('validates the back link through the list whitelist', async () => {
     session({ member: [member()] })
     let element: any = await render('000-203', { list: 'state=former&q=laia' })

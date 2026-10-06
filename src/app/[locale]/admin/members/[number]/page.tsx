@@ -76,6 +76,7 @@ export default async function AdminMemberFilePage({
       activity={activity}
       backHref={backToListHref(rawParams.list)}
       canExportData={canExportData}
+      canRevealFormerDni={isSuperadmin(actor.role)}
     />
   );
 }

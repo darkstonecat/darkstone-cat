@@ -96,7 +96,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T16 — V-2 members list (server search/pagination, mobile cards) — route: delegated
 - [x] T17 — V-2 dialogs (A-10, A-16, S-4) — route: delegated
 - [x] T18 — V-3 member file, read-only — route: delegated
-- [ ] T19 — V-3 edit mode + reveal (A-4, A-5) — route: delegated
+- [x] T19 — V-3 edit mode + reveal (A-4, A-5) — route: delegated
 - [ ] T20 — V-3 leave/rejoin dialogs (A-6, A-7) — route: delegated
 - [ ] T21 — V-3 badges, card, member data, access link (A-8, A-9, A-11, A-15) — route: delegated
 - [ ] T22 — V-3 role card + S-3, V-5 roles — route: delegated
@@ -1752,6 +1752,44 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   to the same search, unknown and malformed number 404, plain member 404, A-11 download with
   header and body assertions). No former-member e2e: it needs the leave action (T20).
 
+### T19 — done (route: delegated)
+
+- Commit: `feat(admin): Add member editing and the reveal dialog` on `develop-users` (hash in
+  `git log -- src/components/admin/member-file/RevealButton.tsx`).
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 97 files /
+  1437 tests passed; `npx playwright test e2e/admin` 41 passed (incl. the new
+  `e2e/admin/member-edit.spec.ts`). Integration not rerun (no server/DB code changed in T19).
+- UI: `PersonalDataCard` (client) replaces the "Dades personals" section: inline edit mode
+  (`MemberEditForm`) and the reveal buttons. `RevealButton` (client): AdminDialog; active member:
+  optional reason in a plain textarea child (null sent when blank); former member (superadmin
+  only, DNI only, chip "Només superadmins"): the `reason` slot, min 10; the value lives in
+  component state, shown in an `aria-live` panel with a copy button, cleared on close. A board
+  member sees no "Mostra" on a former member's DNI (a note says superadmins only). Page passes
+  `canRevealFormerDni = isSuperadmin(actor.role)`.
+- `MemberEditForm`: DNI and phone start EMPTY (placeholder "deixa-ho buit per mantenir l'actual");
+  they are sent only when typed, so an untouched save writes no audit row. Names, postal code and
+  usernames are always sent (the DB writes no entry for unchanged values). Client validation
+  reuses `member-fields` + `normalizeUsername`; every server code maps to a field message
+  (`invalid_*`) or a form-level `admin.member_file.errors.*` text. Success: "Dades desades." +
+  `router.refresh()`.
+- Deviations from the mockup: "Edita" sits in the "Dades personals" card header (not the page
+  header) to keep the edit state local; a stored DNI/phone cannot be cleared from the form (empty
+  = unchanged); the reveal is a dialog (optional reason) instead of an inline eye toggle for
+  active members; the dialog footer shows "Copia" + "Tanca" after the reveal. D-E stays
+  provisional (10 characters).
+- Also (parent request): `EmailsExportDialog` "Copia les adreces" now starts
+  `navigator.clipboard.write([new ClipboardItem({ "text/plain": promise })])` inside the click
+  (one POST, so Safari accepts it and a retry no longer writes extra `export.emails` rows), with
+  the previous await-then-`writeText` path as fallback when ClipboardItem is missing; same
+  "a, b" output. `copied` is now an ICU plural (0/one/other) in ca/es/en. Two tests added with a
+  mocked ClipboardItem.
+- Tests: `MemberEditForm.test.tsx`, `RevealButton.test.tsx`, `MemberFile.test.tsx` (edit toggle,
+  former-member reveal visibility), `admin-member-page.test.ts` (`canRevealFormerDni`),
+  `AdminExportDialogs.test.tsx`; e2e edits names, rejects an invalid DNI, adds a DNI through the
+  form and reveals it (so the ciphertext is created by the real action, no helper encryption).
+- Messages added under `admin.member_file`: `edit`, `reveal`, `errors`, `reveal_former_note`
+  (T20 adds `leave`, `rejoin`).
+
 ## Next step
 
-T19.
+T20.

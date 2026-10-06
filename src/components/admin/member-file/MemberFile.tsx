@@ -1,6 +1,5 @@
-import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { MdArrowBack, MdArrowForward, MdInfoOutline } from "react-icons/md";
+import { MdArrowBack, MdArrowForward } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { roleLabelKey, isBoardRole } from "@/lib/auth/roles";
 import {
@@ -14,10 +13,11 @@ import {
 import { formatAdminDate } from "@/lib/admin/members-list";
 import Notice from "../Notice";
 import StatusChip from "../StatusChip";
+import { Field } from "./Field";
 import MemberDataExport from "./MemberDataExport";
+import PersonalDataCard from "./PersonalDataCard";
 
 const NO_VALUE = "—";
-const MASK = "••••••";
 
 type MemberFileProps = {
   member: AdminMemberFileRow;
@@ -26,19 +26,11 @@ type MemberFileProps = {
   backHref: string;
   /** Former members' data can only be exported by a superadmin (D-D, provisional). */
   canExportData: boolean;
+  /** Former member's DNI can only be revealed by a superadmin (D-E, provisional). */
+  canRevealFormerDni: boolean;
 };
 
 const CARD = "rounded-2xl bg-brand-white p-5 md:p-8";
-
-function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
-  return (
-    <div className="flex min-w-0 flex-col gap-1">
-      <dt className="text-xs text-stone-custom/65">{label}</dt>
-      <dd className="break-words text-base text-stone-custom">{children}</dd>
-      {hint && <p className="text-xs text-stone-custom/65">{hint}</p>}
-    </div>
-  );
-}
 
 /**
  * V-3 read-only member file. Active members show their contact data; for a former member the
@@ -46,7 +38,7 @@ function Field({ label, children, hint }: { label: string; children: ReactNode; 
  * for those fields. DNI and phone are only ever "present or not" (the reveal is T19+). The edit,
  * leave/rejoin, badge, card, role and access-link buttons are omitted until T19-T22 wire them.
  */
-export default function MemberFile({ member, activity, backHref, canExportData }: MemberFileProps) {
+export default function MemberFile({ member, activity, backHref, canExportData, canRevealFormerDni }: MemberFileProps) {
   const t = useTranslations("admin.member_file");
   const tAdmin = useTranslations("admin");
   const former = member.state === "former";
@@ -103,52 +95,7 @@ export default function MemberFile({ member, activity, backHref, canExportData }
         </Notice>
       )}
 
-      <section aria-labelledby="mf-personal" className={`${CARD} flex flex-col gap-5`}>
-        <h3 id="mf-personal" className="text-xl font-bold text-stone-custom">
-          {former ? t("register_title") : t("personal_title")}
-        </h3>
-        <dl className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
-          {!former && (
-            <Field label={t("email")} hint={t("email_hint")}>
-              {member.email ?? NO_VALUE}
-            </Field>
-          )}
-          {former && member.email && <Field label={t("email")}>{member.email}</Field>}
-          <Field label={t("first_name")}>{member.first_name}</Field>
-          <Field label={t("last_name")}>{member.last_name || NO_VALUE}</Field>
-          <Field label={t("dni")}>
-            {member.has_dni ? (
-              <span aria-label={t("masked_label")}>
-                {MASK} <span className="text-sm text-stone-custom/65">{t("masked")}</span>
-              </span>
-            ) : (
-              NO_VALUE
-            )}
-          </Field>
-          {!former && (
-            <>
-              <Field label={t("phone")}>
-                {member.has_phone ? (
-                  <span aria-label={t("masked_label")}>
-                    {MASK} <span className="text-sm text-stone-custom/65">{t("masked")}</span>
-                  </span>
-                ) : (
-                  NO_VALUE
-                )}
-              </Field>
-              <Field label={t("postal_code")}>{member.postal_code || NO_VALUE}</Field>
-              <Field label={t("ludoya")}>{member.ludoya_username ? `@${member.ludoya_username}` : NO_VALUE}</Field>
-              <Field label={t("bgg")}>{member.bgg_username || NO_VALUE}</Field>
-              <Field label={t("newsletter")}>{member.newsletter_accepted ? t("yes") : t("no")}</Field>
-            </>
-          )}
-          <Field label={t("login")}>{member.has_login ? t("login_yes") : t("login_no")}</Field>
-        </dl>
-        <p className="flex items-center gap-2 text-[13px] text-stone-custom/65">
-          <MdInfoOutline aria-hidden="true" className="size-4 shrink-0" />
-          {former ? t("former_footnote") : t("sensitive_footnote")}
-        </p>
-      </section>
+      <PersonalDataCard member={member} canRevealFormerDni={canRevealFormerDni} />
 
       <section aria-labelledby="mf-membership" className={`${CARD} flex flex-col gap-5`}>
         <h3 id="mf-membership" className="text-xl font-bold text-stone-custom">

@@ -138,3 +138,14 @@ export async function createUnconfirmedUser(email: string, password: string): Pr
   if (error) throw new Error(`Failed to create unconfirmed user ${email}: ${error.message}`)
   return data.user.id
 }
+
+/**
+ * Member number (e.g. `000-203`) of a user, read with the service role.
+ */
+export async function getMemberNumber(email: string): Promise<string> {
+  const id = await findUserByEmail(email)
+  if (!id) throw new Error(`No user ${email}`)
+  const { data, error } = await getAdminClient().from('members').select('member_number').eq('id', id).single()
+  if (error || !data) throw new Error(`No member row for ${email}: ${error?.message}`)
+  return data.member_number as string
+}
