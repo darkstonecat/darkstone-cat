@@ -146,7 +146,7 @@ export async function POST(request: Request) {
   // Google Workspace SMTP (src/lib/mail): never throws, logs only code/responseCode/command.
   const sent = await sendMail(
     {
-      fromName: "Web [darkstone.cat]",
+      sender: "contact",
       to: CONTACT_EMAIL,
       replyTo: email.value,
       subject: `[Formulari Web] ${subject.value}`,

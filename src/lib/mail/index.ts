@@ -11,7 +11,17 @@ export { escapeHtml } from "./html";
 
 export const SENDER_EMAIL = "no-reply@darkstone.cat";
 export const CONTACT_EMAIL = "hola@darkstone.cat";
-const DEFAULT_SENDER_NAME = "Darkstone Catalunya";
+
+/**
+ * Display names of the no-reply sender. A fixed list, never free text: the name goes into the
+ * `From` header, so a caller can never inject quotes or line breaks into it.
+ */
+const SENDER_NAMES = {
+  association: "Darkstone Catalunya",
+  contact: "Web [darkstone.cat]",
+} as const;
+
+export type MailSender = keyof typeof SENDER_NAMES;
 
 // Timeouts keep a stalled SMTP server from holding the function open: connect and
 // greeting must finish quickly, and the socket may stay idle for at most 15 s.
@@ -32,8 +42,8 @@ type MailBase = {
   to: string;
   subject: string;
   replyTo?: string;
-  /** Display name of the no-reply sender; "Darkstone Catalunya" by default. */
-  fromName?: string;
+  /** Which fixed display name the no-reply sender uses; `association` by default. */
+  sender?: MailSender;
 };
 
 /** A message needs a plain-text or an HTML body (or both). */
@@ -52,7 +62,9 @@ export type SendMailOptions = {
  * address and the full SMTP transcript) and returned as `{ ok: false, code }`.
  */
 export async function sendMail(message: MailMessage, { logTag }: SendMailOptions): Promise<SendMailResult> {
-  const { to, subject, text, html, replyTo, fromName = DEFAULT_SENDER_NAME } = message;
+  const { to, subject, text, html, replyTo, sender } = message;
+  // Own keys only: an untyped caller passing e.g. "toString" still gets the default name.
+  const fromName = Object.hasOwn(SENDER_NAMES, sender ?? "") ? SENDER_NAMES[sender!] : SENDER_NAMES.association;
   try {
     await transporter.sendMail({
       from: `"${fromName}" <${SENDER_EMAIL}>`,

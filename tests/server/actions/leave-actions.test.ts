@@ -55,6 +55,9 @@ describe('leaveAssociation (M-1)', () => {
   it('requires a signed-in user', async () => {
     db.user = null
     expect(await leaveAssociation()).toEqual({ error: 'unauthenticated' })
+    // authorise first: an anonymous caller learns nothing about the input rules
+    expect(await leaveAssociation('x'.repeat(501))).toEqual({ error: 'unauthenticated' })
+    expect(await leaveAssociation(42 as never)).toEqual({ error: 'unauthenticated' })
     expect(db.rpc).not.toHaveBeenCalled()
     expect(db.signOut).not.toHaveBeenCalled()
   })

@@ -57,9 +57,9 @@ describe('sendMail', () => {
     })
   })
 
-  it('passes a custom sender name and replyTo, and leaves out absent fields', async () => {
+  it('uses the contact sender name and replyTo, and leaves out absent fields', async () => {
     await sendMail(
-      { to: 'hola@darkstone.cat', subject: 'S', html: '<p>H</p>', replyTo: 'x@example.com', fromName: 'Web [darkstone.cat]' },
+      { to: 'hola@darkstone.cat', subject: 'S', html: '<p>H</p>', replyTo: 'x@example.com', sender: 'contact' },
       { logTag: 'test-mail' }
     )
     const message = mockSend.mock.calls[0][0]
@@ -71,6 +71,23 @@ describe('sendMail', () => {
       html: '<p>H</p>',
     })
     expect(Object.hasOwn(message, 'text')).toBe(false)
+  })
+
+  it('only knows fixed sender names: an unknown sender falls back to the association', async () => {
+    await sendMail({ to: 'laia@example.com', subject: 'S', text: 'T', sender: 'association' }, { logTag: 'test-mail' })
+    expect(mockSend.mock.calls[0][0].from).toBe('"Darkstone Catalunya" <no-reply@darkstone.cat>')
+    // a forged value from an untyped caller never reaches the header
+    await sendMail(
+      { to: 'laia@example.com', subject: 'S', text: 'T', sender: 'x"\r\nBcc: evil@example.com' as never },
+      { logTag: 'test-mail' }
+    )
+    expect(mockSend.mock.calls[1][0].from).toBe('"Darkstone Catalunya" <no-reply@darkstone.cat>')
+    // the old free-form display name is ignored
+    await sendMail(
+      { to: 'laia@example.com', subject: 'S', text: 'T', ...({ fromName: 'Evil"\r\nBcc: x@example.com' } as object) },
+      { logTag: 'test-mail' }
+    )
+    expect(mockSend.mock.calls[2][0].from).toBe('"Darkstone Catalunya" <no-reply@darkstone.cat>')
   })
 
   it('never throws on an SMTP failure: logs only code, responseCode and command', async () => {

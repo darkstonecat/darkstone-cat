@@ -1,0 +1,52 @@
+name: Retention
+
+# Daily retention job (admin panel spec §4.5, decision D-F): calls
+# /api/cron/retention, which runs run_retention() in the database: purges former
+# members 3 years after their leave, deletes sign-ups never confirmed after 30
+# days and deletes audit entries older than 3 years (see
+# supabase/migrations/20261006100100_retention.sql).
+#
+# DRY RUN BY DEFAULT. Scheduled runs only report counts until the repository
+# variable RETENTION_APPLY is set to `true` (Settings > Secrets and variables >
+# Actions > Variables). A manual run applies only when the `apply` input is
+# ticked. Do the first production run as a manual dry run and read its counts
+# before setting RETENTION_APPLY (prod runbook, odd/tasks/admin-panel.md).
+#
+# Production only (previews sit behind Vercel Authentication). Needs the
+# CRON_SECRET repository secret, with the same value as CRON_SECRET in Vercel
+# (Production). Schedules run from the default branch only; the job refuses any
+# other branch.
+
+on:
+  schedule:
+    # UTC, once a day. A skipped or delayed run only delays the purge by a day.
+    - cron: "41 2 * * *"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Apply the deletions (unticked = dry run, nothing changes)"
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  retention:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Run the production retention job
+        run: |
+          query=""
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$INPUT_APPLY" = "true" ]; then query="?apply=1"; fi
+          elif [ "$RETENTION_APPLY" = "true" ]; then
+            query="?apply=1"
+          fi
+          if [ -n "$query" ]; then echo "Mode: apply"; else echo "Mode: dry run"; fi
+          curl -fsS --max-time 120 -H "Authorization: Bearer $CRON_SECRET" "https://www.darkstone.cat/api/cron/retention$query"
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_APPLY: ${{ inputs.apply }}
+          RETENTION_APPLY: ${{ vars.RETENTION_APPLY }}

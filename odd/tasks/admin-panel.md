@@ -48,7 +48,9 @@ first, then the server layer, then the screens.
   T6 enforces 5 for a board leave (`membership_leave_reason_min_length()`, provisional); T7
   enforces 10 for a former member's DNI reveal (`admin_reveal_reason_min_length()`, provisional;
   an active member's reveal takes an optional reason).
-- D-F: what runs the retention job: GitHub Actions, pg_cron or Vercel cron (T12).
+- D-F: what runs the retention job: GitHub Actions, pg_cron or Vercel cron (T12). **Decided
+  2026-10-05 by the user: GitHub Actions** (daily workflow calling `/api/cron/retention` with
+  `CRON_SECRET`, like the cache refresh).
 - D-G: path `/admin/tools/event-images` (T25).
 - D-H: does a backdated leave move the purge date; proposal purge = `left_on` + 3 years (T6/T12).
   T6 also limits a board leave to at most 365 days back (`membership_leave_max_backdate_days()`,
@@ -84,7 +86,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T10 — Mail module (`src/lib/mail/`) + leave/rejoin actions + templates — route: delegated (writer trigger: mail module + templates + 2 action files + contact refactor + 6 test files)
 - [x] T11a — Server actions A-4, A-5, A-8, A-9 — route: delegated (writer trigger: actions + error module + 3 test files)
 - [x] T11b — Server actions A-15, roles (S-1, S-2), anonymise (S-3) — route: delegated (writer trigger: 2 action files + sender extraction + error module + 5 test files)
-- [ ] T12 — `run_retention()` + `/api/cron/retention` + workflow (dry run first) — route: delegated
+- [x] T12 — `run_retention()` + `/api/cron/retention` + workflow (dry run first), member-number width fix, T10 follow-ups — route: delegated (writer trigger: 2 migrations + route + lib + workflow + mail/leave fixes + 6 test files)
 - [ ] T13 — `ops_job_runs` + refresh action (A-14), cron route records automatic runs — route: delegated
 
 ### Screens
@@ -228,6 +230,41 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
     deploy: a CSV export from `/admin/members` still downloads (the dialog now POSTs), and
     `curl -X POST https://www.darkstone.cat/api/admin/members/export` without an Origin answers
     403 `forbidden_origin`. A-16/S-4 have no UI until T17.
+
+11. `supabase/migrations/20261006100000_member_number_width.sql` (T12). Apply any time, and
+    before the association reaches member 1000: `generate_member_number()` truncated numbers
+    past 999 (`lpad(n, 3, '0')`, '1196' → '119'), which makes sign-up fail on a duplicate
+    number. Existing numbers keep their value; nothing else changes. After applying, as
+    `postgres` `select public.member_number_format(1000)` returns `000-1000` and
+    `select public.member_number_format(168)` returns `000-168`.
+
+12. `supabase/migrations/20261006100100_retention.sql` (T12) + the retention route and workflow.
+    Needs M1, M3 and T6 (items 1, 3, 5). Safe to apply before the code ships (nothing calls it).
+    Steps:
+    1. Before applying, in a transaction you roll back, check that `postgres` may delete from
+       `auth.users` (the job deletes purged members' and stale unconfirmed accounts in the
+       database so the deletion and its audit entry are atomic):
+       `begin; delete from auth.users where false; rollback;`. If it is refused, do not set
+       `RETENTION_APPLY`: an apply would fail atomically (nothing half-done), and the job must
+       move the account deletion to `auth.admin.deleteUser` first.
+    2. Apply the migration and deploy the code (route `/api/cron/retention`, workflow
+       `.github/workflows/retention.yml` on `main`). `CRON_SECRET` is already set in Vercel and
+       as a repository secret (cache refresh).
+    3. First production run = **dry run**: Actions → Retention → Run workflow with `apply`
+       unticked. The log shows `Mode: dry run` and the JSON counts (`membersPurged`,
+       `unconfirmedDeleted`, `auditEntriesDeleted`). Check them against the database (as
+       `postgres`: former members with `left_on + 3 years <= today` and `purged_at is null`;
+       `auth.users` with `email_confirmed_at is null and created_at < now() - interval '30
+       days'`; `audit_log` older than 3 years). Today expect members ≈ 0 and audit 0; the
+       unconfirmed count is the backlog of abandoned sign-ups.
+    4. When the counts are right, either run once by hand with `apply` ticked, or set the
+       repository variable `RETENTION_APPLY=true` (Settings → Secrets and variables → Actions →
+       Variables) so the daily schedule applies. Until then every scheduled run is a dry run.
+       To stop deletions at any time, delete the variable (or set it to anything but `true`).
+    5. After an apply: `select action, details from audit_log where action in ('member.purge',
+       'account.purge_unconfirmed') order by id desc limit 5` shows the entries (actor NULL).
+    6. D-H is still provisional (purge = `left_on` + 3 years, `member_purge_on()`): confirm it
+       before setting `RETENTION_APPLY`, because a purge cannot be undone.
 
 ## Progress
 
@@ -1240,6 +1277,12 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Prod risk: needs runbook 5 (T6 functions) and `SMTP_USER`/`SMTP_PASSWORD` in Vercel (already
   set for the contact form). The "Si no recordes la contrasenya" line relies on recovery
   working for a reinstated member (T26 neutral reset must allow active members).
+- Independent read-only verification (tier `high`): PASS, no defects (guards first, no callable
+  helper exports, CRLF/HTML-safe mail, copy matches DB behaviour, contact route identical,
+  mail failure never rolls back). Notes, folded into T12: `leaveAssociation` validates the reason
+  before `getUser()` (authorise first); `sendMail` interpolates `fromName` unescaped (constant
+  today; restrict or quote it). User review: the A-6 line "es conserva bloquejat durant 3 anys i
+  després es destrueix" describes the T12 purge (D-H provisional).
 
 ### T11b — done (route: delegated)
 
@@ -1337,6 +1380,89 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   and the shared limiter migration (`20261001100000`); without the limiter table the per-member
   limit falls back to one instance's memory.
 
+### T12 — done (route: delegated)
+
+- Commits on `develop-users`: `fix(db): Stop member numbers from truncating past 999` (3770eea)
+  and `feat(admin): Add the daily retention job` (hash in
+  `git log -- supabase/migrations/20261006100100_retention.sql`).
+- Test-first: RED observed for `tests/integration/member-number.test.ts` (6 of 7 failing:
+  `member_number_format` missing), `tests/integration/retention.test.ts` (every test failing:
+  functions missing), `tests/server/api/cron-retention.test.ts` (import of the missing route),
+  the new `sender` cases in `tests/lib/mail.test.ts` (2 failing) and the authorise-first case in
+  `tests/server/actions/leave-actions.test.ts` (1 failing); GREEN after `npm run db:reset`.
+  `tests/lib/retention-workflow.test.ts` (static checks of the YAML text; no YAML parser is
+  installed, `python3 yaml.safe_load` parsed it with `apply.default: False`) was written right
+  after the workflow and passed on its first run.
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 82 files / 1249 tests passed; `npm run test:integration` 28 files /
+  511 tests passed; `npx playwright test e2e/forms/contact.spec.ts` 10 passed (incl.
+  setup/teardown).
+- Member number (fix from the T11b environment note): `member_number_format(n bigint)`
+  (IMMUTABLE, `search_path ''`, EXECUTE service_role + owner) = `'000-' || lpad(n,
+  greatest(3, length(n)), '0')`: `000-007`, `000-999`, `000-1000`. `generate_member_number()`
+  calls it (same grants). `member_number` has no length CHECK; the admin list sort key (digits
+  padded to 20) orders `000-1000` after `000-999` (tested). The tests that matched
+  `^000-\d{3}$` now accept `\d{3,}`. Tested through the format helper, not by moving the
+  shared sequence (other files create users in parallel).
+- `member_purge_on(p_left_on date) → date` (internal, no API grant): `left_on + 3 years` (D-H).
+  `admin_get_member().purge_on` and `admin_anonymise_member()` keep the same expression inline
+  (not redefined here).
+- `run_retention(p_dry_run boolean DEFAULT true)` RETURNS TABLE `(dry_run boolean,
+  members_purged int, unconfirmed_deleted int, audit_entries_deleted int)`: SECURITY DEFINER,
+  `search_path ''`, EXECUTE service_role only (and postgres); anon/authenticated 42501 (tested).
+  NULL → dry run. It calls the internal `retention_run(p_dry_run, p_only uuid[])` with
+  `p_only` NULL; `p_only` limits every step to the given ids and exists for the integration
+  tests (run as postgres on their own fixtures, since other files hold former members, unconfirmed
+  sign-ups and 1999 audit rows of their own). One transaction, serialised by an advisory lock:
+  1. Purge: former members (`left_on` set, `purged_at` NULL) with `member_purge_on(left_on) <=
+     membership_today()` (Madrid), `FOR UPDATE`. Clears first/last name (to `''`, NOT NULL),
+     DNI and phone ciphertext, postal code, usernames, newsletter, `leave_reason`; deletes the
+     badges and the `auth.users` row (e-mail, identities, sessions cascade;
+     `handle_deleted_user` keeps the former row); sets `purged_at`. Kept: member number,
+     `membership_start_date`, `current_joined_on`, `left_on`, `left_by` (tied to `left_on` by
+     `members_left_on_left_by_pair`; only self/board), `created_at`, `anonymised_at`, the
+     (invalid) card token. One `member.purge` entry each, actor NULL, details
+     `{"left_on","purge_on","badges_deleted","account_deleted"}` (dates, a count, a boolean:
+     BR-15-safe). Already anonymised members purge with `account_deleted: false`.
+  2. Unconfirmed sign-ups: `auth.users.email_confirmed_at IS NULL` and `created_at < now() - 30
+     days`, whose member row is absent or active with role `member`; deleted from `auth.users`
+     in the database (the member row goes with `handle_deleted_user`). **Audit shape: one
+     aggregate `account.purge_unconfirmed` entry per run, no target, details
+     `{"accounts_deleted": n}`**, only when n > 0 (spec §5.1: "number of accounts deleted (no
+     e-mails)").
+  3. `audit_log` rows with `created_at < now() - 3 years` deleted (the boundary of
+     `audit_log_append_only()`); the deletion itself is not logged (spec says nothing).
+  Dry run: the same selection counted; no write, no entry (tested on fixtures).
+- Deviation (brief option taken): the database deletes the auth users itself instead of the route
+  calling `auth.admin.deleteUser` per id: the deletion and its audit entry commit together, and
+  the dry-run counts are exactly what an apply deletes. Needs `postgres` DELETE on
+  `auth.users` in prod (runbook 12 step 1). So there is no per-id failure path: any failure
+  rolls back the whole run and the route answers 502.
+- Route `GET /api/cron/retention` (`src/app/api/cron/retention/route.ts`, logic in
+  `src/lib/retention.ts` `runRetention({ apply }) → { ok: true; summary } | { ok: false; code }`,
+  never throws): same auth as `/api/cron/refresh` (Bearer `CRON_SECRET`, constant-time; 500
+  `not_configured`, 401 `unauthorized`), `no-store` on every answer, `force-dynamic`. Dry run
+  unless the query string has exactly `apply=1`. 200 `{ ok: true, dryRun, membersPurged,
+  unconfirmedDeleted, auditEntriesDeleted }`; DB error or unexpected shape → 502 `{ ok: false,
+  error: "retention_failed" }` with one log line `[retention] failed code=<Postgres code>`;
+  success logs one line `[retention] dry_run=<bool> members_purged=<n> unconfirmed_deleted=<n>
+  audit_entries_deleted=<n>` (counts only).
+- Workflow `.github/workflows/retention.yml`: daily `41 2 * * *` UTC + `workflow_dispatch` with
+  input `apply` (boolean, default false). Manual run applies only when ticked; scheduled runs
+  apply only when the repository variable `RETENTION_APPLY` is `true`. Job runs only on
+  `refs/heads/main`, prints the mode, `curl -fsS --max-time 120` against production. T13
+  (ops_job_runs) may record these runs.
+- T10 follow-ups: `leaveAssociation` now calls `getUser()` before validating the reason
+  (anonymous → `unauthenticated` whatever it sends; tested). `sendMail` takes `sender?:
+  'association' | 'contact'` (fixed display names "Darkstone Catalunya" / "Web
+  [darkstone.cat]") instead of a free-form `fromName`; unknown or forged values fall back to the
+  association name (own-key lookup; tested with a CRLF value). The contact route passes
+  `sender: "contact"`; its tests and the contact E2E pass unchanged.
+- Prod risks: postgres DELETE on `auth.users` (runbook 12 step 1); a purge is irreversible, so
+  D-H must be confirmed before `RETENTION_APPLY` (runbook 12 step 6); the first apply also
+  deletes the whole backlog of abandoned sign-ups older than 30 days. A member number with 9+
+  digits after `000-` could look like a phone to the BR-15 detector (far future).
+
 ## Next step
 
-T12.
+T13.

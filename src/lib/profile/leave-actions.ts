@@ -26,6 +26,13 @@ const MAX_REASON_LENGTH = 500;
 export async function leaveAssociation(
   reason?: string | null
 ): Promise<{ ok: true } | { error: LeaveAssociationError }> {
+  // Authorise first: an anonymous caller gets `unauthenticated` whatever it sends.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "unauthenticated" };
+
   let why: string | null = null;
   if (reason !== undefined && reason !== null) {
     if (typeof reason !== "string") return { error: "invalid" };
@@ -33,12 +40,6 @@ export async function leaveAssociation(
     if ([...trimmed].length > MAX_REASON_LENGTH) return { error: "reason_too_long" };
     why = trimmed || null;
   }
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "unauthenticated" };
 
   const { error } = await supabase.rpc("member_leave_self", { p_reason: why });
   if (error) {
