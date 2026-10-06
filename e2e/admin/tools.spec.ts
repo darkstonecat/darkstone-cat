@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures'
+import { expectHydrated } from '../helpers/hydration'
 
 // V-6. LUDOYA_MOCK is set by the E2E server and the BGG job falls back to its local fixtures
 // without an API key, so a refresh never reaches the network.
@@ -19,7 +20,7 @@ test.describe('Admin tools', () => {
   test('refreshing everything shows the per-job results, then the rate limit', async ({ adminPage: page }) => {
     test.slow()
     await page.goto('/admin/tools')
-    await page.waitForLoadState('networkidle')
+    await expectHydrated(page.getByRole('button', { name: 'Refresca-ho tot' }))
 
     await page.getByRole('button', { name: 'Refresca-ho tot' }).click()
     await expect(page.getByText("Resultat de l'actualització")).toBeVisible({ timeout: 60_000 })

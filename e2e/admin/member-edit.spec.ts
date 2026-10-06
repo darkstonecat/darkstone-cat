@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures'
 import { createTestUser, deleteTestUser, getMemberNumber } from '../helpers/supabase-admin'
+import { expectHydrated } from '../helpers/hydration'
 
 // A-4 / A-5 through the real stack, on a throwaway active member (the shared fixtures are
 // read-only and must stay untouched by parallel tests).
@@ -20,7 +21,7 @@ test.describe('Admin member edit and reveal (A-4, A-5)', () => {
 
   test('the board edits the names, adds a DNI, and reveals it in a dialog only', async ({ adminPage: page }) => {
     await page.goto(`/admin/members/${number}`)
-    await page.waitForLoadState('networkidle')
+    await expectHydrated(page.getByRole('button', { name: 'Edita' }).first())
 
     await page.getByRole('button', { name: 'Edita' }).first().click()
     const form = page.getByRole('form', { name: 'Edita les dades del soci' })

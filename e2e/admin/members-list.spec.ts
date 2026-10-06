@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures'
 import { PAGES, ADMIN_EMAIL, EDITOR_EMAIL } from '../helpers/constants'
+import { expectHydrated } from '../helpers/hydration'
 
 // The fixtures create three confirmed members (e2e-member, e2e-admin, e2e-editor). Other specs
 // may add data, so assertions look for these rows by e-mail instead of counting everything.
@@ -42,11 +43,11 @@ test.describe('Admin members list', () => {
   test('the filters round-trip through the URL', async ({ adminPage: page }) => {
     await page.goto(PAGES.adminMembers)
     // The filters submit from React onChange handlers: wait until the page is hydrated.
-    await page.waitForLoadState('networkidle')
+    await expectHydrated(page.getByRole('radio', { name: 'Exsocis', exact: true }))
     await page.getByRole('radio', { name: 'Exsocis', exact: true }).check({ force: true })
     await expect(page).toHaveURL(/state=former/)
     await expect(page.getByRole('radio', { name: 'Exsocis' })).toBeChecked()
-    await page.waitForLoadState('networkidle')
+    await expectHydrated(page.getByLabel('Rol', { exact: true }))
 
     await page.getByLabel('Rol', { exact: true }).selectOption('superadmin')
     await expect(page).toHaveURL(/state=former/)

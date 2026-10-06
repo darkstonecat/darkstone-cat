@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { test, expect } from '../fixtures'
 import { MEMBER_EMAIL } from '../helpers/constants'
 import { findUserByEmail } from '../helpers/supabase-admin'
+import { expectHydrated } from '../helpers/hydration'
 
 // V-3 through the real stack. The member file is read-only here (T18), so the shared read-only
 // e2e-member fixture is safe. A former-member file needs a mutation (leave) and is covered by the
@@ -58,7 +59,7 @@ test.describe('Admin member file (V-3)', () => {
   test('a board member downloads the data of an active member from the file (A-11)', async ({ adminPage: page }) => {
     const number = await memberNumberOf(MEMBER_EMAIL)
     await page.goto(`/admin/members/${number}`)
-    await page.waitForLoadState('networkidle')
+    await expectHydrated(page.getByRole('button', { name: 'Exporta dades' }))
     await page.getByRole('button', { name: 'Exporta dades' }).click()
 
     const dialog = page.getByRole('dialog', { name: 'Exporta dades del soci' })

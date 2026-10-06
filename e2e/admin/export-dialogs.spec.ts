@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures'
 import { PAGES } from '../helpers/constants'
+import { expectHydrated } from '../helpers/hydration'
 
 // A-16 through the real UI: dialog -> POST /api/admin/members/emails -> download. The export only
 // reads data (and writes an audit entry), so the shared read-only board fixture is safe.
@@ -7,7 +8,7 @@ import { PAGES } from '../helpers/constants'
 test.describe('Admin export dialogs (V-2)', () => {
   test('a board member downloads the association e-mail CSV from the A-16 dialog', async ({ adminPage: page }) => {
     await page.goto(PAGES.adminMembers)
-    await page.waitForLoadState('networkidle')
+    await expectHydrated(page.getByRole('button', { name: 'Exporta correus' }))
     await page.getByRole('button', { name: 'Exporta correus' }).click()
 
     const dialog = page.getByRole('dialog', { name: 'Exporta correus' })
@@ -35,7 +36,7 @@ test.describe('Admin export dialogs (V-2)', () => {
 
   test('the newsletter list posts its own list name', async ({ adminPage: page }) => {
     await page.goto(PAGES.adminMembers)
-    await page.waitForLoadState('networkidle')
+    await expectHydrated(page.getByRole('button', { name: 'Exporta correus' }))
     await page.getByRole('button', { name: 'Exporta correus' }).click()
     const dialog = page.getByRole('dialog', { name: 'Exporta correus' })
     await dialog.getByRole('radio', { name: /Butlletí/ }).check({ force: true })

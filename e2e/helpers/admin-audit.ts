@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { expect, type Page } from '@playwright/test'
+import { expectHydrated } from './hydration'
 import { findUserByEmail } from './supabase-admin'
 
 /** Member number of a test user (service role read; the number is not a secret). */
@@ -20,8 +21,9 @@ export async function memberNumberOf(email: string): Promise<string> {
  */
 export async function exportMemberData(page: Page, number: string) {
   await page.goto(`/admin/members/${number}`)
-  await page.waitForLoadState('networkidle')
-  await page.getByRole('button', { name: 'Exporta dades' }).click()
+  const exportButton = page.getByRole('button', { name: 'Exporta dades' })
+  await expectHydrated(exportButton)
+  await exportButton.click()
   const dialog = page.getByRole('dialog', { name: 'Exporta dades del soci' })
   await Promise.all([
     page.waitForResponse((r) => r.url().endsWith(`/api/admin/members/${number}/data`) && r.request().method() === 'POST'),

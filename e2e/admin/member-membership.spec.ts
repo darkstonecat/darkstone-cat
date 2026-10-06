@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures'
 import { createTestUser, deleteTestUser, getMemberNumber } from '../helpers/supabase-admin'
+import { expectHydrated } from '../helpers/hydration'
 
 // A-6 and A-7 through the real stack: a board member gives a throwaway active member a baixa and
 // then reinstates them. The member is created and deleted here; the shared fixtures stay untouched.
@@ -22,8 +23,8 @@ test.describe('Admin leave and rejoin (A-6, A-7)', () => {
     adminPage: page,
   }) => {
     await page.goto(`/admin/members/${number}`)
-    await page.waitForLoadState('networkidle')
     await expect(page.getByText('Actiu', { exact: true })).toBeVisible()
+    await expectHydrated(page.getByRole('button', { name: 'Dona de baixa' }))
 
     // A-6
     await page.getByRole('button', { name: 'Dona de baixa' }).click()

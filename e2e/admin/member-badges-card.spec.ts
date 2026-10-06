@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures'
 import { createTestUser, deleteTestUser, getMemberNumber } from '../helpers/supabase-admin'
+import { expectHydrated } from '../helpers/hydration'
 
 // A-8 and A-9 through the real stack on a throwaway active member; the shared fixtures stay
 // untouched. The access link (A-15) is covered by component and integration tests: it sends a
@@ -25,8 +26,8 @@ test.describe('Admin badges and card (A-8, A-9)', () => {
 
   test('the board awards and then revokes a badge', async ({ adminPage: page }) => {
     await page.goto(`/admin/members/${number}`)
-    await page.waitForLoadState('networkidle')
     const badges = page.getByRole('region', { name: 'Insígnies' })
+    await expectHydrated(badges.getByRole('button', { name: 'Atorga insígnia' }))
 
     await badges.getByRole('button', { name: 'Atorga insígnia' }).click()
     const award = page.getByRole('dialog', { name: 'Atorga una insígnia' })
@@ -55,8 +56,8 @@ test.describe('Admin badges and card (A-8, A-9)', () => {
 
   test('the board regenerates the card and sees the success notice', async ({ adminPage: page }) => {
     await page.goto(`/admin/members/${number}`)
-    await page.waitForLoadState('networkidle')
     const card = page.getByRole('region', { name: 'Carnet' })
+    await expectHydrated(card.getByRole('button', { name: 'Regenera el carnet' }))
 
     await card.getByRole('button', { name: 'Regenera el carnet' }).click()
     const dialog = page.getByRole('dialog', { name: 'Regenera el carnet' })
