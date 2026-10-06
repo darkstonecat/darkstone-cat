@@ -99,7 +99,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T19 — V-3 edit mode + reveal (A-4, A-5) — route: delegated
 - [x] T20 — V-3 leave/rejoin dialogs (A-6, A-7) — route: delegated
 - [x] T21 — V-3 badges, card, member data, access link (A-8, A-9, A-11, A-15) — route: delegated
-- [ ] T22 — V-3 role card + S-3, V-5 roles — route: delegated
+- [x] T22 — V-3 role card + S-3, V-5 roles — route: delegated
 - [ ] T23 — Audit renderer + V-4 activity — route: delegated
 - [ ] T24 — V-1 dashboard (replaces AdminDashboard) — route: delegated
 - [ ] T25 — V-6 tools + event images move + 308 redirect — route: delegated
@@ -1861,6 +1861,50 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Deviation: the A-11 export stays as T18 built it; "Atorga" note field says "Nota (opcional)" and
   carries the no-DNI hint in its help text instead of the dialog reason slot.
 
+### T22 — done (route: delegated)
+
+- Commit: `feat(admin): Add role management, anonymisation and the roles page` on `develop-users`
+  (hash in `git log -- src/components/admin/member-file/RoleCard.tsx`).
+- Test-first: component and page tests were written together with the code (no RED: the actions
+  are already tested and mocked here).
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 104 files /
+  1508 tests passed; `npm run test:integration` 29 files / 521 tests passed;
+  `npx playwright test e2e/admin` 47 passed (twice).
+- `RoleCard` (client, "Rol" section of the member file, below badges and card; the page passes
+  `canManageRoles = isSuperadmin(actor.role)` and the file `isSelf = viewerId === member.id`).
+  Board: role and `role_since` read-only with "Només els superadmins poden canviar rols" and no
+  buttons. Superadmin: "Canvia el rol" (S-1/S-2, disabled with a visible reason on the own file and
+  for a former member); dialog with a radio group member/board/superadmin (never legacy admin),
+  confirm disabled until a role other than the current one is chosen, grant warning, optional
+  reason in a plain textarea; the notice (grant/revoke) lives in the card. Former members only:
+  "Anonimitza" (S-3, danger, P-4, "Només superadmins"): lists what is deleted now and what stays
+  locked until the purge date, typed member number (trimmed, must equal it exactly) before the
+  confirm enables, optional reason; success notice with the purge date; when `accountDeleted` is
+  false a warning with "Torna-ho a provar" re-runs the same action (idempotent; its answer keeps the
+  first purge date because the retry returns `purgeOn: null`). Disabled with a reason once the
+  member is anonymised AND has no login account (an anonymised member with a login can still retry).
+- Errors: every code of `setMemberRole`/`anonymiseMember` maps to `admin.member_file.errors.*`
+  (`self_role_change, last_superadmin, former_member_role, role_unchanged, role_held,
+  confirm_mismatch, invalid_role`...).
+- V-5 `/admin/roles` (`requireRole('superadmin', '/admin/roles')` first, so a board member or plain
+  member gets the 404; `force-dynamic`, noindex, not in the sitemap): active superadmins and board
+  (`admin_list_members` with `p_role`, SESSION client, limit 200, which includes the legacy
+  `admin`), each with `role_since` and a link to the file, a "Tu" marker, the explanation card
+  (chain, the three roles, minimum of two superadmins, former members cannot hold a role) and a
+  load-error notice. The Rols tab already existed. Messages `admin.roles.*`, `nav.admin_roles`,
+  `metadata.admin_roles_*` were added in the T21 commit.
+- Deviations: the mockup's "Fes superadmin", per-row "Treu el rol" and "Afegeix a la junta" search
+  are not on V-5 (read-only overview; roles change from the member file, whose server actions
+  enforce BR-10..BR-12) because the task asked for lists, dates, links and the BR-10 explanation;
+  `admin_list_members` has no `role_since`, so the page calls `admin_get_member` once per holder
+  (a handful of people). The role dialog is a radio group (mockup), not a select.
+- E2E: no superadmin fixture (not simple/safe: BR-10 needs two superadmins and teardown would
+  need a forced demotion the helpers cannot do), so the superadmin happy paths are covered by
+  component and page tests. `e2e/admin/roles.spec.ts`: board and member get 404 on `/admin/roles`,
+  no Rols tab for the board, the role card is read-only for the board on a throwaway member.
+- Tests: `RoleCard.test.tsx`, `RolesContent.test.tsx`, `tests/server/admin-roles-page.test.tsx`,
+  `MemberFile.test.tsx`, `admin-member-page.test.ts` (`canManageRoles`).
+
 ## Next step
 
-T22.
+T23.

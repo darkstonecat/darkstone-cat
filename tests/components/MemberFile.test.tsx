@@ -98,7 +98,7 @@ const entry = (over: Partial<AdminActivityRow> = {}): AdminActivityRow => ({
 })
 
 const render_ = (member: AdminMemberFileRow, over: Partial<React.ComponentProps<typeof MemberFile>> = {}) =>
-  render(<MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} viewerId="viewer" {...over} />)
+  render(<MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" {...over} />)
 
 describe('MemberFile, active member', () => {
   it('shows header, contact data, masked DNI and phone, badges and card', () => {
@@ -139,7 +139,7 @@ describe('MemberFile, active member', () => {
   it('renders the export button only when the viewer may export', () => {
     const { rerender } = render_(active)
     expect(screen.getByRole('button', { name: 'button' })).toBeInTheDocument()
-    rerender(<MemberFile member={active} activity={[]} backHref="/admin/members" canExportData={false} canRevealFormerDni={false} viewerId="viewer" />)
+    rerender(<MemberFile member={active} activity={[]} backHref="/admin/members" canExportData={false} canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" />)
     expect(screen.queryByRole('button', { name: 'button' })).not.toBeInTheDocument()
   })
 
@@ -216,7 +216,7 @@ describe('MemberFile, former member', () => {
     const { rerender } = render_(active)
     fireEvent.click(screen.getByRole('button', { name: 'open' }))
     expect(screen.getByRole('form', { name: 'form_label' })).toBeInTheDocument()
-    rerender(<MemberFile member={former} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} viewerId="viewer" />)
+    rerender(<MemberFile member={former} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" />)
     expect(screen.queryByRole('form')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'open' })).not.toBeInTheDocument()
   })

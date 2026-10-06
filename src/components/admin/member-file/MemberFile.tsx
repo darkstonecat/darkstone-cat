@@ -17,6 +17,7 @@ import CardSection from "./CardSection";
 import MemberDataExport from "./MemberDataExport";
 import MembershipActions from "./MembershipActions";
 import PersonalDataCard from "./PersonalDataCard";
+import RoleCard from "./RoleCard";
 
 const NO_VALUE = "—";
 
@@ -29,6 +30,8 @@ type MemberFileProps = {
   canExportData: boolean;
   /** Former member's DNI can only be revealed by a superadmin (D-E, provisional). */
   canRevealFormerDni: boolean;
+  /** Superadmin viewer: the role card offers role changes and anonymisation. */
+  canManageRoles: boolean;
   /** Id of the signed-in board member: their own file cannot be given a baixa (`self_target`). */
   viewerId: string;
 };
@@ -40,9 +43,9 @@ const CARD = "rounded-2xl bg-brand-white p-5 md:p-8";
  * RPC already nulls everything BR-20 deletes, and this component never renders a placeholder
  * for those fields. DNI and phone are only ever "present or not" (revealed on demand). Edit and reveal
  * live in `PersonalDataCard`, leave/rejoin in `MembershipActions`; badges, card
- * and access link in their own cards, the role in the header.
+ * and access link in their own cards, role and anonymise in `RoleCard`.
  */
-export default function MemberFile({ member, activity, backHref, canExportData, canRevealFormerDni, viewerId }: MemberFileProps) {
+export default function MemberFile({ member, activity, backHref, canExportData, canRevealFormerDni, canManageRoles, viewerId }: MemberFileProps) {
   const t = useTranslations("admin.member_file");
   const tAdmin = useTranslations("admin");
   const former = member.state === "former";
@@ -123,6 +126,8 @@ export default function MemberFile({ member, activity, backHref, canExportData, 
         <BadgesCard member={member} />
         <CardSection member={member} />
       </div>
+
+      <RoleCard member={member} canManage={canManageRoles} isSelf={viewerId === member.id} />
 
       <section aria-labelledby="mf-activity" className={`${CARD} flex flex-col gap-4`}>
         <div className="flex items-center justify-between gap-3">

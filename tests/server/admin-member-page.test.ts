@@ -99,10 +99,12 @@ describe('admin member file page', () => {
     session({ member: [member({ state: 'former' })] })
     let element: any = await render('000-203')
     expect(element.props.canRevealFormerDni).toBe(false)
+    expect(element.props.canManageRoles).toBe(false)
 
     mocks.requireRole.mockResolvedValue({ id: 'u2', role: 'superadmin' })
     element = await render('000-203')
     expect(element.props.canRevealFormerDni).toBe(true)
+    expect(element.props.canManageRoles).toBe(true)
     mocks.requireRole.mockResolvedValue({ id: 'u1', role: 'board' })
   })
 
