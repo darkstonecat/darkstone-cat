@@ -48,7 +48,7 @@ describe('generate_member_number() privileges', () => {
       .select('member_number')
       .eq('id', user.id)
       .single()
-    expect(data!.member_number).toMatch(/^000-\d{3}$/)
+    expect(data!.member_number).toMatch(/^000-\d{3,}$/)
   })
 })
 

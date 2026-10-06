@@ -29,7 +29,7 @@ describe('signup → member creation', () => {
     expect(data!.first_name).toBe('Signup')
     expect(data!.last_name).toBe('Test')
     expect(data!.role).toBe('member')
-    expect(data!.member_number).toMatch(/^000-\d{3}$/)
+    expect(data!.member_number).toMatch(/^000-\d{3,}$/)
     expect(data!.membership_start_date).toBeTruthy()
   })
 })

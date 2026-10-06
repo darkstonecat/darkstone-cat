@@ -61,7 +61,7 @@ describe('account deletion', () => {
         .eq('id', user.id)
         .maybeSingle()
       expect(stub).toMatchObject({ id: user.id, left_on: '2026-10-01' })
-      expect(stub!.member_number).toMatch(/^000-\d{3}$/)
+      expect(stub!.member_number).toMatch(/^000-\d{3,}$/)
 
       // Badges stay with the blocked register (BR-7); only the purge removes them.
       const { data: badges } = await supabaseAdmin

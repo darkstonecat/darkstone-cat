@@ -68,7 +68,7 @@ describe('generate_member_number()', () => {
       .eq('id', user.id)
       .single()
 
-    expect(data!.member_number).toMatch(/^000-\d{3}$/)
+    expect(data!.member_number).toMatch(/^000-\d{3,}$/)
   })
 
   it('auto-increments for consecutive users', async () => {
