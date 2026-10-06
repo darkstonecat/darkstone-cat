@@ -210,3 +210,104 @@ describe('AdminDialog smooth scroll', () => {
     expect(lenis.start).not.toHaveBeenCalled()
   })
 })
+
+describe('AdminDialog releases the page as soon as it starts closing', () => {
+  beforeEach(() => {
+    lenis.stop.mockClear()
+    lenis.start.mockClear()
+    lenis.isStopped = false
+  })
+
+  function Toggle({ second }: { second?: boolean }) {
+    const [open, setOpen] = useState(false)
+    const [openB, setOpenB] = useState(false)
+    return (
+      <>
+        <button onClick={() => setOpen(true)}>open</button>
+        <button onClick={() => setOpen(false)}>shut</button>
+        <button onClick={() => setOpenB(true)}>openB</button>
+        <button onClick={() => setOpen(false)}>swap-close-a</button>
+        <AdminDialog open={open} onClose={() => setOpen(false)} onConfirm={() => {}} title="A" confirmLabel="Ok">
+          a
+        </AdminDialog>
+        {second && (
+          <AdminDialog open={openB} onClose={() => setOpenB(false)} onConfirm={() => {}} title="B" confirmLabel="Ok">
+            b
+          </AdminDialog>
+        )}
+      </>
+    )
+  }
+
+  function setup() {
+    const main = document.createElement('main')
+    main.id = 'main-content'
+    document.body.appendChild(main)
+    document.body.style.overflow = 'auto'
+    return {
+      main,
+      cleanup: () => {
+        main.remove()
+        document.body.style.overflow = ''
+      },
+    }
+  }
+
+  it('un-inerts the page, unlocks scroll and restarts Lenis before the exit animation ends', () => {
+    const { main, cleanup } = setup()
+    render(<Toggle />)
+    fireEvent.click(screen.getByRole('button', { name: 'open' }))
+    expect(main).toHaveAttribute('inert')
+    fireEvent.click(screen.getByRole('button', { name: 'dialog_cancel' }))
+    // Synchronously after the close: the exiting panel may still be mounted, the page must not be locked.
+    expect(main).not.toHaveAttribute('inert')
+    expect(document.body.style.overflow).toBe('auto')
+    expect(lenis.start).toHaveBeenCalledTimes(1)
+    cleanup()
+  })
+
+  it('makes the exiting panel and backdrop unclickable and unfocusable', () => {
+    const { cleanup } = setup()
+    render(<Toggle />)
+    fireEvent.click(screen.getByRole('button', { name: 'open' }))
+    fireEvent.click(screen.getByRole('button', { name: 'dialog_cancel' }))
+    const backdrop = screen.queryByTestId('admin-dialog-backdrop')
+    // Either already gone or exiting with pointer events off.
+    if (backdrop) {
+      expect(backdrop.className).toMatch(/pointer-events-none/)
+      expect(screen.getByRole('dialog', { hidden: true })).toHaveAttribute('inert')
+    }
+    cleanup()
+  })
+
+  it('returns focus to the trigger right when it starts closing', () => {
+    const { cleanup } = setup()
+    render(<Toggle />)
+    const trigger = screen.getByRole('button', { name: 'open' })
+    trigger.focus()
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByRole('button', { name: 'dialog_cancel' }))
+    expect(document.activeElement).toBe(trigger)
+    cleanup()
+  })
+
+  it('keeps the page inert for a dialog that opens while another one is closing', () => {
+    const { main, cleanup } = setup()
+    render(<Toggle second />)
+    fireEvent.click(screen.getByRole('button', { name: 'open' }))
+    // B opens on top of A, then A closes while B stays open.
+    fireEvent.click(screen.getByRole('button', { name: 'openB' }))
+    expect(main).toHaveAttribute('inert')
+    expect(document.body.style.overflow).toBe('hidden')
+    fireEvent.click(screen.getByRole('button', { name: 'swap-close-a' }))
+    expect(main).toHaveAttribute('inert')
+    expect(document.body.style.overflow).toBe('hidden')
+    // Closing the last one restores the original overflow.
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(main).not.toHaveAttribute('inert')
+    expect(document.body.style.overflow).toBe('auto')
+    expect(lenis.stop).toHaveBeenCalledTimes(1)
+    expect(lenis.start).toHaveBeenCalledTimes(1)
+    cleanup()
+  })
+})

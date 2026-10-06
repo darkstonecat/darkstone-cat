@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "motion/react";
 import { MdClose, MdMenuBook } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { useLenis } from "@/components/SmoothScroll";
@@ -61,12 +61,52 @@ export function isReasonValid(reason: AdminDialogReason | undefined) {
   return reason.value.trim().length >= (reason.minLength ?? 5);
 }
 
+type PageLock = { count: number; overflow: string; inert: boolean; lenis: { start: () => void } | null };
+let pageLock: PageLock | null = null;
+
+/**
+ * Locks the page behind the dialogs (body scroll, Lenis, `#main-content` inert). Shared by every
+ * open dialog through a counter, so a dialog that opens while another one is closing keeps the page
+ * locked, and the original overflow / inert state is restored only when the last one releases.
+ */
+function lockPage(lenis: { isStopped: boolean; stop: () => void; start: () => void } | null) {
+  if (!pageLock) {
+    const main = document.getElementById("main-content");
+    const stopped = lenis && !lenis.isStopped ? lenis : null;
+    // Lenis scrolls the page on wheel events regardless of body overflow: stop it while open, and
+    // restart it on release only if a dialog is the one that stopped it.
+    stopped?.stop();
+    pageLock = {
+      count: 0,
+      overflow: document.body.style.overflow,
+      inert: main?.hasAttribute("inert") ?? false,
+      lenis: stopped,
+    };
+    document.body.style.overflow = "hidden";
+    // Everything behind the dialog becomes inert (no focus, no clicks, hidden from assistive tech).
+    main?.setAttribute("inert", "");
+  }
+  pageLock.count += 1;
+  return function unlockPage() {
+    const lock = pageLock;
+    if (!lock) return;
+    lock.count -= 1;
+    if (lock.count > 0) return;
+    pageLock = null;
+    document.body.style.overflow = lock.overflow;
+    lock.lenis?.start();
+    if (!lock.inert) document.getElementById("main-content")?.removeAttribute("inert");
+  };
+}
+
 /**
  * Shared dialog shell of the admin panel (README §4 "Dialog shell"): modal, focus trap,
  * focus returns to the trigger, Escape closes unless busy, 44 px close button, footer with
  * the procedure link, cancel and confirm. Screens only provide the body and the confirm action.
  * The panel is portalled to <body> so the page behind (`#main-content`) can be made `inert` and
- * its scroll locked while open, like the card QR overlay.
+ * its scroll locked while open, like the card QR overlay. The page is released the moment the
+ * dialog starts closing (not when the exit animation ends): the exiting panel is inert and ignores
+ * the pointer, so the first click after closing is never swallowed.
  */
 export default function AdminDialog(props: AdminDialogProps) {
   return <AnimatePresence>{props.open && <DialogPanel key="dialog" {...props} />}</AnimatePresence>;
@@ -101,11 +141,14 @@ function DialogPanel({
   const explainId = useId();
 
   const lenis = useLenis();
-  // Kept in a ref so a new Lenis identity never re-runs the mount effect (and its cleanup) while open.
+  // Kept in a ref so a new Lenis identity never re-runs the lock effect (and its cleanup) while open.
   const lenisRef = useRef(lenis);
   useEffect(() => {
     lenisRef.current = lenis;
   }, [lenis]);
+
+  // `false` as soon as the parent sets `open` to false, while the exit animation is still running.
+  const isPresent = useIsPresent();
 
   // Latest values for the document listener, which is attached once.
   const live = useRef({ busy, onClose });
@@ -114,18 +157,9 @@ function DialogPanel({
   });
 
   useEffect(() => {
+    if (!isPresent) return;
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    // Lenis scrolls the page on wheel events regardless of body overflow: stop it while open, and
-    // restart it on close only if this dialog is the one that stopped it.
-    const current = lenisRef.current;
-    const stoppedLenis = current && !current.isStopped ? current : null;
-    stoppedLenis?.stop();
-    // Everything behind the dialog becomes inert (no focus, no clicks, hidden from assistive tech).
-    const main = document.getElementById("main-content");
-    const wasInert = main?.hasAttribute("inert") ?? false;
-    main?.setAttribute("inert", "");
+    const unlockPage = lockPage(lenisRef.current);
     const panel = panelRef.current;
     const first = panel?.querySelector<HTMLElement>("[data-autofocus]") ?? panel;
     first?.focus();
@@ -161,12 +195,10 @@ function DialogPanel({
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
-      stoppedLenis?.start();
-      if (!wasInert) main?.removeAttribute("inert");
+      unlockPage();
       previous?.focus?.();
     };
-  }, []);
+  }, [isPresent]);
 
   // The buttons disable while a request runs: keep focus inside the dialog instead of <body>.
   useEffect(() => {
@@ -197,7 +229,10 @@ function DialogPanel({
   return createPortal(
     <motion.div
       data-testid="admin-dialog-backdrop"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-stone-custom/60 sm:items-center sm:p-4"
+      className={cn(
+        "fixed inset-0 z-50 flex items-end justify-center bg-stone-custom/60 sm:items-center sm:p-4",
+        !isPresent && "pointer-events-none",
+      )}
       initial={{ opacity: reduced ? 1 : 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: reduced ? 1 : 0 }}
@@ -214,6 +249,7 @@ function DialogPanel({
         aria-describedby={target ? targetId : undefined}
         aria-busy={busy || undefined}
         tabIndex={-1}
+        inert={!isPresent || undefined}
         data-lenis-prevent
         className="flex max-h-[100dvh] w-full flex-col gap-5 overflow-y-auto rounded-t-2xl bg-brand-white p-5 shadow-[0_24px_64px_rgba(12,10,9,0.35)] outline-none sm:max-h-[calc(100dvh-2rem)] sm:w-[560px] sm:max-w-[calc(100vw-2rem)] sm:rounded-2xl sm:p-8"
         {...motionProps}
