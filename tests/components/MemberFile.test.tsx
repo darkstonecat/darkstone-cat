@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within, fireEvent } from '@testing-library/react'
+import { render, screen, within, fireEvent, waitFor } from '@testing-library/react'
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, values?: Record<string, unknown>) =>
@@ -25,6 +25,8 @@ vi.mock('@/i18n/routing', () => ({
 }))
 
 import MemberFile from '@/components/admin/member-file/MemberFile'
+import { updateMember, regenerateCard, revokeBadge } from '@/lib/admin/member-actions'
+import { leaveMember } from '@/lib/admin/membership-actions'
 import type { AdminActivityRow, AdminMemberFileRow } from '@/lib/admin/member-file'
 
 const active: AdminMemberFileRow = {
@@ -235,5 +237,56 @@ describe('MemberFile, former member', () => {
     render_(active)
     expect(screen.getByRole('button', { name: 'leave_button' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'rejoin_button' })).not.toBeInTheDocument()
+  })
+})
+
+describe('MemberFile, outcome notices and state changes', () => {
+  const again = (member: AdminMemberFileRow) => (
+    <MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" />
+  )
+
+  it('clears the "Dades desades" notice when the member becomes a former one', async () => {
+    vi.mocked(updateMember).mockResolvedValue({ changed: ['first_name'] })
+    const { rerender } = render_(active)
+    fireEvent.click(screen.getByRole('button', { name: 'open' }))
+    fireEvent.submit(screen.getByRole('form', { name: 'form_label' }))
+    expect(await screen.findByText('saved')).toBeInTheDocument()
+    rerender(again(former))
+    expect(screen.queryByText('saved')).not.toBeInTheDocument()
+    rerender(again(active))
+    expect(screen.queryByText('saved')).not.toBeInTheDocument()
+  })
+
+  it('clears the card notice when the member changes state', async () => {
+    vi.mocked(regenerateCard).mockResolvedValue({ ok: true })
+    const { rerender } = render_(active)
+    fireEvent.click(screen.getByRole('button', { name: 'regenerate_button' }))
+    fireEvent.click(screen.getByRole('button', { name: 'regenerate_confirm' }))
+    expect(await screen.findByText('regenerate_done')).toBeInTheDocument()
+    rerender(again(former))
+    expect(screen.queryByText('regenerate_done')).not.toBeInTheDocument()
+  })
+
+  it('clears the badge notice when the member changes state', async () => {
+    vi.mocked(revokeBadge).mockResolvedValue({ ok: true })
+    const { rerender } = render_(active)
+    fireEvent.click(screen.getByRole('button', { name: /revoke_aria/ }))
+    fireEvent.change(screen.getByLabelText(/reason|motiu/i, { selector: 'textarea' }), { target: { value: 'Sense motiu' } })
+    fireEvent.click(screen.getByRole('button', { name: 'revoke_confirm' }))
+    expect(await screen.findByText('revoke_done')).toBeInTheDocument()
+    rerender(again(former))
+    expect(screen.queryByText('revoke_done')).not.toBeInTheDocument()
+  })
+
+  it('keeps the leave outcome of MembershipActions visible after the state change', async () => {
+    vi.mocked(leaveMember).mockResolvedValue({ emailSent: true } as never)
+    const { rerender } = render_(active)
+    fireEvent.click(screen.getByRole('button', { name: 'leave_button' }))
+    fireEvent.change(screen.getByLabelText(/leave_reason_label/), { target: { value: 'Ha marxat de la ciutat' } })
+    fireEvent.click(screen.getByRole('button', { name: 'leave_confirm' }))
+    expect(await screen.findByText('left_done')).toBeInTheDocument()
+    rerender(again(former))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'rejoin_button' })).toBeInTheDocument())
+    expect(screen.getByText('left_done')).toBeInTheDocument()
   })
 })

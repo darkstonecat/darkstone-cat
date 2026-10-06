@@ -52,6 +52,11 @@ export default function MemberFile({ member, activity, backHref, canExportData, 
   const leftOn = formatAdminDate(member.left_on);
   const purgeOn = formatAdminDate(member.purge_on);
   const firstSignup = formatAdminDate(member.membership_start_date);
+  // Notice rule: an outcome notice (saved, awarded, regenerated, role changed...) describes the file
+  // as it was when it happened. Cards that keep one in local state are remounted with this key when
+  // `member.state` changes, which clears it. `MembershipActions` is the exception (no key): its
+  // leave / rejoin outcome is what changes the state and must stay visible after the refresh.
+  const stateKey = member.state;
 
   return (
     <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-4 pb-16 pt-10 sm:px-6 md:pt-16">
@@ -99,7 +104,7 @@ export default function MemberFile({ member, activity, backHref, canExportData, 
         </Notice>
       )}
 
-      <PersonalDataCard member={member} canRevealFormerDni={canRevealFormerDni} />
+      <PersonalDataCard key={`personal-${stateKey}`} member={member} canRevealFormerDni={canRevealFormerDni} />
 
       <section aria-labelledby="mf-membership" className={`${CARD} flex flex-col gap-5`}>
         <h3 id="mf-membership" className="text-xl font-bold text-stone-custom">
@@ -122,11 +127,11 @@ export default function MemberFile({ member, activity, backHref, canExportData, 
       </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <BadgesCard member={member} />
-        <CardSection member={member} />
+        <BadgesCard key={`badges-${stateKey}`} member={member} />
+        <CardSection key={`card-${stateKey}`} member={member} />
       </div>
 
-      <RoleCard member={member} canManage={canManageRoles} isSelf={viewerId === member.id} />
+      <RoleCard key={`role-${stateKey}`} member={member} canManage={canManageRoles} isSelf={viewerId === member.id} />
 
       <section aria-labelledby="mf-activity" className={`${CARD} flex flex-col gap-4`}>
         <div className="flex items-center justify-between gap-3">
