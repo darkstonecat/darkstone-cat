@@ -6,10 +6,6 @@ import { toRole } from "@/lib/auth/roles";
 import { listAllMembersForAdmin } from "@/lib/admin/members";
 import { maskDni, maskPhone } from "@/lib/admin/utils";
 import { decrypt } from "@/lib/encryption";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
-import ScrollToTop from "@/components/ScrollToTop";
-import AuthHero from "@/components/auth/AuthHero";
 import MembersTable, { type MemberRow } from "@/components/admin/MembersTable";
 
 export const revalidate = false;
@@ -43,7 +39,7 @@ export default async function AdminMembersPage({
   const { locale } = await params;
 
   // Board members and superadmins only; anyone else gets the 404 page.
-  const actor = await requireRole("board");
+  const actor = await requireRole("board", "/admin/members");
 
   const [tNav, tMeta] = await Promise.all([
     getTranslations({ locale, namespace: "nav" }),
@@ -99,22 +95,14 @@ export default async function AdminMembersPage({
   }
 
   return (
-    <main id="main-content" className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
       />
-      <NavBar />
-      <AuthHero titleKey="members_title" subtitleKey="members_subtitle" namespace="admin" />
-
-      <section className="flex-1 bg-brand-beige pb-20">
-        <div className="container mx-auto max-w-6xl px-6 pt-16">
-          <MembersTable members={rows} />
-        </div>
-      </section>
-
-      <Footer />
-      <ScrollToTop />
-    </main>
+      <div className="container mx-auto max-w-6xl px-6 pt-16">
+        <MembersTable members={rows} />
+      </div>
+    </>
   );
 }

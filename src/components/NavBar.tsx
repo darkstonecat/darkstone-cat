@@ -67,7 +67,7 @@ const SUBPAGE_THEMES: Record<string, { text: string; bg: string }> = {
 };
 
 /** Dynamic routes have no exact key in `SUBPAGE_THEMES`; they match by prefix (dark hero pages). */
-const DYNAMIC_SUBPAGE_PREFIXES = ["/verify/"];
+const DYNAMIC_SUBPAGE_PREFIXES = ["/verify/", "/admin/"];
 
 function getSubpageTheme(pathname: string) {
   if (SUBPAGE_THEMES[pathname]) return SUBPAGE_THEMES[pathname];

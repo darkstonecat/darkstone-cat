@@ -11,7 +11,21 @@ const nav = vi.hoisted(() => ({
 
 vi.mock('@/lib/supabase/server', () => ({ createClient: vi.fn() }))
 vi.mock('next/navigation', () => ({ notFound: nav.notFound }))
-vi.mock('@/i18n/routing', () => ({ redirect: nav.redirect }))
+vi.mock('@/i18n/routing', () => ({
+  redirect: nav.redirect,
+  routing: { defaultLocale: 'ca' },
+}))
+// React.cache only dedupes inside a server render; emulate it per "request" with a Map keyed on the args.
+const requestCache = vi.hoisted(() => ({ store: new Map<string, unknown>() }))
+vi.mock('react', async (orig) => ({
+  ...(await orig<typeof import('react')>()),
+  cache: <T extends (...a: any[]) => any>(fn: T) =>
+    ((...args: any[]) => {
+      const key = JSON.stringify(args)
+      if (!requestCache.store.has(key)) requestCache.store.set(key, fn(...args))
+      return requestCache.store.get(key)
+    }) as T,
+}))
 vi.mock('next-intl/server', () => ({ getLocale: vi.fn().mockResolvedValue('es') }))
 
 import { createClient } from '@/lib/supabase/server'
@@ -103,7 +117,10 @@ describe('getAdminAccess', () => {
 })
 
 describe('requireRole', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+    requestCache.store.clear()
+  })
 
   it('returns the actor when the role is enough', async () => {
     setup({ user, member: active('board') })
@@ -114,7 +131,38 @@ describe('requireRole', () => {
   it('redirects to the localized login without a session', async () => {
     setup({ user: null })
     await expect(requireRole('board')).rejects.toThrow('NEXT_REDIRECT')
-    expect(nav.redirect).toHaveBeenCalledWith({ href: '/login', locale: 'es' })
+    expect(nav.redirect).toHaveBeenCalledWith({
+      href: { pathname: '/login', query: { redirect: '/es/admin' } },
+      locale: 'es',
+    })
+  })
+
+  it('passes the page path (with the locale prefix) as the login redirect', async () => {
+    setup({ user: null })
+    await expect(requireRole('board', '/admin/members')).rejects.toThrow('NEXT_REDIRECT')
+    expect(nav.redirect).toHaveBeenCalledWith({
+      href: { pathname: '/login', query: { redirect: '/es/admin/members' } },
+      locale: 'es',
+    })
+  })
+
+  it.each(['https://evil.example/x', '//evil.example', '/\\evil', 'admin', '/admin/../..//evil.example'])(
+    'falls back to /admin for the unsafe return path %s',
+    async (bad) => {
+      setup({ user: null })
+      await expect(requireRole('board', bad)).rejects.toThrow('NEXT_REDIRECT')
+      expect(nav.redirect).toHaveBeenCalledWith({
+        href: { pathname: '/login', query: { redirect: '/es/admin' } },
+        locale: 'es',
+      })
+    }
+  )
+
+  it('queries the session once when the layout and the page both call it', async () => {
+    const { client } = setup({ user, member: active('board') })
+    await requireRole('board')
+    await requireRole('board', '/admin/members')
+    expect(client.from).toHaveBeenCalledTimes(1)
   })
 
   it('renders not found for a member', async () => {

@@ -16,7 +16,8 @@ test.describe('Admin dashboard', () => {
 
   test('has link to members management', async ({ adminPage: page }) => {
     await page.goto(PAGES.admin)
-    const membersLink = page.locator('a[href*="/admin/members"]')
+    // The tab and the dashboard card both link to the list.
+    const membersLink = page.locator('a[href*="/admin/members"]').first()
     await expect(membersLink).toBeVisible()
   })
 

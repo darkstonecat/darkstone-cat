@@ -3,10 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { requireRole } from "@/lib/admin/guard";
 import { listAllMembersForAdmin } from "@/lib/admin/members";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
-import ScrollToTop from "@/components/ScrollToTop";
-import AuthHero from "@/components/auth/AuthHero";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 
 export const revalidate = false;
@@ -40,7 +36,7 @@ export default async function AdminPage({
   const { locale } = await params;
 
   // Board members and superadmins only; anyone else gets the 404 page.
-  const actor = await requireRole("board");
+  const actor = await requireRole("board", "/admin");
 
   const [tNav, tMeta] = await Promise.all([
     getTranslations({ locale, namespace: "nav" }),
@@ -73,22 +69,14 @@ export default async function AdminPage({
   }
 
   return (
-    <main id="main-content" className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
       />
-      <NavBar />
-      <AuthHero titleKey="title" subtitleKey="subtitle" namespace="admin" />
-
-      <section className="flex-1 bg-brand-beige pb-20">
-        <div className="container mx-auto max-w-4xl px-6 pt-16">
-          <AdminDashboard stats={stats} />
-        </div>
-      </section>
-
-      <Footer />
-      <ScrollToTop />
-    </main>
+      <div className="container mx-auto max-w-4xl px-6 pt-16">
+        <AdminDashboard stats={stats} />
+      </div>
+    </>
   );
 }

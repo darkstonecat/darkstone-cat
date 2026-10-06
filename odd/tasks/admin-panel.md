@@ -91,7 +91,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 
 ### Screens
 
-- [ ] T14 — Admin shell: layout with guard, AdminHeader/AdminTabs, AdminDialog primitive, i18n — route: delegated
+- [x] T14 — Admin shell: layout with guard, AdminHeader/AdminTabs, AdminDialog primitive, i18n — route: delegated
 - [ ] T15 — V-8 procedures — route: delegated
 - [ ] T16 — V-2 members list (server search/pagination, mobile cards) — route: delegated
 - [ ] T17 — V-2 dialogs (A-10, A-16, S-4) — route: delegated
@@ -1555,6 +1555,51 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   limiter falls back to one instance's memory without the shared limiter table (runbook of
   `20261001100000`, already applied for the contact form).
 
+### T14 — done (route: delegated)
+
+- Commit: `feat(admin): Add the admin panel shell, tabs and dialog` on `develop-users`
+  (hash in `git log -- src/components/admin/AdminDialog.tsx`).
+- Test-first: RED observed (4 new component suites failed to import, 8 guard tests failed);
+  GREEN after. Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 88 files / 1303 tests passed; `npx playwright test e2e/admin` 24 passed.
+- Shell: `src/app/[locale]/admin/layout.tsx` calls `requireRole("board")`, loads the member name,
+  renders NavBar, `AdminHeader` (eyebrow, per-view title from the active tab, "Has entrat com a
+  <name> · Junta|Superadmin"), `AdminTabs`, children and Footer, and sets `robots: noindex`.
+  `/admin` and `/admin/members` pages dropped their own NavBar/Footer/AuthHero/main; later pages
+  render only their content (`container mx-auto px-6 pt-16` inside the beige section).
+- Tabs follow the mockup README order, not the task text: Resum `/admin`, Socis
+  `/admin/members`, Activitat `/admin/activity`, Procediments `/admin/procedures`, Eines
+  `/admin/tools`, Rols `/admin/roles` (superadmin only). `AdminTabs({ isSuperadmin })`;
+  exports `ADMIN_TABS`, `visibleAdminTabs`, `activeAdminTab(pathname)` (nested paths belong to
+  their section). Mobile: 3-column grid, two rows. Header title = the active tab label; a
+  screen that needs another title (member file) must render its own heading below the header.
+- Guard: `requireRole(min, returnTo = "/admin")` is memoised per request with `React.cache`
+  (layout + page share one lookup). Next layouts cannot read the pathname, so the redirect
+  to `/login?redirect=<localized returnTo>` uses `returnTo` (validated with `safeRedirectPath`,
+  unsafe values fall back to `/admin`); pages pass their own path, the layout uses the default.
+  `getAdminAccess` (API routes) is not cached.
+- `AdminDialog` props: `open`, `onClose`, `onConfirm`, `title`, `target?` (line under the title,
+  aria-describedby), `variant?: "neutral" | "danger"`, `superadminOnly?`, `procedure?` ("P-2" links
+  to `/admin/procedures#p-2`), `confirmLabel`, `cancelLabel?`, `confirmDisabled?` +
+  `confirmDisabledReason?` (visible text linked by aria-describedby), `busy?`, `error?`,
+  `reason?: { label, value, onChange, minLength = 5, maxLength = 1000, help? }` (shows the
+  "No escriguis DNI ni telèfons al motiu" hint; confirm stays disabled until the trimmed
+  reason reaches `minLength`; export `isReasonValid`), `closeOnBackdrop?` (default true),
+  children = body. Focus trap, Escape and backdrop ignored while `busy`, focus returns to the
+  trigger, reduced motion respected (Motion `useReducedMotion`; the project hook needs
+  `matchMedia`, absent in jsdom). Bottom sheet below `sm`. `ExportConfirmDialog` now uses it
+  (same behaviour, its tests unchanged; the error is now a `role="alert"`).
+- Shared: `StatusChip({ kind: active|left|valid|invalid|error|board|superadmin, label?, onDark? })`,
+  `Notice({ kind: info|warning|blocked })` (blocked is `role="alert"`),
+  `ReasonButton({ variant, reason, disabled, ... })`, and `adminButtonClass(variant)` in
+  `adminButtons.ts` (primary / secondary / danger, 44 px).
+- i18n (`admin`, ca/es/en): `tabs_label`, `header_*`, `tab_*`, `chip_*` (incl.
+  `chip_superadmin_only`), `dialog_close|cancel|procedure|reason_hint|reason_min`.
+- NavBar: `/admin/` added to the prefix list so every admin subpath gets the dark theme.
+- The dashboard e2e spec's members link locator now uses `.first()` (tab and card both link).
+- Not done / for later: no `SubpageTheme` per-route keys (prefix match instead); dialog is not
+  portalled (fixed positioning is enough inside the layout).
+
 ## Next step
 
-T14 (screens start: admin shell).
+T15.

@@ -1,9 +1,11 @@
 import "server-only";
 
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { getLocale } from "next-intl/server";
-import { redirect } from "@/i18n/routing";
+import { redirect, routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 import { hasRoleAtLeast, toRole, type Role } from "@/lib/auth/roles";
 
 /** Levels an admin page or route can require. */
@@ -50,18 +52,40 @@ export async function getAdminAccess(min: AdminLevel): Promise<AdminAccess> {
   return { status: "ok", actor: { id: user.id, role } };
 }
 
+/** Per-request memo: the admin layout and the page both guard, one lookup serves both. */
+const getAdminAccessOnce = cache((min: AdminLevel) => getAdminAccess(min));
+
+/** Only the path is validated, so any placeholder origin works. */
+const PATH_CHECK_ORIGIN = "http://localhost";
+
 /**
- * Guard for admin pages (server components). Returns the actor, redirects to the
- * localized login without a session (the proxy normally did that already) and
- * renders the 404 page for anyone without the role, so the panel does not reveal
- * itself to members.
+ * Localized, same-origin login redirect target for `returnTo` (a path without the
+ * locale prefix, e.g. "/admin/members"). Anything that is not a plain relative path
+ * falls back to "/admin". Next layouts cannot read the current pathname, so callers
+ * pass the path of the page they guard; the layout passes the default.
  */
-export async function requireRole(min: AdminLevel): Promise<AdminActor> {
-  const access = await getAdminAccess(min);
+function loginRedirectTarget(returnTo: string, locale: string): string {
+  const safe = safeRedirectPath(returnTo, PATH_CHECK_ORIGIN, "/admin");
+  return locale === routing.defaultLocale ? safe : `/${locale}${safe}`;
+}
+
+/**
+ * Guard for admin pages and the admin layout (server components). Returns the actor,
+ * redirects to the localized login without a session (the proxy normally did that
+ * already, with the exact path) and renders the 404 page for anyone without the role,
+ * so the panel does not reveal itself to members. Memoised per request.
+ *
+ * `returnTo` is where login sends the member back (default "/admin").
+ */
+export async function requireRole(min: AdminLevel, returnTo = "/admin"): Promise<AdminActor> {
+  const access = await getAdminAccessOnce(min);
 
   if (access.status === "unauthenticated") {
     const locale = await getLocale();
-    return redirect({ href: "/login", locale });
+    return redirect({
+      href: { pathname: "/login", query: { redirect: loginRedirectTarget(returnTo, locale) } },
+      locale,
+    });
   }
   if (access.status === "forbidden") notFound();
 
