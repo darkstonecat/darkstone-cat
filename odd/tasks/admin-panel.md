@@ -2430,6 +2430,26 @@ delivery, no PR slicing):
 5. User review of the Catalan leave/rejoin e-mail copy (T10) and of the provisional decisions.
 6. Optional: move the post-leave notice from `/login?left=1` to the home page (T26 deviation);
    share the cookie wipe between NavBar and `LeaveAssociationDialog`.
+7. Minor UX from the manual check (below): the first click on the page right after closing an
+   `AdminDialog` is swallowed (the page stays inert during the ~200 ms exit animation); a success
+   notice of `PersonalDataCard` ("Dades desades.") stays visible after a leave/rejoin.
+8. `e2e/admin/activity.spec.ts:9` is flaky on a cold dev server (`waitForLoadState` 15 s);
+   replace the networkidle wait with a hydration marker or URL assertion.
+
+## Final verification (2026-10-06)
+
+- Full E2E `npm run test:e2e` on 2bd28b7: 252 passed, 1 failed (`e2e/navigation/locale-routing.spec.ts`
+  "language switcher is visible", known pre-existing failure), 1 flaky (`e2e/admin/activity.spec.ts:9`,
+  passed on retry and on an isolated rerun); 2.4 min; the zona-socis WIP specs passed too.
+- Manual check in Chrome against a local dev server (port 3200, local Supabase with the CI demo
+  keys, LUDOYA_MOCK) with throwaway users (superadmin, board, member; deleted afterwards):
+  superadmin dashboard figures and activity; members search; member file; edit with DNI, phone
+  and postal code (only field names in the audit entry); reveal of the DNI (v2 ciphertext decrypts
+  end to end, value only in the dialog); award a badge; leave (former view, purge date, `emailSent`
+  false warning with the dummy SMTP) and rejoin (checklist gating, phone/postal code cleared, DNI
+  kept); roles, tools and activity pages; board view: 5 tabs, `/admin/roles` 404, read-only role card.
+  Findings: the two minor UX items in follow-up 7. Not covered manually: Safari clipboard,
+  mobile layout, the member-side leave flow (covered by e2e).
 
 ## Next step
 
