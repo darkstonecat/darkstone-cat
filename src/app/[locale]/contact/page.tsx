@@ -38,12 +38,25 @@ export async function generateMetadata({
   };
 }
 
+// Same limit as the subject field (ContactForm.tsx, src/app/api/contact/route.ts).
+const MAX_SUBJECT = 150;
+
+/** `?subject=` prefill (spec V-7, M-2): plain text only, one line, length-limited. */
+function prefilledSubject(value: string | string[] | undefined): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const clean = [...value.replace(/[\u0000-\u001f\u007f]+/g, " ").trim()].slice(0, MAX_SUBJECT).join("");
+  return clean || undefined;
+}
+
 export default async function ContactPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ subject?: string | string[] }>;
 }) {
   const { locale } = await params;
+  const defaultSubject = prefilledSubject((await searchParams).subject);
   const [tNav, t] = await Promise.all([
     getTranslations({ locale, namespace: "nav" }),
     getTranslations({ locale, namespace: "metadata" }),
@@ -65,7 +78,7 @@ export default async function ContactPage({
       {/* Content */}
       <section className="flex-1 bg-brand-beige pb-20">
         <div className="container mx-auto grid max-w-4xl gap-16 pt-16 px-6 md:grid-cols-3">
-          <ContactForm />
+          <ContactForm defaultSubject={defaultSubject} />
           <ContactInfo />
         </div>
       </section>

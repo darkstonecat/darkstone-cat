@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { MdOutlineMail, MdMarkEmailRead } from "react-icons/md";
+import { MdCheckCircleOutline, MdMailOutline, MdOutlineMail, MdMarkEmailRead } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { motion } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
@@ -29,6 +29,11 @@ const inputClass =
 
 const labelClass = "text-sm font-medium text-stone-custom/80";
 
+/** GoTrue's answer for a banned account (`user_banned`, HTTP 400 "User is banned"). */
+function isBannedError(error: { code?: string; message?: string }): boolean {
+  return error.code === "user_banned" || /\bbanned\b/i.test(error.message ?? "");
+}
+
 const bannerBase = "rounded-xl border px-4 py-3 text-sm";
 const errorBanner = `${bannerBase} border-red-200 bg-red-50 text-red-700`;
 
@@ -38,6 +43,8 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  // The generic sign-in error: wrong password, unknown account or former member (spec §4.4).
+  const [credentialsError, setCredentialsError] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [email, setEmail] = useState("");
   const sentHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -48,6 +55,7 @@ export default function LoginForm() {
   const recovery = searchParams.get("recovery");
   const magic = searchParams.get("magic");
   const redirect = searchParams.get("redirect");
+  const left = searchParams.get("left");
 
   const isBusy = status === "submitting" || status === "sending-link";
   const emailValid = EMAIL_RE.test(email.trim());
@@ -88,6 +96,7 @@ export default function LoginForm() {
 
     setStatus("submitting");
     setErrorMessage("");
+    setCredentialsError(false);
 
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
@@ -97,8 +106,11 @@ export default function LoginForm() {
 
     if (error) {
       setStatus("error");
-      if (error.message === "Invalid login credentials") {
+      // GoTrue checks the ban before the password, so a banned (former) member gets exactly
+      // the wrong-password error: a specific one would reveal who was a member (D-6).
+      if (error.message === "Invalid login credentials" || isBannedError(error)) {
         setErrorMessage(t("login_error_invalid_credentials"));
+        setCredentialsError(true);
       } else if (error.message === "Email not confirmed") {
         setErrorMessage(t("login_error_email_not_confirmed"));
       } else {
@@ -118,6 +130,7 @@ export default function LoginForm() {
 
     setStatus("sending-link");
     setErrorMessage("");
+    setCredentialsError(false);
     setErrors({});
 
     // The email template cannot carry the destination, so remember it briefly.
@@ -199,6 +212,15 @@ export default function LoginForm() {
       noValidate
     >
       <div aria-live="polite" className="flex flex-col gap-5 empty:hidden">
+        {left === "1" && (
+          <div
+            role="status"
+            className={`${bannerBase} flex items-start gap-2.5 border-green-200 bg-green-50 text-green-700`}
+          >
+            <MdCheckCircleOutline size={18} aria-hidden="true" className="mt-px shrink-0" />
+            {t("login_left_notice")}
+          </div>
+        )}
         {confirmed === "success" && (
           <div
             role="status"
@@ -225,6 +247,19 @@ export default function LoginForm() {
         {status === "error" && errorMessage && (
           <div role="alert" className={errorBanner}>
             {errorMessage}
+          </div>
+        )}
+        {status === "error" && credentialsError && (
+          // Shown with the generic error to everyone, so it reveals nothing (spec §4.4).
+          <div className="flex flex-col items-start gap-3 border-t border-stone-custom/[0.12] pt-4">
+            <p className="text-[13px] leading-normal text-stone-custom/75">{t("login_help_text")}</p>
+            <Link
+              href={{ pathname: "/contact", query: { subject: t("login_help_subject") } }}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-stone-custom/15 bg-brand-white px-5 text-sm font-semibold text-stone-custom transition-colors hover:bg-stone-custom/5 max-sm:w-full"
+            >
+              <MdMailOutline size={18} aria-hidden="true" />
+              {t("login_help_button")}
+            </Link>
           </div>
         )}
       </div>

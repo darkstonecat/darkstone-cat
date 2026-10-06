@@ -30,7 +30,11 @@ const mockMember = {
   newsletter_accepted: false,
   membership_start_date: '2026-01-01',
   created_at: '2026-01-01',
+  left_on: null as string | null,
 }
+
+// A former member whose access token GoTrue still accepts (issued before the leave).
+const formerMember = { ...mockMember, left_on: '2026-10-01' }
 
 function setupMock(opts: {
   user?: typeof mockUser | null
@@ -87,6 +91,11 @@ describe('getCurrentMember', () => {
     setupMock({ user: mockUser, member: null })
     expect(await getCurrentMember()).toBeNull()
   })
+
+  it('treats a former member as no member (spec §4.4)', async () => {
+    setupMock({ user: mockUser, member: formerMember })
+    expect(await getCurrentMember()).toBeNull()
+  })
 })
 
 describe('getProfileData', () => {
@@ -119,6 +128,11 @@ describe('getProfileData', () => {
       member: null,
       memberError: { message: 'not found' },
     })
+    expect(await getProfileData()).toBeNull()
+  })
+
+  it('returns null for a former member, whose old access token still validates', async () => {
+    setupMock({ user: mockUser, member: formerMember })
     expect(await getProfileData()).toBeNull()
   })
 

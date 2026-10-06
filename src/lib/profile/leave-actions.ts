@@ -9,7 +9,8 @@ import { adminDbErrorCode } from "@/lib/admin/action-errors";
  * M-1 · A member leaves the association ("Dona't de baixa"). `member_leave_self` closes the
  * caller's own membership, bans the login account and ends its server-side sessions in one
  * transaction (T6); this action then clears this browser's auth cookies. The spec defines no
- * e-mail for a self leave, so none is sent. The UI (T26) shows the notice and redirects home.
+ * e-mail for a self leave, so none is sent. The UI (LeaveAssociationDialog) wipes the cookies
+ * as well and sends the browser to /login with the "T'has donat de baixa" notice.
  */
 
 export type LeaveAssociationError =

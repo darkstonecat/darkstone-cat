@@ -104,7 +104,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T23 — Audit renderer + V-4 activity — route: delegated
 - [x] T24 — V-1 dashboard (replaces AdminDashboard) — route: delegated
 - [x] T25 — V-6 tools + event images move + 308 redirect — route: delegated
-- [ ] T26 — V-7 member side: M-1 leave dialog, login help, neutral password reset via server action — route: delegated
+- [x] T26 — V-7 member side: M-1 leave dialog, login help, neutral password reset via server action — route: delegated
 - [ ] T27 — M7 `roles_contract` + prod runbook + CLAUDE.md/README — route: delegated
 
 ## Acceptance criteria
@@ -2031,6 +2031,66 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - E2E note: the manual refresh test cannot be retried within a minute (per-member limiter), so it has retries off.
 
 
+### T26 — done (route: delegated)
+
+- Commit: `feat(profile): Replace account deletion with leaving the association` on `develop-users`
+  (hash in `git log -- src/components/profile/LeaveAssociationDialog.tsx`). One commit: the leave
+  dialog, the neutral reset, the login help line and their translations share the three message files.
+- Test-first: RED observed with the new `tests/integration/former-member-access.test.ts` (failed to
+  import the missing `password-reset-actions`); GREEN after the action and the `left_on` check (5/5).
+  The unit tests (`password-reset-actions`, `auth` former-member cases, `AccountActions`,
+  `ForgotPasswordForm`, `LoginForm` banned/help/left cases) and `e2e/auth/leave.spec.ts` were written
+  right after the code and passed on their first run, except two e2e selector fixes (the Next.js
+  route announcer is also `role="alert"`; assertions are scoped to the form).
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 117 files /
+  1680 tests passed; `npm run test:integration` 31 files / 529 tests passed;
+  `npx playwright test e2e/auth e2e/admin e2e/forms/contact.spec.ts` 94 passed; `npx playwright test
+  e2e/profile` 42 passed (incl. the WIP `profile-details.spec.ts`, unchanged).
+- M-1: `LeaveAssociationDialog` (reuses `AdminDialog`: focus trap, inert page, Escape, busy state)
+  replaces `DeleteAccountDialog` (deleted) and `deleteAccount` (removed; it had no tests of its own;
+  the `ProfileDetailsCards` AccountActions block moved to `tests/components/AccountActions.test.tsx`).
+  Content per mockup 09 M-1: target "Soci {número}" (the props carry no name, the WIP details page is
+  unchanged), "Què passarà" list, download button + privacy-policy link, "Entenc el que passarà"
+  checkbox gating "Dona'm de baixa", plus an optional reason (≤ 500, "no DNI or phone" hint; the
+  mockup has none, the task and `member_leave_self` take one). Errors: `role_held` → BR-12 text,
+  `reason_too_long`, `unauthenticated` → session expired, others generic. Success: the action already
+  signed the session out server-side; the dialog wipes the `sb-…-auth-token` cookies (same loop as the
+  NavBar, duplicated because NavBar is outside the surface) and hard-redirects to `/login?left=1`.
+- `AccountActions` keeps its props; it reads the role with `useAuthUser` and, for board/admin/superadmin,
+  shows the "Si ets de la junta" chip, the BR-12 warning and a disabled "Dona't de baixa" described by
+  it (mockup 07 §6). Display only: the database still refuses with `role_held`.
+- Former members: `getCurrentMember` / `getProfileData` return null when `left_on` is set. Observed in
+  the integration test: after the leave GoTrue already refuses the old access token (`getUser` 400,
+  its session is gone), so the proxy sends the browser to `/login?redirect=…` (the neutral notice is
+  the normal login page); the `left_on` check covers a token GoTrue would still accept. No redirect in
+  the pages (they are WIP or outside the surface, and the repo forbids page redirects: loop risk).
+- `requestPasswordReset(email)` (`src/lib/supabase/password-reset-actions.ts`, server action):
+  throttles `password-reset-ip` 10 and `password-reset-email` 3 per 10 min (`allowRequestShared`),
+  then `is_email_confirmed` (false for unknown, unconfirmed and former), then a cookie-less
+  `resetPasswordForEmail` with `redirectTo = <request origin>/auth/callback` (Origin header, else
+  host + x-forwarded-proto), same as the browser call. Unknown/unconfirmed/former/throttled/sent and
+  GoTrue 429 → `{ error: null }`; lookup or send failure → `failed` (logs only codes, never the
+  address). `ForgotPasswordForm` (now shows a generic retry error on `failed`) and "Canvia la
+  contrasenya" use it. Integration: a former member's request answers `{ error: null }` and no mail
+  reaches Mailpit.
+- Login: `user_banned` (code, or a "banned" message) maps to the wrong-password text; that generic
+  error always carries the help line "Si no pots entrar o t'has donat de baixa, contacta amb la junta."
+  + "Contacta amb la junta" → `/contact?subject=Vull tornar a ser soci` (localized). `?left=1` shows the
+  "T'has donat de baixa…" status notice.
+- `/contact?subject=`: the page reads the param (string only, control characters → space, trimmed, 150
+  code points) and passes `defaultSubject` to `ContactForm` (uncontrolled `defaultValue`, editable).
+- Integration (`former-member-access.test.ts`): control (active member: magic link and recovery links
+  verify), then after `leaveAssociation`: old token refused and member area null, password `user_banned`,
+  generated magic link and recovery link refused at `verifyOtp`, neutral reset sends nothing. E2E
+  (`e2e/auth/leave.spec.ts`, throwaway member): leave from `/profile/details`, notice, `/profile` →
+  `/login`, sign-in shows the generic error + help line, the link prefills the contact subject; a wrong
+  password shows the same; `adminPage` sees the disabled button and the BR-12 warning.
+- Deviations from the mockups: after the leave the notice is on `/login?left=1`, not on `/` (the home
+  page is outside this task's surface; T27 can move it); the M-1 dialog adds the optional reason; the
+  help line shows only with the credentials error (not with unrelated failures such as a 500).
+- Risks: the reset now depends on the request Origin/host (Supabase must allow `<origin>/auth/callback`,
+  as before); a throttled reset looks sent; the post-leave cookie wipe is duplicated from NavBar.
+
 ## Next step
 
-T26.
+T27.

@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { MdDeleteOutline, MdFileDownload, MdVpnKey } from "react-icons/md";
+import { MdFileDownload, MdLogout, MdVpnKey, MdWarningAmber } from "react-icons/md";
 import { exportProfileData } from "@/lib/profile/actions";
-import { createClient } from "@/lib/supabase/client";
+import { requestPasswordReset } from "@/lib/supabase/password-reset-actions";
+import { useAuthUser } from "@/hooks/useAuthUser";
+import { isBoardRole } from "@/lib/auth/roles";
 import { cn } from "@/lib/utils";
-import DeleteAccountDialog from "./DeleteAccountDialog";
+import LeaveAssociationDialog from "./LeaveAssociationDialog";
 import LiveMessages from "./LiveMessages";
 
 const BUTTON =
@@ -17,10 +19,17 @@ type AccountActionsProps = {
   memberNumber: string;
 };
 
-/** "Compte": change password (reuses the recovery email flow), download my data, delete account. */
+/**
+ * "Compte": change password (the neutral recovery e-mail), download my data, and leave the
+ * association (M-1). A member with a board role cannot leave until a superadmin removes the
+ * role (BR-12): the button is disabled with the reason visible. The role read here only
+ * drives the UI; the database refuses the leave of a role holder anyway (`role_held`).
+ */
 export default function AccountActions({ email, memberNumber }: AccountActionsProps) {
   const t = useTranslations("profile.details");
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const { role } = useAuthUser();
+  const holdsRole = isBoardRole(role);
+  const [leaveOpen, setLeaveOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [password, setPassword] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [exportError, setExportError] = useState(false);
@@ -28,10 +37,8 @@ export default function AccountActions({ email, memberNumber }: AccountActionsPr
   async function handlePassword() {
     if (password === "sending") return;
     setPassword("sending");
-    // Same flow as /forgot-password: a recovery link that opens /auth/callback -> /reset-password.
-    const { error } = await createClient()
-      .auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback` })
-      .catch(() => ({ error: new Error("failed") }));
+    // Same server action as /forgot-password: a recovery link that opens /auth/callback -> /reset-password.
+    const { error } = await requestPasswordReset(email).catch(() => ({ error: "failed" as const }));
     setPassword(error ? "error" : "sent");
   }
 
@@ -55,6 +62,21 @@ export default function AccountActions({ email, memberNumber }: AccountActionsPr
 
   return (
     <>
+      {holdsRole && (
+        <div className="mb-4 flex flex-col items-start gap-3">
+          <span className="rounded-full bg-stone-custom px-2.5 py-1 text-xs font-bold text-brand-white">
+            {t("leave_board_chip")}
+          </span>
+          <p
+            id="leave-role-held"
+            className="flex items-start gap-2 rounded-xl bg-brand-orange/10 px-4 py-3 text-sm text-stone-custom"
+          >
+            <MdWarningAmber aria-hidden="true" className="mt-px size-[18px] shrink-0 text-brand-orange-text" />
+            {t("leave_error_role_held")}
+          </p>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
@@ -76,11 +98,16 @@ export default function AccountActions({ email, memberNumber }: AccountActionsPr
         </button>
         <button
           type="button"
-          onClick={() => setDeleteOpen(true)}
-          className={cn(BUTTON, "border-brand-red/35 text-brand-red hover:bg-brand-red/5")}
+          onClick={() => setLeaveOpen(true)}
+          disabled={holdsRole}
+          aria-describedby={holdsRole ? "leave-role-held" : undefined}
+          className={cn(
+            BUTTON,
+            "border-brand-red/35 text-brand-red enabled:hover:bg-brand-red/5 disabled:cursor-not-allowed disabled:opacity-50"
+          )}
         >
-          <MdDeleteOutline aria-hidden="true" className="size-[18px]" />
-          {t("delete_account")}
+          <MdLogout aria-hidden="true" className="size-[18px]" />
+          {t("leave_button")}
         </button>
       </div>
 
@@ -93,7 +120,13 @@ export default function AccountActions({ email, memberNumber }: AccountActionsPr
         }
       />
 
-      <DeleteAccountDialog open={deleteOpen} onClose={() => setDeleteOpen(false)} />
+      <LeaveAssociationDialog
+        open={leaveOpen}
+        onClose={() => setLeaveOpen(false)}
+        memberNumber={memberNumber}
+        onDownload={handleExport}
+        downloading={exporting}
+      />
     </>
   );
 }

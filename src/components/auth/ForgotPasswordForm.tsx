@@ -4,9 +4,9 @@ import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "motion/react";
-import { createClient } from "@/lib/supabase/client";
+import { requestPasswordReset } from "@/lib/supabase/password-reset-actions";
 
-type FormStatus = "idle" | "submitting" | "success";
+type FormStatus = "idle" | "submitting" | "success" | "error";
 
 type FieldErrors = {
   email?: string;
@@ -38,13 +38,16 @@ export default function ForgotPasswordForm() {
 
     setStatus("submitting");
 
-    const supabase = createClient();
-    await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback`,
-    });
-
-    // Always show success (don't reveal if email exists)
-    setStatus("success");
+    // Sent through the server, which only mails confirmed, active accounts and always answers
+    // the same, so the form never reveals who has an account (spec §4.4). Only a failure that
+    // does not depend on the address asks to retry.
+    let failed = false;
+    try {
+      failed = (await requestPasswordReset(email)).error !== null;
+    } catch {
+      failed = true;
+    }
+    setStatus(failed ? "error" : "success");
   }
 
   const isSubmitting = status === "submitting";
@@ -102,6 +105,11 @@ export default function ForgotPasswordForm() {
             onSubmit={handleSubmit}
             noValidate
           >
+            {status === "error" && (
+              <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {t("login_error_generic")}
+              </div>
+            )}
             <div>
               <label
                 htmlFor="email"

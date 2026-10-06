@@ -18,7 +18,9 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/i18n/routing', () => ({
-  Link: ({ children, href }: any) => <a href={href}>{children}</a>,
+  Link: ({ children, href }: any) => (
+    <a href={typeof href === 'string' ? href : `${href.pathname}?${new URLSearchParams(href.query)}`}>{children}</a>
+  ),
 }))
 
 vi.mock('@/lib/supabase/client', () => ({
@@ -208,5 +210,42 @@ describe('LoginForm', () => {
     searchString = 'confirmed=success'
     render(<LoginForm />)
     expect(screen.getByRole('status')).toHaveTextContent('login_confirmed_success')
+  })
+
+  describe('generic sign-in error (spec §4.4)', () => {
+    async function submitWith(error: { message: string; code?: string; status?: number }) {
+      mockSignInWithPassword.mockResolvedValue({ data: {}, error })
+      render(<LoginForm />)
+      typeEmail('laia@example.cat')
+      fireEvent.change(screen.getByLabelText('login_password_label'), { target: { value: 'secret' } })
+      fireEvent.click(screen.getByRole('button', { name: 'login_submit' }))
+      await screen.findByRole('alert')
+    }
+
+    it.each([
+      ['a wrong password', { message: 'Invalid login credentials', code: 'invalid_credentials', status: 400 }],
+      ['a banned (former) member', { message: 'User is banned', code: 'user_banned', status: 400 }],
+      ['a banned member without a code', { message: 'User is banned' }],
+    ])('shows the same error and the help line for %s', async (_name, error) => {
+      await submitWith(error)
+      expect(screen.getByRole('alert')).toHaveTextContent('login_error_invalid_credentials')
+      expect(screen.getByText('login_help_text')).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'login_help_button' })).toHaveAttribute(
+        'href',
+        '/contact?subject=login_help_subject'
+      )
+    })
+
+    it('shows no help line for an unrelated failure', async () => {
+      await submitWith({ message: 'Database error', status: 500 })
+      expect(screen.getByRole('alert')).toHaveTextContent('login_error_generic')
+      expect(screen.queryByText('login_help_text')).toBeNull()
+    })
+  })
+
+  it('renders the ?left=1 notice after a self leave', () => {
+    searchString = 'left=1'
+    render(<LoginForm />)
+    expect(screen.getByRole('status')).toHaveTextContent('login_left_notice')
   })
 })

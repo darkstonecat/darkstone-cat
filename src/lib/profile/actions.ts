@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { getProfileData } from "@/lib/supabase/auth";
 import { encrypt, decrypt } from "@/lib/encryption";
 import { normalizeUsername } from "@/lib/profile/username-pattern";
@@ -184,29 +183,4 @@ export async function exportProfileData(): Promise<{
   };
 
   return { data: JSON.stringify(exportData, null, 2), error: null };
-}
-
-// ---------------------------------------------------------------------------
-// deleteAccount
-// ---------------------------------------------------------------------------
-
-export async function deleteAccount(): Promise<{ error: string | null }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: "Not authenticated" };
-  }
-
-  const adminClient = createAdminClient();
-  const { error } = await adminClient.auth.admin.deleteUser(user.id);
-
-  if (error) {
-    console.error("[delete-account] auth.admin.deleteUser failed status=%s", error.status ?? "unknown");
-    return { error: "failed" };
-  }
-
-  return { error: null };
 }

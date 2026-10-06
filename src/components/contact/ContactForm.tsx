@@ -19,7 +19,12 @@ type FieldErrors = {
   message?: string;
 };
 
-export default function ContactForm() {
+type ContactFormProps = {
+  /** Prefilled, editable subject (e.g. "Vull tornar a ser soci" from the login help line). */
+  defaultSubject?: string;
+};
+
+export default function ContactForm({ defaultSubject }: ContactFormProps = {}) {
   const t = useTranslations("contact_page");
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -225,6 +230,7 @@ export default function ContactForm() {
                 name="subject"
                 required
                 maxLength={MAX_SUBJECT}
+                defaultValue={defaultSubject}
                 placeholder={t("subject_placeholder")}
                 disabled={isSending}
                 aria-invalid={!!errors.subject}

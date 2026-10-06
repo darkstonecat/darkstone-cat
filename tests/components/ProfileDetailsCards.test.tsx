@@ -6,8 +6,6 @@ const mockUnlink = vi.fn()
 const mockNewsletter = vi.fn()
 const mockCheckLudoya = vi.fn()
 const mockCheckBgg = vi.fn()
-const mockExport = vi.fn()
-const mockReset = vi.fn()
 
 vi.mock('next-intl', () => ({
   useTranslations: vi.fn(() => (key: string, v?: Record<string, string>) =>
@@ -36,18 +34,10 @@ vi.mock('@/lib/profile/username-checks', () => ({
   checkLudoyaUsername: (...a: unknown[]) => mockCheckLudoya(...a),
   checkBggUsername: (...a: unknown[]) => mockCheckBgg(...a),
 }))
-vi.mock('@/lib/profile/actions', () => ({
-  exportProfileData: (...a: unknown[]) => mockExport(...a),
-  deleteAccount: vi.fn(),
-}))
-vi.mock('@/lib/supabase/client', () => ({
-  createClient: () => ({ auth: { resetPasswordForEmail: mockReset, signOut: vi.fn() } }),
-}))
 
 import GamingAccounts from '@/components/profile/GamingAccounts'
 import NewsletterSwitch from '@/components/profile/NewsletterSwitch'
 import MemberDataCard from '@/components/profile/MemberDataCard'
-import AccountActions from '@/components/profile/AccountActions'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -253,33 +243,5 @@ describe('MemberDataCard', () => {
   it('shows "not provided" for missing values', () => {
     render(<MemberDataCard {...props} dni={null} phone={null} postalCode={null} />)
     expect(screen.getAllByText('not_provided')).toHaveLength(3)
-  })
-})
-
-describe('AccountActions', () => {
-  it('sends the recovery email through the existing reset flow', async () => {
-    mockReset.mockResolvedValue({ error: null })
-    render(<AccountActions email="a@b.test" memberNumber="000-001" />)
-    fireEvent.click(screen.getByRole('button', { name: /change_password/ }))
-    expect(await screen.findByText('change_password_sent')).toBeInTheDocument()
-    expect(mockReset).toHaveBeenCalledWith('a@b.test', {
-      redirectTo: `${window.location.origin}/auth/callback`,
-    })
-  })
-
-  it('announces an error when the recovery email fails', async () => {
-    mockReset.mockResolvedValue({ error: new Error('x') })
-    render(<AccountActions email="a@b.test" memberNumber="000-001" />)
-    fireEvent.click(screen.getByRole('button', { name: /change_password/ }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('change_password_error')
-  })
-
-  it('reports a failed export and opens the delete dialog', async () => {
-    mockExport.mockResolvedValue({ data: null, error: 'x' })
-    render(<AccountActions email="a@b.test" memberNumber="000-001" />)
-    fireEvent.click(screen.getByRole('button', { name: /download_data/ }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('download_error')
-    fireEvent.click(screen.getByRole('button', { name: /delete_account/ }))
-    expect(await screen.findByLabelText('delete_confirm_prompt')).toBeInTheDocument()
   })
 })

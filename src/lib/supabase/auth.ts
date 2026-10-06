@@ -19,7 +19,20 @@ export type Member = {
   newsletter_accepted: boolean;
   membership_start_date: string | null;
   created_at: string;
+  /** Set while the person is a former member (spec §4.1). */
+  left_on: string | null;
 };
+
+/**
+ * A former member is a visitor (spec §4.4, BR-18). The leave bans the account and deletes its
+ * sessions, but an access token issued before it stays valid until it expires (up to an hour),
+ * so every member-area read treats a closed membership as no member at all.
+ */
+function activeMember(row: unknown): Member | null {
+  if (!row || typeof row !== "object") return null;
+  const member = row as Member;
+  return member.left_on == null ? member : null;
+}
 
 export async function getCurrentUser(): Promise<User | null> {
   const supabase = await createClient();
@@ -40,7 +53,7 @@ export async function getCurrentMember(): Promise<Member | null> {
     .eq("id", user.id)
     .single();
 
-  return data as Member | null;
+  return activeMember(data);
 }
 
 export async function getProfileData(): Promise<{
@@ -71,9 +84,12 @@ export async function getProfileData(): Promise<{
     return null;
   }
 
+  const member = activeMember(data);
+  if (!member) return null;
+
   return {
     email: user.email ?? "",
     emailConfirmed: Boolean(user.email_confirmed_at),
-    member: data as Member,
+    member,
   };
 }
