@@ -29,8 +29,12 @@ export interface RefreshJob {
 export interface RefreshJobResult {
   name: string;
   ok: boolean;
-  /** Error message only, never credentials. */
+  /** Wall time of the job (revalidate + warm-up), whole milliseconds. */
+  durationMs: number;
+  /** Error message only, never credentials. Not stored and not shown in the panel. */
   error?: string;
+  /** Short code (`refreshErrorCode`), safe to store and show: ops_job_runs, the V-6 screen. */
+  errorCode?: string;
 }
 
 export const REFRESH_JOBS: RefreshJob[] = [
@@ -49,16 +53,44 @@ export const REFRESH_JOBS: RefreshJob[] = [
   },
 ];
 
+const SHORT_CODE = /^[a-z0-9_]{1,40}$/;
+
+/**
+ * A short, storable code for a failed job (`^[a-z0-9_]{1,40}$`, the ops_job_runs CHECK): the
+ * Ludoya client's own code (`timeout`, `rate_limited`, …), `shape_changed`, `timeout`,
+ * `http_<status>`, `missing_api_key`, otherwise `error`. Never derived from free text beyond
+ * those fixed patterns, so no upstream message or URL can reach the database or the screen.
+ */
+export function refreshErrorCode(error: unknown): string {
+  if (!(error instanceof Error)) return "error";
+  const code = (error as { code?: unknown }).code;
+  if (error.name === "LudoyaApiError") return typeof code === "string" && SHORT_CODE.test(code) ? code : "error";
+  if (error.name === "LudoyaShapeError") return "shape_changed";
+  if (error.name === "TimeoutError" || /\btimeout\b/i.test(error.message)) return "timeout";
+  if (/BGG_API_KEY not set/.test(error.message)) return "missing_api_key";
+  const status = /\bHTTP (\d{3})\b/.exec(error.message);
+  if (status) return `http_${status[1]}`;
+  return "error";
+}
+
 /** Run every job in order; a failing job is reported and does not stop the rest. */
 export async function runRefreshJobs(jobs: RefreshJob[] = REFRESH_JOBS): Promise<RefreshJobResult[]> {
   const results: RefreshJobResult[] = [];
   for (const job of jobs) {
+    const started = Date.now();
+    const elapsed = () => Math.max(0, Math.round(Date.now() - started));
     try {
       revalidateTag(job.tag, "max");
       await job.warm();
-      results.push({ name: job.name, ok: true });
+      results.push({ name: job.name, ok: true, durationMs: elapsed() });
     } catch (error) {
-      results.push({ name: job.name, ok: false, error: error instanceof Error ? error.message : "unknown error" });
+      results.push({
+        name: job.name,
+        ok: false,
+        durationMs: elapsed(),
+        error: error instanceof Error ? error.message : "unknown error",
+        errorCode: refreshErrorCode(error),
+      });
     }
   }
   return results;

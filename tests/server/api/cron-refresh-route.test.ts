@@ -1,7 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { runRefreshJobs } = vi.hoisted(() => ({ runRefreshJobs: vi.fn() }));
+const { runRefreshJobs, recordAutomaticRuns } = vi.hoisted(() => ({
+  runRefreshJobs: vi.fn(),
+  recordAutomaticRuns: vi.fn(),
+}));
 vi.mock("@/lib/cache-refresh", () => ({ runRefreshJobs }));
+vi.mock("@/lib/ops/job-runs", () => ({ recordAutomaticRuns }));
 
 import { GET } from "@/app/api/cron/refresh/route";
 
@@ -13,6 +17,7 @@ describe("GET /api/cron/refresh", () => {
   beforeEach(() => {
     vi.stubEnv("CRON_SECRET", SECRET);
     runRefreshJobs.mockResolvedValue([{ name: "ludoya", ok: true }]);
+    recordAutomaticRuns.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -28,6 +33,7 @@ describe("GET /api/cron/refresh", () => {
       expect(await res.json()).toEqual({ error: "not_configured" });
     }
     expect(runRefreshJobs).not.toHaveBeenCalled();
+    expect(recordAutomaticRuns).not.toHaveBeenCalled();
   });
 
   it("returns 401 for a missing, wrong or different-length token", async () => {
@@ -38,6 +44,7 @@ describe("GET /api/cron/refresh", () => {
       expect(res.headers.get("cache-control")).toBe("no-store");
     }
     expect(runRefreshJobs).not.toHaveBeenCalled();
+    expect(recordAutomaticRuns).not.toHaveBeenCalled();
   });
 
   it("returns 200 with the job results for the right token", async () => {
@@ -55,5 +62,31 @@ describe("GET /api/cron/refresh", () => {
 
     expect(res.status).toBe(502);
     expect(await res.json()).toEqual({ ok: false, jobs: [{ name: "ludoya", ok: false, error: "Ludoya API 503" }] });
+  });
+
+  it("records the automatic runs with the job results", async () => {
+    const jobs = [
+      { name: "ludoya", ok: true, durationMs: 2100 },
+      { name: "bgg", ok: false, durationMs: 900, error: "BGG API error: HTTP 503", errorCode: "http_503" },
+    ];
+    runRefreshJobs.mockResolvedValue(jobs);
+
+    await call(`Bearer ${SECRET}`);
+
+    expect(recordAutomaticRuns).toHaveBeenCalledTimes(1);
+    expect(recordAutomaticRuns).toHaveBeenCalledWith(jobs);
+  });
+
+  it("answers the same when recording fails or throws", async () => {
+    for (const failure of [() => Promise.resolve(undefined), () => Promise.reject(new Error("db down"))]) {
+      recordAutomaticRuns.mockImplementationOnce(failure);
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const res = await call(`Bearer ${SECRET}`);
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ ok: true, jobs: [{ name: "ludoya", ok: true }] });
+      errorSpy.mockRestore();
+    }
   });
 });

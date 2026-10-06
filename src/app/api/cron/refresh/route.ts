@@ -1,9 +1,12 @@
 // Scheduled cache refresh, called by .github/workflows/cache-refresh.yml with
 // `Authorization: Bearer $CRON_SECRET`. Fails closed: no secret configured
-// means no work, and the comparison is constant-time.
+// means no work, and the comparison is constant-time. Each job run is recorded in
+// ops_job_runs as an automatic run (V-6); a failed recording is only logged and never
+// changes the answer.
 
 import { timingSafeEqual } from "node:crypto";
 import { runRefreshJobs } from "@/lib/cache-refresh";
+import { recordAutomaticRuns } from "@/lib/ops/job-runs";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +26,12 @@ export async function GET(request: Request) {
   if (!isAuthorized(request.headers.get("authorization"), secret)) return json({ error: "unauthorized" }, 401);
 
   const jobs = await runRefreshJobs();
+  try {
+    await recordAutomaticRuns(jobs);
+  } catch {
+    // recordAutomaticRuns never throws; this only guards the answer against a future change.
+    console.error("[ops] record_job_run failed job=all code=exception");
+  }
   const ok = jobs.every((job) => job.ok);
   return json({ ok, jobs }, ok ? 200 : 502);
 }

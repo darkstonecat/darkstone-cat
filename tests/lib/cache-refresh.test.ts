@@ -13,7 +13,7 @@ vi.mock("@/lib/ludoya", () => ({ fetchPublicSessions: fetchPublic }));
 
 vi.mock("@/lib/bgg", () => ({ BGG_CACHE_TAG: "bgg", fetchBggCollectionOrThrow: fetchBgg }));
 
-import { REFRESH_JOBS, runRefreshJobs } from "@/lib/cache-refresh";
+import { REFRESH_JOBS, refreshErrorCode, runRefreshJobs } from "@/lib/cache-refresh";
 
 describe("runRefreshJobs", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -27,7 +27,7 @@ describe("runRefreshJobs", () => {
 
     expect(revalidateTag).toHaveBeenCalledWith("tag-a", "max");
     expect(order).toEqual(["revalidate", "warm"]);
-    expect(results).toEqual([{ name: "a", ok: true }]);
+    expect(results).toEqual([{ name: "a", ok: true, durationMs: expect.any(Number) }]);
   });
 
   it("reports a failing job with its message and still runs the others", async () => {
@@ -38,8 +38,8 @@ describe("runRefreshJobs", () => {
     ]);
 
     expect(results).toEqual([
-      { name: "bad", ok: false, error: "boom" },
-      { name: "good", ok: true },
+      { name: "bad", ok: false, error: "boom", errorCode: "error", durationMs: expect.any(Number) },
+      { name: "good", ok: true, durationMs: expect.any(Number) },
     ]);
     expect(warmOk).toHaveBeenCalled();
   });
@@ -66,6 +66,51 @@ describe("runRefreshJobs", () => {
     fetchBgg.mockRejectedValueOnce(new Error("bgg down"));
     const job = REFRESH_JOBS.find((j) => j.name === "bgg")!;
 
-    expect(await runRefreshJobs([job])).toEqual([{ name: "bgg", ok: false, error: "bgg down" }]);
+    expect(await runRefreshJobs([job])).toEqual([
+      { name: "bgg", ok: false, error: "bgg down", errorCode: "error", durationMs: expect.any(Number) },
+    ]);
+  });
+
+  it("measures the duration of each job in whole milliseconds", async () => {
+    vi.useFakeTimers();
+    try {
+      const pending = runRefreshJobs([
+        { name: "slow", tag: "t", warm: () => new Promise((resolve) => setTimeout(resolve, 1500)) },
+      ]);
+      await vi.advanceTimersByTimeAsync(1500);
+      const [result] = await pending;
+      expect(result.durationMs).toBe(1500);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("only selected jobs run when a subset is passed", async () => {
+    const results = await runRefreshJobs(REFRESH_JOBS.filter((j) => j.name === "bgg"));
+    expect(results.map((r) => r.name)).toEqual(["bgg"]);
+    expect(fetchMember).not.toHaveBeenCalled();
+  });
+});
+
+describe("refreshErrorCode", () => {
+  it("keeps the Ludoya client's own short code", () => {
+    const error = Object.assign(new Error("Ludoya API 503 (unknown): /events"), { name: "LudoyaApiError", code: "rate_limited" });
+    expect(refreshErrorCode(error)).toBe("rate_limited");
+  });
+
+  it("maps a changed Ludoya shape, a timeout, an HTTP status and a missing key", () => {
+    expect(refreshErrorCode(Object.assign(new Error("shape"), { name: "LudoyaShapeError" }))).toBe("shape_changed");
+    expect(refreshErrorCode(new Error("BGG API timeout after retries"))).toBe("timeout");
+    expect(refreshErrorCode(Object.assign(new Error("aborted"), { name: "TimeoutError" }))).toBe("timeout");
+    expect(refreshErrorCode(new Error("BGG API error: HTTP 503"))).toBe("http_503");
+    expect(refreshErrorCode(new Error("BGG_API_KEY not set"))).toBe("missing_api_key");
+  });
+
+  it("never passes a message, a malformed code or a non-error through", () => {
+    const odd = Object.assign(new Error("x"), { name: "LudoyaApiError", code: "Not A Code; drop table" });
+    expect(refreshErrorCode(odd)).toBe("error");
+    expect(refreshErrorCode(new Error("something with user@example.com"))).toBe("error");
+    expect(refreshErrorCode("boom")).toBe("error");
+    expect(refreshErrorCode(null)).toBe("error");
   });
 });

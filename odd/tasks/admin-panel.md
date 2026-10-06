@@ -87,7 +87,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T11a — Server actions A-4, A-5, A-8, A-9 — route: delegated (writer trigger: actions + error module + 3 test files)
 - [x] T11b — Server actions A-15, roles (S-1, S-2), anonymise (S-3) — route: delegated (writer trigger: 2 action files + sender extraction + error module + 5 test files)
 - [x] T12 — `run_retention()` + `/api/cron/retention` + workflow (dry run first), member-number width fix, T10 follow-ups — route: delegated (writer trigger: 2 migrations + route + lib + workflow + mail/leave fixes + 6 test files)
-- [ ] T13 — `ops_job_runs` + refresh action (A-14), cron route records automatic runs — route: delegated
+- [x] T13 — `ops_job_runs` + refresh action (A-14), cron route records automatic runs — route: delegated (writer trigger: migration + lib + action + route + 4 test files)
 
 ### Screens
 
@@ -265,6 +265,16 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
        'account.purge_unconfirmed') order by id desc limit 5` shows the entries (actor NULL).
     6. D-H is still provisional (purge = `left_on` + 3 years, `member_purge_on()`): confirm it
        before setting `RETENTION_APPLY`, because a purge cannot be undone.
+
+13. `supabase/migrations/20261006100200_ops_job_runs.sql` (T13). Needs M2 (item 2,
+    `has_role`). Safe to apply before the code ships: it only adds `ops_job_runs` and four
+    functions (one internal); nothing calls them yet. Apply it before (or with) the T13 code: if the code ships
+    first, `/api/cron/refresh` still refreshes and answers as before, and only logs
+    `[ops] record_job_run failed job=<job> code=<code>` once per job. After applying and
+    deploying: the next scheduled refresh (or Actions → Cache refresh → Run workflow) leaves one
+    row per job (`select job, ran_at, ok, actor_id, duration_ms, error_code from
+    ops_job_runs order by id desc limit 4`, as `postgres`, `actor_id` NULL), and as a board
+    member `select * from public.admin_ops_status()` returns the `ludoya` and `bgg` rows.
 
 ## Progress
 
@@ -1463,6 +1473,88 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   deletes the whole backlog of abandoned sign-ups older than 30 days. A member number with 9+
   digits after `000-` could look like a phone to the BR-15 detector (far future).
 
+### T13 — done (route: delegated)
+
+- Commit: `feat(admin): Record cache refresh runs and add a manual refresh action` on
+  `develop-users` (hash in `git log -- supabase/migrations/20261006100200_ops_job_runs.sql`).
+- Test-first: RED observed with the new `tests/integration/ops-job-runs.test.ts` (setup failed:
+  `ops_job_runs` missing), `tests/lib/ops-job-runs.test.ts` and
+  `tests/server/actions/ops-actions.test.ts` (missing modules), and the new cases in
+  `tests/lib/cache-refresh.test.ts` (7 failing: `durationMs`, `errorCode`, `refreshErrorCode`) and
+  `tests/server/api/cron-refresh-route.test.ts` (1 failing: no recording call); GREEN after the
+  migration (`npm run db:reset`) and the code (10/10 integration, 34/34 unit in those files).
+- Verification: `npm run db:reset` ok; `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 84 files / 1274 tests passed; `npm run test:integration` 29 files /
+  521 tests passed.
+- `public.ops_job_runs(id bigserial pk, job text NOT NULL CHECK in ('ludoya','bgg'), ran_at
+  timestamptz NOT NULL default now(), ok boolean NOT NULL, actor_id uuid NULL (NULL =
+  automatic; no FK, a run outlives its actor), duration_ms int NULL CHECK >= 0, error_code text
+  NULL CHECK `^[a-z0-9_]{1,40}$`, CHECK not (ok and error_code))`. RLS on, no policies; anon and
+  authenticated no grant at all; service_role SELECT only (no INSERT/UPDATE/DELETE/TRUNCATE,
+  sequence revoked).
+- Functions (all SECURITY DEFINER, `search_path ''`; errors `ops:forbidden` 42501,
+  `ops:invalid_argument` 22023 for an unknown job, NULL ok, negative duration, a code that is
+  not a short code, or a code on a successful run):
+  - `ops_job_run_insert(job, ok, duration_ms, error_code, actor)` internal, no API grant:
+    validates, inserts, prunes.
+  - `ops_record_job_run(p_job, p_ok, p_duration_ms = NULL, p_error_code = NULL) → bigint`:
+    service_role only; actor NULL (the cron route).
+  - `admin_record_job_run(same args) → bigint`: authenticated, `has_role('board')`; actor =
+    `auth.uid()` (cannot be passed in). service_role/anon refused.
+  - `admin_ops_status()` RETURNS TABLE `(job, last_run_at, last_ok, last_automatic,
+    last_actor_member_number, last_actor_name, last_duration_ms, last_error_code,
+    last_success_at)`: board+, STABLE; always one row per job in display order `ludoya`, `bgg`
+    (all NULL but `job` when never run). Last = newest `ran_at`, then id. Actor number/name from
+    the member row (NULL when automatic, or the row is gone or purged); `last_actor_name` =
+    "first last" (added for the mockup's "Oriol Mas"; the board already sees names).
+- Pruning (decision): on every insert, runs of the same job older than 90 days are deleted,
+  except the newest successful run, so "last success" survives an outage. Not tied to the
+  retention job.
+- Retention runs are NOT recorded (decision): V-6 shows only the two cache jobs, and a retention
+  apply already leaves `member.purge` / `account.purge_unconfirmed` entries; the GitHub Actions
+  log holds the dry-run counts. Recording it later = widen the CHECK and the job list.
+- V-1 does not show job status (spec V-1: stats, recent activity, shortcuts), so `admin_stats`
+  keeps its shape; V-6 (T25) calls `admin_ops_status()`.
+- `src/lib/cache-refresh.ts`: `RefreshJobResult` gains `durationMs` (whole ms, `Date.now()`
+  around revalidate + warm-up) and, on failure, `errorCode` from the new
+  `refreshErrorCode(error)`: the Ludoya client's own code (validated), `shape_changed`,
+  `timeout`, `http_<status>`, `missing_api_key`, else `error`. `error` (the message) stays for
+  the cron response only; it is never stored or shown in the panel.
+- `src/lib/ops/job-runs.ts` (`server-only`): `recordAutomaticRuns(results)` (service role,
+  `ops_record_job_run`) and `recordManualRuns(sessionClient, results)` (`admin_record_job_run`).
+  Unknown job names are skipped; a non-integer/negative duration → NULL; a failed run without a
+  valid short code → `error`. Never throw; a failure logs only `[ops] record_job_run failed
+  job=<job> code=<Postgres code | exception>`.
+- `GET /api/cron/refresh` records the automatic runs after the jobs; status and body unchanged
+  (`{ ok, jobs }`, jobs now also carry `durationMs` / `errorCode`). A recording failure never
+  changes the answer (tested for a failed and a throwing recorder).
+- `src/lib/admin/ops-actions.ts` (`"use server"`): `refreshCaches(job: 'ludoya' | 'bgg' | 'all'
+  = 'all'): Promise<{ ok: true; results: { job, ok, durationMs, errorCode: string | null }[] } |
+  { error: 'unauthenticated' | 'forbidden' | 'invalid' | 'rate_limited' }>` (A-14). Steps:
+  `getAdminAccess('board')` → job check (`invalid`) → shared limiter
+  `allowRequestShared('cache-refresh:<actor uuid>', null, 1, 60 s)` (`rate_limited`; bucket is
+  the literal string, like the access link) → `runRefreshJobs(selected)` → `recordManualRuns`
+  with the SESSION client → `log_admin_event('ops.cache_refresh', NULL, {"jobs":[…],"ok":bool},
+  NULL)` with the SESSION client → revalidate `/[locale]/admin/tools` (`page`). Results carry
+  the short code only, never the upstream message.
+- Deviation: the audit entry is written AFTER the run (it records the result), so it cannot
+  fail closed; if it fails the action still returns the results and logs only
+  `[admin-ops] cache_refresh_audit failed code=<code>` (a refresh discloses nothing and is
+  harmless to repeat). The shared mapper (`adminDbErrorCode`) is therefore not needed: no DB
+  error reaches the caller. No i18n texts (T25).
+- Tests: integration (direct insert refused for anon/member/board/service_role; direct select
+  only for service_role; `ops_record_job_run` service role only; `admin_record_job_run` and
+  `admin_ops_status` refuse anon/member/service_role; invalid arguments; automatic vs manual
+  actor; status rows, last run vs last success, never-run job all NULL; pruning keeps the newest
+  success and drops it once a newer success exists, other jobs untouched). Unit (duration with
+  fake timers, error codes, subset run; recorder args, skip/normalise, never throws, logs code
+  only; cron route records and ignores recording failures; action guard, invalid job before the
+  limiter, limiter args, step order, per-job results, audit details, failed job, audit failure,
+  no message/e-mail in results or logs).
+- Prod risk: needs runbook 13 before the code (otherwise only log noise). The per-member
+  limiter falls back to one instance's memory without the shared limiter table (runbook of
+  `20261001100000`, already applied for the contact form).
+
 ## Next step
 
-T13.
+T14 (screens start: admin shell).
