@@ -37,7 +37,8 @@ first, then the server layer, then the screens.
 
 ## Open decisions (owner: user)
 
-- D-A: which current admins become the two superadmins (needed by T27 runbook).
+- D-A: which current admins become the two superadmins. **Still open**: the runbook (phase 6)
+  carries placeholders for the two member numbers; M7 cannot be applied until it is decided.
 - D-B: fields of the llibre de socis export, DNI or not (T9b). **Decided 2026-10-05 by the user:
   with DNI** (member number, names, DNI/NIE, first sign-up, current sign-up, leave date, left by).
 - D-C: language of the leave/rejoin e-mails; no locale is stored (T10). **Decided 2026-10-05 by
@@ -105,7 +106,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T24 — V-1 dashboard (replaces AdminDashboard) — route: delegated
 - [x] T25 — V-6 tools + event images move + 308 redirect — route: delegated
 - [x] T26 — V-7 member side: M-1 leave dialog, login help, neutral password reset via server action — route: delegated
-- [ ] T27 — M7 `roles_contract` + prod runbook + CLAUDE.md/README — route: delegated
+- [x] T27 — M7 `roles_contract` + prod runbook + CLAUDE.md/README — route: delegated
 
 ## Acceptance criteria
 
@@ -113,7 +114,225 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Every admin mutation writes exactly one audit entry in the same transaction.
 - `npm run lint`, `npm test` and the affected E2E specs pass after each task.
 
-## Prod runbook (migrations to apply before deploying the code that needs them)
+## Final prod runbook (ordered, copy-pasteable)
+
+Run top to bottom. Each step says whether it is safe before the code ships. Details and the
+post-checks of every migration are in "Per-migration notes" below (item numbers in brackets).
+Apply migrations **one file at a time** (Supabase MCP `apply_migration` or the SQL editor of the
+production project), never `supabase db push` for this feature: it applies every pending file at
+once and would skip the deploy-together point of phase 3.
+
+### Phase 0 — prerequisites (no database change)
+
+1. Backup: confirm a recent backup / point-in-time recovery exists for the production project.
+2. Vercel (Production) already has `SMTP_USER`, `SMTP_PASSWORD` (leave/rejoin e-mails reuse the
+   contact form transport), `ENCRYPTION_KEY` (unchanged), `SUPABASE_SERVICE_ROLE_KEY`, and
+   `CRON_SECRET`. GitHub has the repository secret `CRON_SECRET` with the same value (the cache
+   refresh and retention workflows use it). Do NOT create the variable `RETENTION_APPLY` yet.
+3. Supabase → Authentication → URL configuration: the redirect allow-list contains
+   `https://www.darkstone.cat/auth/callback` and `https://darkstone.cat/auth/callback` (the
+   neutral password reset builds `redirectTo` from the request origin, T26), plus the existing
+   `/auth/confirm` and `/auth/magic-link` URLs.
+4. The earlier migrations `20261001100000_shared_rate_limiter.sql` and
+   `20261001130000_unconfirmed_user_id.sql` are applied (previous features).
+
+### Phase 1 — read-only checks (SQL editor, as `postgres`)
+
+```sql
+-- a) names M1 drops without IF EXISTS [1]: expect members_id_fkey, admins_update_all,
+--    admins_select_all and member_badges_admins_select_all (the last two are dropped by T7b [8])
+select conname from pg_constraint
+ where conrelid = 'public.members'::regclass and conname = 'members_id_fkey';
+select tablename, policyname from pg_policies
+ where policyname in ('admins_update_all', 'admins_select_all', 'member_badges_admins_select_all');
+
+-- b) postgres may write the Auth tables the leave/rejoin and retention functions touch [5, 12]
+begin;
+update auth.users set banned_until = banned_until where false;
+delete from auth.sessions where false;
+delete from auth.refresh_tokens where false;
+delete from auth.users where false;
+rollback;
+-- If any statement is refused: stop. Leave/rejoin (T6) and retention (T12) need a change first.
+
+-- c) member numbers: the sequence must be ahead of every stored number [11]
+select (select last_value from public.member_number_seq) as seq_last_value,
+       (select max(substring(member_number from 5)::int) from public.members
+         where member_number ~ '^000-[0-9]+$') as max_number;
+-- seq_last_value must be >= max_number, otherwise sign-ups collide: fix with setval first.
+
+-- d) who holds a role today (all become board in M7; none can delete their account after M2/T8 [7])
+select member_number, first_name, last_name, role from public.members
+ where role <> 'member' order by member_number;
+```
+
+### Phase 2 — migrations safe before the code (in order)
+
+Apply each file, then run its post-check from the notes:
+
+1. `20261005100000_membership_state.sql` [1] — then check profile edit, gaming-account link and
+   newsletter switch still save on the live site.
+2. `20261005100100_roles_expand.sql` [2] — an admin still opens `/admin`.
+3. `20261005100200_audit_log.sql` [3]
+4. `20261005100300_admin_read_rpcs.sql` [4]
+5. `20261005100400_membership_lifecycle.sql` [5]
+6. `20261005100500_member_admin_mutations.sql` [6]
+7. `20261005100600_roles_and_anonymise.sql` [7] — from here a role holder cannot delete their
+   account (old "Dona't de baixa" fails for them until the deploy).
+
+### Phase 3 — deploy window (apply, then deploy at once)
+
+The live (pre-panel) code breaks between step 1 and the deploy: sign-up details and profile edits
+of DNI/phone are refused, and the old `/admin` list and CSV are empty/500. Keep it short.
+
+1. `20261005100700_lock_down_member_secrets.sql` [8]
+2. `20261005100800_admin_exports.sql` [9]
+3. `20261005100900_admin_exports_more.sql` [10]
+4. `20261006100000_member_number_width.sql` [11]
+5. `20261006100100_retention.sql` [12] (nothing runs it until phase 5)
+6. `20261006100200_ops_job_runs.sql` [13]
+7. `20261006100300_ops_record_actor.sql` [14]
+8. `20261006100400_activity_hide_names.sql` [15]
+9. Merge `develop-users` into `main` and let Vercel deploy production. Do NOT apply
+   `20261007100000_roles_contract.sql` yet.
+
+### Phase 4 — right after the deploy
+
+1. Re-encrypt DNI/phone [8] (prod `ENCRYPTION_KEY` and service-role key in the shell
+   environment, never in the repo):
+   ```sh
+   node scripts/reencrypt-member-secrets.mjs --dry-run   # expect errors=0 duplicates=0; exit 0
+   node scripts/reencrypt-member-secrets.mjs --apply
+   node scripts/reencrypt-member-secrets.mjs --dry-run   # expect legacy=0; exit 0
+   ```
+   Exit codes: 0 clean, 1 errors, 2 usage/environment, 3 duplicates (resolve every
+   `duplicate_ciphertext` line before re-running). Keep the legacy decrypt fallback in the code.
+2. Smoke checks as a board member: `/admin` shows figures and activity; `/admin/members` lists
+   and searches; a member file opens; an A-10 CSV export downloads and leaves an
+   `export.members_csv` entry in `/admin/activity`; a member's `/profile/edit` still shows their
+   own DNI/phone. As a board member, `select dni_nie_encrypted from members where id <> auth.uid()`
+   returns no rows.
+3. Actions → Cache refresh → Run workflow; then `select job, ran_at, ok from ops_job_runs order by
+   id desc limit 2` shows two rows [13]. (The workflow file was invalid YAML before T27; this is
+   its first real run.)
+
+### Phase 5 — retention activation [12]
+
+1. Actions → Retention → Run workflow with `apply` unticked. The log shows `Mode: dry run` and
+   the counts. Compare with the database (queries in item 12 step 3).
+2. Confirm D-H (purge = `left_on` + 3 years) with the association: a purge cannot be undone.
+3. Only then: a manual run with `apply` ticked, or the repository variable
+   `RETENTION_APPLY=true` for the daily schedule. Delete the variable to stop deletions.
+
+### Phase 6 — superadmin bootstrap (needs D-A)
+
+`supabase/snippets/` is owned by root (Supabase Studio), so the snippet lives here. Replace the
+two placeholders with the member numbers decided in D-A, paste the whole block into the SQL
+editor (runs as `postgres`) and run it. It is one transaction: any failed check changes nothing.
+
+```sql
+-- Superadmin bootstrap (D-A). BR-10 allows promotions, so 0 → 1 → 2 works; BR-11 does not
+-- apply (no auth.uid() in the SQL editor). Writes one role.grant entry per promotion
+-- (actor "Sistema"). Tested locally in a rolled-back transaction (T27).
+BEGIN;
+
+DO $$
+DECLARE
+  -- D-A: replace these two placeholders ----------------------------------------------------------
+  v_numbers constant text[] := ARRAY['<MEMBER_NUMBER_1>', '<MEMBER_NUMBER_2>'];
+  --------------------------------------------------------------------------------------------------
+  v_number text;
+  v_id uuid;
+  v_old_role text;
+  v_count integer;
+BEGIN
+  IF EXISTS (SELECT 1 FROM unnest(v_numbers) AS n WHERE n LIKE '<%') THEN
+    RAISE EXCEPTION 'promote_superadmins: replace the member number placeholders first';
+  END IF;
+  IF v_numbers[1] = v_numbers[2] THEN
+    RAISE EXCEPTION 'promote_superadmins: the two member numbers must differ';
+  END IF;
+
+  FOREACH v_number IN ARRAY v_numbers LOOP
+    v_id := NULL;
+    SELECT m.id, m.role INTO v_id, v_old_role
+    FROM public.members AS m
+    JOIN auth.users AS u ON u.id = m.id
+    WHERE m.member_number = v_number
+      AND m.left_on IS NULL
+      AND m.purged_at IS NULL
+      AND u.email_confirmed_at IS NOT NULL
+    FOR UPDATE OF m;
+
+    IF v_id IS NULL THEN
+      RAISE EXCEPTION 'promote_superadmins: % is not an active member with a confirmed login', v_number;
+    END IF;
+
+    IF v_old_role = 'superadmin' THEN
+      RAISE NOTICE 'promote_superadmins: % is already superadmin, skipped', v_number;
+      CONTINUE;
+    END IF;
+
+    UPDATE public.members SET role = 'superadmin' WHERE id = v_id;
+
+    PERFORM public.audit_write(
+      'role.grant',
+      v_id,
+      jsonb_build_object('from', v_old_role, 'to', 'superadmin'),
+      'Superadmin bootstrap (prod runbook, D-A)'
+    );
+
+    RAISE NOTICE 'promote_superadmins: % promoted from %', v_number, v_old_role;
+  END LOOP;
+
+  SELECT count(*) INTO v_count
+  FROM public.members AS m
+  WHERE m.role = 'superadmin' AND m.left_on IS NULL;
+
+  IF v_count <> 2 OR EXISTS (
+    SELECT 1 FROM public.members AS m
+    WHERE m.role = 'superadmin' AND m.left_on IS NULL AND NOT (m.member_number = ANY (v_numbers))
+  ) THEN
+    RAISE EXCEPTION 'promote_superadmins: expected exactly the two chosen members as superadmins, found %', v_count;
+  END IF;
+END;
+$$;
+
+-- Check before COMMIT: two rows, role superadmin, role_since = now.
+SELECT member_number, first_name, last_name, role, role_since
+FROM public.members
+WHERE role = 'superadmin' AND left_on IS NULL
+ORDER BY member_number;
+
+COMMIT;
+```
+
+Rollback: before COMMIT nothing is written (any error aborts the block). After COMMIT, to swap
+one person, promote the replacement first from the member file (Rol → Canvia el rol), then demote
+the one leaving: with two superadmins BR-10 refuses every demotion. To undo the whole bootstrap
+(exceptional, before M7 only): in one transaction as `postgres`, `ALTER TABLE public.members
+DISABLE TRIGGER members_role_guard;`, set both roles back, `ALTER TABLE public.members ENABLE
+TRIGGER members_role_guard;`, `COMMIT`.
+
+After it: both superadmins sign in and see the "Rols" tab and `/admin/roles`.
+
+### Phase 7 — M7 `20261007100000_roles_contract.sql` (last)
+
+1. Apply it [16]. It refuses to run (nothing changes) with fewer than two active superadmins.
+2. Check: `select role, count(*) from public.members group by role` shows no `admin`; former
+   admins still open `/admin` (now as Junta); `select public.role_rank('admin')` is NULL.
+
+### Phase 8 — follow-ups after production is done
+
+1. Once phase 4 showed `legacy=0`: remove the legacy decrypt fallback from
+   `src/lib/encryption.ts` and its tests (and the legacy branch of
+   `scripts/reencrypt-member-secrets.mjs` if wanted).
+2. Once M7 is applied: remove `admin` from `ROLES`/`RANKS` in `src/lib/auth/roles.ts` and its
+   tests (keep the audit renderer's `actor_role = 'admin'` → Junta mapping for old entries).
+3. Apply `odd/tasks/admin-panel-claude-md.md` to `CLAUDE.md` once `zona-socis-mockups-v2` has
+   committed its CLAUDE.md changes.
+
+## Per-migration notes (reference for the runbook)
 
 1. `supabase/migrations/20261005100000_membership_state.sql` (T1). Safe to apply before any
    code ships: no current code path writes a column that loses its UPDATE grant. Must be
@@ -189,7 +408,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
       returns no rows; `/admin/members` still shows masked DNI/phone; a member's
       `/profile/edit` still shows their own values.
    5. Follow-up (T27): once step 3 shows `legacy=0` on prod, remove the legacy decrypt
-      fallback from `src/lib/encryption.ts` (and its tests).
+      fallback from `src/lib/encryption.ts` (and its tests). (Post-merge follow-up; not done in T27.)
    6. Script exit codes (T9b): 0 clean, 1 errors, 2 usage/environment, 3 duplicates found (and
       no errors). Exit 3 is evidence of the T7 exploit: resolve every `duplicate_ciphertext`
       line before re-running. `duplicates=0` is **not** proof that no copy happened: a victim
@@ -291,6 +510,19 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 15. `supabase/migrations/20261006100400_activity_hide_names.sql` (T23 fix). Apply any time; it
     only replaces `admin_list_activity`. After applying, a `member.update` entry about an
     anonymised or purged member no longer carries `details.changes` (the old names).
+
+16. `supabase/migrations/20261007100000_roles_contract.sql` (T27, M7). **Not safe before the code**
+    and not before the superadmin bootstrap: the pre-panel code only lets `role = 'admin'` into
+    `/admin`, so applying it under that code locks every admin out. Step 0 refuses to run when the
+    database has members but fewer than two active superadmins (the bootstrap is the only way to
+    get them: after M7 roles change only through `admin_set_role`, which needs a superadmin). It
+    maps active `admin` → `board` (`role_since` kept: the role guard restamps only on a rank
+    change, and both rank 1 while the UPDATE runs; a former member still holding `admin` becomes
+    `member`), narrows `members_role_check` to member/board/superadmin, drops `admin` from
+    `role_rank()`, and drops `get_all_members_for_admin()` and the type `admin_member_view`
+    (no caller since T24). Old audit entries keep `actor_role = 'admin'` (shown as Junta). No
+    rollback needed in practice; to undo, re-add `admin` to the CHECK and `role_rank()` (the
+    dropped function has no caller).
 
 ## Progress
 
@@ -2091,6 +2323,109 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Risks: the reset now depends on the request Origin/host (Supabase must allow `<origin>/auth/callback`,
   as before); a throttled reset looks sent; the post-leave cookie wipe is duplicated from NavBar.
 
+### T27 — done (route: delegated)
+
+- Commits on `develop-users`: `fix(profile): Refuse the card and calendar to former members`
+  (062d54e, T26 verification follow-up), `feat(db): Retire the legacy admin role` (b24636c),
+  `chore(admin): Document the admin routes and fix the scheduled workflows` (7052fb7), and
+  `docs(admin): Add the production runbook and CLAUDE.md changes` (this document,
+  `odd/tasks/admin-panel-claude-md.md`).
+- Verification: `npm run db:reset` ok (applies `20261007100000_roles_contract.sql`); `npm run lint`
+  exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 117 files / 1682 tests passed;
+  `npm run test:integration` 31 files / 521 tests passed; `npx playwright test e2e/admin e2e/auth`
+  86 passed (incl. setup/teardown).
+- Test-first: the T26 follow-up observed RED (2 new route tests failing on the old routes) then
+  GREEN. M7: the contract tests (`roles-contract.test.ts`, the new CHECK/role_rank cases in
+  `roles.test.ts`) were written with the migration; no RED run before it (a reset was needed to
+  apply it).
+- M7 (`20261007100000_roles_contract.sql`): precondition (two active superadmins unless the
+  table is empty, so `db:reset`/CI pass), active `admin` → `board`, former `admin` → `member`,
+  CHECK member/board/superadmin (NOT VALID + VALIDATE), `role_rank()` without `admin`,
+  `get_all_members_for_admin()` + `admin_member_view` dropped. Probed locally in rolled-back
+  transactions as `postgres`: with members and no superadmin step 0 raises; on a restored pre-M7
+  shape (old CHECK and `role_rank`, the old function and type, an `admin` row with
+  `role_since = 2020-01-01`) the migration gives `board` with the same `role_since`, NULL rank for
+  `admin` and the function gone; the superadmin snippet promotes two members (one board, one
+  member), writes two `role.grant` entries (actor NULL, details `{from,to}`), and M7 then runs.
+- App role model: `src/lib/auth/roles.ts` keeps `admin` (rank 1) with "remove after M7 is applied
+  in prod" comments, because the code ships before M7 (deploy window). Unit tests of `admin`
+  stay for the same reason.
+- Fixtures: `createTestAdmin` and the e2e `e2e-admin` user are `board`; the e2e helper now also
+  sets the role on a reused user (a teardown that demoted but failed to delete left it a plain
+  member). Integration files that used a "legacy" `admin` user now make it a second board member
+  (titles and `actor_role` assertions adapted); `admin-rpc.test.ts` deleted and the
+  `get_all_members_for_admin` blocks of `member-secrets-lockdown.test.ts` and `roles.test.ts`
+  removed (the function is gone; `roles-contract.test.ts` asserts PGRST202, `to_regprocedure` /
+  `to_regtype` NULL, the CHECK definition and no `admin` row); the `alias` admin→board
+  `role_since` test moved to the local migration probe above (the CHECK no longer accepts the
+  fixture).
+- T26 follow-up: `/api/members/card` and `/api/profile/calendar` read `left_on` with the member
+  row and answer 404 when it is set (route tests for both).
+- Leftovers: README admin routes table (and `/events/images` rows removed); Lighthouse no longer
+  audits `/events/images` (19 pages); comments in `sitemap.ts` and the event image route point to
+  `/admin/tools/event-images`; `scripts/migrate-members.mjs` accepts `^000-\d{3,}$`;
+  `retention.yml` and `cache-refresh.yml` have `permissions: {}` and a `concurrency` group
+  (cancel-in-progress false).
+- Finding: `.github/workflows/cache-refresh.yml` was **invalid YAML** (`run: curl … -H
+  "Authorization: Bearer …"` as a plain scalar cannot hold `: `). GitHub rejected the file (every
+  push shows a 0 s "failure" run on `develop-users`), so the scheduled refresh never ran. Fixed
+  with a block scalar (checked with `yaml.safe_load`). The file is not on `main` yet, so
+  production lost nothing; runbook phase 4 step 3 is its first run.
+- Deviation: `supabase/snippets/` is owned by root (created by Supabase Studio) and not writable,
+  so the superadmin snippet lives in the runbook (phase 6) instead of
+  `supabase/snippets/promote-superadmins.sql`.
+- CLAUDE.md: not edited (WIP of `zona-socis-mockups-v2`); every change is listed, ready to apply,
+  in `odd/tasks/admin-panel-claude-md.md`.
+
+## Feature summary
+
+The admin panel is complete on `develop-users` (T1–T27, about 35 commits, `exception-ok`
+delivery, no PR slicing):
+
+| Area | What shipped |
+|---|---|
+| Data model | Membership state (leave, rejoin, anonymise, purge), roles member/board/superadmin with BR-10/11/12 guards, append-only audit log with a BR-15 leak detector, `ops_job_runs` |
+| Security | Board sessions read no other rows directly; DNI/phone ciphertext bound to its member (AES-GCM AAD, `v2:`) with a re-encryption script; every admin mutation is a SECURITY DEFINER function that writes its audit entry in the same transaction; exports are POST + same-origin and audited before data |
+| Screens | V-1 summary, V-2 member list + exports, V-3 member file (edit, reveal, leave/rejoin, badges, card, access link, data export, role, anonymise), V-4 activity, V-5 roles, V-6 tools, V-8 procedures, M-1 member-side leave |
+| Operations | Daily retention job (dry run by default), cache refresh runs recorded, leave/rejoin e-mails, final production runbook above |
+
+## Open decisions and accepted residuals
+
+- D-A (open): the two superadmins. Blocks phase 6 and M7 only.
+- Provisional, enforced in one place each (change the function and its tests):
+  - D-D: A-11 on a former member is superadmin only (`admin_member_data_former_min_role()`).
+  - D-E: reason minimums 5 for a board leave (`membership_leave_reason_min_length()`), 10 for a
+    former member's DNI reveal / data export / register (`admin_reveal_reason_min_length()`).
+  - D-G: path `/admin/tools/event-images` (page folder, three redirects in `next.config.ts`, link).
+  - D-H: purge = `left_on` + 3 years (`member_purge_on()`), board leave at most 365 days back;
+    confirm before `RETENTION_APPLY` (phase 5).
+- Accepted residuals (T26 verification):
+  - GoTrue checks the ban before the password, so the raw Auth API answers `user_banned` for a
+    former member's e-mail whatever password is sent: it reveals that an account is banned. The
+    app shows the wrong-password text; the leak is inherent to blocking sign-in with bans
+    (D-6 / spec §4.4).
+  - Password reset and magic link requests: response timing differs between sent and not sent,
+    and the per-address bucket (3 per 10 min) lets someone block a victim's resets for 10 minutes
+    (same trade-off as the magic link).
+  - Hardening idea, not done: build the reset `redirectTo` from a fixed configured origin instead
+    of the request `Origin`/host headers (the Supabase allow-list already limits where it can go).
+- Other known gaps carried from earlier tasks: the audit `reason` column is not scanned for
+  DNI/phone (dialogs warn); the detector misses compound keys (`telefono_movil`); a 9-digit id
+  starting 6–9 in audit details reads as a phone; PostgREST `max_rows` 1000 caps exports (they
+  refuse instead of truncating); no superadmin e2e fixture (superadmin paths are covered by
+  component, route and integration tests); `current_joined_on DEFAULT CURRENT_DATE` is the UTC
+  date.
+
+## Post-merge follow-ups
+
+1. Run the final prod runbook (phases 0–7).
+2. Remove the legacy decrypt fallback once a production dry run shows `legacy=0` (phase 8.1).
+3. Remove `admin` from `src/lib/auth/roles.ts` and its tests once M7 is applied (phase 8.2).
+4. Apply `odd/tasks/admin-panel-claude-md.md` to `CLAUDE.md` (phase 8.3).
+5. User review of the Catalan leave/rejoin e-mail copy (T10) and of the provisional decisions.
+6. Optional: move the post-leave notice from `/login?left=1` to the home page (T26 deviation);
+   share the cookie wipe between NavBar and `LeaveAssociationDialog`.
+
 ## Next step
 
-T27.
+Feature closed. Next: decide D-A, then run the prod runbook after merging to `main`.
