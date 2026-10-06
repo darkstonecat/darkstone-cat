@@ -7,7 +7,7 @@ import { maskDni, maskPhone } from "@/lib/profile/mask";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
-import MemberHero from "@/components/profile/MemberHero";
+import MemberHeader from "@/components/profile/MemberHeader";
 import GamingAccounts from "@/components/profile/GamingAccounts";
 import MemberDataCard from "@/components/profile/MemberDataCard";
 import NewsletterSwitch from "@/components/profile/NewsletterSwitch";
@@ -77,47 +77,50 @@ export default async function ProfileDetailsPage({
 
       {profile && member ? (
         <>
-          <MemberHero
-            firstName={member.first_name}
-            lastName={member.last_name}
+          <MemberHeader
+            title={`${member.first_name} ${member.last_name}`}
             memberNumber={member.member_number}
             membershipStartDate={member.membership_start_date}
             active="details"
           />
 
           <div className="flex-1 bg-brand-beige px-4 py-6 sm:px-6 md:px-12 md:pt-12 md:pb-20">
-            <div className="mx-auto flex max-w-[960px] flex-col gap-4 sm:gap-6">
-              <section aria-labelledby="gaming-title" className={cardClass}>
+            <div className="mx-auto grid max-w-[1120px] grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+              <section aria-labelledby="gaming-title" className={`${cardClass} lg:col-span-3`}>
                 <h2 id="gaming-title" className={`${titleClass} mb-5`}>
                   {t("gaming_title")}
                 </h2>
                 <GamingAccounts ludoyaUsername={member.ludoya_username} bggUsername={member.bgg_username} />
               </section>
 
-              <MemberDataCard
-                email={profile.email}
-                firstName={member.first_name}
-                lastName={member.last_name}
-                postalCode={member.postal_code}
-                dni={dni.value}
-                phone={phone.value}
-                dniUnavailable={dni.unavailable}
-                phoneUnavailable={phone.unavailable}
-              />
+              <div className="lg:col-span-2 [&>section]:h-full">
+                <MemberDataCard
+                  email={profile.email}
+                  firstName={member.first_name}
+                  lastName={member.last_name}
+                  postalCode={member.postal_code}
+                  dni={dni.value}
+                  phone={phone.value}
+                  dniUnavailable={dni.unavailable}
+                  phoneUnavailable={phone.unavailable}
+                />
+              </div>
 
-              <section aria-labelledby="comms-title" className={`${cardClass} flex flex-col gap-4`}>
-                <h2 id="comms-title" className={titleClass}>
-                  {t("comms_title")}
-                </h2>
-                <NewsletterSwitch initialValue={member.newsletter_accepted} />
-              </section>
+              <div className="flex flex-col gap-4 sm:gap-6">
+                <section aria-labelledby="comms-title" className={`${cardClass} flex flex-col gap-4`}>
+                  <h2 id="comms-title" className={titleClass}>
+                    {t("comms_title")}
+                  </h2>
+                  <NewsletterSwitch initialValue={member.newsletter_accepted} />
+                </section>
 
-              <section aria-labelledby="account-title" className={`${cardClass} flex flex-col gap-5`}>
-                <h2 id="account-title" className={titleClass}>
-                  {t("account_title")}
-                </h2>
-                <AccountActions email={profile.email} memberNumber={member.member_number} />
-              </section>
+                <section aria-labelledby="account-title" className={`${cardClass} flex flex-col gap-5`}>
+                  <h2 id="account-title" className={titleClass}>
+                    {t("account_title")}
+                  </h2>
+                  <AccountActions email={profile.email} memberNumber={member.member_number} />
+                </section>
+              </div>
             </div>
           </div>
         </>

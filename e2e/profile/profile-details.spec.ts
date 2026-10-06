@@ -7,10 +7,9 @@ test.describe('Profile details shell', () => {
     await expect(page).toHaveURL(/\/login\?redirect=%2Fprofile%2Fdetails/)
   })
 
-  test('shows the member hero with initials, name and number', async ({ memberPage: page }) => {
+  test('shows the member header with name and number', async ({ memberPage: page }) => {
     await page.goto(PAGES.profileDetails)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${MEMBER_FIRST_NAME} ${MEMBER_LAST_NAME}`)
-    await expect(page.getByTestId('member-avatar')).toHaveText('EM')
     await expect(page.getByText('Núm. de soci')).toBeVisible()
     await expect(page.getByText('Membre des del')).toBeVisible()
   })

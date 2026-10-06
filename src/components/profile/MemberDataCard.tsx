@@ -68,7 +68,7 @@ export default function MemberDataCard({
         </Link>
       </div>
 
-      <dl className="mt-6 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+      <dl className="mt-6 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
         {fields.map((f) => (
           <div key={f.key}>
             <dt className="text-[13px] font-medium text-stone-custom/65">{f.label}</dt>

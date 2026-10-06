@@ -13,7 +13,7 @@ vi.mock('@/i18n/routing', () => ({
   ),
 }))
 
-import MemberHero from '@/components/profile/MemberHero'
+import MemberHeader from '@/components/profile/MemberHeader'
 import MemberTabs from '@/components/profile/MemberTabs'
 
 describe('MemberTabs', () => {
@@ -40,27 +40,31 @@ describe('MemberTabs', () => {
   })
 })
 
-describe('MemberHero', () => {
+describe('MemberHeader', () => {
   const props = {
-    firstName: 'Anna',
-    lastName: 'Puig',
+    title: 'Anna Puig',
     memberNumber: '000-001',
     membershipStartDate: '2026-09-14',
     active: 'details' as const,
   }
 
-  it('shows the name as h1, the initials avatar (hidden from AT), number and start date', () => {
-    render(<MemberHero {...props} />)
+  it('shows eyebrow, title as h1, number, start date and tabs, with children below the tabs', () => {
+    render(
+      <MemberHeader {...props}>
+        <p>extra</p>
+      </MemberHeader>
+    )
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Anna Puig')
-    const avatar = screen.getByTestId('member-avatar')
-    expect(avatar).toHaveTextContent('AP')
-    expect(avatar).toHaveAttribute('aria-hidden', 'true')
-    expect(screen.getByText('000-001')).toBeInTheDocument()
+    expect(screen.getByText('card.eyebrow')).toBeInTheDocument()
+    expect(screen.getByText('000-001', { selector: 'strong' })).toBeInTheDocument()
     expect(screen.getByText(/hero_since/)).toHaveTextContent('14/9/2026')
+    const nav = screen.getByRole('navigation', { name: 'tabs_label' })
+    expect(nav.compareDocumentPosition(screen.getByText('extra')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
-  it('omits the start date when there is none', () => {
-    render(<MemberHero {...props} membershipStartDate={null} />)
+  it('omits the start date when there is none and renders the aside', () => {
+    render(<MemberHeader {...props} membershipStartDate={null} aside={<div>side</div>} />)
     expect(screen.queryByText(/hero_since/)).not.toBeInTheDocument()
+    expect(screen.getByText('side')).toBeInTheDocument()
   })
 })

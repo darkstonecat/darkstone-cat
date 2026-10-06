@@ -9,7 +9,7 @@ import { buildQrMatrix } from "@/lib/member-card/qr";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
-import MemberTabs from "@/components/profile/MemberTabs";
+import MemberHeader from "@/components/profile/MemberHeader";
 import CardFace from "@/components/profile/CardFace";
 import CardDownloadButton from "@/components/profile/CardDownloadButton";
 import CardQrOverlay from "@/components/profile/CardQrOverlay";
@@ -109,17 +109,16 @@ export default async function ProfileCardPage({
             </div>
           </div>
 
-          {/* Desktop: dark hero with tilted landscape card */}
-          <section className="hidden bg-stone-custom px-12 pt-32 pb-[72px] text-brand-white md:block">
-            <div className="mx-auto flex max-w-[1120px] flex-col items-start justify-between gap-14 xl:flex-row xl:items-center">
-              <div className="flex flex-col gap-3.5">
-                <p className="text-[13px] font-semibold tracking-[0.3em] text-brand-white/65 uppercase">{t("eyebrow")}</p>
-                <h1 className="text-5xl font-bold tracking-tight lg:text-6xl">{t("title")}</h1>
-                <p className="max-w-[440px] text-lg leading-normal text-brand-white/65">{t("intro")}</p>
-                <MemberTabs active="card" className="pt-2.5" />
-                <CardDownloadButton className="mt-5 self-start" />
-              </div>
-              <div className="self-center py-4">
+          {/* Desktop: shared member header with the tilted landscape card as aside */}
+          <MemberHeader
+            className="hidden md:block"
+            title={t("title")}
+            memberNumber={member.member_number}
+            membershipStartDate={member.membership_start_date}
+            active="card"
+            wideAside
+            aside={
+              <div className="self-start py-4 xl:self-center">
                 <CardFace
                   variant="landscape"
                   className="-rotate-2"
@@ -138,8 +137,11 @@ export default async function ProfileCardPage({
                   }
                 />
               </div>
-            </div>
-          </section>
+            }
+          >
+            <p className="max-w-[440px] text-lg leading-normal text-brand-white/65">{t("intro")}</p>
+            <CardDownloadButton className="mt-2 self-start" />
+          </MemberHeader>
 
           <section className="hidden flex-1 bg-brand-beige px-12 pt-12 pb-[72px] md:block">
             <div className="mx-auto grid max-w-[1120px] grid-cols-3 gap-6">

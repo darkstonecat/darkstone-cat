@@ -194,8 +194,6 @@ function GamingTile({ service, initialUsername }: { service: GamingService; init
       )}
 
       <LiveMessages
-        // Collapse the flex gap while both regions are empty.
-        className={status || error ? undefined : "-mt-3.5"}
         statusClassName={statusClass}
         errorClassName={isLinked ? "text-brand-white" : "text-brand-red"}
         status={status}

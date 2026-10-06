@@ -16,7 +16,7 @@ export default function MemberTabs({ active, className }: { active: MemberTab; c
 
   return (
     <nav aria-label={t("tabs_label")} className={className}>
-      <ul className="flex flex-wrap gap-2">
+      <ul className="grid w-full max-w-[360px] grid-cols-3 gap-2">
         {TABS.map((tab) => {
           const isActive = tab.key === active;
           return (
@@ -25,7 +25,7 @@ export default function MemberTabs({ active, className }: { active: MemberTab; c
                 href={tab.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "inline-flex min-h-11 items-center rounded-full px-[18px] text-sm font-semibold transition-colors",
+                  "flex min-h-11 w-full items-center justify-center rounded-full px-2 text-sm font-semibold transition-colors",
                   isActive
                     ? "bg-brand-white text-stone-custom"
                     : "border border-brand-white/20 text-brand-white hover:bg-brand-white/10"
