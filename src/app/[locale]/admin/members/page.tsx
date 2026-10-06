@@ -1,12 +1,19 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { redirect } from "@/i18n/routing";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { requireRole } from "@/lib/admin/guard";
-import { toRole } from "@/lib/auth/roles";
-import { listAllMembersForAdmin } from "@/lib/admin/members";
-import { maskDni, maskPhone } from "@/lib/admin/utils";
-import { decrypt } from "@/lib/encryption";
-import MembersTable, { type MemberRow } from "@/components/admin/MembersTable";
+import { isSuperadmin } from "@/lib/auth/roles";
+import { createClient } from "@/lib/supabase/server";
+import {
+  buildMembersHref,
+  parseMembersParams,
+  toListMembersArgs,
+  type AdminMemberListRow,
+} from "@/lib/admin/members-list";
+import MembersFilters from "@/components/admin/members/MembersFilters";
+import MembersExports from "@/components/admin/members/MembersExports";
+import MembersList, { MembersLoadError } from "@/components/admin/members/MembersList";
 
 export const revalidate = false;
 
@@ -33,19 +40,36 @@ export async function generateMetadata({
 
 export default async function AdminMembersPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { locale } = await params;
+  const [{ locale }, rawParams] = await Promise.all([params, searchParams]);
 
   // Board members and superadmins only; anyone else gets the 404 page.
   const actor = await requireRole("board", "/admin/members");
+
+  // Nothing from the URL reaches the RPC unchecked: it raises on unknown state, role or sort.
+  const query = parseMembersParams(rawParams);
+
+  // The user's own session (RLS and the RPC's role check apply): no service role here.
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("admin_list_members", toListMembersArgs(query));
+
+  const rows = (data ?? []) as AdminMemberListRow[];
+  if (error) {
+    // Postgres code only: messages can echo values.
+    console.error("[admin/members] list failed code=%s", error.code ?? "unknown");
+  } else if (rows.length === 0 && query.page > 1) {
+    // A page past the end (a stale link, a filter that shrank the list): back to the first page.
+    return redirect({ href: buildMembersHref(query, { page: 1 }), locale });
+  }
 
   const [tNav, tMeta] = await Promise.all([
     getTranslations({ locale, namespace: "nav" }),
     getTranslations({ locale, namespace: "metadata" }),
   ]);
-
   const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
     { name: tNav("admin"), path: "/admin" },
     { name: tNav("admin_members"), path: "/admin/members" },
@@ -57,51 +81,22 @@ export default async function AdminMembersPage({
     tMeta("admin_members_description"),
   );
 
-  let rows: MemberRow[] = [];
-  const { data: members } = await listAllMembersForAdmin(actor);
-  if (members) {
-    rows = members.map((m) => {
-      let phoneMasked: string | null = null;
-      let dniMasked: string | null = null;
-
-      if (m.phone_encrypted) {
-        try {
-          phoneMasked = maskPhone(decrypt(m.phone_encrypted, m.id));
-        } catch {
-          phoneMasked = null;
-        }
-      }
-
-      if (m.dni_nie_encrypted) {
-        try {
-          dniMasked = maskDni(decrypt(m.dni_nie_encrypted, m.id));
-        } catch {
-          dniMasked = null;
-        }
-      }
-
-      return {
-        memberNumber: m.member_number,
-        firstName: m.first_name,
-        lastName: m.last_name,
-        email: m.email,
-        phoneMasked,
-        dniMasked,
-        postalCode: m.postal_code,
-        role: toRole(m.role) ?? "member",
-        membershipStartDate: m.membership_start_date,
-      };
-    });
-  }
-
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
       />
-      <div className="container mx-auto max-w-6xl px-6 pt-16">
-        <MembersTable members={rows} />
+      <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-4 pt-10 sm:px-6 md:pt-16">
+        <div className="flex flex-col gap-4 rounded-2xl bg-brand-white p-5 md:p-6">
+          <MembersFilters query={query} />
+          <MembersExports role={query.role} isSuperadmin={isSuperadmin(actor.role)} />
+        </div>
+        {error ? (
+          <MembersLoadError query={query} />
+        ) : (
+          <MembersList rows={rows} total={rows[0]?.total_count ?? 0} query={query} />
+        )}
       </div>
     </>
   );

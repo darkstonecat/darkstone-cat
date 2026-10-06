@@ -45,4 +45,12 @@ describe('ExportConfirmDialog', () => {
     expect(await screen.findByText('export_error')).toBeInTheDocument()
     expect(onClose).not.toHaveBeenCalled()
   })
+  it('sends the role filter when the list is filtered by role', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response('x', { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<ExportConfirmDialog open onClose={vi.fn()} role="superadmin" />)
+    fireEvent.click(screen.getByText('export_confirm'))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+    expect(fetchMock.mock.calls[0][1].body).toBe('{"role":"superadmin"}')
+  })
 })

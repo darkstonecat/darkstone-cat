@@ -93,7 +93,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 
 - [x] T14 — Admin shell: layout with guard, AdminHeader/AdminTabs, AdminDialog primitive, i18n — route: delegated
 - [x] T15 — V-8 procedures — route: delegated
-- [ ] T16 — V-2 members list (server search/pagination, mobile cards) — route: delegated
+- [x] T16 — V-2 members list (server search/pagination, mobile cards) — route: delegated
 - [ ] T17 — V-2 dialogs (A-10, A-16, S-4) — route: delegated
 - [ ] T18 — V-3 member file, read-only — route: delegated
 - [ ] T19 — V-3 edit mode + reveal (A-4, A-5) — route: delegated
@@ -1622,6 +1622,47 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   `/admin/procedures` (member 404, board 200).
 - Tests: `tests/components/ProceduresContent.test.tsx`; `e2e/admin/procedures.spec.ts`.
 
+### T16 — done (route: delegated)
+
+- Commit: `feat(admin): Rebuild the member list on the admin read function` on `develop-users`
+  (hash in `git log -- src/lib/admin/members-list.ts`).
+- Verification: `npm run lint` exit 0 (no warnings); `npx tsc --noEmit` exit 0; `npm run test:unit`
+  90 files / 1340 tests passed; `npm run test:integration` 29 files / 521 tests passed;
+  `npx playwright test e2e/admin` 33 passed (4 consecutive runs after waiting for hydration in
+  the filter test, which submits from React `onChange` handlers).
+- `/admin/members` is a server page: `searchParams` (a Promise) go through
+  `parseMembersParams` (`src/lib/admin/members-list.ts`, pure): `state` active|former|all, `role`
+  all|member|board|superadmin, `sort` the 8 whitelisted values, `q` (control characters removed,
+  whitespace collapsed, 100 code points), `page` plain digits 1..100000, `pp` 12|24|48|96 (no UI
+  yet); anything else falls back to the default, and `toListMembersArgs` maps to the RPC (role
+  "all" and empty search become NULL). The RPC is called with the SESSION client; error → blocked
+  notice + retry link (Postgres code logged only); an empty page past the end redirects to page 1.
+  URL parameter names are `state`/`role` (English, task text), not the mockup's `estat`/`rol`.
+- UI (`src/components/admin/members/`): `MembersFilters` (client GET form: search + "Cerca"
+  button, state segmented radios, role select, mobile-only sort select driving a hidden `sort`
+  field; state/role/sort submit on change, never sends `page`), `MembersList` (server-compatible:
+  table from `md` with sortable Núm./Nom/Alta actual headers + `aria-sort`, cards below, whole row
+  or card links to `/admin/members/<number>` (V-3 arrives in T18, 404 until then), `StatusChip`
+  for state ("Baixa des de d/m/yyyy") and board/superadmin, "Mostrant a–b de n", prev/next,
+  `role=status` empty state), `MembersLoadError`, `MembersExports`, and `loading.tsx` skeleton.
+  No DNI/phone anywhere. Deviation: the header count line ("168 socis actius · 23 exsocis") is not
+  shown (the layout header has no counts; it would need a second RPC call).
+- Exports: "Exporta CSV" opens `ExportConfirmDialog`, which gained an optional `role` prop: the POST
+  body is `{ role }` only when the list is filtered by a role, `{}` otherwise (state is never sent:
+  A-10 is active-only, the dialog says so and names the role). DECISION for A-16 and S-4: both are
+  rendered DISABLED with the visible reason "Properament" (via `ReasonButton`), S-4 and its
+  "Només superadmins" hint only for superadmins; T17 replaces them with the real dialogs.
+- Removed: `MembersTable`, its role test and `src/lib/admin/utils.ts` (admin `maskDni`/`maskPhone`),
+  plus the old flat `admin.members_*`, `col_*`, `not_provided`, `export_button` keys. NOT removed:
+  `listAllMembersForAdmin` (`src/lib/admin/members.ts`), still used by `/admin` until T24.
+  CLAUDE.md still names `MembersTable` in the component list (not edited: it has uncommitted
+  changes from another feature).
+- Tests: `tests/lib/admin-members-list.test.ts` (sanitiser, args, href, round trip),
+  `tests/components/MembersList.test.tsx` (table/cards, chips, links, sorting, pagination, empty,
+  error, filters form, export buttons and role filter), `ExportConfirmDialog` role case,
+  `e2e/admin/members-list.spec.ts` (list, search and filter round trips via URL, sort, invalid
+  params, page past the end, CSV dialog, member 404).
+
 ## Next step
 
-T16.
+T17.

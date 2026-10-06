@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { roleLabelKey } from "@/lib/auth/roles";
 import AdminDialog from "./AdminDialog";
 
 type ExportConfirmDialogProps = {
   open: boolean;
   onClose: () => void;
+  /** Role filter of the list ("Rol"); sent as `{ role }` and named in the dialog. Omit for everyone. */
+  role?: "member" | "board" | "superadmin";
 };
 
-export default function ExportConfirmDialog({ open, onClose }: ExportConfirmDialogProps) {
+export default function ExportConfirmDialog({ open, onClose, role }: ExportConfirmDialogProps) {
   const t = useTranslations("admin");
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState("");
@@ -23,7 +26,7 @@ export default function ExportConfirmDialog({ open, onClose }: ExportConfirmDial
       const res = await fetch("/api/admin/members/export", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify(role ? { role } : {}),
       });
 
       if (!res.ok) {
@@ -71,6 +74,8 @@ export default function ExportConfirmDialog({ open, onClose }: ExportConfirmDial
       error={error || undefined}
     >
       <p className="text-sm text-stone-custom/70">{t("export_warning")}</p>
+      <p className="text-sm text-stone-custom/70">{t("export_active_only")}</p>
+      {role && <p className="text-sm font-semibold text-stone-custom">{t("export_role_note", { role: t(roleLabelKey(role)) })}</p>}
     </AdminDialog>
   );
 }
