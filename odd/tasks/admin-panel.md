@@ -2374,6 +2374,11 @@ After it: both superadmins sign in and see the "Rols" tab and `/admin/roles`.
 - Deviation: `supabase/snippets/` is owned by root (created by Supabase Studio) and not writable,
   so the superadmin snippet lives in the runbook (phase 6) instead of
   `supabase/snippets/promote-superadmins.sql`.
+- Final verification (tier `high`): PASS. One low defect fixed by the parent: M7's header and
+  precondition error pointed at the non-existent snippet file; both now point at runbook phase 6.
+  Runbook note: apply migrations with the Supabase MCP `apply_migration` (or record their versions
+  in `supabase_migrations.schema_migrations` by hand) — the SQL editor does not record them, so a
+  later `db push` would re-apply them; never run M7 through psql outside a single transaction.
 - CLAUDE.md: not edited (WIP of `zona-socis-mockups-v2`); every change is listed, ready to apply,
   in `odd/tasks/admin-panel-claude-md.md`.
 

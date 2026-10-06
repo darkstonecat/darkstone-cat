@@ -21,7 +21,8 @@
 --      role = 'admin' into /admin, so applying M7 under it locks every admin out; the admin-panel
 --      code accepts 'board' (and still treats a leftover 'admin' as board until M7 is applied,
 --      src/lib/auth/roles.ts), and
---   b) after supabase/snippets/promote-superadmins.sql has run and two active superadmins exist:
+--   b) after the superadmin bootstrap (odd/tasks/admin-panel.md, prod runbook phase 6) has run
+--      and two active superadmins exist:
 --      BR-10 only lets a superadmin go while two others remain, and roles can only change
 --      through the superadmin functions once nobody holds 'admin' any more.
 -- The migration refuses to run without two active superadmins (step 0), so b) cannot be skipped
@@ -40,7 +41,7 @@ BEGIN
   -- An empty database (local db:reset, CI, a fresh preview branch) has no members at all and
   -- nothing to protect; any database with members must have the superadmins first.
   IF v_superadmins < 2 AND EXISTS (SELECT 1 FROM public.members) THEN
-    RAISE EXCEPTION 'roles_contract: found % active superadmins, need 2 (run supabase/snippets/promote-superadmins.sql first)', v_superadmins
+    RAISE EXCEPTION 'roles_contract: found % active superadmins, need 2 (run the superadmin bootstrap in odd/tasks/admin-panel.md, prod runbook phase 6, first)', v_superadmins
       USING ERRCODE = 'check_violation';
   END IF;
 END;
