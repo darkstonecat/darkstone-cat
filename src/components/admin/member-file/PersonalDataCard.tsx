@@ -30,7 +30,9 @@ export default function PersonalDataCard({ member, canRevealFormerDni }: Persona
   const router = useRouter();
   const former = member.state === "former";
   const name = `${member.first_name} ${member.last_name}`.trim();
-  const [editing, setEditing] = useState(false);
+  const [editingRequested, setEditing] = useState(false);
+  // A leave done from the same screen turns the member into a former one: never keep the form open.
+  const editing = editingRequested && !former;
   const [saved, setSaved] = useState<"saved" | "unchanged" | null>(null);
 
   const mask = (

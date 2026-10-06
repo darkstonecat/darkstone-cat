@@ -6,7 +6,15 @@ vi.mock('next-intl', () => ({
     values ? `${key}:${JSON.stringify(values)}` : key,
 }))
 vi.mock('@/lib/admin/membership-actions', () => ({ leaveMember: vi.fn(), rejoinMember: vi.fn() }))
-vi.mock('@/lib/admin/member-actions', () => ({ updateMember: vi.fn(), revealSensitive: vi.fn() }))
+vi.mock('@/lib/admin/member-actions', () => ({
+  updateMember: vi.fn(),
+  revealSensitive: vi.fn(),
+  awardBadge: vi.fn(),
+  revokeBadge: vi.fn(),
+  regenerateCard: vi.fn(),
+}))
+vi.mock('@/lib/admin/access-actions', () => ({ sendAccessLink: vi.fn() }))
+vi.mock('@/lib/admin/superadmin-actions', () => ({ setMemberRole: vi.fn(), anonymiseMember: vi.fn() }))
 vi.mock('@/i18n/routing', () => ({
   useRouter: () => ({ refresh: vi.fn() }),
   Link: ({ children, href, ...rest }: any) => (
@@ -202,6 +210,15 @@ describe('MemberFile, former member', () => {
     fireEvent.click(screen.getByRole('button', { name: 'cancel' }))
     expect(screen.queryByRole('form')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'open' })).toBeInTheDocument()
+  })
+
+  it('closes an open edit form when the member becomes a former one on the same screen', () => {
+    const { rerender } = render_(active)
+    fireEvent.click(screen.getByRole('button', { name: 'open' }))
+    expect(screen.getByRole('form', { name: 'form_label' })).toBeInTheDocument()
+    rerender(<MemberFile member={former} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} viewerId="viewer" />)
+    expect(screen.queryByRole('form')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'open' })).not.toBeInTheDocument()
   })
 
   it('has no edit button on a former member', () => {

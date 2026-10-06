@@ -1,12 +1,10 @@
 import { useTranslations } from "next-intl";
 import { MdArrowBack, MdArrowForward } from "react-icons/md";
 import { Link } from "@/i18n/routing";
-import { roleLabelKey, isBoardRole } from "@/lib/auth/roles";
+import { roleLabelKey } from "@/lib/auth/roles";
 import {
-  KNOWN_BADGE_KEYS,
   activityKeyOf,
   formatAdminTimestamp,
-  yearOf,
   type AdminActivityRow,
   type AdminMemberFileRow,
 } from "@/lib/admin/member-file";
@@ -14,6 +12,8 @@ import { formatAdminDate } from "@/lib/admin/members-list";
 import Notice from "../Notice";
 import StatusChip from "../StatusChip";
 import { Field } from "./Field";
+import BadgesCard from "./BadgesCard";
+import CardSection from "./CardSection";
 import MemberDataExport from "./MemberDataExport";
 import MembershipActions from "./MembershipActions";
 import PersonalDataCard from "./PersonalDataCard";
@@ -39,8 +39,8 @@ const CARD = "rounded-2xl bg-brand-white p-5 md:p-8";
  * V-3 read-only member file. Active members show their contact data; for a former member the
  * RPC already nulls everything BR-20 deletes, and this component never renders a placeholder
  * for those fields. DNI and phone are only ever "present or not" (revealed on demand). Edit and reveal
- * live in `PersonalDataCard`, leave/rejoin in `MembershipActions`; the badge, card, role and
- * access-link buttons are omitted until T21-T22 wire them.
+ * live in `PersonalDataCard`, leave/rejoin in `MembershipActions`; badges, card
+ * and access link in their own cards, the role in the header.
  */
 export default function MemberFile({ member, activity, backHref, canExportData, canRevealFormerDni, viewerId }: MemberFileProps) {
   const t = useTranslations("admin.member_file");
@@ -50,9 +50,6 @@ export default function MemberFile({ member, activity, backHref, canExportData, 
   const leftOn = formatAdminDate(member.left_on);
   const purgeOn = formatAdminDate(member.purge_on);
   const firstSignup = formatAdminDate(member.membership_start_date);
-  const roleSince = isBoardRole(member.role) ? formatAdminTimestamp(member.role_since) : null;
-  const badges = member.badges ?? [];
-  const startYear = yearOf(member.membership_start_date);
 
   return (
     <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-4 pb-16 pt-10 sm:px-6 md:pt-16">
@@ -123,64 +120,8 @@ export default function MemberFile({ member, activity, backHref, canExportData, 
       </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <section aria-labelledby="mf-badges" className={`${CARD} flex flex-col gap-4`}>
-          <h3 id="mf-badges" className="text-xl font-bold text-stone-custom">
-            {t("badges_title")}
-          </h3>
-          <ul className="flex flex-col">
-            {startYear !== null && (
-              <li className="flex flex-col gap-0.5 border-t border-stone-custom/10 py-3 first:border-0">
-                <span className="font-semibold text-stone-custom">{t("badge_member_year", { year: startYear })}</span>
-                <span className="text-[13px] text-stone-custom/65">{t("badge_automatic")}</span>
-              </li>
-            )}
-            {badges.map((badge) => {
-              const date = formatAdminTimestamp(badge.awarded_at);
-              const known = (KNOWN_BADGE_KEYS as readonly string[]).includes(badge.badge_key);
-              return (
-                <li
-                  key={badge.badge_key}
-                  className="flex flex-col gap-0.5 border-t border-stone-custom/10 py-3 first:border-0"
-                >
-                  <span className="font-semibold text-stone-custom">
-                    {known ? t(`badge_${badge.badge_key}`) : badge.badge_key}
-                  </span>
-                  <span className="text-[13px] text-stone-custom/65">
-                    {date && badge.awarded_by_name
-                      ? t("badge_awarded_by", { date, name: badge.awarded_by_name })
-                      : date
-                        ? t("badge_awarded", { date })
-                        : null}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-          {badges.length === 0 && startYear === null && <p className="text-sm text-stone-custom/65">{t("badges_none")}</p>}
-          {former && <p className="text-[13px] text-stone-custom/65">{t("badges_kept")}</p>}
-        </section>
-
-        <section aria-labelledby="mf-card" className={`${CARD} flex flex-col gap-3`}>
-          <div className="flex items-center justify-between gap-3">
-            <h3 id="mf-card" className="text-xl font-bold text-stone-custom">
-              {t("card_title")}
-            </h3>
-            <StatusChip kind={member.card_valid ? "valid" : "invalid"} />
-          </div>
-          {former ? (
-            <p className="text-sm text-stone-custom/70">{t("card_former")}</p>
-          ) : (
-            <p className="text-sm text-stone-custom/70">
-              {formatAdminTimestamp(member.card_issued_at)
-                ? t("card_issued", { date: formatAdminTimestamp(member.card_issued_at) ?? "" })
-                : t("card_no_date")}
-            </p>
-          )}
-          <p className="text-sm text-stone-custom/70">
-            {t("role_card")} <strong className="text-stone-custom">{tAdmin(roleLabelKey(member.role))}</strong>
-            {roleSince ? ` · ${t("role_since", { date: roleSince })}` : ""}
-          </p>
-        </section>
+        <BadgesCard member={member} />
+        <CardSection member={member} />
       </div>
 
       <section aria-labelledby="mf-activity" className={`${CARD} flex flex-col gap-4`}>

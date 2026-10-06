@@ -16,6 +16,16 @@ const KNOWN_ERROR_KEYS = [
   "no_login",
   "invalid_channel",
   "note_too_long",
+  "badge_held",
+  "badge_not_held",
+  "invalid_badge",
+  "send_failed",
+  "invalid_role",
+  "role_unchanged",
+  "self_role_change",
+  "last_superadmin",
+  "former_member_role",
+  "confirm_mismatch",
   "failed",
 ] as const;
 

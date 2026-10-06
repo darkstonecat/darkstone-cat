@@ -98,7 +98,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T18 — V-3 member file, read-only — route: delegated
 - [x] T19 — V-3 edit mode + reveal (A-4, A-5) — route: delegated
 - [x] T20 — V-3 leave/rejoin dialogs (A-6, A-7) — route: delegated
-- [ ] T21 — V-3 badges, card, member data, access link (A-8, A-9, A-11, A-15) — route: delegated
+- [x] T21 — V-3 badges, card, member data, access link (A-8, A-9, A-11, A-15) — route: delegated
 - [ ] T22 — V-3 role card + S-3, V-5 roles — route: delegated
 - [ ] T23 — Audit renderer + V-4 activity — route: delegated
 - [ ] T24 — V-1 dashboard (replaces AdminDashboard) — route: delegated
@@ -1820,6 +1820,47 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   rejoin a throwaway member; the file switches Actiu -> Baixa -> Actiu).
 - Messages added under `admin.member_file.membership` (ca/es/en).
 
+### T21 — done (route: delegated)
+
+- Commit: `feat(admin): Add badge, card and access link actions to the member file` on
+  `develop-users` (hash in `git log -- src/components/admin/member-file/BadgesCard.tsx`).
+- Test-first: component tests were written together with the components (no RED observed: the
+  server actions they call already existed and were mocked); the e2e spec was run green.
+- Verification (run with the T22 files already in the tree, so the T21 commit itself was
+  linted and type-checked in its final form): `npm run lint` exit 0; `npx tsc --noEmit` exit 0;
+  `npm run test:unit` 104 files / 1508 tests passed; `npx playwright test e2e/admin` 46 passed
+  (the one failure, the T22 role-card e2e, needs T22's RoleCard and is not part of this commit).
+  Integration is run once, before the T22 commit (no server code changed in T21).
+- `BadgesCard` (client, replaces the inline badges section): A-8. Award dialog = radio list of the
+  catalogue (`KNOWN_BADGE_KEYS`), held ones disabled with "Ja la té des del …", optional note in a
+  plain textarea (null when blank), note "Membre és automàtica"; revoke = per-badge "Retira"
+  button, confirm dialog with optional reason. "Membre {year}" has no button (derived, BR-6). For a
+  former member the award button is disabled with a visible reason and no revoke buttons exist.
+  When every badge is held the award button is disabled with a reason.
+- `CardSection` (client, replaces the inline card section): chip, issued date, A-9 "Regenera el
+  carnet" (confirm dialog, P-5, explains the old QR stops; success notice; the token is never
+  shown) and A-15 "Envia enllaç d'accés" (P-6; enabled only for active members with a login; info
+  list; success notice never names the address; `rate_limited` shows "Ja s'ha enviat; torna-ho a
+  provar d'aquí a N min" from `retryAfter` (ceil minutes, generic text when null) and disables the
+  confirm until the dialog is closed). The role line moved out of this card (T22 adds RoleCard).
+- Outcome notices (`role=status`) live in the cards, so they survive `router.refresh()`.
+- Errors: `errors.ts` knows the new codes (`badge_held, badge_not_held, invalid_badge, send_failed,
+  invalid_role, role_unchanged, self_role_change, last_superadmin, former_member_role,
+  confirm_mismatch`); texts in `admin.member_file.errors.*` (ca/es/en).
+- Messages: `admin.member_file.badge_actions|card_actions|role_actions`, `admin.roles`,
+  `nav.admin_roles`, `metadata.admin_roles_*` were all added in this commit (ca/es/en), so the T22
+  texts are already here and unused until T22.
+- Coordinator fix (T19/T20 verification): `PersonalDataCard` rendered the edit form after a leave
+  done from the same screen. It now renders the form only when `editing && !former`; test in
+  `MemberFile.test.tsx` (rerender from active to former closes the form).
+- Tests: `tests/components/BadgesCard.test.tsx`, `CardSection.test.tsx` (catalogue filtering,
+  disabled states for former members, rate-limited message, address never passed),
+  `MemberFile.test.tsx`; `e2e/admin/member-badges-card.spec.ts` (serial: a board member awards,
+  sees the badge disabled, revokes; regenerates the card and sees the notice, on a throwaway member).
+  No access-link e2e: it sends a real e-mail and consumes the shared rate-limit bucket.
+- Deviation: the A-11 export stays as T18 built it; "Atorga" note field says "Nota (opcional)" and
+  carries the no-DNI hint in its help text instead of the dialog reason slot.
+
 ## Next step
 
-T21.
+T22.
