@@ -949,18 +949,6 @@
     }
   },
   "admin": {
-    "title": "Administración",
-    "subtitle": "Panel de administración de Darkstone Catalunya",
-
-    "stat_total": "Total socios",
-    "stat_new_month": "Nuevos este mes",
-    "stat_newsletter": "Boletín",
-
-    "nav_members": "Gestión de socios",
-    "nav_members_description": "Consulta, busca y exporta el listado de socios",
-    "nav_event_images": "Imágenes de eventos",
-    "nav_event_images_description": "Genera imágenes para los eventos",
-
 
 
     "role_member": "Socio",
@@ -1596,6 +1584,36 @@
         "ludoya": "Ludoya",
         "bgg": "BGG"
       }
+    },
+    "overview": {
+      "figures_title": "Cifras",
+      "stats_error": "No se han podido cargar las cifras.",
+      "retry": "Vuelve a intentarlo",
+      "stat_active": "Socios activos",
+      "stat_active_hint": "Sin fecha de baja",
+      "stat_joined": "Altas este mes",
+      "stat_joined_hint": "Primeras altas del mes",
+      "stat_left": "Bajas este mes",
+      "stat_left_hint": "{self} por el socio · {board} por la junta",
+      "stat_rejoined": "Reincorporaciones este año",
+      "stat_rejoined_hint": "Desde el 1 de enero",
+      "stat_newsletter": "Boletín",
+      "stat_newsletter_hint": "{percent} % de los socios activos",
+      "stat_board": "Miembros de la junta",
+      "stat_board_hint": "{count, plural, one {De los cuales # superadmin} other {De los cuales # superadmins}}",
+      "activity_title": "Actividad reciente",
+      "activity_all": "Ver todo el registro",
+      "activity_empty": "Todavía no hay actividad.",
+      "activity_error": "No se ha podido cargar la actividad reciente.",
+      "shortcuts_title": "Atajos",
+      "shortcut_members": "Busca un socio",
+      "shortcut_members_text": "Por nombre, número o correo",
+      "shortcut_export": "Exporta",
+      "shortcut_export_text": "Listado CSV o lista de correos",
+      "shortcut_tools": "Herramientas",
+      "shortcut_tools_text": "Imágenes y caché",
+      "shortcut_procedures": "Procedimientos",
+      "shortcut_procedures_text": "Guías paso a paso para la junta"
     },
     "roles": {
       "intro": "Solo los superadmins pueden otorgar y quitar roles.",

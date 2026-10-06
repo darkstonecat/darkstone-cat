@@ -1,37 +1,16 @@
-import { createClient } from '@supabase/supabase-js'
 import { test, expect } from '../fixtures'
 import { MEMBER_EMAIL } from '../helpers/constants'
-import { findUserByEmail } from '../helpers/supabase-admin'
+import { exportMemberData, memberNumberOf } from '../helpers/admin-audit'
 
 // V-4 through the real stack. The entry it reads is written by the A-11 export the test runs
 // itself (one `export.member_data` row for the shared read-only member), so it does not depend on
 // the order of the other specs.
-async function memberNumberOf(email: string): Promise<string> {
-  const id = await findUserByEmail(email)
-  expect(id).not.toBeNull()
-  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-  const { data, error } = await admin.from('members').select('member_number').eq('id', id!).single()
-  expect(error).toBeNull()
-  return data!.member_number as string
-}
-
 test.describe('Admin activity log (V-4)', () => {
   test('a board member filters by an action group and follows the member file link', async ({ adminPage: page }) => {
     const number = await memberNumberOf(MEMBER_EMAIL)
 
     // Produce one entry: the member data export (A-11) from the member file.
-    await page.goto(`/admin/members/${number}`)
-    await page.waitForLoadState('networkidle')
-    await page.getByRole('button', { name: 'Exporta dades' }).click()
-    const dialog = page.getByRole('dialog', { name: 'Exporta dades del soci' })
-    await Promise.all([
-      page.waitForResponse((r) => r.url().endsWith(`/api/admin/members/${number}/data`) && r.request().method() === 'POST'),
-      page.waitForEvent('download'),
-      dialog.getByRole('button', { name: 'Descarrega JSON' }).click(),
-    ])
-    await expect(dialog.getByRole('status')).toHaveText('JSON descarregat.')
+    await exportMemberData(page, number)
 
     // "Veure-ho al registre" lands on the log filtered to this member.
     await page.reload()

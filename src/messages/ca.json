@@ -949,18 +949,6 @@
     }
   },
   "admin": {
-    "title": "Administració",
-    "subtitle": "Panell d'administració de Darkstone Catalunya",
-
-    "stat_total": "Total socis",
-    "stat_new_month": "Nous aquest mes",
-    "stat_newsletter": "Butlletí",
-
-    "nav_members": "Gestió de socis",
-    "nav_members_description": "Consulta, cerca i exporta el llistat de socis",
-    "nav_event_images": "Imatges d'esdeveniments",
-    "nav_event_images_description": "Genera imatges per als esdeveniments",
-
 
 
     "role_member": "Soci",
@@ -1596,6 +1584,36 @@
         "ludoya": "Ludoya",
         "bgg": "BGG"
       }
+    },
+    "overview": {
+      "figures_title": "Xifres",
+      "stats_error": "No s'han pogut carregar les xifres.",
+      "retry": "Torna-ho a provar",
+      "stat_active": "Socis actius",
+      "stat_active_hint": "Sense data de baixa",
+      "stat_joined": "Altes aquest mes",
+      "stat_joined_hint": "Primeres altes del mes",
+      "stat_left": "Baixes aquest mes",
+      "stat_left_hint": "{self} pel soci · {board} per la junta",
+      "stat_rejoined": "Reincorporacions aquest any",
+      "stat_rejoined_hint": "Des de l'1 de gener",
+      "stat_newsletter": "Butlletí",
+      "stat_newsletter_hint": "{percent} % dels socis actius",
+      "stat_board": "Membres de la junta",
+      "stat_board_hint": "{count, plural, one {Dels quals # superadmin} other {Dels quals # superadmins}}",
+      "activity_title": "Activitat recent",
+      "activity_all": "Veure tot el registre",
+      "activity_empty": "Encara no hi ha activitat.",
+      "activity_error": "No s'ha pogut carregar l'activitat recent.",
+      "shortcuts_title": "Dreceres",
+      "shortcut_members": "Cerca un soci",
+      "shortcut_members_text": "Per nom, número o correu",
+      "shortcut_export": "Exporta",
+      "shortcut_export_text": "Llistat CSV o llista de correus",
+      "shortcut_tools": "Eines",
+      "shortcut_tools_text": "Imatges i memòria cau",
+      "shortcut_procedures": "Procediments",
+      "shortcut_procedures_text": "Guies pas a pas per a la junta"
     },
     "roles": {
       "intro": "Només els superadmins poden atorgar i treure rols.",

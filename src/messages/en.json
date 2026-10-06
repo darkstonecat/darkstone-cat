@@ -949,18 +949,6 @@
     }
   },
   "admin": {
-    "title": "Administration",
-    "subtitle": "Darkstone Catalunya administration panel",
-
-    "stat_total": "Total members",
-    "stat_new_month": "New this month",
-    "stat_newsletter": "Newsletter",
-
-    "nav_members": "Member management",
-    "nav_members_description": "View, search and export the members list",
-    "nav_event_images": "Event images",
-    "nav_event_images_description": "Generate images for events",
-
 
 
     "role_member": "Member",
@@ -1596,6 +1584,36 @@
         "ludoya": "Ludoya",
         "bgg": "BGG"
       }
+    },
+    "overview": {
+      "figures_title": "Figures",
+      "stats_error": "The figures could not be loaded.",
+      "retry": "Try again",
+      "stat_active": "Active members",
+      "stat_active_hint": "No leave date",
+      "stat_joined": "Sign-ups this month",
+      "stat_joined_hint": "First sign-ups of the month",
+      "stat_left": "Leavers this month",
+      "stat_left_hint": "{self} by the member · {board} by the board",
+      "stat_rejoined": "Rejoined this year",
+      "stat_rejoined_hint": "Since 1 January",
+      "stat_newsletter": "Newsletter",
+      "stat_newsletter_hint": "{percent} % of active members",
+      "stat_board": "Board members",
+      "stat_board_hint": "{count, plural, one {Of whom # superadmin} other {Of whom # superadmins}}",
+      "activity_title": "Recent activity",
+      "activity_all": "See the whole log",
+      "activity_empty": "There is no activity yet.",
+      "activity_error": "Recent activity could not be loaded.",
+      "shortcuts_title": "Shortcuts",
+      "shortcut_members": "Find a member",
+      "shortcut_members_text": "By name, number or e-mail",
+      "shortcut_export": "Export",
+      "shortcut_export_text": "CSV list or e-mail list",
+      "shortcut_tools": "Tools",
+      "shortcut_tools_text": "Images and cache",
+      "shortcut_procedures": "Procedures",
+      "shortcut_procedures_text": "Step-by-step guides for the board"
     },
     "roles": {
       "intro": "Only superadmins can grant and remove roles.",

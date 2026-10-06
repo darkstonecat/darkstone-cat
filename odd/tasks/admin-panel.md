@@ -101,7 +101,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T21 — V-3 badges, card, member data, access link (A-8, A-9, A-11, A-15) — route: delegated
 - [x] T22 — V-3 role card + S-3, V-5 roles — route: delegated
 - [x] T23 — Audit renderer + V-4 activity — route: delegated
-- [ ] T24 — V-1 dashboard (replaces AdminDashboard) — route: delegated
+- [x] T24 — V-1 dashboard (replaces AdminDashboard) — route: delegated
 - [ ] T25 — V-6 tools + event images move + 308 redirect — route: delegated
 - [ ] T26 — V-7 member side: M-1 leave dialog, login help, neutral password reset via server action — route: delegated
 - [ ] T27 — M7 `roles_contract` + prod runbook + CLAUDE.md/README — route: delegated
@@ -1943,7 +1943,35 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   member file tests adapted, `e2e/admin/activity.spec.ts` (A-11 export, "Veure tot" link, group filter,
   empty state, malformed params, member 404).
 
+### T24 — done (route: delegated)
+
+- Commit: `feat(admin): Rebuild the admin dashboard on admin_stats` on `develop-users` (hash in
+  `git log -- src/lib/admin/stats.ts`).
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 111 files /
+  1621 tests passed; `npm run test:integration` 29 files / 521 tests passed; `npx playwright test e2e/admin`
+  50 passed.
+- `/admin` (`force-dynamic`, `requireRole('board', '/admin')`): `admin_stats()` and
+  `admin_list_activity({ p_limit: 10 })` in parallel through the SESSION client; each failure logs only the
+  Postgres code and renders its own notice (figures: with a retry link; activity: notice) without hiding the
+  rest. `parseAdminStats` (`src/lib/admin/stats.ts`) validates the row (non-negative safe integers, unknown
+  fields dropped; an unusable answer counts as a failure). Newsletter percent is computed in the app.
+- UI `src/components/admin/overview/AdminOverview.tsx` (V-1): six figure cards in spec order (not links),
+  "Activitat recent" with the shared audit renderer (`<ol>`, `<time>`, link "Veure tot el registre"), empty
+  and error states, "Dreceres" dark card with four real links (Cerca un soci and Exporta both go to
+  `/admin/members`, where the exports live; Eines `/admin/tools` 404s until T25; Procediments); shortcuts
+  first on mobile. i18n `admin.overview` ca/es/en.
+- Removed: `AdminDashboard.tsx`, `src/lib/admin/members.ts` (`listAllMembersForAdmin`; it had no other
+  caller, the SQL function `get_all_members_for_admin` stays for T27 to drop) and the nine old admin message
+  keys (`title`, `subtitle`, `stat_*`, `nav_*`). CLAUDE.md still mentions both (WIP file of another
+  feature, not edited): T27.
+- Deviation: the instruction said `p_limit 5`; spec V-1 and the mockup say the last 10, so 10 is used
+  (`OVERVIEW_ACTIVITY_LIMIT`, one constant).
+- Tests: `tests/lib/admin-stats.test.ts`, `tests/components/AdminOverview.test.tsx`,
+  `tests/server/admin-overview-page.test.ts` (guard first, session client, no service-role import, per-failure
+  flags), `e2e/admin/dashboard.spec.ts` rewritten (six figures with numbers, latest activity after an A-11
+  export, shortcuts, guards), shared `e2e/helpers/admin-audit.ts`.
+
 
 ## Next step
 
-T24.
+T25.

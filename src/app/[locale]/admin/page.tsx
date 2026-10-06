@@ -2,10 +2,13 @@ import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { requireRole } from "@/lib/admin/guard";
-import { listAllMembersForAdmin } from "@/lib/admin/members";
-import AdminDashboard from "@/components/admin/AdminDashboard";
+import { createClient } from "@/lib/supabase/server";
+import type { AdminActivityRow } from "@/lib/admin/audit-format";
+import { OVERVIEW_ACTIVITY_LIMIT, parseAdminStats } from "@/lib/admin/stats";
+import AdminOverview from "@/components/admin/overview/AdminOverview";
 
-export const revalidate = false;
+// Live figures and audit entries: computed per request, never cached.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -36,7 +39,7 @@ export default async function AdminPage({
   const { locale } = await params;
 
   // Board members and superadmins only; anyone else gets the 404 page.
-  const actor = await requireRole("board", "/admin");
+  await requireRole("board", "/admin");
 
   const [tNav, tMeta] = await Promise.all([
     getTranslations({ locale, namespace: "nav" }),
@@ -53,20 +56,21 @@ export default async function AdminPage({
     tMeta("admin_description"),
   );
 
-  let stats = { total: 0, newThisMonth: 0, newsletter: 0 };
-  const { data: members } = await listAllMembersForAdmin(actor);
-  if (members) {
-    const now = new Date();
-    const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    stats = {
-      total: members.length,
-      newThisMonth: members.filter((m) => {
-        if (!m.created_at) return false;
-        return new Date(m.created_at) >= firstOfMonth;
-      }).length,
-      newsletter: members.filter((m) => m.newsletter_accepted).length,
-    };
+  // The user's own session: the RPCs check the role and never return personal data.
+  const supabase = await createClient();
+  const [statsResult, activityResult] = await Promise.all([
+    supabase.rpc("admin_stats"),
+    supabase.rpc("admin_list_activity", { p_limit: OVERVIEW_ACTIVITY_LIMIT }),
+  ]);
+  if (statsResult.error) {
+    // Postgres code only: messages can echo values.
+    console.error("[admin/overview] stats failed code=%s", statsResult.error.code ?? "unknown");
   }
+  if (activityResult.error) {
+    console.error("[admin/overview] activity failed code=%s", activityResult.error.code ?? "unknown");
+  }
+  const stats = statsResult.error ? null : parseAdminStats(statsResult.data);
+  const activity = activityResult.error ? null : ((activityResult.data ?? []) as AdminActivityRow[]);
 
   return (
     <>
@@ -74,9 +78,7 @@ export default async function AdminPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
       />
-      <div className="container mx-auto max-w-4xl px-6 pt-16">
-        <AdminDashboard stats={stats} />
-      </div>
+      <AdminOverview stats={stats} activity={activity} />
     </>
   );
 }
