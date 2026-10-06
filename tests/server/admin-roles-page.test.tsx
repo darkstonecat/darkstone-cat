@@ -72,4 +72,20 @@ describe('admin roles page', () => {
     expect(spy).toHaveBeenCalledWith('[admin/roles] list failed code=%s', '42501')
     spy.mockRestore()
   })
+  it('logs only the Postgres code when a member file lookup fails and keeps the holder', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const rpc = vi.fn((name: string) =>
+      Promise.resolve(
+        name === 'admin_list_members'
+          ? { data: [row('a', '000-001', 'Marta')], error: null }
+          : { data: null, error: { code: 'XX000', message: 'secret detail' } }
+      )
+    )
+    mocks.createClient.mockResolvedValue({ rpc })
+    const element: any = await render()
+    expect(content(element).props.superadmins[0].role_since).toBeNull()
+    expect(spy).toHaveBeenCalledWith('[admin/roles] member file failed code=%s', 'XX000')
+    expect(JSON.stringify(spy.mock.calls)).not.toContain('secret detail')
+    spy.mockRestore()
+  })
 })

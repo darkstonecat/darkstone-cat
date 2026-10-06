@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { MdAdminPanelSettings, MdDeleteForever } from "react-icons/md";
 import { useRouter } from "@/i18n/routing";
@@ -70,6 +70,8 @@ export default function RoleCard({ member, canManage, isSelf }: RoleCardProps) {
   const reasonId = useId();
   const anonReasonId = useId();
   const typedId = useId();
+  // What was confirmed in the dialog, so the retry button repeats exactly the same call.
+  const confirmedRef = useRef("");
 
   function closeRole() {
     if (busy) return;
@@ -110,9 +112,10 @@ export default function RoleCard({ member, canManage, isSelf }: RoleCardProps) {
   }
 
   /** Runs S-3; the retry button runs the very same call (idempotent on the server). */
-  async function runAnonymise(reason: string | null): Promise<string | null> {
+  async function runAnonymise(confirmation: string, reason: string | null): Promise<string | null> {
     try {
-      const result = await anonymiseMember(member.id, member.member_number, reason);
+      // The text the superadmin typed, as typed: the database compares it with the number.
+      const result = await anonymiseMember(member.id, confirmation, reason);
       if ("error" in result) return tErr(errorKey(result.error));
       setAnonymised({ purgeOn: result.purgeOn ?? member.purge_on, accountDeleted: result.accountDeleted });
       router.refresh();
@@ -125,7 +128,8 @@ export default function RoleCard({ member, canManage, isSelf }: RoleCardProps) {
   async function handleAnonymise() {
     setBusy(true);
     setError("");
-    const failure = await runAnonymise(anonReason.trim() || null);
+    confirmedRef.current = typed;
+    const failure = await runAnonymise(typed, anonReason.trim() || null);
     setBusy(false);
     if (failure) {
       setError(failure);
@@ -139,7 +143,7 @@ export default function RoleCard({ member, canManage, isSelf }: RoleCardProps) {
   async function handleRetry() {
     setBusy(true);
     setRetryError("");
-    const failure = await runAnonymise(null);
+    const failure = await runAnonymise(confirmedRef.current, null);
     setBusy(false);
     if (failure) setRetryError(failure);
   }

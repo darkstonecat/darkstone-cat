@@ -154,7 +154,7 @@ describe('RoleCard anonymise (S-3)', () => {
     fireEvent.change(typed, { target: { value: ' 000-154 ' } })
     expect(confirm).toBeEnabled()
     fireEvent.click(confirm)
-    await waitFor(() => expect(anonymiseMember).toHaveBeenCalledWith('id-1', '000-154', null))
+    await waitFor(() => expect(anonymiseMember).toHaveBeenCalledWith('id-1', ' 000-154 ', null))
     await waitFor(() => expect(refresh).toHaveBeenCalled())
     expect(screen.getByRole('status')).toHaveTextContent('anonymise_done:{"date":"4/10/2029"}')
     expect(screen.queryByText('anonymise_retry')).not.toBeInTheDocument()
@@ -166,13 +166,13 @@ describe('RoleCard anonymise (S-3)', () => {
       .mockResolvedValueOnce({ ok: true, accountDeleted: true, alreadyAnonymised: true, purgeOn: null })
     render(<RoleCard member={former} canManage isSelf={false} />)
     fireEvent.click(screen.getByRole('button', { name: 'anonymise_button' }))
-    fireEvent.change(screen.getAllByRole('textbox')[0], { target: { value: '000-154' } })
+    fireEvent.change(screen.getAllByRole('textbox')[0], { target: { value: '000-154 ' } })
     fireEvent.click(screen.getByRole('button', { name: 'anonymise_confirm' }))
 
     expect(await screen.findByText('anonymise_account_pending')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'anonymise_retry' }))
     await waitFor(() => expect(anonymiseMember).toHaveBeenCalledTimes(2))
-    expect(anonymiseMember).toHaveBeenLastCalledWith('id-1', '000-154', null)
+    expect(anonymiseMember).toHaveBeenLastCalledWith('id-1', '000-154 ', null)
     await waitFor(() => expect(screen.queryByText('anonymise_account_pending')).not.toBeInTheDocument())
     // The purge date of the first answer survives the retry (the retry answers null).
     expect(screen.getByRole('status')).toHaveTextContent('anonymise_done:{"date":"4/10/2029"}')
@@ -185,6 +185,7 @@ describe('RoleCard anonymise (S-3)', () => {
     fireEvent.change(screen.getAllByRole('textbox')[0], { target: { value: '000-154' } })
     fireEvent.click(screen.getByRole('button', { name: 'anonymise_confirm' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('confirm_mismatch')
+    expect(anonymiseMember).toHaveBeenCalledWith('id-1', '000-154', null)
     expect(refresh).not.toHaveBeenCalled()
   })
 

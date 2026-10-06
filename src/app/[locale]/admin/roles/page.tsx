@@ -55,7 +55,13 @@ async function loadHolders(
   // The list has no role_since; the member file function does. A handful of people, so one call each.
   return Promise.all(
     rows.map(async (row) => {
-      const { data: file } = await supabase.rpc("admin_get_member", { p_member_number: row.member_number });
+      const { data: file, error: fileError } = await supabase.rpc("admin_get_member", {
+        p_member_number: row.member_number,
+      });
+      if (fileError) {
+        // Postgres code only: messages can echo values.
+        console.error("[admin/roles] member file failed code=%s", fileError.code ?? "unknown");
+      }
       const since = ((file ?? []) as AdminMemberFileRow[])[0]?.role_since ?? null;
       return {
         id: row.id,

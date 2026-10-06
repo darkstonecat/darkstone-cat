@@ -1904,6 +1904,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   no Rols tab for the board, the role card is read-only for the board on a throwaway member.
 - Tests: `RoleCard.test.tsx`, `RolesContent.test.tsx`, `tests/server/admin-roles-page.test.tsx`,
   `MemberFile.test.tsx`, `admin-member-page.test.ts` (`canManageRoles`).
+- Correction after the T21/T22 verification (medium, separate commit `fix(admin): Send the typed member number when anonymising`): `RoleCard.runAnonymise` now sends the text the superadmin TYPED (kept in a ref so the retry button repeats the same call), so the database `confirm_mismatch` check is the real gate; `loadHolders` in `/admin/roles` logs only the Postgres code when an `admin_get_member` call fails. Tests: RoleCard asserts the raw typed string (with spaces) on submit, retry and mismatch; roles page test for the code-only log.
 
 ## Next step
 
