@@ -107,6 +107,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T25 — V-6 tools + event images move + 308 redirect — route: delegated
 - [x] T26 — V-7 member side: M-1 leave dialog, login help, neutral password reset via server action — route: delegated
 - [x] T27 — M7 `roles_contract` + prod runbook + CLAUDE.md/README — route: delegated
+- [x] T28 — UX fixes from the manual check: release the page when an AdminDialog starts closing, clear stale card notices on state change, drop networkidle waits in e2e/admin — route: delegated
 
 ## Acceptance criteria
 
@@ -2382,6 +2383,29 @@ After it: both superadmins sign in and see the "Rols" tab and `/admin/roles`.
 - CLAUDE.md: not edited (WIP of `zona-socis-mockups-v2`); every change is listed, ready to apply,
   in `odd/tasks/admin-panel-claude-md.md`.
 
+### T28 — done (route: delegated)
+
+- Bug 1 (`AdminDialog`): the page lock (body overflow, Lenis, `#main-content` inert) moved from
+  panel mount/unmount to a module-level counter (`lockPage`) driven by `useIsPresent()`, so it is
+  released the moment `open` turns false, not when the exit animation ends. The exiting backdrop gets
+  `pointer-events-none` and the panel `inert`; the Escape/Tab listener and focus restoration run in the
+  same cleanup. The counter keeps the page locked when a dialog opens while another closes, and
+  restores the original overflow / inert state only when the last one releases.
+- Bug 2 (`MemberFile`): rule: an outcome notice kept in a card's local state is cleared when
+  `member.state` changes. Implemented with `key={`<card>-${member.state}`}` on `PersonalDataCard`,
+  `BadgesCard`, `CardSection` and `RoleCard`; `MembershipActions` has no key because its leave/rejoin
+  outcome is what changes the state and must stay visible after `router.refresh()`.
+- Bug 3: new `e2e/helpers/hydration.ts` (`expectHydrated`: element attached and carrying a
+  `__reactProps$` key) replaces every `waitForLoadState('networkidle')` in `e2e/admin/*` and
+  `e2e/helpers/admin-audit.ts`.
+- RED (before the fix): `AdminDialog releases the page as soon as it starts closing` (4 tests: un-inerts
+  before the exit ends, exiting panel unclickable, focus returns on close start, stacked dialogs) and
+  `MemberFile, outcome notices and state changes` (`Dades desades` and card notice cleared on state
+  change) failed; the leave-outcome-persists test passed already (guard against the key rule).
+- GREEN: `npm run test:unit` 117 files / 1690 tests; `npm run lint` and `npx tsc --noEmit` clean;
+  `npx playwright test e2e/admin e2e/auth` 86 passed; `e2e/admin/activity.spec.ts --repeat-each=5`
+  15 passed (17 with setup/teardown).
+
 ## Feature summary
 
 The admin panel is complete on `develop-users` (T1–T27, about 35 commits, `exception-ok`
@@ -2430,10 +2454,10 @@ delivery, no PR slicing):
 5. User review of the Catalan leave/rejoin e-mail copy (T10) and of the provisional decisions.
 6. Optional: move the post-leave notice from `/login?left=1` to the home page (T26 deviation);
    share the cookie wipe between NavBar and `LeaveAssociationDialog`.
-7. Minor UX from the manual check (below): the first click on the page right after closing an
+7. DONE (T28). Minor UX from the manual check (below): the first click on the page right after closing an
    `AdminDialog` is swallowed (the page stays inert during the ~200 ms exit animation); a success
    notice of `PersonalDataCard` ("Dades desades.") stays visible after a leave/rejoin.
-8. `e2e/admin/activity.spec.ts:9` is flaky on a cold dev server (`waitForLoadState` 15 s);
+8. DONE (T28). `e2e/admin/activity.spec.ts:9` is flaky on a cold dev server (`waitForLoadState` 15 s);
    replace the networkidle wait with a hydration marker or URL assertion.
 
 ## Final verification (2026-10-06)
