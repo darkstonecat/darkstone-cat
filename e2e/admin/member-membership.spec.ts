@@ -38,7 +38,8 @@ test.describe('Admin leave and rejoin (A-6, A-7)', () => {
     await expect(page.getByText('El soci ha quedat de baixa.')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Reincorpora' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Dona de baixa' })).toHaveCount(0)
-    await expect(page.getByText('Prova automàtica de baixa')).toBeVisible()
+    await // The Activitat card repeats the reason in its detail line: match the Pertinença field only.
+    await expect(page.getByText('Prova automàtica de baixa', { exact: true })).toBeVisible()
 
     // A-7
     await page.getByRole('button', { name: 'Reincorpora' }).click()

@@ -100,7 +100,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T20 — V-3 leave/rejoin dialogs (A-6, A-7) — route: delegated
 - [x] T21 — V-3 badges, card, member data, access link (A-8, A-9, A-11, A-15) — route: delegated
 - [x] T22 — V-3 role card + S-3, V-5 roles — route: delegated
-- [ ] T23 — Audit renderer + V-4 activity — route: delegated
+- [x] T23 — Audit renderer + V-4 activity — route: delegated
 - [ ] T24 — V-1 dashboard (replaces AdminDashboard) — route: delegated
 - [ ] T25 — V-6 tools + event images move + 308 redirect — route: delegated
 - [ ] T26 — V-7 member side: M-1 leave dialog, login help, neutral password reset via server action — route: delegated
@@ -1905,7 +1905,45 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Tests: `RoleCard.test.tsx`, `RolesContent.test.tsx`, `tests/server/admin-roles-page.test.tsx`,
   `MemberFile.test.tsx`, `admin-member-page.test.ts` (`canManageRoles`).
 - Correction after the T21/T22 verification (medium, separate commit `fix(admin): Send the typed member number when anonymising`): `RoleCard.runAnonymise` now sends the text the superadmin TYPED (kept in a ref so the retry button repeats the same call), so the database `confirm_mismatch` check is the real gate; `loadHolders` in `/admin/roles` logs only the Postgres code when an `admin_get_member` call fails. Tests: RoleCard asserts the raw typed string (with spaces) on submit, retry and mismatch; roles page test for the code-only log.
+### T23 — done (route: delegated)
+
+- Commit: `feat(admin): Add the activity log page and audit renderer` on `develop-users` (hash in
+  `git log -- src/lib/admin/audit-format.ts`).
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 108 files /
+  1593 tests passed; `npx playwright test e2e/admin` 50 tests (the only failure, `member-membership`,
+  was a locator that now matched the reason twice because the Activitat card prints it; fixed with
+  `exact: true`, 3/3 green on rerun, `e2e/admin/activity.spec.ts` 3/3).
+- Renderer `src/lib/admin/audit-format.ts` (pure): `describeAuditEntry(row)` returns `{ actor, sentence,
+  details, reason }`; sentence and details are `{ key, params }` under `admin.activity`, params may be
+  text, number, `{ i18n }` (translated by the component) or lists. All 18 keys have their own sentence.
+  Only whitelisted detail fields are read and type-checked (field names, badge, role, channel, list,
+  state/role filter, dates `YYYY-MM-DD`, counts as safe non-negative integers, jobs); before/after only for
+  first/last name; anything else is dropped. Unknown action, missing/unknown detail values fall back to a
+  generic sentence (`unknown`, `unknown_target`, `*_generic`); malformed details never throw. Reason is
+  plain text (React escapes it). `describeAuditTime` gives today/yesterday/date in Madrid time.
+  `AdminActivityRow` now lives there (re-exported from `member-file.ts`); `activityKeyOf` and the local
+  `admin.member_file.activity.*` map and `activity_system` were deleted.
+- Query module `src/lib/admin/activity.ts`: `parseActivityParams` whitelists action (18 keys + `badge.*`,
+  `role.*`), actor (`system`, `self`, UUID), member number, real days 2000-2100 (reversed range swapped) and an
+  integer cursor; `toActivityArgs` asks `p_limit 26` (one extra row decides "load more"), converts
+  "Fins a" to a half-open Madrid-midnight `p_to`; `buildActivityHref` round-trips.
+- V-4 `/admin/activity` (`force-dynamic`, noindex, `requireRole('board', '/admin/activity')`, session
+  client): info notice, GET filters form (Des de, Fins a, Qui = everyone / each board member and superadmin
+  / Soci (ell mateix) / Sistema, Acció = all + 16 groups, Soci number, Aplica, Neteja), table with caption,
+  actor chip, `<time>`, no links or buttons in it, mobile cards, count and keyset "Carrega'n més" (link to
+  `?before=<last id>`) plus "Torna a les més noves", empty / filtered-empty / error states, `loading.tsx`.
+  Member file "Activitat" card uses the same renderer. i18n ca/es/en (`admin.activity`, nav, metadata).
+- Decisions vs the mockup: no default last-30-days range (the "Veure tot" link and the 3-year log read
+  better unfiltered; the URL carries any range); "Soci" filters by member NUMBER only (the RPC has no name
+  filter; placeholder says so); pagination is keyset (next / back to newest) instead of numbered pages, since
+  `admin_list_activity` is keyset-only; "Detalls" shows details and the reason on one line joined with " · ".
+- Tests: `tests/lib/audit-format.test.ts` (every key, i18n keys exist in the 3 locales, no DNI/phone value,
+  malformed details, unknown), `tests/lib/admin-activity.test.ts` (sanitiser, Madrid day start incl. DST
+  days, args, href), `tests/components/ActivityLog.test.tsx`, `tests/server/admin-activity-page.test.ts`,
+  member file tests adapted, `e2e/admin/activity.spec.ts` (A-11 export, "Veure tot" link, group filter,
+  empty state, malformed params, member 404).
+
 
 ## Next step
 
-T23.
+T24.

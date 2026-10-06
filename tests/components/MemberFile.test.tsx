@@ -143,18 +143,19 @@ describe('MemberFile, active member', () => {
     expect(screen.queryByRole('button', { name: 'button' })).not.toBeInTheDocument()
   })
 
-  it('renders activity as short sentences with a fallback for unknown actions', () => {
+  it('words activity through the shared renderer, with a fallback for unknown actions', () => {
     render_(active, {
       activity: [
-        entry(),
-        entry({ id: 2, action: 'made.up', actor_name: null, actor_member_number: null }),
+        entry({ details: { badge: 'ludoteca_donor' }, reason: 'Per la donació' }),
+        entry({ id: 2, action: 'made.up', actor_id: null, actor_name: null, actor_member_number: null }),
       ],
     })
     const list = screen.getAllByRole('list').at(-1)!
     expect(within(list).getByText('Pau Ferrer')).toBeInTheDocument()
-    expect(within(list).getByText(/activity\.badge_award/)).toBeInTheDocument()
-    expect(within(list).getByText('activity_system')).toBeInTheDocument()
-    expect(within(list).getByText(/activity\.unknown.*made\.up/)).toBeInTheDocument()
+    expect(within(list).getByText(/sentence\.badge_award:.*badge\.ludoteca_donor/)).toBeInTheDocument()
+    expect(within(list).getByText(/reason_line.*Per la donació/)).toBeInTheDocument()
+    expect(within(list).getByText('actor_system')).toBeInTheDocument()
+    expect(within(list).getByText(/sentence\.unknown_target.*made\.up/)).toBeInTheDocument()
   })
 
   it('shows the empty activity message', () => {

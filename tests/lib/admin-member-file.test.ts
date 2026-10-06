@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
 import {
-  activityKeyOf,
   backToListHref,
   formatAdminTimestamp,
   isValidMemberNumber,
@@ -43,13 +42,6 @@ describe('list query round trip', () => {
 })
 
 describe('display helpers', () => {
-  it('maps known actions to a label key and leaves unknown ones null', () => {
-    expect(activityKeyOf('membership.leave')).toBe('membership_leave')
-    expect(activityKeyOf('export.member_data')).toBe('export_member_data')
-    expect(activityKeyOf('made.up')).toBeNull()
-    expect(activityKeyOf('__proto__')).toBeNull()
-    expect(activityKeyOf('constructor')).toBeNull()
-  })
 
   it('formats a timestamp as d/m/yyyy in Madrid time', () => {
     expect(formatAdminTimestamp('2026-10-05T07:15:00+00:00')).toBe('5/10/2026')

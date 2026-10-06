@@ -54,17 +54,7 @@ export type AdminMemberFileRow = {
   badges: MemberBadgeEntry[] | null;
 };
 
-/** One row of `admin_list_activity` (the columns the member file uses). */
-export type AdminActivityRow = {
-  id: number;
-  created_at: string;
-  actor_id: string | null;
-  actor_member_number: string | null;
-  actor_name: string | null;
-  action: string;
-  target_member_number: string | null;
-  target_name: string | null;
-};
+export type { AdminActivityRow } from "./audit-format";
 
 /** How many entries the "Activitat" card shows. */
 export const MEMBER_ACTIVITY_LIMIT = 5;
@@ -92,26 +82,6 @@ export function backToListHref(raw: string | string[] | undefined): string {
     if (!(key in params)) params[key] = value;
   }
   return buildMembersHref(parseMembersParams(params));
-}
-
-/** Translation key (under `admin.member_file.activity`) of an audit action; unknown → null. */
-const ACTIVITY_KEYS: Readonly<Record<string, string>> = {
-  "member.update": "member_update",
-  "member.reveal_sensitive": "member_reveal_sensitive",
-  "member.send_access_link": "member_send_access_link",
-  "member.anonymise": "member_anonymise",
-  "membership.leave": "membership_leave",
-  "membership.rejoin": "membership_rejoin",
-  "badge.award": "badge_award",
-  "badge.revoke": "badge_revoke",
-  "card.regenerate": "card_regenerate",
-  "export.member_data": "export_member_data",
-  "role.grant": "role_grant",
-  "role.revoke": "role_revoke",
-};
-
-export function activityKeyOf(action: string): string | null {
-  return Object.hasOwn(ACTIVITY_KEYS, action) ? ACTIVITY_KEYS[action] : null;
 }
 
 /** Badge keys the member file can name; others fall back to the raw key. */

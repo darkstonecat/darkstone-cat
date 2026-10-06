@@ -3,14 +3,13 @@ import { MdArrowBack, MdArrowForward } from "react-icons/md";
 import { Link } from "@/i18n/routing";
 import { roleLabelKey } from "@/lib/auth/roles";
 import {
-  activityKeyOf,
-  formatAdminTimestamp,
   type AdminActivityRow,
   type AdminMemberFileRow,
 } from "@/lib/admin/member-file";
 import { formatAdminDate } from "@/lib/admin/members-list";
 import Notice from "../Notice";
 import StatusChip from "../StatusChip";
+import { AuditActorLabel, AuditTimeLabel, useAuditLines } from "../activity/AuditParts";
 import { Field } from "./Field";
 import BadgesCard from "./BadgesCard";
 import CardSection from "./CardSection";
@@ -156,25 +155,20 @@ export default function MemberFile({ member, activity, backHref, canExportData, 
   );
 }
 
-/**
- * Short Catalan-style sentence per action. A local map until the shared audit renderer (T23)
- * replaces it; unknown actions fall back to the raw key.
- */
+/** One entry of the "Activitat" card, worded by the shared audit renderer. */
 function ActivityEntry({ entry }: { entry: AdminActivityRow }) {
-  const t = useTranslations("admin.member_file");
-  const key = activityKeyOf(entry.action);
-  const actor = entry.actor_name ?? entry.actor_member_number ?? t("activity_system");
-  const target = entry.target_member_number ?? NO_VALUE;
-  const date = formatAdminTimestamp(entry.created_at);
+  const { actor, sentence, detail } = useAuditLines(entry);
   return (
     <li className="flex flex-col gap-1 border-t border-stone-custom/10 py-3 first:border-0 sm:flex-row sm:gap-6">
-      <time dateTime={entry.created_at} className="w-28 shrink-0 text-[13px] text-stone-custom/65">
-        {date ?? NO_VALUE}
-      </time>
-      <p className="text-sm text-stone-custom">
-        <strong>{actor}</strong>{" "}
-        {key ? t(`activity.${key}`, { target }) : t("activity.unknown", { action: entry.action, target })}
-      </p>
+      <span className="w-28 shrink-0 text-[13px] text-stone-custom/65">
+        <AuditTimeLabel iso={entry.created_at} />
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm text-stone-custom">
+          <AuditActorLabel actor={actor} withChip={false} /> {sentence}
+        </p>
+        {detail && <p className="text-[13px] break-words text-stone-custom/65">{detail}</p>}
+      </div>
     </li>
   );
 }
