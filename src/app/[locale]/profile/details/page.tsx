@@ -61,8 +61,8 @@ export default async function ProfileDetailsPage({
     tMeta("profile_details_description")
   );
 
-  const dni = maskEncryptedField(member?.dni_nie_encrypted ?? null, maskDni, "dni");
-  const phone = maskEncryptedField(member?.phone_encrypted ?? null, maskPhone, "phone");
+  const dni = maskEncryptedField(member?.dni_nie_encrypted ?? null, maskDni, "dni", member?.id);
+  const phone = maskEncryptedField(member?.phone_encrypted ?? null, maskPhone, "phone", member?.id);
 
   const cardClass = "rounded-2xl bg-brand-white p-5 sm:p-8";
   const titleClass = "text-[22px] font-bold text-stone-custom";
