@@ -5,7 +5,7 @@ const locales = ["ca", "es", "en"] as const;
 
 /**
  * Only indexable pages belong here. Pages served with `robots: noindex`
- * (/legal, /privacy, /cookies, /data-protection, /events/images and the
+ * (/legal, /privacy, /cookies, /data-protection and the
  * auth/profile/admin pages) are intentionally excluded:
  * listing a noindex URL in the sitemap is a contradictory signal that Search
  * Console reports as "Excluded by 'noindex' tag".

@@ -11,7 +11,7 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ eventId: string }> }
 ) {
-  // Only the admin tool `/events/images` uses this route. Rendering is expensive
+  // Only the admin tool `/admin/tools/event-images` uses this route. Rendering is expensive
   // (BGG and Ludoya fetches + Satori), so it must not be open to anonymous traffic.
   const access = await getAdminAccess("board");
   if (access.status === "unauthenticated") {

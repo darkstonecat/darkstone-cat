@@ -263,7 +263,7 @@ function cleanData(rows) {
     const newsletterAccepted = parseBool(row.newsletter_raw);
 
     // Validation warnings
-    if (!/^000-\d{3}$/.test(memberNumber)) {
+    if (!/^000-\d{3,}$/.test(memberNumber)) {
       warnings.push(`${memberNumber}: invalid member_number format`);
     }
     if (!email.includes("@")) {

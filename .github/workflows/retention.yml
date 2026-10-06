@@ -29,6 +29,15 @@ on:
         required: false
         default: false
 
+# The job only calls the site with curl: no repository access is needed.
+permissions: {}
+
+# Never two runs at once (a manual apply during the scheduled run); the second
+# one waits instead of being cancelled, and the database lock serialises them anyway.
+concurrency:
+  group: retention
+  cancel-in-progress: false
+
 jobs:
   retention:
     if: github.ref == 'refs/heads/main'

@@ -44,7 +44,6 @@
 | `/ludoteca` | Game library with filters, search, and BGG data |
 | `/contact` | Contact form |
 | `/events` | Upcoming events from Ludoya |
-| `/events/images` | Internal tool to generate shareable event images (not indexed) |
 | `/faq` | Frequently asked questions |
 | `/conduct` | Code of conduct |
 | `/legal` | Terms & conditions |
@@ -59,10 +58,22 @@
 | `/profile/edit` | Profile edit form (protected) |
 | `/profile/card` | Member card with a real QR, image download (protected) |
 | `/verify/[token]` | Public member card check from the QR (valid + member number only, `noindex`) |
-| `/admin` | Admin dashboard with stats (admin only) |
-| `/admin/members` | Member list with search, sort & CSV export (admin only) |
 | `/data-protection` | Data protection policy (RGPD) |
-| `/events/images` | Event image generator (admin only) |
+
+### Admin panel (board and superadmin only, `noindex`)
+
+| Route | Description |
+|---|---|
+| `/admin` | Summary: membership figures, recent activity, shortcuts |
+| `/admin/members` | Member list: search, state/role filters, sort, pagination; exports (CSV, e-mail lists, register) |
+| `/admin/members/[number]` | Member file: edit, reveal DNI/phone (audited), leave/rejoin, badges, card, access link, data export, role, anonymise |
+| `/admin/activity` | Audit log with filters |
+| `/admin/procedures` | Written procedures (P-1 … P-7) |
+| `/admin/tools` | Cache refresh status and manual refresh, link to the event image tool |
+| `/admin/tools/event-images` | Event image generator (`/events/images` redirects here with a 308) |
+| `/admin/roles` | Board and superadmin overview (superadmin only) |
+
+Roles: `member`, `board` ("Junta") and `superadmin`. Every admin action is enforced in the database and writes one audit entry.
 
 All routes are localized under `/[locale]/` (`ca`, `es`, `en`).
 

@@ -14,12 +14,23 @@ on:
     - cron: "23 3,15 * * *"
   workflow_dispatch:
 
+# The job only calls the site with curl: no repository access is needed.
+permissions: {}
+
+# One refresh at a time; a manual run during the scheduled one waits.
+concurrency:
+  group: cache-refresh
+  cancel-in-progress: false
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Refresh production caches
-        run: curl -fsS --max-time 120 -H "Authorization: Bearer $CRON_SECRET" https://www.darkstone.cat/api/cron/refresh
+        # Block scalar: a plain scalar cannot hold ": " (the Authorization header), and GitHub
+        # rejected the whole file while it was written on one line.
+        run: |
+          curl -fsS --max-time 120 -H "Authorization: Bearer $CRON_SECRET" https://www.darkstone.cat/api/cron/refresh
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
