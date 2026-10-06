@@ -123,6 +123,17 @@ describe('describeAuditEntry', () => {
     ])
   })
 
+  it('shows no name change for an anonymised or purged target (target_name null)', () => {
+    const entry = row(
+      'member.update',
+      { fields: ['first_name'], changes: { first_name: { from: 'Laia', to: 'Laia Maria' } } },
+      { target_name: null }
+    )
+    const { details } = describeAuditEntry(entry)
+    expect(details.map((d) => d.key)).toEqual(['detail.fields'])
+    expect(JSON.stringify(describeAuditEntry(entry))).not.toContain('Laia')
+  })
+
   it('renders only whitelisted detail fields, never DNI or phone values', () => {
     const entry = row('member.update', {
       fields: ['dni', 'phone', 'secret'],

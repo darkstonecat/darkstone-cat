@@ -145,7 +145,8 @@ function describeKnown(action: AuditAction, row: AdminActivityRow, actor: AuditA
         ? FIELDS.filter((field) => (d.fields as unknown[]).includes(field))
         : [];
       if (fields.length > 0) details.push(detail("fields", { fields: fields.map((f) => ({ i18n: `field.${f}` })) }));
-      const changes = asRecord(d.changes);
+      // Past names of an anonymised or purged member (target_name null) are never shown.
+      const changes = row.target_name === null ? {} : asRecord(d.changes);
       for (const field of NAME_FIELDS) {
         const change = asRecord(changes[field]);
         const from = text(change.from);
