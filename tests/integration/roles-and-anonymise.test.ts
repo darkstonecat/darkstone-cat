@@ -68,7 +68,7 @@ beforeAll(async () => {
   }
   await update(users.board.id, { role: 'board' })
   await update(users.holder.id, { role: 'board' })
-  await update(users.legacy.id, { role: 'admin' })
+  await update(users.legacy.id, { role: 'board' }) // pre-M7 this was the legacy 'admin' role
   await update(users.former.id, { left_on: '2026-09-01', left_by: 'self' })
 
   board = await createAuthenticatedClient(emails.board, password)

@@ -49,7 +49,8 @@ export async function createTestUser(
 }
 
 /**
- * Create a test admin user (creates user + sets role to 'admin').
+ * Create a test admin user (creates user + sets role to 'board'; the legacy 'admin' role is
+ * gone since M7, 20261007100000_roles_contract.sql).
  */
 export async function createTestAdmin(email: string, password: string) {
   const user = await createTestUser(email, password, {
@@ -58,7 +59,7 @@ export async function createTestAdmin(email: string, password: string) {
   })
   await supabaseAdmin
     .from('members')
-    .update({ role: 'admin' })
+    .update({ role: 'board' })
     .eq('id', user.id)
   return user
 }

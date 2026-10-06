@@ -27,7 +27,7 @@ export async function createTestUser(opts: {
   password: string
   firstName: string
   lastName: string
-  role?: 'member' | 'admin'
+  role?: 'member' | 'board'
 }) {
   const supabase = getAdminClient()
 
@@ -43,27 +43,29 @@ export async function createTestUser(opts: {
       },
     })
 
+  let userId: string
   if (authError) {
-    // If user already exists, fetch and return
-    if (authError.message.includes('already been registered')) {
-      const { data: list } = await supabase.auth.admin.listUsers()
-      const existing = list?.users?.find((u) => u.email === opts.email)
-      if (existing) return existing.id
-    }
-    throw new Error(`Failed to create user ${opts.email}: ${authError.message}`)
+    // If the user already exists (left over by a previous run), reuse it
+    const existing = authError.message.includes('already been registered')
+      ? (await supabase.auth.admin.listUsers()).data?.users?.find((u) => u.email === opts.email)
+      : undefined
+    if (!existing) throw new Error(`Failed to create user ${opts.email}: ${authError.message}`)
+    userId = existing.id
+  } else {
+    userId = authData.user.id
   }
 
-  const userId = authData.user.id
-
-  // Update member role if admin
-  if (opts.role === 'admin') {
+  // Board role (the legacy 'admin' role is gone since M7). Also set on a reused user: a previous
+  // teardown may have demoted it before failing to delete it.
+  if (opts.role === 'board') {
     const { error: updateError } = await supabase
       .from('members')
-      .update({ role: 'admin' })
+      .update({ role: 'board' })
       .eq('id', userId)
+      .neq('role', 'board')
 
     if (updateError) {
-      console.warn(`Warning: Could not set admin role for ${opts.email}: ${updateError.message}`)
+      console.warn(`Warning: Could not set the board role for ${opts.email}: ${updateError.message}`)
     }
   }
 
@@ -72,7 +74,7 @@ export async function createTestUser(opts: {
 
 /**
  * Drop any role first: the database refuses to delete a role holder's row (BR-12,
- * members_role_delete_guard), and e2e-admin holds the legacy role 'admin'. E2E never creates
+ * members_role_delete_guard), and e2e-admin holds the board role. E2E never creates
  * superadmins, so the last-superadmin rule never applies here.
  */
 async function demoteToMember(supabase: ReturnType<typeof getAdminClient>, userId: string) {

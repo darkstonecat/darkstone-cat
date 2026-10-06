@@ -100,7 +100,7 @@ describe('verify_card_token', () => {
   it('stops verifying the old token after an admin regenerates it', async () => {
     const admin = await createTestUser('verify-card-admin@test.local', 'password123')
     userIds.push(admin.id)
-    await supabaseAdmin.from('members').update({ role: 'admin' }).eq('id', admin.id)
+    await supabaseAdmin.from('members').update({ role: 'board' }).eq('id', admin.id)
     const client = await createAuthenticatedClient('verify-card-admin@test.local', 'password123')
     const { data: fresh } = await client.rpc('regenerate_card_token', { target_member_id: member.id })
 

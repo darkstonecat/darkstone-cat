@@ -141,7 +141,7 @@ describe('UPDATE policies', () => {
     )
     const { error } = await client
       .from('members')
-      .update({ role: 'admin' })
+      .update({ role: 'board' })
       .eq('id', userA.id)
 
     expect(error).not.toBeNull()
@@ -250,7 +250,7 @@ describe('UPDATE policies', () => {
     )
     const { error } = await client
       .from('members')
-      .update({ role: 'admin' })
+      .update({ role: 'board' })
       .eq('id', userA.id)
 
     expect(error).not.toBeNull()

@@ -173,7 +173,7 @@ beforeAll(async () => {
   }
 
   await update(users.board.id, { role: 'board' })
-  await update(users.legacy.id, { role: 'admin' })
+  await update(users.legacy.id, { role: 'board' })
   await update(users.member.id, {
     postal_code: '08221',
     ludoya_username: 'carlesq',
@@ -259,7 +259,7 @@ describe('who may call the admin read functions', () => {
     }
   })
 
-  it.each(calls)('%s answers a board member and a legacy admin', async (fn, args) => {
+  it.each(calls)('%s answers two board members', async (fn, args) => {
     for (const client of [clients.board, clients.legacy]) {
       const { error } = await client.rpc(fn, args)
       expect(error).toBeNull()
@@ -274,7 +274,7 @@ describe('who may call the admin read functions', () => {
       expect(error?.message).toContain('admin:forbidden')
     } finally {
       await update(users.legacy.id, { left_on: null, left_by: null })
-      await update(users.legacy.id, { role: 'admin' })
+      await update(users.legacy.id, { role: 'board' })
     }
   })
 })
@@ -320,7 +320,7 @@ describe('admin_list_members()', () => {
     })
   })
 
-  it('filters by role; board includes the legacy admin role', async () => {
+  it('filters by role (board)', async () => {
     const board = ids(await list({ p_role: 'board', p_q: DOMAIN }))
     expect(board.sort()).toEqual([users.board.id, users.legacy.id].sort())
 
@@ -669,7 +669,7 @@ describe('admin_list_activity()', () => {
   it('filters by actor, system and self', async () => {
     const legacy = await activity({ p_actor: users.legacy.id, p_target: users.bruna.id })
     expect(legacy).toHaveLength(1)
-    expect(legacy[0]).toMatchObject({ actor_role: 'admin', action: 'export.member_data' })
+    expect(legacy[0]).toMatchObject({ actor_role: 'board', action: 'export.member_data' })
 
     const system = await activity({ p_actor_kind: 'system', p_target: users.angel.id })
     expect(system.map((r) => r.action)).toEqual(['member.purge'])

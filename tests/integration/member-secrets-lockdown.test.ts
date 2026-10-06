@@ -1,6 +1,6 @@
 import { createCipheriv, randomBytes } from 'node:crypto'
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   supabaseAdmin,
   createTestUser,
@@ -11,7 +11,8 @@ import {
 import { encrypt, decrypt } from '@/lib/encryption'
 
 // Migration 20261005100700_lock_down_member_secrets.sql (T7b): board sessions no longer read
-// other members' rows or badges directly, get_all_members_for_admin() is service-role only,
+// other members' rows or badges directly, get_all_members_for_admin() was service-role only
+// (dropped by M7, see roles-contract.test.ts),
 // stored DNI/phone ciphertext must be v2 bound to its own row (members_ciphertext_guard),
 // TRUNCATE is revoked, and the BR-15 detector v3 closes the T7 verification misses.
 
@@ -28,12 +29,6 @@ const users = {} as Record<Key, { id: string }>
 const userIds: string[] = []
 let board: SupabaseClient
 let member: SupabaseClient
-
-const anon = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
-  { auth: { persistSession: false } }
-)
 
 /** The pre-v2 format of src/lib/encryption.ts: iv:tag:data, no AAD. */
 function legacyEncrypt(plainText: string) {
@@ -103,34 +98,6 @@ describe('board sessions read only their own row and badges', () => {
     expect(other.data).toEqual([])
     const own = await board.from('member_badges').select('badge_key').eq('member_id', users.board.id)
     expect(own.data).toEqual([{ badge_key: 'ludoteca_donor' }])
-  })
-})
-
-// ---------------------------------------------------------------------------------------------
-describe('get_all_members_for_admin() is service-role only', () => {
-  it.each([
-    ['a board session', () => board],
-    ['a plain member', () => member],
-    ['anon', () => anon],
-  ])('%s gets permission denied (42501)', async (_label, client) => {
-    const { data, error } = await client().rpc('get_all_members_for_admin')
-    expect(error?.code).toBe('42501')
-    expect(data).toBeNull()
-  })
-
-  it('the service role gets every member with email and ciphertext', async () => {
-    const { data, error } = await supabaseAdmin.rpc('get_all_members_for_admin')
-    expect(error).toBeNull()
-    const row = (data as { id: string; email: string; dni_nie_encrypted: string }[]).find(
-      (m) => m.id === users.victim.id
-    )
-    expect(row?.email).toBe(emails.victim)
-    expect(decrypt(row!.dni_nie_encrypted, users.victim.id)).toBe('12345678Z')
-  })
-
-  it('refuses the owner role without a service-role JWT (guard inside the function)', async () => {
-    const { error } = await runSqlAsPostgres('select count(*) from public.get_all_members_for_admin()')
-    expect(error?.message).toContain('service role required')
   })
 })
 

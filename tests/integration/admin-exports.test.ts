@@ -94,7 +94,7 @@ beforeAll(async () => {
   userIds.push(unconfirmedId)
 
   await update(users.board.id, { role: 'board' })
-  await update(users.legacy.id, { role: 'admin' })
+  await update(users.legacy.id, { role: 'board' }) // pre-M7 this was the legacy 'admin' role
 
   ciphers.activePhone = fakeMemberCipher(users.active.id)
   ciphers.activeDni = fakeMemberCipher(users.active.id)
@@ -198,13 +198,13 @@ describe('admin_export_members() (A-10)', () => {
     expect(ids).not.toContain(unconfirmedId)
   })
 
-  it('filters by role, the legacy admin role counting as board, and logs the filter', async () => {
+  it('filters by role and logs the filter', async () => {
     const { data, error } = await exportAs(legacy, 'board')
     expect(error).toBeNull()
     const rows = data as Row[]
     const own = rows.filter((r) => userIds.includes(r.id)).map((r) => r.id).sort()
     expect(own).toEqual([users.board.id, users.legacy.id].sort())
-    expect(rows.every((r) => r.role === 'board' || r.role === 'admin')).toBe(true)
+    expect(rows.every((r) => r.role === 'board')).toBe(true)
 
     const members = (await exportAs(board, 'member')).data as Row[]
     expect(members.filter((r) => userIds.includes(r.id)).map((r) => r.id).sort()).toEqual(
@@ -212,7 +212,7 @@ describe('admin_export_members() (A-10)', () => {
     )
 
     const [entry] = (await entriesBy(users.legacy.id, 'export.members_csv')).slice(-1)
-    expect(entry).toMatchObject({ actor_role: 'admin', details: { filter: { state: 'active', role: 'board' }, rows: rows.length } })
+    expect(entry).toMatchObject({ actor_role: 'board', details: { filter: { state: 'active', role: 'board' }, rows: rows.length } })
   })
 
   it('every export leaves its own entry', async () => {
@@ -395,7 +395,7 @@ describe('admin_export_emails() (A-16)', () => {
       expect(all).not.toContain(absent)
     }
     const [entry] = (await entriesBy(users.legacy.id, 'export.emails')).slice(-1)
-    expect(entry).toMatchObject({ actor_role: 'admin', details: { list: 'newsletter', rows: rows.length } })
+    expect(entry).toMatchObject({ actor_role: 'board', details: { list: 'newsletter', rows: rows.length } })
   })
 
   it('rejects an unknown list without logging', async () => {
@@ -426,7 +426,7 @@ describe('admin_export_emails() (A-16)', () => {
 
 // ---------------------------------------------------------------------------------------------
 describe('admin_export_register() (S-4) refuses everyone below superadmin', () => {
-  it('board, legacy admin and plain member get admin:forbidden and nothing is logged', async () => {
+  it('board members and a plain member get admin:forbidden and nothing is logged', async () => {
     for (const [key, client] of [['board', board], ['legacy', legacy], ['member', member]] as const) {
       const { data, error } = await client.rpc('admin_export_register', { p_reason: 'Requeriment del registre' })
       expect(error?.code, key).toBe('42501')

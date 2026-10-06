@@ -39,7 +39,7 @@ setup('create test users and save auth state', async ({ browser }) => {
     password: ADMIN_PASSWORD,
     firstName: ADMIN_FIRST_NAME,
     lastName: ADMIN_LAST_NAME,
-    role: 'admin',
+    role: 'board',
   })
 
   await createTestUser({

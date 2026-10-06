@@ -67,7 +67,7 @@ beforeAll(async () => {
     userIds.push(user.id)
   }
   expect((await supabaseAdmin.from('members').update({ role: 'board' }).eq('id', users.board.id)).error).toBeNull()
-  expect((await supabaseAdmin.from('members').update({ role: 'admin' }).eq('id', users.legacy.id)).error).toBeNull()
+  expect((await supabaseAdmin.from('members').update({ role: 'board' }).eq('id', users.legacy.id)).error).toBeNull()
   expect(
     (
       await supabaseAdmin
@@ -104,10 +104,10 @@ describe('log_admin_event()', () => {
     expect(Date.now() - new Date(row.created_at).getTime()).toBeLessThan(60_000)
   })
 
-  it('accepts the legacy admin role, recorded as it was at that moment', async () => {
+  it('accepts a second board member, recording the role held at that moment', async () => {
     const { data, error } = await logEvent(clients.legacy, 'member.send_access_link', users.target.id)
     expect(error).toBeNull()
-    expect(await entry(data as number)).toMatchObject({ actor_role: 'admin', target_member_id: users.target.id })
+    expect(await entry(data as number)).toMatchObject({ actor_role: 'board', target_member_id: users.target.id })
   })
 
   it('accepts every event the app logs directly, with the details it needs', async () => {

@@ -135,7 +135,7 @@ describe('column-level UPDATE for members', () => {
     ['card_issued_at', '2000-01-01T00:00:00Z'],
     ['anonymised_at', '2000-01-01T00:00:00Z'],
     ['purged_at', '2000-01-01T00:00:00Z'],
-    ['role', 'admin'],
+    ['role', 'board'],
     ['member_number', 'XXX-999'],
     ['card_token', 'a'.repeat(32)],
     ['membership_start_date', '2000-01-01'],

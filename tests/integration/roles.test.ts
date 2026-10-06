@@ -35,7 +35,6 @@ const emails = {
   superB: 'roles-super-b@test.local',
   superC: 'roles-super-c@test.local',
   former: 'roles-former@test.local',
-  alias: 'roles-alias@test.local',
   target: 'roles-target@test.local',
   erased: 'roles-erased@test.local',
   purged: 'roles-purged@test.local',
@@ -90,8 +89,8 @@ beforeAll(async () => {
     userIds.push(users[key].id)
   }
   expect((await setRole(users.board.id, 'board')).error).toBeNull()
-  expect((await setRole(users.legacy.id, 'admin')).error).toBeNull()
-  expect((await setRole(users.alias.id, 'admin')).error).toBeNull()
+  // `legacy` held the pre-M7 role 'admin'; since M7 (roles contract) it is a second board member.
+  expect((await setRole(users.legacy.id, 'board')).error).toBeNull()
   expect((await setRole(users.superA.id, 'superadmin')).error).toBeNull()
   expect((await setRole(users.superB.id, 'superadmin')).error).toBeNull()
   const { error } = await supabaseAdmin
@@ -129,11 +128,18 @@ beforeAll(async () => {
 afterAll(() => cleanupUsers(userIds))
 
 describe('role values', () => {
-  it('accepts member, admin, board and superadmin', async () => {
+  it('accepts member, board and superadmin', async () => {
     const { role } = await getRow(users.board.id)
     expect(role).toBe('board')
     expect((await getRow(users.superA.id)).role).toBe('superadmin')
-    expect((await getRow(users.legacy.id)).role).toBe('admin')
+    expect((await getRow(users.member.id)).role).toBe('member')
+  })
+
+  it('rejects the legacy admin role since M7 (roles contract)', async () => {
+    const { error } = await setRole(users.member.id, 'admin')
+    expect(error?.code).toBe('23514')
+    expect(error?.message).toContain('members_role_check')
+    expect((await getRow(users.member.id)).role).toBe('member')
   })
 
   it('rejects any other role', async () => {
@@ -154,9 +160,10 @@ describe('has_role()', () => {
     expect(await hasRole('board', 'superadmin')).toBe(false)
   })
 
-  it('the legacy admin role counts as board', async () => {
-    expect(await hasRole('legacy', 'board')).toBe(true)
-    expect(await hasRole('legacy', 'superadmin')).toBe(false)
+  it('the legacy admin role name is never satisfied since M7', async () => {
+    expect(await hasRole('superA', 'admin')).toBe(false)
+    expect((await anon.rpc('role_rank', { p_role: 'admin' })).data).toBeNull()
+    expect((await anon.rpc('role_rank', { p_role: 'board' })).data).toBe(1)
   })
 
   it('superadmin has board and superadmin', async () => {
@@ -198,11 +205,8 @@ describe('is_admin() accepts board and superadmin', () => {
     expect(data ?? []).toHaveLength(0)
   })
 
-  it.each(['board', 'superA'] as const)('%s can regenerate a card but not call the service-role member list', async (key) => {
+  it.each(['board', 'superA'] as const)('%s can regenerate a card', async (key) => {
     const client = await createAuthenticatedClient(emails[key], password)
-
-    const list = await client.rpc('get_all_members_for_admin')
-    expect(list.error?.code).toBe('42501')
 
     const card = await client.rpc('regenerate_card_token', { target_member_id: users.member.id })
     expect(card.error).toBeNull()
@@ -240,15 +244,6 @@ describe('role_since', () => {
     expect(asSuper).not.toBe(asBoard)
     // back to board (3 superadmins at this point, so BR-10 allows it)
     expect((await setRole(users.board.id, 'board')).error).toBeNull()
-  })
-
-  it('stays when the legacy admin alias becomes board (same rank)', async () => {
-    const { role_since: asAdmin } = await getRow(users.alias.id)
-    expect(asAdmin).not.toBeNull()
-    expect((await setRole(users.alias.id, 'board')).error).toBeNull()
-    const row = await getRow(users.alias.id)
-    expect(row.role).toBe('board')
-    expect(row.role_since).toBe(asAdmin)
   })
 })
 
@@ -479,12 +474,6 @@ describe('admin_set_role (S-1, S-2)', () => {
     expect(await roleEntries(users.target.id)).toHaveLength(1)
   })
 
-  it('the legacy admin role ranks like board, so admin → board is unchanged too', async () => {
-    const { error } = await setRoleAs('superA', users.legacy.id, 'board')
-    expect(error?.message).toContain('admin:role_unchanged')
-    expect((await getRow(users.legacy.id)).role).toBe('admin')
-  })
-
   it('only member, board and superadmin can be assigned (never the legacy admin)', async () => {
     for (const role of ['admin', 'owner', '']) {
       const { error } = await setRoleAs('superA', users.member.id, role)
@@ -570,7 +559,7 @@ describe('admin_set_role (S-1, S-2)', () => {
     expect(await roleEntries(users.former.id)).toEqual([])
   })
 
-  it('revoking board and the legacy admin role is a role.revoke', async () => {
+  it('revoking board is a role.revoke', async () => {
     for (const key of ['board', 'legacy'] as const) {
       const from = (await getRow(users[key].id)).role
       const { error } = await setRoleAs('superB', users[key].id, 'member')
