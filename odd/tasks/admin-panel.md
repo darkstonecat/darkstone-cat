@@ -94,7 +94,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - [x] T14 — Admin shell: layout with guard, AdminHeader/AdminTabs, AdminDialog primitive, i18n — route: delegated
 - [x] T15 — V-8 procedures — route: delegated
 - [x] T16 — V-2 members list (server search/pagination, mobile cards) — route: delegated
-- [ ] T17 — V-2 dialogs (A-10, A-16, S-4) — route: delegated
+- [x] T17 — V-2 dialogs (A-10, A-16, S-4) — route: delegated
 - [ ] T18 — V-3 member file, read-only — route: delegated
 - [ ] T19 — V-3 edit mode + reveal (A-4, A-5) — route: delegated
 - [ ] T20 — V-3 leave/rejoin dialogs (A-6, A-7) — route: delegated
@@ -1663,6 +1663,42 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
   `e2e/admin/members-list.spec.ts` (list, search and filter round trips via URL, sort, invalid
   params, page past the end, CSV dialog, member 404).
 
+### T17 — done (route: delegated)
+
+- Commit: `feat(admin): Add the e-mail and register export dialogs` on `develop-users` (hash in
+  `git log -- src/components/admin/members/EmailsExportDialog.tsx`).
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 91 files /
+  1358 tests passed; `npx playwright test e2e/admin` 36 passed. (Integration is run once, before
+  the T18 commit.)
+- A-16 `EmailsExportDialog` (`src/components/admin/members/`): list radio cards (association /
+  newsletter), the "Abans d'enviar" block, procedure link P-7. Both outputs are disabled until a
+  list is chosen (visible reason). "Descarrega CSV" is the AdminDialog confirm (POST
+  `{ list, format: "csv" }` -> download, `role=status` "CSV descarregat."); "Copia les adreces" is
+  a body button (POST `format: "json"` -> `navigator.clipboard.writeText(addresses.join(", "))`,
+  status "Copiades N adreces." with the real count). Clipboard failure -> `copy_failed` alert.
+  Deviation: the mockup draws both outputs in the body and only "Tanca" in the footer; here the
+  CSV button is the footer confirm and "Tanca" the cancel (AdminDialog has one confirm slot).
+- No address counts (mockup's "168 adreces", "191 files") are shown: no read function returns
+  them (`admin_stats` has active/newsletter totals but not "confirmed with an e-mail"), and
+  calling the audited export just to count is not allowed.
+- S-4 `RegisterExportDialog`: `superadminOnly` chip, warning with the legal purpose, the column
+  list of the real file (D-B: includes DNI/NIE and "Baixa per", not the mockup's five), reason
+  textarea (min 10, max 500, trimmed) in place of the mockup checkbox (T9b requires a reason);
+  POST `{ reason }` -> download. Only rendered for superadmins in `MembersExports`; the route
+  re-checks the role.
+- Errors (`admin.members.export_errors.*`, ca/es/en) via `src/lib/admin/export-client.ts`
+  (`classifyExportError`: `forbidden_origin`, `reason_required`, `reason_too_long`, else 401
+  `unauthenticated`, 403 `forbidden`, anything else `failed`; `saveResponseAsFile`,
+  `postExport`). Server text is never shown. `export_soon` key is now unused.
+- Coordinator fix (T15/T16 verification): `AdminDialog` stops Lenis on mount (only if it was
+  running) and restarts it on cleanup, copying `CardQrOverlay`; tests in `AdminDialog.test.tsx`
+  with a mocked `useLenis`.
+- Tests: `tests/components/AdminExportDialogs.test.tsx` (disabled until list/reason, POST bodies,
+  download, clipboard, error mapping), `MembersList.test.tsx` (buttons enabled, superadmin-only
+  register), `AdminDialog.test.tsx` (Lenis), `e2e/admin/export-dialogs.spec.ts` (A-16 CSV with
+  `waitForResponse` header assertions for both lists; S-4 button absent for board). No superadmin
+  e2e fixture exists, so the S-4 happy path is covered by component and route tests only.
+
 ## Next step
 
-T17.
+T18.

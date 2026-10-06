@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { MdClose, MdMenuBook } from "react-icons/md";
 import { Link } from "@/i18n/routing";
+import { useLenis } from "@/components/SmoothScroll";
 import { cn } from "@/lib/utils";
 import { adminButtonClass } from "./adminButtons";
 
@@ -99,6 +100,13 @@ function DialogPanel({
   const reasonHintId = useId();
   const explainId = useId();
 
+  const lenis = useLenis();
+  // Kept in a ref so a new Lenis identity never re-runs the mount effect (and its cleanup) while open.
+  const lenisRef = useRef(lenis);
+  useEffect(() => {
+    lenisRef.current = lenis;
+  }, [lenis]);
+
   // Latest values for the document listener, which is attached once.
   const live = useRef({ busy, onClose });
   useEffect(() => {
@@ -109,6 +117,11 @@ function DialogPanel({
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    // Lenis scrolls the page on wheel events regardless of body overflow: stop it while open, and
+    // restart it on close only if this dialog is the one that stopped it.
+    const current = lenisRef.current;
+    const stoppedLenis = current && !current.isStopped ? current : null;
+    stoppedLenis?.stop();
     // Everything behind the dialog becomes inert (no focus, no clicks, hidden from assistive tech).
     const main = document.getElementById("main-content");
     const wasInert = main?.hasAttribute("inert") ?? false;
@@ -149,6 +162,7 @@ function DialogPanel({
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
+      stoppedLenis?.start();
       if (!wasInert) main?.removeAttribute("inert");
       previous?.focus?.();
     };

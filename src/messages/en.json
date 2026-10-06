@@ -1099,7 +1099,50 @@
       "export_emails": "Export e-mails",
       "export_register": "Export register of members",
       "export_soon": "Coming soon",
-      "loading": "Loading members…"
+      "loading": "Loading members…",
+        "emails": {
+          "title": "Export e-mails",
+          "subtitle": "Addresses of active members",
+          "list_label": "List",
+          "association": "Association communications",
+          "association_desc": "Assemblies, statutes, important notices · legal basis: membership",
+          "newsletter": "Newsletter",
+          "newsletter_desc": "News, events and activities · legal basis: consent",
+          "before_title": "Before sending",
+          "before_1": "Export right before each mailing.",
+          "before_bcc": "Always send in BCC or through a Google Group. Never in To or CC: everyone would see the others' addresses.",
+          "before_2": "Delete the file after sending.",
+          "pick_list": "Choose a list to copy or download the addresses.",
+          "copy": "Copy the addresses",
+          "copying": "Copying...",
+          "copied": "Copied {count} addresses.",
+          "download": "Download CSV",
+          "downloading": "Generating...",
+          "downloaded": "CSV downloaded.",
+          "close": "Close"
+        },
+        "register": {
+          "title": "Export the register of members",
+          "subtitle": "Register of members · active and blocked former members",
+          "warning": "It includes former members with blocked data and their ID number. Use it only for the legal purpose (LO 1/2002 art. 14) or for a request from an authority.",
+          "columns_label": "Columns",
+          "columns": "Member no., First name, Last name, ID number, First sign-up, Current sign-up, Leave date, Left by",
+          "scope": "One row per member, active or blocked former member. Purged records are not included.",
+          "reason_label": "Reason for the export (legal purpose)",
+          "reason_help": "It is kept in the activity log under your name.",
+          "confirm": "Download CSV",
+          "downloading": "Generating...",
+          "downloaded": "CSV downloaded."
+        },
+        "export_errors": {
+          "forbidden_origin": "The origin of the request could not be verified. Reload the page from darkstone.cat and try again.",
+          "unauthenticated": "Your session has expired. Sign in again and retry.",
+          "forbidden": "You do not have permission to run this export.",
+          "reason_required": "A reason is required.",
+          "reason_too_long": "The reason is too long.",
+          "failed": "The export could not be generated. Please try again.",
+          "copy_failed": "The addresses could not be copied. Download the CSV instead."
+        }
     }
   }
 }

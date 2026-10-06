@@ -1099,7 +1099,50 @@
       "export_emails": "Exportar correos",
       "export_register": "Exportar libro de socios",
       "export_soon": "Próximamente",
-      "loading": "Cargando socios…"
+      "loading": "Cargando socios…",
+        "emails": {
+          "title": "Exportar correos",
+          "subtitle": "Direcciones de los socios activos",
+          "list_label": "Lista",
+          "association": "Comunicaciones de la asociación",
+          "association_desc": "Asambleas, estatutos, avisos importantes · base legal: la pertenencia",
+          "newsletter": "Boletín",
+          "newsletter_desc": "Noticias, eventos y actividades · base legal: el consentimiento",
+          "before_title": "Antes de enviar",
+          "before_1": "Exporta justo antes de cada envío.",
+          "before_bcc": "Envíalo siempre en CCO o con un Grupo de Google. Nunca en A o CC: todos verían los correos de los demás.",
+          "before_2": "Borra el archivo después de enviar.",
+          "pick_list": "Elige una lista para poder copiar o descargar las direcciones.",
+          "copy": "Copiar las direcciones",
+          "copying": "Copiando...",
+          "copied": "Copiadas {count} direcciones.",
+          "download": "Descargar CSV",
+          "downloading": "Generando...",
+          "downloaded": "CSV descargado.",
+          "close": "Cerrar"
+        },
+        "register": {
+          "title": "Exportar el libro de socios",
+          "subtitle": "Libro de socios · activos y exsocios bloqueados",
+          "warning": "Incluye a los exsocios con los datos bloqueados y el DNI/NIE. Solo debe usarse para la finalidad legal (LO 1/2002 art. 14) o por una petición de una autoridad.",
+          "columns_label": "Columnas",
+          "columns": "N.º de socio, Nombre, Apellidos, DNI/NIE, Primera alta, Alta actual, Fecha de baja, Baja por",
+          "scope": "Una fila por socio, activo o exsocio bloqueado. Los registros purgados no se incluyen.",
+          "reason_label": "Motivo de la exportación (finalidad legal)",
+          "reason_help": "Queda en el registro de actividad con tu nombre.",
+          "confirm": "Descargar CSV",
+          "downloading": "Generando...",
+          "downloaded": "CSV descargado."
+        },
+        "export_errors": {
+          "forbidden_origin": "No se ha podido verificar el origen de la petición. Recarga la página desde darkstone.cat e inténtalo de nuevo.",
+          "unauthenticated": "La sesión ha caducado. Vuelve a entrar e inténtalo de nuevo.",
+          "forbidden": "No tienes permiso para hacer esta exportación.",
+          "reason_required": "Hay que escribir un motivo.",
+          "reason_too_long": "El motivo es demasiado largo.",
+          "failed": "No se ha podido generar la exportación. Inténtalo de nuevo.",
+          "copy_failed": "No se han podido copiar las direcciones. Descarga el CSV."
+        }
     }
   }
 }

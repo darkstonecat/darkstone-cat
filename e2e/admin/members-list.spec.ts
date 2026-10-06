@@ -11,8 +11,7 @@ test.describe('Admin members list', () => {
     await expect(page.getByRole('searchbox', { name: 'Cerca' })).toBeVisible()
     await expect(page.getByRole('radio', { name: 'Actius' })).toBeChecked()
     await expect(page.getByRole('button', { name: 'Exporta CSV' })).toBeVisible()
-    // A-16 has no dialog yet (T17): disabled with a visible reason.
-    await expect(page.getByRole('button', { name: 'Exporta correus' })).toBeDisabled()
+    await expect(page.getByRole('button', { name: 'Exporta correus' })).toBeEnabled()
 
     const table = page.getByRole('table')
     await expect(table.getByRole('columnheader')).toHaveText(['Núm.', 'Nom i cognoms', 'Email', 'Estat', 'Rol', 'Alta actual'])

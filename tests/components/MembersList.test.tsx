@@ -188,15 +188,24 @@ describe('MembersExports', () => {
     vi.unstubAllGlobals()
   })
 
-  it('renders the e-mail export disabled with a visible reason, and the register only for superadmins', () => {
+  it('shows the e-mail export to everyone and the register only to superadmins', () => {
     const { rerender } = render(<MembersExports role="all" isSuperadmin={false} />)
-    expect(screen.getByRole('button', { name: /export_emails/ })).toBeDisabled()
-    expect(screen.getByText('export_soon')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /export_emails/ })).toBeEnabled()
+    expect(screen.queryByText('export_soon')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /export_register/ })).not.toBeInTheDocument()
     expect(screen.queryByText('chip_superadmin_only')).not.toBeInTheDocument()
 
     rerender(<MembersExports role="all" isSuperadmin />)
-    expect(screen.getByRole('button', { name: /export_register/ })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /export_register/ })).toBeEnabled()
     expect(screen.getByText('chip_superadmin_only')).toBeInTheDocument()
+  })
+
+  it('opens the e-mail dialog and, for superadmins, the register dialog', () => {
+    render(<MembersExports role="all" isSuperadmin />)
+    fireEvent.click(screen.getByRole('button', { name: /export_emails/ }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'close' }))
+    fireEvent.click(screen.getByRole('button', { name: /export_register/ }))
+    expect(screen.getAllByText('chip_superadmin_only').length).toBeGreaterThan(1)
   })
 })

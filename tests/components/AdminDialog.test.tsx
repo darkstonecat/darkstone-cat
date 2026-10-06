@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { useState } from 'react'
 
@@ -13,6 +13,9 @@ vi.mock('@/i18n/routing', () => ({
     </a>
   ),
 }))
+
+const lenis = { stop: vi.fn(), start: vi.fn(), isStopped: false }
+vi.mock('@/components/SmoothScroll', () => ({ useLenis: () => lenis }))
 
 import AdminDialog from '@/components/admin/AdminDialog'
 
@@ -181,5 +184,29 @@ describe('AdminDialog', () => {
     expect(document.activeElement).toBe(confirm)
     rerender(<Harness busy />)
     expect(document.activeElement).toBe(screen.getByRole('dialog'))
+  })
+})
+
+describe('AdminDialog smooth scroll', () => {
+  beforeEach(() => {
+    lenis.stop.mockClear()
+    lenis.start.mockClear()
+    lenis.isStopped = false
+  })
+
+  it('stops Lenis while open and restarts it on close', () => {
+    const { unmount } = render(<Harness />)
+    expect(lenis.stop).toHaveBeenCalledTimes(1)
+    expect(lenis.start).not.toHaveBeenCalled()
+    unmount()
+    expect(lenis.start).toHaveBeenCalledTimes(1)
+  })
+
+  it('leaves Lenis alone when something else already stopped it', () => {
+    lenis.isStopped = true
+    const { unmount } = render(<Harness />)
+    unmount()
+    expect(lenis.stop).not.toHaveBeenCalled()
+    expect(lenis.start).not.toHaveBeenCalled()
   })
 })

@@ -1099,7 +1099,50 @@
       "export_emails": "Exporta correus",
       "export_register": "Exporta llibre de socis",
       "export_soon": "Properament",
-      "loading": "Carregant socis…"
+      "loading": "Carregant socis…",
+        "emails": {
+          "title": "Exporta correus",
+          "subtitle": "Adreces dels socis actius",
+          "list_label": "Llista",
+          "association": "Comunicacions de l'associació",
+          "association_desc": "Assemblees, estatuts, avisos importants · base legal: la pertinença",
+          "newsletter": "Butlletí",
+          "newsletter_desc": "Notícies, esdeveniments i activitats · base legal: el consentiment",
+          "before_title": "Abans d'enviar",
+          "before_1": "Exporta just abans de cada enviament.",
+          "before_bcc": "Envia-ho sempre en CCO o amb un Grup de Google. Mai en A o CC: tothom veuria els correus dels altres.",
+          "before_2": "Esborra el fitxer després d'enviar.",
+          "pick_list": "Tria una llista per poder copiar o descarregar les adreces.",
+          "copy": "Copia les adreces",
+          "copying": "Copiant...",
+          "copied": "Copiades {count} adreces.",
+          "download": "Descarrega CSV",
+          "downloading": "Generant...",
+          "downloaded": "CSV descarregat.",
+          "close": "Tanca"
+        },
+        "register": {
+          "title": "Exporta el llibre de socis",
+          "subtitle": "Llibre de socis · actius i exsocis bloquejats",
+          "warning": "Inclou els exsocis amb les dades bloquejades i el DNI/NIE. Només s'ha de fer servir per a la finalitat legal (LO 1/2002 art. 14) o per una petició d'una autoritat.",
+          "columns_label": "Columnes",
+          "columns": "Núm. de soci, Nom, Cognoms, DNI/NIE, Primera alta, Alta actual, Data de baixa, Baixa per",
+          "scope": "Una fila per soci, actiu o exsoci bloquejat. Els registres purgats no s'hi inclouen.",
+          "reason_label": "Motiu de l'exportació (finalitat legal)",
+          "reason_help": "Queda al registre d'activitat amb el teu nom.",
+          "confirm": "Descarrega CSV",
+          "downloading": "Generant...",
+          "downloaded": "CSV descarregat."
+        },
+        "export_errors": {
+          "forbidden_origin": "No s'ha pogut verificar l'origen de la petició. Recarrega la pàgina des de darkstone.cat i torna-ho a provar.",
+          "unauthenticated": "La sessió ha caducat. Torna a entrar i prova-ho de nou.",
+          "forbidden": "No tens permís per fer aquesta exportació.",
+          "reason_required": "Cal escriure un motiu.",
+          "reason_too_long": "El motiu és massa llarg.",
+          "failed": "No s'ha pogut generar l'exportació. Torna-ho a provar.",
+          "copy_failed": "No s'han pogut copiar les adreces. Descarrega el CSV."
+        }
     }
   }
 }
