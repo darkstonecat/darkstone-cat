@@ -92,7 +92,7 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 ### Screens
 
 - [x] T14 — Admin shell: layout with guard, AdminHeader/AdminTabs, AdminDialog primitive, i18n — route: delegated
-- [ ] T15 — V-8 procedures — route: delegated
+- [x] T15 — V-8 procedures — route: delegated
 - [ ] T16 — V-2 members list (server search/pagination, mobile cards) — route: delegated
 - [ ] T17 — V-2 dialogs (A-10, A-16, S-4) — route: delegated
 - [ ] T18 — V-3 member file, read-only — route: delegated
@@ -1600,6 +1600,28 @@ Route per task: `delegated` = one bounded writer subagent; `inline` = parent.
 - Not done / for later: no `SubpageTheme` per-route keys (prefix match instead); dialog is not
   portalled (fixed positioning is enough inside the layout).
 
+### T15 — done (route: delegated)
+
+- Commit: `feat(admin): Add the procedures page` on `develop-users` (hash in
+  `git log -- src/components/admin/procedures/ProceduresContent.tsx`).
+- Verification: `npm run lint` exit 0; `npx tsc --noEmit` exit 0; `npm run test:unit` 89 files /
+  1309 tests passed; `npx playwright test e2e/admin` 27 passed.
+- `/admin/procedures` (`requireRole('board', '/admin/procedures')`, noindex, `revalidate = false`,
+  breadcrumb + WebPage JSON-LD, not in the sitemap). `ProceduresContent` (server-compatible, no
+  client JS) renders the index `<nav aria-label>` (chips on mobile, titles from `lg`) and seven
+  `<article id="p-n">` cards; structure in `procedures.ts` (nested items, legal refs, warning
+  step), text in `admin.procedures.*` ca/es/en (rich tags `<b>`, `<p1>` cross-reference). Internal
+  rule ids (BR-12, A-6, S-3...) are dropped from the user-facing copy. Footer "Acció al panell"
+  links to `/admin/members` (`?state=former` for P-1 and P-4). New keys `metadata.admin_procedures_*`
+  and `nav.admin_procedures`.
+- From the coordinator (T14 verification): `AdminDialog` now portals to `<body>`, locks body scroll
+  and makes `#main-content` inert while open (restored on unmount), has `data-lenis-prevent` on
+  the panel and moves focus to the panel when `busy` turns true; 2 new test cases. The layout's
+  `<main id="main-content">` wraps the page, so the dialog had to leave it to stay interactive
+  (T14's "not portalled" note no longer holds). `shell.spec.ts` 404 test now uses
+  `/admin/procedures` (member 404, board 200).
+- Tests: `tests/components/ProceduresContent.test.tsx`; `e2e/admin/procedures.spec.ts`.
+
 ## Next step
 
-T15.
+T16.

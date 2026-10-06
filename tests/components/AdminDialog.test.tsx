@@ -155,4 +155,31 @@ describe('AdminDialog', () => {
     expect(screen.getByText('chip_superadmin_only')).toBeInTheDocument()
     expect(screen.getByRole('alert')).toHaveTextContent('Ha fallat')
   })
+  it('locks body scroll and makes #main-content inert while open, then restores both', () => {
+    const main = document.createElement('main')
+    main.id = 'main-content'
+    document.body.appendChild(main)
+    document.body.style.overflow = 'auto'
+    const { unmount } = render(<Harness />)
+    expect(document.body.style.overflow).toBe('hidden')
+    expect(main).toHaveAttribute('inert')
+    // Portalled to <body>, outside the inert region, and Lenis leaves its scroll alone.
+    const dialog = screen.getByRole('dialog')
+    expect(main.contains(dialog)).toBe(false)
+    expect(dialog).toHaveAttribute('data-lenis-prevent')
+    unmount()
+    expect(document.body.style.overflow).toBe('auto')
+    expect(main).not.toHaveAttribute('inert')
+    main.remove()
+    document.body.style.overflow = ''
+  })
+
+  it('moves focus to the panel when busy turns true', () => {
+    const { rerender } = render(<Harness />)
+    const confirm = screen.getByRole('button', { name: 'Confirma' })
+    confirm.focus()
+    expect(document.activeElement).toBe(confirm)
+    rerender(<Harness busy />)
+    expect(document.activeElement).toBe(screen.getByRole('dialog'))
+  })
 })

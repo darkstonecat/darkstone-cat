@@ -19,7 +19,8 @@
     "profile_details": "Profile and account",
     "logout": "Log out",
     "admin": "Admin",
-    "admin_members": "Members"
+    "admin_members": "Members",
+    "admin_procedures": "Procedures"
   },
   "hero": {
     "tagline": "Board Games & RPG in Terrassa",
@@ -385,6 +386,8 @@
     "admin_description": "Darkstone Catalunya administration panel.",
     "admin_members_title": "Members — Administration",
     "admin_members_description": "Darkstone Catalunya members list.",
+    "admin_procedures_title": "Procedures — Administration",
+    "admin_procedures_description": "Step-by-step guides for the requests that reach the board outside the website.",
     "data_protection_title": "Data protection policy",
     "data_protection_description": "Personal data protection policy of Darkstone Catalunya. Information about the data controller, GDPR rights, legal basis and data communication."
   },
@@ -999,6 +1002,75 @@
     "dialog_cancel": "Cancel",
     "dialog_procedure": "Procedure {id}",
     "dialog_reason_hint": "Do not write ID numbers or phone numbers in the reason.",
-    "dialog_reason_min": "Write a reason of at least {min} characters to continue."
+    "dialog_reason_min": "Write a reason of at least {min} characters to continue.",
+    "procedures": {
+      "intro": "What to do when a request reaches the board outside the website.",
+      "index_label": "Index",
+      "index_aria": "Procedures index",
+      "action_label": "Action in the panel:",
+      "p1": {
+        "title": "Reinstating a former member",
+        "s1": "Find the person in Members with the \"Former members\" filter (name, member number or e-mail). If they are not there, their record was purged (more than 3 years since the baixa): tell them to sign up again as a new member.",
+        "s2": "Confirm identity. The request must come from the e-mail of the account. If it came from another address or in person, write to the account e-mail and wait for the answer.",
+        "s3": "Read the last baixa in the member's file. If the board gave it, discuss the request with the board before accepting it.",
+        "s4": "Look for duplicates. If the person signed up again with another account, ask which one to keep. Then give the other one a baixa with the reason \"Duplicate account\".",
+        "s5": "Click \"Reinstate\" and record how the request arrived.",
+        "s6": "The member receives the e-mail automatically. Reply to the request too: the old card no longer works, the new one is in \"Card\", and the newsletter is off until they switch it on.",
+        "action": "Reinstate"
+      },
+      "p2": {
+        "title": "Removing a member by board decision",
+        "s1": "Check that the decision follows the statutes and has been agreed by the board.",
+        "s2": "Before deciding, inform the member of the facts and give them the chance to explain themselves.",
+        "s2_legal": "LO 1/2002, art. 21",
+        "s3": "If the member holds a board role, a superadmin removes it first.",
+        "s4": "Click \"Remove member\" with a reason the member can read. They receive it by e-mail.",
+        "action": "Remove member"
+      },
+      "p3": {
+        "title": "Data access request",
+        "s1": "Confirm identity through the account e-mail.",
+        "s2": "Click \"Export data\" in the member's file.",
+        "s3": "Send the file to the account e-mail within one month of the request.",
+        "s3_legal": "GDPR, art. 12.3",
+        "action": "Export data"
+      },
+      "p4": {
+        "title": "Data erasure request",
+        "s1": "Confirm identity through the account e-mail.",
+        "s2": "If the person is still an active member, give the baixa first, with the reason \"Erasure request\".",
+        "s3": "Ask a superadmin to run \"Anonymise\".",
+        "s4": "Reply within one month. Explain that name, DNI and dates stay blocked until the purge date because of possible liabilities, and give that date.",
+        "s4_legal": "LOPDGDD, art. 32",
+        "action": "Anonymise"
+      },
+      "p5": {
+        "title": "Lost or shared card",
+        "s1": "Click \"Regenerate card\". The old QR stops working at once.",
+        "s2": "Tell the member to download the new card from \"Card\".",
+        "action": "Regenerate card"
+      },
+      "p6": {
+        "title": "A member cannot sign in",
+        "s1": "Find the person in Members.",
+        "s1_a": "If they are not listed, the account was never confirmed and was deleted, or it never existed. Tell them to sign up again.",
+        "s1_b": "If they are a former member, follow <p1>P-1</p1> instead.",
+        "s2": "Click \"Send access link\". The link goes only to the account e-mail.",
+        "s3": "Tell them to check the spam folder. Once inside, they can set a new password from \"Account\".",
+        "s4": "If they no longer have access to that e-mail, the board cannot change it. The person signs up again with the new e-mail, and the board gives the old account a baixa with the reason \"Duplicate account\".",
+        "action": "Send access link"
+      },
+      "p7": {
+        "title": "Sending an e-mail to the members",
+        "s1": "Choose the list by the purpose of the message:",
+        "s1_a": "assembly, statutes or important notice → \"Association communications\";",
+        "s1_b": "news, events or activities → \"Newsletter\".",
+        "s2": "Export the list <b>right before sending</b>. Never reuse an earlier export or a list saved in Gmail: it would still include people who left, or who switched the newsletter off.",
+        "s3": "Send from the association's account, with the addresses in <b>BCC</b>, never in To or CC. Otherwise every member sees everyone else's e-mail, which is a data breach. A Google Group whose members cannot see each other is an alternative.",
+        "s4": "In a newsletter, end with: \"To stop receiving the newsletter, switch it off in My area › Communications.\"",
+        "s5": "Delete the exported file once the message has been sent.",
+        "action": "Export e-mails"
+      }
+    }
   }
 }

@@ -19,7 +19,8 @@
     "profile_details": "Perfil y cuenta",
     "logout": "Cerrar sesión",
     "admin": "Admin",
-    "admin_members": "Socios"
+    "admin_members": "Socios",
+    "admin_procedures": "Procedimientos"
   },
   "hero": {
     "tagline": "Juegos de Mesa y Rol en Terrassa",
@@ -385,6 +386,8 @@
     "admin_description": "Panel de administración de Darkstone Catalunya.",
     "admin_members_title": "Socios — Administración",
     "admin_members_description": "Listado de socios de Darkstone Catalunya.",
+    "admin_procedures_title": "Procedimientos — Administración",
+    "admin_procedures_description": "Guías paso a paso para las peticiones que llegan a la junta fuera de la web.",
     "data_protection_title": "Política de protección de datos",
     "data_protection_description": "Política de protección de datos personales de la Asociación Darkstone Catalunya. Información sobre el responsable del tratamiento, derechos RGPD, legitimidad y comunicación de datos."
   },
@@ -999,6 +1002,75 @@
     "dialog_cancel": "Cancelar",
     "dialog_procedure": "Procedimiento {id}",
     "dialog_reason_hint": "No escribas DNI ni teléfonos en el motivo.",
-    "dialog_reason_min": "Escribe un motivo de al menos {min} caracteres para continuar."
+    "dialog_reason_min": "Escribe un motivo de al menos {min} caracteres para continuar.",
+    "procedures": {
+      "intro": "Qué hacer cuando una petición llega fuera de la web.",
+      "index_label": "Índice",
+      "index_aria": "Índice de procedimientos",
+      "action_label": "Acción en el panel:",
+      "p1": {
+        "title": "Reincorporación de un exsocio",
+        "s1": "Busca a la persona en Socios con el filtro «Exsocios» (nombre, número de socio o correo). Si no aparece, su registro se ha purgado (han pasado más de 3 años desde la baja): dile que se registre de nuevo como socio nuevo.",
+        "s2": "Confirma la identidad. La petición debe llegar desde el correo de la cuenta. Si llegó desde otra dirección o en persona, escribe al correo de la cuenta y espera la respuesta.",
+        "s3": "Lee la última baja en la ficha del socio. Si la dio la junta, habla de la petición con la junta antes de aceptarla.",
+        "s4": "Busca duplicados. Si la persona se ha registrado de nuevo con otra cuenta, pregúntale cuál quiere conservar. Después da de baja la otra con el motivo «Cuenta duplicada».",
+        "s5": "Pulsa «Reincorporar» y anota cómo llegó la petición.",
+        "s6": "El socio recibe el correo automáticamente. Responde también a la petición: el carnet antiguo ya no funciona, el nuevo está en «Carnet» y el boletín queda desactivado hasta que lo vuelva a activar.",
+        "action": "Reincorporar"
+      },
+      "p2": {
+        "title": "Baja de un socio por decisión de la junta",
+        "s1": "Comprueba que la decisión sigue los estatutos y que la ha acordado la junta.",
+        "s2": "Antes de decidir, informa al socio de los hechos y dale la oportunidad de explicarse.",
+        "s2_legal": "LO 1/2002, art. 21",
+        "s3": "Si el socio tiene un rol de junta, un superadmin se lo quita primero.",
+        "s4": "Pulsa «Dar de baja» con un motivo que el socio pueda leer. Lo recibirá por correo.",
+        "action": "Dar de baja"
+      },
+      "p3": {
+        "title": "Solicitud de acceso a los datos",
+        "s1": "Confirma la identidad a través del correo de la cuenta.",
+        "s2": "Pulsa «Exportar datos» en la ficha del socio.",
+        "s3": "Envía el archivo al correo de la cuenta en el plazo de un mes desde la petición.",
+        "s3_legal": "RGPD, art. 12.3",
+        "action": "Exportar datos"
+      },
+      "p4": {
+        "title": "Solicitud de supresión de datos",
+        "s1": "Confirma la identidad a través del correo de la cuenta.",
+        "s2": "Si la persona sigue siendo socia activa, dale primero la baja con el motivo «Solicitud de supresión».",
+        "s3": "Pide a un superadmin que ejecute «Anonimizar».",
+        "s4": "Responde en el plazo de un mes. Explica que el nombre, el DNI y las fechas quedan bloqueados hasta la fecha de purga por posibles responsabilidades, e indica esa fecha.",
+        "s4_legal": "LOPDGDD, art. 32",
+        "action": "Anonimizar"
+      },
+      "p5": {
+        "title": "Carnet perdido o compartido",
+        "s1": "Pulsa «Regenerar carnet». El QR antiguo deja de funcionar al instante.",
+        "s2": "Dile al socio que descargue el carnet nuevo desde «Carnet».",
+        "action": "Regenerar carnet"
+      },
+      "p6": {
+        "title": "Un socio no puede entrar",
+        "s1": "Busca a la persona en Socios.",
+        "s1_a": "Si no aparece, la cuenta no se confirmó y se eliminó, o nunca existió. Dile que se registre de nuevo.",
+        "s1_b": "Si es un exsocio, sigue más bien el procedimiento <p1>P-1</p1>.",
+        "s2": "Pulsa «Enviar enlace de acceso». El enlace solo va al correo de la cuenta.",
+        "s3": "Dile que mire la carpeta de spam. Una vez dentro, puede poner una contraseña nueva desde «Cuenta».",
+        "s4": "Si ya no tiene acceso a ese correo, la junta no puede cambiarlo. La persona se registra de nuevo con el correo nuevo y la junta da de baja la cuenta antigua con el motivo «Cuenta duplicada».",
+        "action": "Enviar enlace de acceso"
+      },
+      "p7": {
+        "title": "Enviar un correo a los socios",
+        "s1": "Elige la lista según la finalidad del mensaje:",
+        "s1_a": "asamblea, estatutos o aviso importante → «Comunicaciones de la asociación»;",
+        "s1_b": "noticias, eventos o actividades → «Boletín».",
+        "s2": "Exporta la lista <b>justo antes de enviar</b>. No reutilices nunca una exportación anterior ni una lista guardada en Gmail: incluiría a gente que se ha ido o que ha desactivado el boletín.",
+        "s3": "Envía desde la cuenta de la asociación con las direcciones en <b>CCO</b>, nunca en Para ni en CC. Si no, cada socio ve el correo de todos los demás, y eso es una filtración de datos. Una alternativa es un Grupo de Google en el que los miembros no se vean entre sí.",
+        "s4": "En un boletín, termina con: «Para dejar de recibir el boletín, desactívalo en Mi zona › Comunicaciones.»",
+        "s5": "Borra el archivo exportado cuando hayas enviado el mensaje.",
+        "action": "Exportar correos"
+      }
+    }
   }
 }

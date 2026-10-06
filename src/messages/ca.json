@@ -19,7 +19,8 @@
     "profile_details": "Perfil i compte",
     "logout": "Tancar sessió",
     "admin": "Admin",
-    "admin_members": "Socis"
+    "admin_members": "Socis",
+    "admin_procedures": "Procediments"
   },
   "hero": {
     "tagline": "Jocs de Taula i Rol a Terrassa",
@@ -385,6 +386,8 @@
     "admin_description": "Panell d'administració de Darkstone Catalunya.",
     "admin_members_title": "Socis — Administració",
     "admin_members_description": "Llistat de socis de Darkstone Catalunya.",
+    "admin_procedures_title": "Procediments — Administració",
+    "admin_procedures_description": "Guies pas a pas per a les peticions que arriben a la junta fora del web.",
     "data_protection_title": "Política de protecció de dades",
     "data_protection_description": "Política de protecció de dades personals de l'Associació Darkstone Catalunya. Informació sobre el responsable del tractament, drets RGPD, legitimitat i comunicació de dades."
   },
@@ -999,6 +1002,75 @@
     "dialog_cancel": "Cancel·la",
     "dialog_procedure": "Procediment {id}",
     "dialog_reason_hint": "No escriguis DNI ni telèfons al motiu.",
-    "dialog_reason_min": "Escriu un motiu d'almenys {min} caràcters per continuar."
+    "dialog_reason_min": "Escriu un motiu d'almenys {min} caràcters per continuar.",
+    "procedures": {
+      "intro": "Què fer quan una petició arriba fora del web.",
+      "index_label": "Índex",
+      "index_aria": "Índex de procediments",
+      "action_label": "Acció al panell:",
+      "p1": {
+        "title": "Reincorporació d'un exsoci",
+        "s1": "Busca la persona a Socis amb el filtre «Exsocis» (nom, número de soci o correu). Si no hi és, el seu registre s'ha purgat (han passat més de 3 anys des de la baixa): digues-li que es torni a registrar com a soci nou.",
+        "s2": "Confirma la identitat. La petició ha d'arribar des del correu del compte. Si ha arribat des d'una altra adreça o en persona, escriu al correu del compte i espera la resposta.",
+        "s3": "Llegeix l'última baixa a la fitxa del soci. Si la va donar la junta, parla de la petició amb la junta abans d'acceptar-la.",
+        "s4": "Cerca duplicats. Si la persona s'ha registrat de nou amb un altre compte, pregunta-li quin vol conservar. Després dona de baixa l'altre amb el motiu «Compte duplicat».",
+        "s5": "Fes clic a «Reincorpora» i anota com ha arribat la petició.",
+        "s6": "El soci rep el correu automàticament. Respon també a la petició: el carnet antic ja no funciona, el nou és a «Carnet» i el butlletí queda desactivat fins que el torni a activar.",
+        "action": "Reincorpora"
+      },
+      "p2": {
+        "title": "Baixa d'un soci per decisió de la junta",
+        "s1": "Comprova que la decisió segueix els estatuts i que l'ha acordada la junta.",
+        "s2": "Abans de decidir, informa el soci dels fets i dona-li l'oportunitat d'explicar-se.",
+        "s2_legal": "LO 1/2002, art. 21",
+        "s3": "Si el soci té un rol de junta, un superadmin l'hi treu primer.",
+        "s4": "Fes clic a «Dona de baixa» amb un motiu que el soci pugui llegir. El rebrà per correu.",
+        "action": "Dona de baixa"
+      },
+      "p3": {
+        "title": "Sol·licitud d'accés a les dades",
+        "s1": "Confirma la identitat a través del correu del compte.",
+        "s2": "Fes clic a «Exporta dades» a la fitxa del soci.",
+        "s3": "Envia el fitxer al correu del compte en el termini d'un mes des de la petició.",
+        "s3_legal": "RGPD, art. 12.3",
+        "action": "Exporta dades"
+      },
+      "p4": {
+        "title": "Sol·licitud de supressió de dades",
+        "s1": "Confirma la identitat a través del correu del compte.",
+        "s2": "Si la persona encara és sòcia activa, dona-li primer la baixa amb el motiu «Sol·licitud de supressió».",
+        "s3": "Demana a un superadmin que executi «Anonimitza».",
+        "s4": "Respon en el termini d'un mes. Explica que el nom, el DNI i les dates queden blocats fins a la data de purga per possibles responsabilitats, i indica aquesta data.",
+        "s4_legal": "LOPDGDD, art. 32",
+        "action": "Anonimitza"
+      },
+      "p5": {
+        "title": "Carnet perdut o compartit",
+        "s1": "Fes clic a «Regenera carnet». El QR antic deixa de funcionar a l'instant.",
+        "s2": "Digues al soci que descarregui el carnet nou des de «Carnet».",
+        "action": "Regenera carnet"
+      },
+      "p6": {
+        "title": "Un soci no pot entrar",
+        "s1": "Busca la persona a Socis.",
+        "s1_a": "Si no hi surt, el compte no es va confirmar i es va eliminar, o no ha existit mai. Digues-li que es torni a registrar.",
+        "s1_b": "Si és un exsoci, segueix més aviat el procediment <p1>P-1</p1>.",
+        "s2": "Fes clic a «Envia enllaç d'accés». L'enllaç només va al correu del compte.",
+        "s3": "Digues-li que miri la carpeta de correu brossa. Un cop dins, pot posar una contrasenya nova des de «Compte».",
+        "s4": "Si ja no té accés a aquest correu, la junta no el pot canviar. La persona es torna a registrar amb el correu nou i la junta dona de baixa el compte antic amb el motiu «Compte duplicat».",
+        "action": "Envia enllaç d'accés"
+      },
+      "p7": {
+        "title": "Enviar un correu als socis",
+        "s1": "Tria la llista segons la finalitat del missatge:",
+        "s1_a": "assemblea, estatuts o avís important → «Comunicacions de l'associació»;",
+        "s1_b": "notícies, esdeveniments o activitats → «Butlletí».",
+        "s2": "Exporta la llista <b>just abans d'enviar</b>. No reutilitzis mai una exportació anterior ni una llista desada a Gmail: inclouria gent que ha marxat o que ha desactivat el butlletí.",
+        "s3": "Envia des del compte de l'associació amb les adreces en <b>CCO</b>, mai a Per a ni a CC. Si no, cada soci veu el correu de tots els altres, i això és una fuita de dades. Una alternativa és un Grup de Google en què els membres no es vegin entre ells.",
+        "s4": "En un butlletí, acaba amb: «Per deixar de rebre el butlletí, desactiva-ho a La meva zona › Comunicacions.»",
+        "s5": "Esborra el fitxer exportat quan hagis enviat el missatge.",
+        "action": "Exporta correus"
+      }
+    }
   }
 }

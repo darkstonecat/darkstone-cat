@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { MdClose, MdMenuBook } from "react-icons/md";
@@ -63,6 +64,8 @@ export function isReasonValid(reason: AdminDialogReason | undefined) {
  * Shared dialog shell of the admin panel (README §4 "Dialog shell"): modal, focus trap,
  * focus returns to the trigger, Escape closes unless busy, 44 px close button, footer with
  * the procedure link, cancel and confirm. Screens only provide the body and the confirm action.
+ * The panel is portalled to <body> so the page behind (`#main-content`) can be made `inert` and
+ * its scroll locked while open, like the card QR overlay.
  */
 export default function AdminDialog(props: AdminDialogProps) {
   return <AnimatePresence>{props.open && <DialogPanel key="dialog" {...props} />}</AnimatePresence>;
@@ -104,6 +107,12 @@ function DialogPanel({
 
   useEffect(() => {
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    // Everything behind the dialog becomes inert (no focus, no clicks, hidden from assistive tech).
+    const main = document.getElementById("main-content");
+    const wasInert = main?.hasAttribute("inert") ?? false;
+    main?.setAttribute("inert", "");
     const panel = panelRef.current;
     const first = panel?.querySelector<HTMLElement>("[data-autofocus]") ?? panel;
     first?.focus();
@@ -139,9 +148,16 @@ function DialogPanel({
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      if (!wasInert) main?.removeAttribute("inert");
       previous?.focus?.();
     };
   }, []);
+
+  // The buttons disable while a request runs: keep focus inside the dialog instead of <body>.
+  useEffect(() => {
+    if (busy) panelRef.current?.focus();
+  }, [busy]);
 
   const reasonInvalid = !isReasonValid(reason);
   const blocked = Boolean(confirmDisabled) || reasonInvalid;
@@ -161,7 +177,10 @@ function DialogPanel({
         transition: { duration: 0.2 },
       };
 
-  return (
+  // Mounted only after a click, so `document` exists; the guard keeps an initially-open render safe.
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <motion.div
       data-testid="admin-dialog-backdrop"
       className="fixed inset-0 z-50 flex items-end justify-center bg-stone-custom/60 sm:items-center sm:p-4"
@@ -181,6 +200,7 @@ function DialogPanel({
         aria-describedby={target ? targetId : undefined}
         aria-busy={busy || undefined}
         tabIndex={-1}
+        data-lenis-prevent
         className="flex max-h-[100dvh] w-full flex-col gap-5 overflow-y-auto rounded-t-2xl bg-brand-white p-5 shadow-[0_24px_64px_rgba(12,10,9,0.35)] outline-none sm:max-h-[calc(100dvh-2rem)] sm:w-[560px] sm:max-w-[calc(100vw-2rem)] sm:rounded-2xl sm:p-8"
         {...motionProps}
       >
@@ -285,6 +305,7 @@ function DialogPanel({
           </div>
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body,
   );
 }

@@ -20,8 +20,11 @@ test.describe('Admin shell', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Socis' })).toBeVisible()
   })
 
-  test('a member gets the 404 page on an admin sub-route', async ({ memberPage: page }) => {
-    const response = await page.goto('/admin/activity')
-    expect(response?.status()).toBe(404)
+  test('a member gets the 404 page on an admin sub-route, a board member the page', async ({
+    memberPage,
+    adminPage,
+  }) => {
+    expect((await memberPage.goto('/admin/procedures'))?.status()).toBe(404)
+    expect((await adminPage.goto('/admin/procedures'))?.status()).toBe(200)
   })
 })
