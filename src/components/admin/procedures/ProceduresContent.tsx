@@ -40,7 +40,7 @@ export default function ProceduresContent() {
                   href={`#p-${n}`}
                   className="flex min-h-11 items-center gap-3 rounded-lg text-sm text-stone-custom hover:underline"
                 >
-                  <span className="rounded-full bg-brand-orange/12 px-2.5 py-1 text-xs font-bold text-brand-orange-text">
+                  <span className="shrink-0 whitespace-nowrap rounded-full bg-brand-orange/12 px-2.5 py-1 text-xs font-bold text-brand-orange-text">
                     P-{n}
                   </span>
                   <span className="hidden lg:inline">{t(`p${n}.title`)}</span>
