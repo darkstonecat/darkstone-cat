@@ -60,6 +60,9 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Separate build directory for E2E tests to avoid lock conflicts with `npm run dev`
   ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
+  // Dev only: lets a phone or another machine on the LAN open `next dev` by IP. Without it the
+  // dev server blocks /_next/hmr from that origin and the page never hydrates (dead buttons).
+  allowedDevOrigins: ["127.0.0.1", "192.168.*.*", "10.*.*.*"],
   env: {
     NEXT_PUBLIC_BUILD_VERSION: gitSha.slice(0, 7),
     NEXT_PUBLIC_BUILD_DATE: buildDate,
