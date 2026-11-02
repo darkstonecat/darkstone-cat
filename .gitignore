@@ -65,3 +65,6 @@ audits/
 
 # Docs not included by default
 /docs/
+
+# CodeGraph local index
+/.codegraph/
