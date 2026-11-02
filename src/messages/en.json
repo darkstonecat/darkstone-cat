@@ -827,9 +827,9 @@
       "badge_member_year_no_year": "Member",
       "badge_member_year_earned": "Member of Darkstone since {date}.",
       "badge_member_year_locked": "Unlocked when you become a Darkstone member.",
-      "badge_volunteer_egara_joga": "Egara Joga volunteer",
-      "badge_volunteer_egara_joga_earned": "Helped out at the Egara Joga fair.",
-      "badge_volunteer_egara_joga_locked": "Help out at the Egara Joga fair to earn it.",
+      "badge_volunteer_egara_joga": "Egara Juga volunteer",
+      "badge_volunteer_egara_joga_earned": "Helped out at the Egara Juga fair.",
+      "badge_volunteer_egara_joga_locked": "Help out at the Egara Juga fair to earn it.",
       "badge_ludoteca_donor": "Library donor",
       "badge_ludoteca_donor_earned": "Donated a game to the association's library.",
       "badge_ludoteca_donor_locked": "Donate a game to the association's library to earn it.",
@@ -1202,7 +1202,7 @@
         "badges_title": "Badges",
         "badge_member_year": "Member {year}",
         "badge_automatic": "Automatic · from the first sign-up",
-        "badge_volunteer_egara_joga": "Egara Joga volunteer",
+        "badge_volunteer_egara_joga": "Egara Juga volunteer",
         "badge_ludoteca_donor": "Game library donor",
         "badge_awarded": "Awarded on {date}",
         "badge_awarded_by": "Awarded on {date} by {name}",
@@ -1371,7 +1371,7 @@
           "award_label": "Badge",
           "held_since": "Held since {date}",
           "held": "Already held",
-          "caption_volunteer_egara_joga": "Helped at the Egara Joga fair.",
+          "caption_volunteer_egara_joga": "Helped at the Egara Juga fair.",
           "caption_ludoteca_donor": "Donated games to the game library.",
           "automatic_note": "\"Member\" is automatic and cannot be awarded.",
           "note_label": "Note (optional)",
@@ -1576,7 +1576,7 @@
         "dni": "ID number"
       },
       "badge": {
-        "volunteer_egara_joga": "Egara Joga volunteer",
+        "volunteer_egara_joga": "Egara Juga volunteer",
         "ludoteca_donor": "Game library donor"
       },
       "role": {

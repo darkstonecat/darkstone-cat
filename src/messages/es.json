@@ -827,9 +827,9 @@
       "badge_member_year_no_year": "Miembro",
       "badge_member_year_earned": "Miembro de Darkstone desde el {date}.",
       "badge_member_year_locked": "Se desbloquea al hacerte socio de Darkstone.",
-      "badge_volunteer_egara_joga": "Voluntariado Egara Joga",
-      "badge_volunteer_egara_joga_earned": "Ha colaborado en la feria Egara Joga.",
-      "badge_volunteer_egara_joga_locked": "Colabora en la feria Egara Joga para conseguirla.",
+      "badge_volunteer_egara_joga": "Voluntariado Egara Juga",
+      "badge_volunteer_egara_joga_earned": "Ha colaborado en la feria Egara Juga.",
+      "badge_volunteer_egara_joga_locked": "Colabora en la feria Egara Juga para conseguirla.",
       "badge_ludoteca_donor": "Donante de la ludoteca",
       "badge_ludoteca_donor_earned": "Ha donado un juego a la ludoteca de la asociación.",
       "badge_ludoteca_donor_locked": "Dona un juego a la ludoteca de la asociación para conseguirla.",
@@ -1202,7 +1202,7 @@
         "badges_title": "Insignias",
         "badge_member_year": "Miembro {year}",
         "badge_automatic": "Automática · según la primera alta",
-        "badge_volunteer_egara_joga": "Voluntariado Egara Joga",
+        "badge_volunteer_egara_joga": "Voluntariado Egara Juga",
         "badge_ludoteca_donor": "Donante de la ludoteca",
         "badge_awarded": "Otorgada el {date}",
         "badge_awarded_by": "Otorgada el {date} por {name}",
@@ -1371,7 +1371,7 @@
           "award_label": "Insignia",
           "held_since": "Ya la tiene desde el {date}",
           "held": "Ya la tiene",
-          "caption_volunteer_egara_joga": "Ha colaborado en la feria Egara Joga.",
+          "caption_volunteer_egara_joga": "Ha colaborado en la feria Egara Juga.",
           "caption_ludoteca_donor": "Ha donado juegos a la ludoteca.",
           "automatic_note": "«Miembro» es automática y no se puede otorgar.",
           "note_label": "Nota (opcional)",
@@ -1576,7 +1576,7 @@
         "dni": "DNI"
       },
       "badge": {
-        "volunteer_egara_joga": "Voluntariado Egara Joga",
+        "volunteer_egara_joga": "Voluntariado Egara Juga",
         "ludoteca_donor": "Donante de la ludoteca"
       },
       "role": {

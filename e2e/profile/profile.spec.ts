@@ -40,7 +40,7 @@ test.describe('Member home (/profile)', () => {
     await expect(badges).toBeVisible()
     const year = new Date().getFullYear()
     await expect(badges.getByText(`Membre ${year}`).first()).toBeAttached()
-    await expect(badges.getByText('Voluntariat Egara Joga').first()).toBeAttached()
+    await expect(badges.getByText('Voluntariat Egara Juga').first()).toBeAttached()
     await expect(badges.getByText('Donant de la ludoteca').first()).toBeAttached()
   })
 
