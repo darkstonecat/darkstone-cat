@@ -325,7 +325,7 @@ After it: both superadmins sign in and see the "Rols" tab and `/admin/roles`.
 2. Check: `select role, count(*) from public.members group by role` shows no `admin`; former
    admins still open `/admin` (now as Junta); `select public.role_rank('admin')` is NULL.
 
-### Phase 8 — follow-ups after production is done
+### Phase 8 — follow-ups after production is done (DONE 2026-11-02, cad3be1)
 
 1. Once phase 4 showed `legacy=0`: remove the legacy decrypt fallback from
    `src/lib/encryption.ts` and its tests (and the legacy branch of
@@ -2449,10 +2449,11 @@ delivery, no PR slicing):
 
 ## Post-merge follow-ups
 
-1. Run the final prod runbook (phases 0–7).
-2. Remove the legacy decrypt fallback once a production dry run shows `legacy=0` (phase 8.1).
-3. Remove `admin` from `src/lib/auth/roles.ts` and its tests once M7 is applied (phase 8.2).
-4. Apply `odd/tasks/admin-panel-claude-md.md` to `CLAUDE.md` (phase 8.3).
+1. DONE. The prod runbook (phases 0–7) ran on 2026-10-06 against `httvpxakxaycqbagybym`, which
+   is the only Supabase project and therefore production (user, 2026-11-02).
+2. DONE (cad3be1). Legacy decrypt fallback removed (phase 8.1).
+3. DONE (cad3be1). `admin` removed from `src/lib/auth/roles.ts` and its tests (phase 8.2).
+4. DONE (c8f7987, cad3be1). `CLAUDE.md` documents the admin panel (phase 8.3).
 5. User review of the Catalan leave/rejoin e-mail copy (T10) and of the provisional decisions.
 6. Optional: move the post-leave notice from `/login?left=1` to the home page (T26 deviation);
    share the cookie wipe between NavBar and `LeaveAssociationDialog`.
@@ -2515,8 +2516,36 @@ was Ready before the migrations.
   `get_all_members_for_admin()` dropped; migrations head `20261007100000`.
 - The pulled Preview env file was deleted from the scratchpad after the re-encryption.
 
-## Next step
+## Branch and database status (2026-11-02)
 
-The develop-users database is fully migrated. Remaining before production: merge to `main` and
-run the runbook against the production setup; after that, phase 8 (remove the legacy decrypt
-fallback and the `admin` alias in `src/lib/auth/roles.ts`) and apply the CLAUDE.md change list.
+- L (2026-11-02, user): "Solo hay una supabase". `httvpxakxaycqbagybym` is the production
+  database and is fully migrated (above), so the runbook's database phases are done.
+- `develop-users` was fast-forwarded into `develop` (1d8e45b), `develop` was pushed and
+  `develop-users` was deleted locally and on GitHub. Its Vercel preview
+  (`darkstone-cat-git-develop-users-…vercel.app`) no longer exists. Work continues on `develop`.
+- Health check on 1d8e45b: lint and `tsc` clean, Vitest 2211/2211, E2E 252/254. The 2 failures
+  were stale tests (a calendar test tied to October/November 2026, and the language switcher
+  selector after bdec996), fixed in 1d8e45b.
+- Phase 8 done in cad3be1, test-first (11 RED, then GREEN). Vitest 2207/2207, and an
+  independent verifier returned PASS.
+
+## Next step: go live
+
+1. `git push origin develop`, then merge `develop` into `main` (a PR runs CI: `ci.yml` only
+   triggers on `main` pushes and PRs, so commits on `develop` are not checked by CI) and let
+   Vercel deploy.
+2. Supabase Auth: set the Site URL back to `https://www.darkstone.cat` (the confirm and
+   magic-link e-mails build their links from it) and keep
+   `https://www.darkstone.cat/auth/callback` in the redirect allow-list (the password reset
+   `redirectTo`). Remove the deleted `develop-users` preview URLs.
+3. Vercel Production env: `NEXT_PUBLIC_SUPABASE_URL`,
+   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
+   `ENCRYPTION_KEY` (same value as Preview, or nothing decrypts), `CRON_SECRET` (same value
+   as the GitHub secret), `LUDOYA_API_KEY`, `SMTP_USER`, `SMTP_PASSWORD`. Move any variable
+   that was scoped to the `develop-users` branch.
+4. Smoke test on www.darkstone.cat: sign-up, magic link, login, password reset, contact form,
+   `/admin` as a superadmin.
+5. Run `ludoya-check.yml` and `cache-refresh.yml` by hand once from `main`. `RETENTION_APPLY`
+   stays unset until the board decides.
+6. Still open: user review of the Catalan leave/rejoin e-mail copy (follow-up 5), and rotating
+   `SUPABASE_DB_PASSWORD` (`security-audit.md`).
