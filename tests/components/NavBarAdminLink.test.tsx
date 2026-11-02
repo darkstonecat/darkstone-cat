@@ -37,12 +37,12 @@ describe('NavBar admin link', () => {
     auth.role = 'member'
   })
 
-  it.each(['board', 'admin', 'superadmin'])('is shown to %s', (role) => {
+  it.each(['board', 'superadmin'])('is shown to %s', (role) => {
     auth.role = role
     expect(adminLinks().length).toBeGreaterThan(0)
   })
 
-  it.each(['member', null, 'owner'])('is hidden from %s', (role) => {
+  it.each(['member', null, 'owner', 'admin'])('is hidden from %s', (role) => {
     auth.role = role
     expect(adminLinks()).toHaveLength(0)
   })

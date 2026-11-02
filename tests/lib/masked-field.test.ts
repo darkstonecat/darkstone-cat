@@ -51,10 +51,4 @@ describe('maskEncryptedField', () => {
     maskEncryptedField(`v2:${OWNER}:a:b:c`, maskDni, 'dni')
     expect(mockDecrypt).toHaveBeenCalledWith(`v2:${OWNER}:a:b:c`, OWNER)
   })
-
-  it('without a member id, still decrypts a legacy value', () => {
-    mockDecrypt.mockReturnValue('12345678Z')
-    expect(maskEncryptedField('iv:tag:data', maskDni, 'dni').value?.tail).toBe('678Z')
-    expect(mockDecrypt).toHaveBeenCalledWith('iv:tag:data', '')
-  })
 })

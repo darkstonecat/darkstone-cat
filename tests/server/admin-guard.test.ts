@@ -85,9 +85,9 @@ describe('getAdminAccess', () => {
     expect(await getAdminAccess('superadmin')).toEqual({ status: 'forbidden' })
   })
 
-  it('treats the legacy admin role as board', async () => {
+  it('refuses the retired admin role (removed by M7)', async () => {
     setup({ user, member: active('admin') })
-    expect((await getAdminAccess('board')).status).toBe('ok')
+    expect((await getAdminAccess('board')).status).toBe('forbidden')
     expect((await getAdminAccess('superadmin')).status).toBe('forbidden')
   })
 

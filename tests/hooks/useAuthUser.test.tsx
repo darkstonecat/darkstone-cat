@@ -92,10 +92,10 @@ describe('useAuthUser', () => {
     document.cookie = `sb-127-auth-token=${encodeURIComponent(
       JSON.stringify(session)
     )}`
-    mockRoleQuery.mockResolvedValue({ data: { role: 'admin' }, error: null })
+    mockRoleQuery.mockResolvedValue({ data: { role: 'board' }, error: null })
 
     const { result } = renderHook(() => useAuthUser())
-    await waitFor(() => expect(result.current.role).toBe('admin'))
+    await waitFor(() => expect(result.current.role).toBe('board'))
   })
 
   it.each(['board', 'superadmin'])('exposes the %s role', async (role) => {

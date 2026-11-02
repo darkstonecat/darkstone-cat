@@ -93,7 +93,7 @@ describe('AccountActions', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('download_error')
   })
 
-  it.each(['board', 'admin', 'superadmin'])('blocks the leave of a %s with the reason visible (BR-12)', (role) => {
+  it.each(['board', 'superadmin'])('blocks the leave of a %s with the reason visible (BR-12)', (role) => {
     m.role = role
     render(<AccountActions email="a@b.test" memberNumber="000-001" />)
     const button = screen.getByRole('button', { name: /leave_button/ })

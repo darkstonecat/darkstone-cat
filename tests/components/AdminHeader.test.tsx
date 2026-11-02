@@ -25,9 +25,9 @@ describe('AdminHeader', () => {
     expect(screen.getByText('role_superadmin')).toBeInTheDocument()
   })
 
-  it('labels a board member and the legacy admin role as Junta and hides Rols', () => {
+  it('labels a board member as Junta and hides Rols', () => {
     nav.pathname = '/admin'
-    render(<AdminHeader memberName="Pau Ferrer" role="admin" />)
+    render(<AdminHeader memberName="Pau Ferrer" role="board" />)
     expect(screen.getByText('role_board')).toBeInTheDocument()
     expect(screen.queryByText('tab_roles')).not.toBeInTheDocument()
   })

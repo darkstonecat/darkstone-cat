@@ -156,12 +156,12 @@ describe('POST /api/admin/members/export', () => {
       expect((await call()).status).toBe(403)
     })
 
-    it('returns 403 for an unknown role', async () => {
-      setupMock({ user: { id: 'u1' }, member: { role: 'owner', left_on: null } })
+    it.each(['owner', 'admin'])('returns 403 for the unknown role %s', async (role) => {
+      setupMock({ user: { id: 'u1' }, member: { role, left_on: null } })
       expect((await call()).status).toBe(403)
     })
 
-    it.each(['board', 'superadmin', 'admin'])('exports for an active %s', async (role) => {
+    it.each(['board', 'superadmin'])('exports for an active %s', async (role) => {
       setupMock({ user: { id: 'u1' }, member: { role, left_on: null }, rpcData: rowsOf(fakeMember) })
       expect((await call()).status).toBe(200)
     })

@@ -145,7 +145,7 @@ describe('stored ciphertext is bound to its row (members_ciphertext_guard)', () 
     expect((await member.from('members').update({ phone_encrypted: null }).eq('id', users.member.id)).error).toBeNull()
   })
 
-  it('a row still holding a legacy value keeps working and decrypts through the fallback', async () => {
+  it('a row still holding a legacy value stays editable, but the value no longer decrypts', async () => {
     const legacy = legacyEncrypt('12345678Z')
     const { error: seedError } = await runSqlAsPostgres(
       `DO $$
@@ -163,7 +163,8 @@ describe('stored ciphertext is bound to its row (members_ciphertext_guard)', () 
       (await legacyClient.from('members').update({ postal_code: '08221' }).eq('id', users.legacy.id)).error
     ).toBeNull()
     const { data } = await legacyClient.from('members').select('dni_nie_encrypted').eq('id', users.legacy.id).single()
-    expect(decrypt(data!.dni_nie_encrypted!, users.legacy.id)).toBe('12345678Z')
+    expect(data!.dni_nie_encrypted).toBe(legacy)
+    expect(() => decrypt(data!.dni_nie_encrypted!, users.legacy.id)).toThrow('Invalid ciphertext')
   })
 })
 

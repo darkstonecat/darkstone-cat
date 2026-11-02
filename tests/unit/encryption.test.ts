@@ -118,26 +118,10 @@ describe('encryption', () => {
     })
   })
 
-  describe('legacy iv:tag:data (transitional fallback)', () => {
-    it('still decrypts without AAD, whatever member id is passed', async () => {
+  describe('legacy iv:tag:data (fallback removed: every stored value is v2)', () => {
+    it('refuses a valid legacy ciphertext, without decrypting it', async () => {
       const { decrypt } = await import('@/lib/encryption')
-      expect(decrypt(legacyEncrypt('612345678'), OWNER)).toBe('612345678')
-    })
-
-    it('rejects a tampered legacy tag', async () => {
-      const { decrypt } = await import('@/lib/encryption')
-      const parts = legacyEncrypt('612345678').split(':')
-      const tag = Buffer.from(parts[1], 'base64')
-      tag[0] ^= 0xff
-      parts[1] = tag.toString('base64')
-      expect(() => decrypt(parts.join(':'), OWNER)).toThrow()
-    })
-
-    it('rejects a wrong legacy IV length', async () => {
-      const { decrypt } = await import('@/lib/encryption')
-      const parts = legacyEncrypt('x').split(':')
-      parts[0] = Buffer.alloc(8).toString('base64')
-      expect(() => decrypt(parts.join(':'), OWNER)).toThrow('IV must be 12 bytes')
+      expect(() => decrypt(legacyEncrypt('612345678'), OWNER)).toThrow('Invalid ciphertext')
     })
   })
 

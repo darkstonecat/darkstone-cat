@@ -9,18 +9,17 @@ import {
   roleLabelKey,
 } from '@/lib/auth/roles'
 
-// Mirrors public.role_rank() in supabase/migrations/20261005100100_roles_expand.sql.
+// Mirrors public.role_rank() after M7 (supabase/migrations/20261007100000_roles_contract.sql).
 describe('roleRank', () => {
   it.each([
     ['member', 0],
     ['board', 1],
-    ['admin', 1],
     ['superadmin', 2],
   ])('ranks %s as %i', (role, rank) => {
     expect(roleRank(role)).toBe(rank)
   })
 
-  it.each([['owner'], ['Admin'], [''], [null], [undefined], [1]])(
+  it.each([['admin'], ['owner'], ['Admin'], [''], [null], [undefined], [1]])(
     'has no rank for %j',
     (role) => {
       expect(roleRank(role)).toBeNull()
@@ -33,7 +32,8 @@ describe('toRole', () => {
     for (const role of ROLES) expect(toRole(role)).toBe(role)
   })
 
-  it('returns null for anything else', () => {
+  it('returns null for anything else, including the retired admin role', () => {
+    expect(toRole('admin')).toBeNull()
     expect(toRole('root')).toBeNull()
     expect(toRole(' board')).toBeNull()
     expect(toRole(null)).toBeNull()
@@ -49,8 +49,8 @@ describe('hasRoleAtLeast', () => {
     ['board', 'member', true],
     ['board', 'board', true],
     ['board', 'superadmin', false],
-    ['admin', 'board', true],
-    ['admin', 'superadmin', false],
+    ['admin', 'member', false],
+    ['admin', 'board', false],
     ['superadmin', 'member', true],
     ['superadmin', 'board', true],
     ['superadmin', 'superadmin', true],
@@ -68,9 +68,9 @@ describe('hasRoleAtLeast', () => {
 })
 
 describe('isBoardRole / isSuperadmin', () => {
-  it('treats board, legacy admin and superadmin as board roles', () => {
+  it('treats board and superadmin as board roles; the retired admin role is unknown', () => {
     expect(isBoardRole('board')).toBe(true)
-    expect(isBoardRole('admin')).toBe(true)
+    expect(isBoardRole('admin')).toBe(false)
     expect(isBoardRole('superadmin')).toBe(true)
     expect(isBoardRole('member')).toBe(false)
     expect(isBoardRole(null)).toBe(false)
@@ -89,7 +89,7 @@ describe('roleLabelKey', () => {
   it.each([
     ['member', 'role_member'],
     ['board', 'role_board'],
-    ['admin', 'role_board'],
+    ['admin', 'role_member'],
     ['superadmin', 'role_superadmin'],
     ['owner', 'role_member'],
     [null, 'role_member'],

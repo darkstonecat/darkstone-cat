@@ -7,7 +7,7 @@ import AdminTabs, { activeAdminTab } from "./AdminTabs";
 
 type AdminHeaderProps = {
   memberName: string;
-  /** Raw role of the signed-in member; the legacy `admin` role counts as board. */
+  /** Raw role of the signed-in member. */
   role: string;
 };
 

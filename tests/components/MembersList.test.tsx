@@ -61,7 +61,7 @@ describe('MembersList', () => {
           row('1'),
           row('2', { state: 'former', left_on: '2025-06-10', role: 'member' }),
           row('3', { role: 'board' }),
-          row('4', { role: 'admin' }),
+          row('4', { role: 'board' }),
           row('5', { role: 'superadmin' }),
         ]}
         total={5}
