@@ -129,7 +129,10 @@ test.describe('Member home calendar', () => {
   test('navigates to another month through the URL and back', async ({ memberPage: page }) => {
     await page.goto(`${PAGES.profile}?month=2026-10`)
     const heading = page.getByRole('heading', { name: /Calendari/ })
-    if (!(await heading.textContent())?.includes('Octubre 2026')) return // out of range: fell back to today's month
+    test.skip(
+      !(await heading.textContent())?.includes('Octubre 2026'),
+      'October 2026 is out of the browsable range: the page fell back to the current month',
+    )
     const table = page.getByRole('table', { name: 'Calendari de Octubre 2026' })
     await expect(table).toBeVisible()
     await expect(table.getByRole('columnheader')).toHaveText(['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg'])
@@ -142,7 +145,12 @@ test.describe('Member home calendar', () => {
     const monthResponse = page.waitForResponse((r) => r.url().includes('/api/profile/calendar?month=2026-11'))
     await page.getByRole('button', { name: /^Mes següent: Novembre 2026/ }).click()
     expect((await monthResponse).status()).toBe(200)
-    await expect(page).toHaveURL(/month=2026-11/)
+    // The current month is the bare /profile, so ?month is dropped when November 2026 is today's month.
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit' })
+      .format(new Date())
+      .slice(0, 7)
+    if (today === '2026-11') await expect(page).toHaveURL(/\/profile$/)
+    else await expect(page).toHaveURL(/month=2026-11/)
     await expect(page.getByRole('table', { name: 'Calendari de Novembre 2026' })).toBeVisible()
     await expect(page.getByRole('heading', { name: /Calendari/ })).toContainText('Novembre 2026')
   })

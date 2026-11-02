@@ -21,19 +21,17 @@ test.describe('Locale routing', () => {
 
   test('language switcher is visible', async ({ page }) => {
     await page.goto(PAGES.about)
-    // The language switcher should be in the navbar
-    const switcher = page.locator('nav').locator('select, [role="listbox"], button:has-text("CA"), button:has-text("ES")').first()
+    // The navbar switcher renders crawlable <a href> links, one per locale
+    const switcher = page.locator('nav').getByRole('group', { name: 'Language' }).locator('visible=true').first()
     await expect(switcher).toBeVisible()
+    await expect(switcher.getByRole('link', { name: 'Switch to ESP' })).toHaveAttribute('href', '/es/about')
   })
 
   test('switching to Spanish changes URL', async ({ page }) => {
     await page.goto(PAGES.about)
-    // Find and click Spanish option in language switcher
-    const esOption = page.locator('nav').locator('a[href*="/es/"], button:has-text("ES")').first()
-    if (await esOption.isVisible()) {
-      await esOption.click()
-      await expect(page).toHaveURL(/\/es\//)
-    }
+    const esOption = page.locator('nav').getByRole('link', { name: 'Switch to ESP' }).locator('visible=true').first()
+    await esOption.click()
+    await expect(page).toHaveURL(/\/es\/about$/)
   })
 
   test('Spanish about page has Spanish content', async ({ page }) => {
