@@ -30,29 +30,31 @@
 //                - Bools  → "Sí" / "Accepto." → true, else false.
 //              Emits non-blocking warnings for unusual formats.
 //
-// 4. IMPORT    For each cleaned member:
+// 4. IMPORT    INSERT-ONLY. A row whose email (auth user) or member_number already
+//              exists in Supabase is SKIPPED and never touched: the database is the
+//              source of truth, so data members edited on the web, leaves and roles
+//              are never overwritten. For each new member:
 //                a) Creates a Supabase Auth user (email_confirm: true, no password).
 //                   → Members must use "Forgot password" to set their first password.
 //                b) The DB trigger `handle_new_user` auto-creates a `members` row.
-//                c) UPDATEs that row with the original member_number, encrypted
-//                   DNI/phone (AES-256-GCM), postal_code, consents, and dates.
+//                c) UPDATEs that new row with the original member_number, encrypted
+//                   DNI/phone (AES-256-GCM), postal_code, consents, and dates
+//                   (membership_start_date and current_joined_on).
 //
-// 5. SEQUENCE  Resets `member_number_seq` to the highest existing number so the
-//              next web registration gets the correct sequential ID.
+// 5. SEQUENCE  Prints the SQL that moves `member_number_seq` to the highest existing
+//              number, so the next web registration gets the next free ID.
 //
 // ─── Modes ──────────────────────────────────────────────────────────────────
 //
 //   Dry-run (default):  Parses, cleans, and shows what WOULD happen. No writes.
-//   --execute:          Actually creates users and updates member rows.
-//   --clean --execute:  Deletes ALL existing auth users + members, resets the
-//                       sequence, then performs a fresh import. Useful during
-//                       development to start from a clean slate.
+//   --execute:          Creates the new members only.
+//
+//   The old `--clean` mode (delete every member) was removed: the database now holds
+//   production data, the audit log and the roles.
 //
 // ─── Idempotency ────────────────────────────────────────────────────────────
 //
-//   Safe to re-run. If an auth user already exists for a given email, the script
-//   skips creation and updates the member row with the CSV data. This means you
-//   can run `--execute` multiple times without creating duplicates.
+//   Safe to re-run: members already imported are skipped.
 //
 // ─── Environment variables (read from .env.local / .env) ────────────────────
 //
@@ -63,8 +65,8 @@
 // ─── Usage ──────────────────────────────────────────────────────────────────
 //
 //   npm run migrate                    # Dry-run
-//   npm run migrate -- --execute       # Import
-//   npm run migrate -- --clean --execute   # Wipe + reimport
+//   npm run migrate -- --execute       # Import the new members
+//   npm run migrate -- --renumber 000-168=000-206   # Sheet number taken in Supabase
 //
 // ─── Exit codes ─────────────────────────────────────────────────────────────
 //
@@ -103,7 +105,8 @@ function loadEnv() {
       const idx = trimmed.indexOf("=");
       if (idx === -1) continue;
       const key = trimmed.slice(0, idx).trim();
-      const val = trimmed.slice(idx + 1).trim();
+      // Strip one pair of surrounding quotes, as dotenv does.
+      const val = trimmed.slice(idx + 1).trim().replace(/^(["'])(.*)\1$/, "$2");
       if (!process.env[key]) process.env[key] = val;
     }
   }
@@ -338,49 +341,70 @@ async function fetchExistingState(supabase) {
 // Import a single member
 // ---------------------------------------------------------------------------
 
-async function importMember(supabase, member, existingUsers) {
-  const { usersByEmail } = existingUsers;
-  let userId = usersByEmail.get(member.email);
-  let action;
-
-  if (!userId) {
-    // Create auth user (no password — they must use "Forgot password")
-    const { data, error } = await supabase.auth.admin.createUser({
-      email: member.email,
-      email_confirm: true,
-      user_metadata: { first_name: member.first_name, last_name: member.last_name },
-    });
-
-    if (error) {
-      // Fallback: maybe user was created between our check and now
-      if (error.message.includes("already") || error.message.includes("duplicate")) {
-        const { data: { users } } = await supabase.auth.admin.listUsers({ perPage: 1000 });
-        const found = users.find((u) => u.email.toLowerCase() === member.email);
-        if (found) {
-          userId = found.id;
-          action = "fallback-found";
-        } else {
-          return { status: "error", error: error.message };
-        }
-      } else {
-        return { status: "error", error: error.message };
-      }
-    } else {
-      userId = data.user.id;
-      action = "created";
+// --renumber 000-168=000-206,000-169=000-207 gives a sheet row a new number when its
+// sheet number already belongs to someone else in Supabase.
+function parseRenumber(args) {
+  const idx = args.indexOf("--renumber");
+  if (idx === -1) return new Map();
+  const map = new Map();
+  for (const pair of (args[idx + 1] || "").split(",")) {
+    const [from, to] = pair.split("=").map((s) => s?.trim());
+    if (!/^000-\d{3,}$/.test(from || "") || !/^000-\d{3,}$/.test(to || "")) {
+      console.error(`ERROR: invalid --renumber pair "${pair}" (expected 000-168=000-206)`);
+      process.exit(1);
     }
+    map.set(from, to);
+  }
+  return map;
+}
 
-    // Add to map so subsequent lookups work
-    usersByEmail.set(member.email, userId);
-  } else {
-    action = "existing";
+function applyRenumber(members, renumber, existingState) {
+  const sheetNumbers = new Set(members.map((m) => m.member_number));
+  for (const [from, to] of renumber) {
+    const member = members.find((m) => m.member_number === from);
+    if (!member) {
+      console.error(`ERROR: --renumber ${from}: no such number in the sheet`);
+      process.exit(1);
+    }
+    if (sheetNumbers.has(to) || existingState.membersByNumber.has(to)) {
+      console.error(`ERROR: --renumber ${from}=${to}: ${to} is already used`);
+      process.exit(1);
+    }
+    console.log(`  RENUMBER: ${from} → ${to}`);
+    member.member_number = to;
+    sheetNumbers.add(to);
+  }
+}
+
+// Why a member is not imported, or null when it is new.
+function skipReason(member, existingState) {
+  if (existingState.usersByEmail.has(member.email)) return "email exists";
+  if (existingState.membersByNumber.has(member.member_number)) return "number exists";
+  return null;
+}
+
+async function importMember(supabase, member, existingState) {
+  // Create auth user (no password — they must use "Forgot password")
+  const { data, error } = await supabase.auth.admin.createUser({
+    email: member.email,
+    email_confirm: true,
+    user_metadata: { first_name: member.first_name, last_name: member.last_name },
+  });
+
+  if (error) {
+    // Created between our check and now: leave it alone (insert-only).
+    if (error.message.includes("already") || error.message.includes("duplicate")) {
+      return { status: "skipped", reason: "email exists" };
+    }
+    return { status: "error", error: error.message };
   }
 
-  // UPDATE member row (trigger handle_new_user already created a row for new users)
-  // Small delay to let the trigger execute for newly created users
-  if (action === "created") {
-    await sleep(100);
-  }
+  const userId = data.user.id;
+  existingState.usersByEmail.set(member.email, userId);
+  existingState.membersByNumber.set(member.member_number, userId);
+
+  // The trigger handle_new_user creates the members row; give it a moment.
+  await sleep(100);
 
   const updateData = {
     member_number: member.member_number,
@@ -389,6 +413,8 @@ async function importMember(supabase, member, existingUsers) {
     postal_code: member.postal_code,
     newsletter_accepted: member.newsletter_accepted,
     membership_start_date: member.membership_start_date,
+    // Defaults to today; a member imported now joined on the sheet's date.
+    current_joined_on: member.membership_start_date,
   };
 
   // Only encrypt and set DNI/phone if they have values
@@ -405,88 +431,22 @@ async function importMember(supabase, member, existingUsers) {
     .eq("id", userId);
 
   if (updateError) {
-    return { status: "error", error: `UPDATE failed: ${updateError.message}`, action };
+    // The auth user exists but its row kept the defaults: fix it by hand.
+    return { status: "error", error: `UPDATE failed for user ${userId}: ${updateError.message}` };
   }
 
-  return { status: "ok", action: action === "created" ? "created" : "updated", userId };
+  return { status: "ok", userId };
 }
 
 // ---------------------------------------------------------------------------
-// Clean mode: delete all members except developer, reset sequence
+// Sequence: PostgREST cannot run raw SQL, so print it for the SQL editor / MCP
 // ---------------------------------------------------------------------------
 
-async function cleanMode(supabase) {
-  console.log("\n  CLEAN MODE: removing all members...\n");
-
-  const { data: members, error } = await supabase
-    .from("members")
-    .select("id, member_number");
-  if (error) throw new Error(`Failed to fetch members: ${error.message}`);
-
-  let deleted = 0;
-
-  for (const member of members) {
-    const { error: deleteError } = await supabase.auth.admin.deleteUser(member.id);
-    if (deleteError) {
-      console.error(`  ERROR deleting ${member.member_number}: ${deleteError.message}`);
-    } else {
-      console.log(`  DELETED: ${member.member_number}`);
-      deleted++;
-    }
-    await sleep(50);
-  }
-
-  // Reset sequence to 0 (will be set correctly after import)
-  await executeSQL(supabase, "SELECT setval('member_number_seq', 0, true)");
-
-  console.log(`\n  Clean complete: ${deleted} deleted`);
-}
-
-// ---------------------------------------------------------------------------
-// Execute raw SQL via Supabase
-// ---------------------------------------------------------------------------
-
-async function executeSQL(supabase, sql) {
-  // Use the Supabase REST API to execute SQL via the pg_net extension or rpc
-  // Since we're using service_role, we can use the rpc endpoint
-  const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/`;
-
-  // Try using supabase.rpc first — but the function may not exist
-  // Fallback: use the SQL endpoint directly
-  const response = await fetch(
-    url,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-      },
-      body: JSON.stringify({ query: sql }),
-    }
-  );
-
-  if (!response.ok) {
-    // If rpc doesn't work, log it — the sequence will be reset post-import via
-    // the MCP tool or manually
-    console.warn(`  WARNING: Could not execute SQL directly. Run manually:`);
-    console.warn(`  ${sql}`);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Reset sequence after import
-// ---------------------------------------------------------------------------
-
-async function resetSequence(supabase) {
-  const sql = `SELECT setval('member_number_seq',
+function printSequenceSql() {
+  console.log("\nRun this SQL so the next web sign-up gets the next free number:");
+  console.log(`  SELECT setval('member_number_seq',
     (SELECT COALESCE(MAX(CAST(SPLIT_PART(member_number, '-', 2) AS INTEGER)), 0)
-     FROM public.members)
-  , true)`;
-
-  console.log("\nResetting member_number_seq...");
-  await executeSQL(supabase, sql);
-  console.log("  Sequence reset command sent. Verify with: SELECT last_value FROM member_number_seq;");
+     FROM public.members), true);`);
 }
 
 // ---------------------------------------------------------------------------
@@ -517,12 +477,15 @@ async function retryOnError(fn, retries = 1, delayMs = 2000) {
 async function main() {
   const args = process.argv.slice(2);
   const executeMode = args.includes("--execute");
-  const cleanFlag = args.includes("--clean");
+  const renumber = parseRenumber(args);
+  if (args.includes("--clean")) {
+    console.error("ERROR: --clean was removed (it deleted every member). Nothing was done.");
+    process.exit(1);
+  }
 
   console.log("=".repeat(60));
-  console.log("  Darkstone Catalunya — Member Migration Script");
+  console.log("  Darkstone Catalunya — Member Migration Script (insert-only)");
   console.log("  Mode:", executeMode ? "EXECUTE" : "DRY-RUN");
-  if (cleanFlag) console.log("  Clean:", "YES (will delete all members first)");
   console.log("=".repeat(60));
 
   // 1. Load environment
@@ -567,71 +530,61 @@ async function main() {
 
   // 5. Fetch existing state
   console.log("\nFetching existing state...");
-  let existingState = await fetchExistingState(supabase);
+  const existingState = await fetchExistingState(supabase);
   console.log(`  Auth users: ${existingState.usersByEmail.size}`);
   console.log(`  Members: ${existingState.membersByNumber.size}`);
+  applyRenumber(members, renumber, existingState);
 
-  // 6. Clean mode
-  if (cleanFlag && executeMode) {
-    await cleanMode(supabase);
-    // Re-fetch state after clean
-    existingState = await fetchExistingState(supabase);
-    console.log(`\n  After clean — Auth users: ${existingState.usersByEmail.size}, Members: ${existingState.membersByNumber.size}`);
-  } else if (cleanFlag && !executeMode) {
-    console.log("\n  [DRY] --clean flag detected but not in --execute mode. Would delete all members.");
-  }
-
-  // 7. Import members
-  console.log("\nImporting members...\n");
+  // 6. Import the new members only
+  console.log("\nImporting new members...\n");
 
   let created = 0;
-  let updated = 0;
+  let skipped = 0;
   let errors = 0;
 
   for (const member of members) {
-    if (!executeMode) {
-      const exists = existingState.usersByEmail.has(member.email);
-      console.log(`  [DRY] ${member.member_number} ${member.first_name} ${member.last_name} <${member.email}> → ${exists ? "WOULD UPDATE" : "WOULD CREATE"}`);
+    const label = `${member.member_number} ${member.first_name} ${member.last_name} <${member.email}>`;
+    const reason = skipReason(member, existingState);
+    if (reason) {
+      console.log(`  [=] ${label} → skipped (${reason})`);
+      skipped++;
       continue;
     }
 
-    // Execute mode
+    if (!executeMode) {
+      console.log(`  [DRY] ${label} → WOULD CREATE`);
+      created++;
+      continue;
+    }
+
     const result = await retryOnError(() => importMember(supabase, member, existingState));
 
     if (result.status === "error") {
-      console.error(`  ERROR: ${member.member_number} <${member.email}> — ${result.error}`);
+      console.error(`  ERROR: ${label} — ${result.error}`);
       errors++;
+    } else if (result.status === "skipped") {
+      console.log(`  [=] ${label} → skipped (${result.reason})`);
+      skipped++;
     } else {
-      const icon = result.action === "created" ? "+" : "~";
-      console.log(`  [${icon}] ${member.member_number} ${member.first_name} ${member.last_name} <${member.email}> → ${result.action}`);
-      if (result.action === "created") created++;
-      else updated++;
+      console.log(`  [+] ${label} → created`);
+      created++;
     }
 
     await sleep(50);
   }
 
-  // 8. Reset sequence (only in execute mode)
-  if (executeMode) {
-    await resetSequence(supabase);
-  }
+  if (executeMode && created > 0) printSequenceSql();
 
-  // 9. Summary
+  // 7. Summary
   console.log("\n" + "=".repeat(60));
   if (executeMode) {
-    console.log(`  RESULTS: ${created} created, ${updated} updated, ${errors} errors`);
+    console.log(`  RESULTS: ${created} created, ${skipped} skipped, ${errors} errors`);
     if (errors > 0) {
       console.log(`  ⚠ Some errors occurred. Review output above.`);
       process.exit(2);
     }
   } else {
-    const wouldCreate = members.filter(
-      (m) => !existingState.usersByEmail.has(m.email)
-    ).length;
-    const wouldUpdate = members.filter(
-      (m) => existingState.usersByEmail.has(m.email)
-    ).length;
-    console.log(`  DRY-RUN: ${wouldCreate} would create, ${wouldUpdate} would update`);
+    console.log(`  DRY-RUN: ${created} would create, ${skipped} skipped (already in Supabase)`);
     console.log(`  Run with --execute to apply changes.`);
   }
   console.log("=".repeat(60));
