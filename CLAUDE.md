@@ -262,7 +262,7 @@ Ludoya **public v1 API** (`https://api.ludoya.com/public/v1`, header `X-Api-Key`
 - Username checks (sign-up and profile, `src/lib/profile/username-checks.ts`): server actions returning found / not_found / failed, never blocking; throttled per IP with the shared limiter (`src/lib/rate-limit.ts`)
 - Mock mode: `LUDOYA_MOCK=1` reads sanitized fixtures from `/public/mock/ludoya/v1/` (no key needed; the E2E server sets it)
 - Monitoring: `.github/workflows/ludoya-check.yml` runs `scripts/ludoya/check.mjs` weekly and needs the `LUDOYA_API_KEY` repository secret
-- Ludoya images are served as `application/octet-stream`; image host must be in `next.config.ts` `remotePatterns` and CSP `img-src`
+- Ludoya images are served as `application/octet-stream` from `images.ludoya.com` (since November 2026; the old `ludoya-images.s3.eu-west-par.io.cloud.ovh.net` stays allowed). Every image host must be in `next.config.ts` `remotePatterns` **and** CSP `img-src` (pinned by `tests/lib/next-config-images.test.ts`) and in `IMAGE_HOSTS` of `scripts/ludoya/check.mjs`: a missing host makes `next/image` throw in dev (the page shows the 500 error screen) and the production optimizer answer 400 (broken images)
 
 ### Cookie Consent
 

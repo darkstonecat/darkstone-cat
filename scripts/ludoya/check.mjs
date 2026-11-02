@@ -34,7 +34,8 @@ loadLocalEnv();
 
 const API_URL = (process.env.LUDOYA_API_URL || "https://api.ludoya.com").replace(/\/$/, "");
 const API_KEY = process.env.LUDOYA_API_KEY;
-const IMAGE_HOST = "ludoya-images.s3.eu-west-par.io.cloud.ovh.net";
+// Must match next.config.ts (images.remotePatterns and the CSP img-src).
+const IMAGE_HOSTS = ["images.ludoya.com", "ludoya-images.s3.eu-west-par.io.cloud.ovh.net"];
 const TIMEOUT_MS = 20_000;
 
 const failures = [];
@@ -222,8 +223,8 @@ async function main() {
   } else {
     let reachable = 0;
     for (const url of urls) {
-      if (new URL(url).host !== IMAGE_HOST) {
-        fail(`Image host changed: ${url} (expected ${IMAGE_HOST}); update next.config.ts remotePatterns + CSP`);
+      if (!IMAGE_HOSTS.includes(new URL(url).host)) {
+        fail(`Image host changed: ${url} (expected one of ${IMAGE_HOSTS.join(", ")}); update next.config.ts remotePatterns + CSP and IMAGE_HOSTS`);
         continue;
       }
       const status = await head(url);

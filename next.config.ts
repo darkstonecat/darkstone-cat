@@ -45,7 +45,7 @@ const securityHeaders = [
       // 'unsafe-eval' is only needed by React's dev tooling (stack reconstruction); never ship it.
       `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"} https://www.googletagmanager.com https://va.vercel-scripts.com`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://cf.geekdo-images.com https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net https://www.googletagmanager.com",
+      "img-src 'self' data: blob: https://cf.geekdo-images.com https://images.ludoya.com https://ludoya-images.s3.eu-west-par.io.cloud.ovh.net https://www.googletagmanager.com",
       "font-src 'self'",
       `connect-src 'self' https://*.google-analytics.com https://www.googletagmanager.com https://va.vercel-scripts.com https://vitals.vercel-insights.com ${supabaseUrl}`,
       "frame-src 'self' https://www.google.com",
@@ -75,6 +75,12 @@ const nextConfig: NextConfig = {
         hostname: "cf.geekdo-images.com",
       },
       {
+        // Ludoya's image host since November 2026.
+        protocol: "https",
+        hostname: "images.ludoya.com",
+      },
+      {
+        // Ludoya's previous image host, kept for URLs still cached.
         protocol: "https",
         hostname: "ludoya-images.s3.eu-west-par.io.cloud.ovh.net",
       },
