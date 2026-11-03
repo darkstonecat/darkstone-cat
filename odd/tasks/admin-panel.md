@@ -2529,6 +2529,25 @@ was Ready before the migrations.
 - Phase 8 done in cad3be1, test-first (11 RED, then GREEN). Vitest 2207/2207, and an
   independent verifier returned PASS.
 
+## Member list import and renumbering (2026-11-02 / 2026-11-03)
+
+- The Google Forms sheet (`data/llista_membres.csv`, gitignored) has 205 filled rows and 3
+  repeated sign-ups (same email and DNI): sheet 000-070 + 000-138, 000-112 + 000-127 and
+  000-120 + 000-132. Each was merged:
+  first row's number and date, last row's data. 202 members.
+- `scripts/migrate-members.mjs --execute` imported the missing members (2026-11-02).
+- L (2026-11-03, user): "Analiza que no hayan numeros de socio no usados, de ser asi desplaza
+  todos para que se usen". One SQL transaction (`supabase db query --linked`) renumbered the
+  202 members to 000-001 … 000-202 in sheet order (77 changed; everyone from sheet 000-128
+  moved down 1–3). Rubén Codina Cid's web account (000-168) took his sheet place 000-032 with
+  dates 2024-11-07 and kept superadmin. `member_number_seq` = 202, so the next sign-up is
+  000-203. Roles unchanged (2 superadmins, 12 board).
+- Read-back check: no gaps, every number as planned; name, DNI, phone, postal code and
+  newsletter of all 202 match the sheet (merged rows: the last row). Audit entries written
+  before the renumbering keep the old numbers (append-only).
+- So production numbers are sheet positions, not the sheet's own number column. Re-running the
+  import is still safe (it skips existing emails), but compare by email, not by number.
+
 ## Next step: go live
 
 1. `git push origin develop`, then merge `develop` into `main` (a PR runs CI: `ci.yml` only

@@ -44,6 +44,11 @@
 // 5. SEQUENCE  Prints the SQL that moves `member_number_seq` to the highest existing
 //              number, so the next web registration gets the next free ID.
 //
+// Note (2026-11-03): production was renumbered after the import to 000-001 … 000-202
+// in sheet order with no gaps (merged duplicates left holes). Production numbers are
+// therefore sheet positions, not the sheet's own number column: match members by email.
+// See odd/tasks/admin-panel.md, "Member list import and renumbering".
+//
 // ─── Modes ──────────────────────────────────────────────────────────────────
 //
 //   Dry-run (default):  Parses, cleans, and shows what WOULD happen. No writes.
