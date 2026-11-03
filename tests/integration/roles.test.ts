@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import {
   supabaseAdmin,
   createTestUser,
@@ -7,6 +7,7 @@ import {
   createServiceClientAs,
   cleanupUsers,
   forceDemoteForTests,
+  runSqlAsPostgres,
 } from '../helpers/supabase'
 import { fakeMemberCipher } from '../helpers/cipher'
 
@@ -1020,5 +1021,64 @@ describe('superadmin actions (S-1, S-2, S-3)', () => {
     expect(await auditFor(users.actFormer.id, ['member.anonymise'])).toHaveLength(1)
     // the confirmation is still checked on a retry
     expect(await anonymiseMember(users.actFormer.id, '999-999')).toEqual({ error: 'confirm_mismatch' })
+  })
+})
+
+// Migration 20261103100000_badge_catalogue.sql (odd/tasks/badge-catalogue.md S2): deleting a
+// badge for good is superadmin only, and only for a badge that was never awarded. Here because
+// this is the only file with superadmins; the board cases live in badge-catalogue.test.ts.
+describe('admin_delete_badge() (superadmin)', () => {
+  const run = `rl${Date.now().toString(36)}`
+  const keys = { unused: `${run}_unused`, revoked: `${run}_revoked` }
+  const newBadge = (client: SupabaseClient, key: string) =>
+    client.rpc('admin_create_badge', {
+      p_key: key,
+      p_name: { ca: `Esborrable ${key}` },
+      p_earned_text: { ca: 'La tens.' },
+      p_locked_text: { ca: 'Encara no.' },
+      p_icon: 'star',
+      p_show_locked: true,
+    })
+
+  afterAll(async () => {
+    await supabaseAdmin.from('member_badges').delete().in('badge_key', Object.values(keys))
+    await runSqlAsPostgres('DELETE FROM public.badges WHERE key = ANY($1::text[])', [Object.values(keys)])
+  })
+
+  it('deletes a badge nobody ever had and writes badge.delete with the name', async () => {
+    const superA = await createAuthenticatedClient(emails.superA, password)
+    expect((await newBadge(superA, keys.unused)).error).toBeNull()
+    expect((await superA.rpc('admin_delete_badge', { p_key: keys.unused })).error).toBeNull()
+
+    const { data: gone } = await supabaseAdmin.from('badges').select('key').eq('key', keys.unused)
+    expect(gone).toEqual([])
+    const { data: entries } = await supabaseAdmin
+      .from('audit_log')
+      .select('actor_id, target_member_id, details')
+      .eq('action', 'badge.delete')
+      .filter('details->>badge', 'eq', keys.unused)
+    expect(entries).toEqual([
+      { actor_id: users.superA.id, target_member_id: null, details: { badge: keys.unused, name: `Esborrable ${keys.unused}` } },
+    ])
+    const again = await superA.rpc('admin_delete_badge', { p_key: keys.unused })
+    expect(again.error?.message).toContain('admin:not_found')
+  })
+
+  it('refuses a badge that was ever awarded, even after it was revoked', async () => {
+    const superA = await createAuthenticatedClient(emails.superA, password)
+    expect((await newBadge(superA, keys.revoked)).error).toBeNull()
+    const award = { p_member_id: users.target.id, p_badge_key: keys.revoked, p_note: null }
+    expect((await superA.rpc('admin_award_badge', award)).error).toBeNull()
+
+    const held = await superA.rpc('admin_delete_badge', { p_key: keys.revoked })
+    expect(held.error?.code).toBe('22023')
+    expect(held.error?.message).toContain('admin:badge_in_use')
+
+    const revoke = { p_member_id: users.target.id, p_badge_key: keys.revoked, p_reason: null }
+    expect((await superA.rpc('admin_revoke_badge', revoke)).error).toBeNull()
+    const revoked = await superA.rpc('admin_delete_badge', { p_key: keys.revoked })
+    expect(revoked.error?.message).toContain('admin:badge_in_use')
+    const { data } = await supabaseAdmin.from('badges').select('key').eq('key', keys.revoked)
+    expect(data).toEqual([{ key: keys.revoked }])
   })
 })
