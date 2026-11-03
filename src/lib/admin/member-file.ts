@@ -102,9 +102,3 @@ export function formatAdminTimestamp(iso: string | null | undefined): string | n
   const pick = (type: string) => String(Number(parts.find((p) => p.type === type)?.value ?? ""));
   return `${pick("day")}/${pick("month")}/${pick("year")}`;
 }
-
-/** Year of a "YYYY-MM-DD" date, for the derived "Membre {year}" badge (BR-6). */
-export function yearOf(iso: string | null | undefined): number | null {
-  const match = iso ? /^(\d{4})-/.exec(iso) : null;
-  return match ? Number(match[1]) : null;
-}

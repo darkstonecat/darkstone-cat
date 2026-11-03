@@ -5,12 +5,8 @@ import { useTranslations } from "next-intl";
 import { MdAdd } from "react-icons/md";
 import { useRouter } from "@/i18n/routing";
 import { awardBadge, revokeBadge } from "@/lib/admin/member-actions";
-import {
-  KNOWN_BADGE_KEYS,
-  formatAdminTimestamp,
-  yearOf,
-  type AdminMemberFileRow,
-} from "@/lib/admin/member-file";
+import { KNOWN_BADGE_KEYS, formatAdminTimestamp, type AdminMemberFileRow } from "@/lib/admin/member-file";
+import { tenureYears } from "@/lib/member-tenure";
 import AdminDialog from "../AdminDialog";
 import Notice from "../Notice";
 import ReasonButton from "../ReasonButton";
@@ -23,23 +19,26 @@ const ROW = "flex flex-col gap-0.5 border-t border-stone-custom/10 py-3 first:bo
 type BadgesCardProps = {
   member: Pick<
     AdminMemberFileRow,
-    "id" | "member_number" | "state" | "first_name" | "last_name" | "badges" | "membership_start_date"
+    "id" | "member_number" | "state" | "first_name" | "last_name" | "badges" | "current_joined_on" | "left_on"
   >;
+  /** Madrid calendar day (`YYYY-MM-DD`) the tenure badge is counted up to; computed by the server page. */
+  today: string;
 };
 
 /**
- * "Insígnies" card of the member file (A-8). "Membre {year}" is derived (BR-6): never awarded or
- * revoked. Awarding and revoking are for active members only (the database refuses a former one).
+ * "Insígnies" card of the member file (A-8). "X anys amb Darkstone" is derived (BR-6) from the
+ * current sign-up, up to the leave date for a former member: never awarded or revoked. Awarding and revoking are for active members only (the database refuses a former one).
  * The outcome notice lives here so it survives the `router.refresh()` after each change.
  */
-export default function BadgesCard({ member }: BadgesCardProps) {
+export default function BadgesCard({ member, today }: BadgesCardProps) {
   const t = useTranslations("admin.member_file");
   const tb = useTranslations("admin.member_file.badge_actions");
   const tErr = useTranslations("admin.member_file.errors");
   const router = useRouter();
   const former = member.state === "former";
   const badges = member.badges ?? [];
-  const startYear = yearOf(member.membership_start_date);
+  const years = tenureYears(member.current_joined_on, former && member.left_on ? member.left_on : today);
+  const tenure = years !== null && years >= 1 ? years : null;
   const name = `${member.first_name} ${member.last_name}`.trim();
   const target = t("membership.target", { number: member.member_number, name });
   const held = new Map(badges.map((badge) => [badge.badge_key, badge]));
@@ -135,9 +134,9 @@ export default function BadgesCard({ member }: BadgesCardProps) {
         </div>
       )}
       <ul className="flex flex-col">
-        {startYear !== null && (
+        {tenure !== null && (
           <li className={ROW}>
-            <span className="font-semibold text-stone-custom">{t("badge_member_year", { year: startYear })}</span>
+            <span className="font-semibold text-stone-custom">{t("badge_member_tenure", { years: tenure })}</span>
             <span className="text-[13px] text-stone-custom/65">{t("badge_automatic")}</span>
           </li>
         )}
@@ -172,7 +171,7 @@ export default function BadgesCard({ member }: BadgesCardProps) {
           );
         })}
       </ul>
-      {badges.length === 0 && startYear === null && <p className="text-sm text-stone-custom/65">{t("badges_none")}</p>}
+      {badges.length === 0 && tenure === null && <p className="text-sm text-stone-custom/65">{t("badges_none")}</p>}
       {former && <p className="text-[13px] text-stone-custom/65">{t("badges_kept")}</p>}
 
       <ReasonButton

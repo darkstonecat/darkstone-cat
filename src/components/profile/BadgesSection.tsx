@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 const SCROLL_SETTLE_MS = 900;
 
 const ICONS: Record<BadgeKey, IconType> = {
-  member_year: MdOutlineStarBorder,
+  member_tenure: MdOutlineStarBorder,
   volunteer_egara_joga: MdOutlineHowToReg,
   ludoteca_donor: MdOutlineCardGiftcard,
 };
@@ -26,19 +26,19 @@ const ICONS: Record<BadgeKey, IconType> = {
 function useBadgeText() {
   const t = useTranslations("profile.home");
   return (item: BadgeItem) => {
-    const title =
-      item.key === "member_year"
-        ? item.year
-          ? t("badge_member_year", { year: item.year })
-          : t("badge_member_year_no_year")
-        : t(`badge_${item.key}`);
-    let description: string;
-    if (item.key === "member_year" && item.earned && item.sinceLabel) {
-      description = t("badge_member_year_earned", { date: item.sinceLabel });
-    } else {
-      description = t(`badge_${item.key}_${item.earned ? "earned" : "locked"}`);
+    if (item.key === "member_tenure") {
+      // Locked: the first anniversary is what it brings.
+      const title = t("badge_member_tenure", { years: item.earned && item.years ? item.years : 1 });
+      const description =
+        item.earned && item.sinceLabel
+          ? t("badge_member_tenure_earned", { date: item.sinceLabel })
+          : t("badge_member_tenure_locked");
+      return { title, description };
     }
-    return { title, description };
+    return {
+      title: t(`badge_${item.key}`),
+      description: t(`badge_${item.key}_${item.earned ? "earned" : "locked"}`),
+    };
   };
 }
 

@@ -1,10 +1,12 @@
 import { createClient } from "./server";
 import { getCurrentUser } from "./auth";
+import { madridToday } from "@/lib/admin/leave-dates";
+import { tenureYears } from "@/lib/member-tenure";
 
 export type StoredBadgeKey = "volunteer_egara_joga" | "ludoteca_donor";
 
 export type MemberBadge =
-  | { key: "member_year"; year: number; awardedAt: string }
+  | { key: "member_tenure"; years: number; since: string }
   | { key: StoredBadgeKey; awardedAt: string };
 
 type StoredBadgeRow = { badge_key: string; awarded_at: string };
@@ -12,19 +14,21 @@ type StoredBadgeRow = { badge_key: string; awarded_at: string };
 const STORED_KEYS: readonly string[] = ["volunteer_egara_joga", "ludoteca_donor"];
 
 /**
- * Pure derivation: the stored badges plus "Membre {year}", whose year comes from
- * `members.membership_start_date` (YYYY-MM-DD). Unknown stored keys are ignored.
+ * Pure derivation: the stored badges plus "X anys amb Darkstone", counted in full years from
+ * `members.current_joined_on` (YYYY-MM-DD) up to `today`. It is earned on the first
+ * anniversary and never stored (BR-6). Unknown stored keys are ignored.
  * The derived badge comes first, stored ones keep their award order.
  */
 export function buildMemberBadges(
-  membershipStartDate: string | null,
+  currentJoinedOn: string | null,
   stored: StoredBadgeRow[],
+  today: string,
 ): MemberBadge[] {
   const badges: MemberBadge[] = [];
 
-  const year = membershipStartDate ? Number(membershipStartDate.slice(0, 4)) : NaN;
-  if (Number.isInteger(year) && year > 0) {
-    badges.push({ key: "member_year", year, awardedAt: membershipStartDate as string });
+  const years = tenureYears(currentJoinedOn, today);
+  if (years !== null && years >= 1) {
+    badges.push({ key: "member_tenure", years, since: currentJoinedOn as string });
   }
 
   const sorted = [...stored].sort((a, b) => a.awarded_at.localeCompare(b.awarded_at));
@@ -44,9 +48,9 @@ export async function getMemberBadges(): Promise<MemberBadge[]> {
 
   const supabase = await createClient();
   const [{ data: member }, { data: rows }] = await Promise.all([
-    supabase.from("members").select("membership_start_date").eq("id", user.id).single(),
+    supabase.from("members").select("current_joined_on").eq("id", user.id).single(),
     supabase.from("member_badges").select("badge_key, awarded_at").eq("member_id", user.id),
   ]);
 
-  return buildMemberBadges(member?.membership_start_date ?? null, rows ?? []);
+  return buildMemberBadges(member?.current_joined_on ?? null, rows ?? [], madridToday());
 }

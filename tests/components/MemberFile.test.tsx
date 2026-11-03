@@ -100,7 +100,7 @@ const entry = (over: Partial<AdminActivityRow> = {}): AdminActivityRow => ({
 })
 
 const render_ = (member: AdminMemberFileRow, over: Partial<React.ComponentProps<typeof MemberFile>> = {}) =>
-  render(<MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" {...over} />)
+  render(<MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" {...over} />)
 
 describe('MemberFile, active member', () => {
   it('shows header, contact data, masked DNI and phone, badges and card', () => {
@@ -117,7 +117,7 @@ describe('MemberFile, active member', () => {
     expect(screen.getAllByLabelText('masked_label')).toHaveLength(2)
     expect(screen.getAllByRole('button', { name: /button_label/ })).toHaveLength(2)
 
-    expect(screen.getByText(/badge_member_year.*2026/)).toBeInTheDocument()
+    expect(screen.queryByText(/badge_member_tenure/)).not.toBeInTheDocument() // first year
     expect(screen.getByText('badge_volunteer_egara_joga')).toBeInTheDocument()
     expect(screen.getByText(/badge_awarded_by.*Pau Ferrer/)).toBeInTheDocument()
     expect(screen.getByText('chip_valid')).toBeInTheDocument()
@@ -141,7 +141,7 @@ describe('MemberFile, active member', () => {
   it('renders the export button only when the viewer may export', () => {
     const { rerender } = render_(active)
     expect(screen.getByRole('button', { name: 'button' })).toBeInTheDocument()
-    rerender(<MemberFile member={active} activity={[]} backHref="/admin/members" canExportData={false} canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" />)
+    rerender(<MemberFile member={active} activity={[]} backHref="/admin/members" canExportData={false} canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" />)
     expect(screen.queryByRole('button', { name: 'button' })).not.toBeInTheDocument()
   })
 
@@ -184,7 +184,7 @@ describe('MemberFile, former member', () => {
     expect(screen.getByText('former_footnote')).toBeInTheDocument()
     expect(screen.getByText('chip_invalid')).toBeInTheDocument()
     expect(screen.getByText('card_former')).toBeInTheDocument()
-    expect(screen.getByText(/badge_member_year.*2021/)).toBeInTheDocument()
+    expect(screen.getByText('badge_member_tenure:{"years":2}')).toBeInTheDocument()
   })
 
   it('does not render an e-mail field for an anonymised former member', () => {
@@ -219,7 +219,7 @@ describe('MemberFile, former member', () => {
     const { rerender } = render_(active)
     fireEvent.click(screen.getByRole('button', { name: 'open' }))
     expect(screen.getByRole('form', { name: 'form_label' })).toBeInTheDocument()
-    rerender(<MemberFile member={former} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" />)
+    rerender(<MemberFile member={former} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" />)
     expect(screen.queryByRole('form')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'open' })).not.toBeInTheDocument()
   })
@@ -242,7 +242,7 @@ describe('MemberFile, former member', () => {
 
 describe('MemberFile, outcome notices and state changes', () => {
   const again = (member: AdminMemberFileRow) => (
-    <MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" />
+    <MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" />
   )
 
   it('clears the "Dades desades" notice when the member becomes a former one', async () => {

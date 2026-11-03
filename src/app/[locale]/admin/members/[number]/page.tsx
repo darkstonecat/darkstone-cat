@@ -13,6 +13,7 @@ import {
   type AdminMemberFileRow,
 } from "@/lib/admin/member-file";
 import MemberFile from "@/components/admin/member-file/MemberFile";
+import { madridToday } from "@/lib/admin/leave-dates";
 
 // Personal data: never cached or prerendered.
 export const dynamic = "force-dynamic";
@@ -79,6 +80,7 @@ export default async function AdminMemberFilePage({
       canRevealFormerDni={isSuperadmin(actor.role)}
       canManageRoles={isSuperadmin(actor.role)}
       viewerId={actor.id}
+      today={madridToday()}
     />
   );
 }

@@ -376,8 +376,8 @@ describe('admin_award_badge() / admin_revoke_badge() (A-8)', () => {
     expect(await auditEntries(users.badges.id, 'badge.award')).toHaveLength(1)
   })
 
-  it('only badges of the catalogue can be awarded ("Membre {year}" is automatic)', async () => {
-    for (const key of ['made_up', 'member_2026', 'member_year', '']) {
+  it('only badges of the catalogue can be awarded (the tenure badge is automatic)', async () => {
+    for (const key of ['made_up', 'member_2026', 'member_year', 'member_tenure', '']) {
       const { error } = await award(board, users.badges.id, key)
       expect(error?.code, key).toBe('22023')
       expect(error?.message).toContain('admin:invalid_argument')

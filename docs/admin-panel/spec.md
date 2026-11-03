@@ -97,7 +97,7 @@ The membership state is a **mark on the member's own row**. There is no separate
 
 Previous leave and return cycles are not stored on the row. Each one is an entry in the audit log (`membership.leave` / `membership.rejoin`, §5), and the member file shows them from there (V-3). Nothing is lost, and the member stays a single row.
 
-The "Membre {year}" badge keeps using the **primera alta** (BR-6).
+The automatic "X anys amb Darkstone" badge counts full years from the **current alta**, so a return starts it from zero (BR-6). It replaced "Membre {year}" on 2026-11-03.
 
 Why not move former members to a separate table: the member row is tied to the login account, and the member number, badges and audit entries all point to it. Moving the row means either deleting the login account or keeping two tables with the same columns. Deleting the account means reinstatement must create a new account and password. Two tables have to be kept in sync. Neither is simpler than a date column.
 
@@ -245,7 +245,7 @@ Reading is recorded only when it exposes sensitive data: revealing DNI/phone and
 | BR-3 | Nobody can delete a member row by hand through the site. Personal data is removed on *baixa* (contact data), by anonymisation (S-3) and by the purge 3 years after the *baixa* (§4.5). |
 | BR-4 | A card is valid only while the membership is active. Returning issues a new token. |
 | BR-5 | Leaving switches newsletter consent off. |
-| BR-6 | "Membre {year}" badge uses the *primera alta*. |
+| BR-6 | The "X anys amb Darkstone" badge is derived, never stored: full years since the *current alta* (up to the leave date for a former member), earned on the first anniversary. |
 | BR-7 | Badges are kept while the register is blocked, and are there again on return. The purge deletes them. |
 | BR-8 | A *baixa* given by the board requires a written reason, and the member is notified by e-mail with that reason. This follows LO 1/2002 art. 21: a member must be informed of the facts and given a reasoned decision before disciplinary measures. |
 | BR-9 | Only a superadmin grants or revokes `board` and `superadmin`. |

@@ -68,23 +68,25 @@ describe('ProfileChecklist', () => {
 
 describe('BadgesSection', () => {
   const items: BadgeItem[] = [
-    { key: 'member_year', earned: true, year: 2024, sinceLabel: '2/3/2024' },
-    { key: 'volunteer_egara_joga', earned: false, year: null, sinceLabel: null },
-    { key: 'ludoteca_donor', earned: false, year: null, sinceLabel: null },
+    { key: 'member_tenure', earned: true, years: 2, sinceLabel: '2/3/2024' },
+    { key: 'volunteer_egara_joga', earned: false, years: null, sinceLabel: null },
+    { key: 'ludoteca_donor', earned: false, years: null, sinceLabel: null },
   ]
 
   it('counts earned badges and tells locked ones apart in text', () => {
     render(<BadgesSection items={items} />)
     expect(screen.getByText('badges_count(1,3)')).toBeInTheDocument()
-    expect(screen.getAllByText('badge_member_year(2024)').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('badge_member_year_earned(2/3/2024)').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('badge_member_tenure(2)').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('badge_member_tenure_earned(2/3/2024)').length).toBeGreaterThan(0)
     expect(screen.getAllByText('badge_locked')).toHaveLength(4) // 2 locked x (grid + carousel)
   })
 
   it('is empty-safe and renders locked badges when nothing is earned', () => {
-    render(<BadgesSection items={items.map((i) => ({ ...i, earned: false, year: null, sinceLabel: null }))} />)
+    render(<BadgesSection items={items.map((i) => ({ ...i, earned: false, years: null, sinceLabel: null }))} />)
     expect(screen.getByText('badges_count(0,3)')).toBeInTheDocument()
-    expect(screen.getAllByText('badge_member_year_no_year').length).toBeGreaterThan(0)
+    // Locked tenure: what the first anniversary brings, and how to get it.
+    expect(screen.getAllByText('badge_member_tenure(1)').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('badge_member_tenure_locked').length).toBeGreaterThan(0)
   })
 
   it('exposes an accessible carousel with one group per badge and 44px controls', () => {

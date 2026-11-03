@@ -23,6 +23,8 @@ vi.mock('@/lib/admin/member-actions', () => ({
 
 import BadgesCard from '@/components/admin/member-file/BadgesCard'
 
+const TODAY = '2026-11-03'
+
 const held = {
   badge_key: 'volunteer_egara_joga',
   awarded_at: '2026-10-05T09:00:00Z',
@@ -35,7 +37,8 @@ const active = {
   state: 'active' as const,
   first_name: 'Laia',
   last_name: 'Serra',
-  membership_start_date: '2026-09-14',
+  current_joined_on: '2024-09-14',
+  left_on: null,
   badges: [held],
 }
 
@@ -48,7 +51,7 @@ beforeEach(() => {
 describe('BadgesCard award (A-8)', () => {
   it('disables the badges the member already holds and awards a free one with the note', async () => {
     awardBadge.mockResolvedValue({ ok: true, awardedAt: null })
-    render(<BadgesCard member={active} />)
+    render(<BadgesCard member={active} today={TODAY} />)
     fireEvent.click(screen.getByRole('button', { name: 'award_button' }))
 
     const radios = screen.getAllByRole('radio')
@@ -72,7 +75,7 @@ describe('BadgesCard award (A-8)', () => {
 
   it('sends a null note when it is blank', async () => {
     awardBadge.mockResolvedValue({ ok: true, awardedAt: null })
-    render(<BadgesCard member={active} />)
+    render(<BadgesCard member={active} today={TODAY} />)
     fireEvent.click(screen.getByRole('button', { name: 'award_button' }))
     fireEvent.click(screen.getAllByRole('radio')[1])
     fireEvent.click(screen.getByRole('button', { name: 'award_confirm' }))
@@ -81,7 +84,7 @@ describe('BadgesCard award (A-8)', () => {
 
   it('disables the award button with a reason when every badge is held', () => {
     const all = [held, { ...held, badge_key: 'ludoteca_donor' }]
-    render(<BadgesCard member={{ ...active, badges: all }} />)
+    render(<BadgesCard member={{ ...active, badges: all }} today={TODAY} />)
     expect(screen.getByRole('button', { name: 'award_button' })).toBeDisabled()
     expect(screen.getByText('blocked_all')).toBeInTheDocument()
   })
@@ -93,7 +96,7 @@ describe('BadgesCard award (A-8)', () => {
     ['weird', 'failed'],
   ])('maps %s to a translated message and keeps the dialog open', async (code, text) => {
     awardBadge.mockResolvedValue({ error: code })
-    render(<BadgesCard member={active} />)
+    render(<BadgesCard member={active} today={TODAY} />)
     fireEvent.click(screen.getByRole('button', { name: 'award_button' }))
     fireEvent.click(screen.getAllByRole('radio')[1])
     fireEvent.click(screen.getByRole('button', { name: 'award_confirm' }))
@@ -103,11 +106,12 @@ describe('BadgesCard award (A-8)', () => {
 })
 
 describe('BadgesCard revoke (A-8)', () => {
-  it('revokes a held badge with an optional reason; "Membre" has no revoke button', async () => {
+  it('revokes a held badge with an optional reason; the tenure badge has no revoke button', async () => {
     revokeBadge.mockResolvedValue({ ok: true })
-    render(<BadgesCard member={active} />)
+    render(<BadgesCard member={active} today={TODAY} />)
     expect(screen.getAllByRole('button', { name: /revoke_aria/ })).toHaveLength(1)
-    expect(screen.getByText(/badge_member_year.*2026/)).toBeInTheDocument()
+    expect(screen.getByText('badge_member_tenure:{"years":2}')).toBeInTheDocument()
+    expect(screen.getByText('badge_automatic')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /revoke_aria/ }))
     fireEvent.change(screen.getByRole('textbox'), { target: { value: ' Error ' } })
@@ -119,7 +123,7 @@ describe('BadgesCard revoke (A-8)', () => {
 
   it('revokes without a reason as null', async () => {
     revokeBadge.mockResolvedValue({ ok: true })
-    render(<BadgesCard member={active} />)
+    render(<BadgesCard member={active} today={TODAY} />)
     fireEvent.click(screen.getByRole('button', { name: /revoke_aria/ }))
     fireEvent.click(screen.getByRole('button', { name: 'revoke_confirm' }))
     await waitFor(() => expect(revokeBadge).toHaveBeenCalledWith('id-1', 'volunteer_egara_joga', null))
@@ -128,10 +132,28 @@ describe('BadgesCard revoke (A-8)', () => {
 
 describe('BadgesCard, former member', () => {
   it('has the award button disabled with a reason and no revoke buttons', () => {
-    render(<BadgesCard member={{ ...active, state: 'former' }} />)
+    render(<BadgesCard member={{ ...active, state: 'former', left_on: '2026-10-04' }} today={TODAY} />)
     expect(screen.getByRole('button', { name: 'award_button' })).toBeDisabled()
     expect(screen.getByText('blocked_former')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /revoke_aria/ })).not.toBeInTheDocument()
     expect(screen.getByText('badges_kept')).toBeInTheDocument()
+  })
+})
+
+describe('BadgesCard, tenure badge', () => {
+  it('is not listed during the first year after the current sign-up', () => {
+    render(<BadgesCard member={{ ...active, current_joined_on: '2026-09-14', badges: [] }} today={TODAY} />)
+    expect(screen.queryByText(/badge_member_tenure/)).not.toBeInTheDocument()
+    expect(screen.getByText('badges_none')).toBeInTheDocument()
+  })
+
+  it('counts a former member\'s years up to the leave date, not up to today', () => {
+    render(
+      <BadgesCard
+        member={{ ...active, state: 'former', current_joined_on: '2023-10-10', left_on: '2026-10-04' }}
+        today={TODAY}
+      />
+    )
+    expect(screen.getByText('badge_member_tenure:{"years":2}')).toBeInTheDocument()
   })
 })

@@ -1,34 +1,42 @@
 import { describe, it, expect } from 'vitest'
 import { buildMemberBadges } from '@/lib/supabase/badges'
 
+const TODAY = '2026-11-03'
+
 describe('buildMemberBadges', () => {
-  it('derives "member_year" from membership_start_date', () => {
-    expect(buildMemberBadges('2023-05-14', [])).toEqual([
-      { key: 'member_year', year: 2023, awardedAt: '2023-05-14' },
+  it('derives "member_tenure" from the current sign-up once a full year has passed', () => {
+    expect(buildMemberBadges('2023-05-14', [], TODAY)).toEqual([
+      { key: 'member_tenure', years: 3, since: '2023-05-14' },
     ])
   })
 
-  it('omits the derived badge when there is no start date', () => {
-    expect(buildMemberBadges(null, [])).toEqual([])
-    expect(buildMemberBadges('garbage', [])).toEqual([])
+  it('omits the tenure badge during the first year', () => {
+    expect(buildMemberBadges('2026-09-14', [], TODAY)).toEqual([])
+    expect(buildMemberBadges('2025-11-04', [], TODAY)).toEqual([])
+  })
+
+  it('omits the tenure badge when there is no valid sign-up date', () => {
+    expect(buildMemberBadges(null, [], TODAY)).toEqual([])
+    expect(buildMemberBadges('garbage', [], TODAY)).toEqual([])
   })
 
   it('appends stored badges after the derived one, ordered by award date', () => {
     const badges = buildMemberBadges('2024-01-10', [
       { badge_key: 'ludoteca_donor', awarded_at: '2025-06-01T10:00:00Z' },
       { badge_key: 'volunteer_egara_joga', awarded_at: '2024-09-01T10:00:00Z' },
-    ])
+    ], TODAY)
     expect(badges.map((b) => b.key)).toEqual([
-      'member_year',
+      'member_tenure',
       'volunteer_egara_joga',
       'ludoteca_donor',
     ])
   })
 
-  it('ignores unknown stored keys', () => {
+  it('ignores unknown stored keys, including the retired "member_year"', () => {
     const badges = buildMemberBadges('2024-01-10', [
       { badge_key: 'made_up', awarded_at: '2025-01-01T00:00:00Z' },
-    ])
-    expect(badges.map((b) => b.key)).toEqual(['member_year'])
+      { badge_key: 'member_year', awarded_at: '2025-01-01T00:00:00Z' },
+    ], TODAY)
+    expect(badges.map((b) => b.key)).toEqual(['member_tenure'])
   })
 })

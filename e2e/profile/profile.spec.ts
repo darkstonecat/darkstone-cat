@@ -34,12 +34,14 @@ test.describe('Member home (/profile)', () => {
     await expect(card.getByRole('link', { name: 'Vincula BoardGameGeek' })).toHaveAttribute('href', /\/profile\/details/)
   })
 
-  test('shows the badges: the derived member badge is earned, the others are locked', async ({ memberPage: page }) => {
+  test('shows the badges: a new member sees the tenure badge locked until the first anniversary', async ({ memberPage: page }) => {
     await page.goto(PAGES.profile)
     const badges = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Les teves insígnies' }) })
     await expect(badges).toBeVisible()
-    const year = new Date().getFullYear()
-    await expect(badges.getByText(`Membre ${year}`).first()).toBeAttached()
+    // The E2E member signs up on every run, so it is always in its first year.
+    await expect(badges.getByText('1 any amb Darkstone').first()).toBeAttached()
+    await expect(badges.getByText('Es desbloqueja quan facis el teu primer any.').first()).toBeAttached()
+    await expect(badges.getByText('0 de 3', { exact: false }).first()).toBeAttached()
     await expect(badges.getByText('Voluntariat Egara Juga').first()).toBeAttached()
     await expect(badges.getByText('Donant de la ludoteca').first()).toBeAttached()
   })

@@ -4,7 +4,6 @@ import {
   formatAdminTimestamp,
   isValidMemberNumber,
   listParamFor,
-  yearOf,
 } from '@/lib/admin/member-file'
 import { DEFAULT_MEMBERS_QUERY } from '@/lib/admin/members-list'
 
@@ -49,10 +48,5 @@ describe('display helpers', () => {
     expect(formatAdminTimestamp('2026-10-05T23:30:00Z')).toBe('6/10/2026')
     expect(formatAdminTimestamp(null)).toBeNull()
     expect(formatAdminTimestamp('not a date')).toBeNull()
-  })
-
-  it('reads the year of a date', () => {
-    expect(yearOf('2021-03-12')).toBe(2021)
-    expect(yearOf(null)).toBeNull()
   })
 })

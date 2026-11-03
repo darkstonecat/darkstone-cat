@@ -56,28 +56,29 @@ describe('buildProfileChecklist', () => {
 })
 
 describe('buildBadgeItems', () => {
-  it('lists the whole catalogue with unearned badges locked', () => {
-    const items = buildBadgeItems([{ key: 'member_year', year: 2024, awardedAt: '2024-03-02' }], 'ca')
+  it('lists the whole catalogue with unearned badges locked, tenure first', () => {
+    const items = buildBadgeItems([{ key: 'member_tenure', years: 2, since: '2024-03-02' }], 'ca')
     expect(items.map((i) => [i.key, i.earned])).toEqual([
-      ['member_year', true],
+      ['member_tenure', true],
       ['volunteer_egara_joga', false],
       ['ludoteca_donor', false],
     ])
-    expect(items[0]).toMatchObject({ year: 2024, sinceLabel: '2/3/2024' })
+    expect(items[0]).toMatchObject({ years: 2, sinceLabel: '2/3/2024' })
   })
 
   it('marks stored badges as earned', () => {
     const items = buildBadgeItems([
-      { key: 'member_year', year: 2024, awardedAt: '2024-03-02' },
+      { key: 'member_tenure', years: 2, since: '2024-03-02' },
       { key: 'ludoteca_donor', awardedAt: '2025-01-01T00:00:00Z' },
     ], 'ca')
     expect(items.find((i) => i.key === 'ludoteca_donor')?.earned).toBe(true)
     expect(items.find((i) => i.key === 'volunteer_egara_joga')?.earned).toBe(false)
   })
 
-  it('is empty-safe: no badges means everything locked', () => {
+  it('is empty-safe: no badges means everything locked, tenure included', () => {
     const items = buildBadgeItems([], 'ca')
     expect(items).toHaveLength(3)
-    expect(items.every((i) => !i.earned && i.year === null)).toBe(true)
+    expect(items[0].key).toBe('member_tenure')
+    expect(items.every((i) => !i.earned && i.years === null && i.sinceLabel === null)).toBe(true)
   })
 })

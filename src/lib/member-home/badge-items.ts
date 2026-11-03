@@ -6,13 +6,13 @@ export type BadgeKey = MemberBadge["key"];
 export type BadgeItem = {
   key: BadgeKey;
   earned: boolean;
-  /** Only for `member_year`: the year (title) and the start date, already formatted (description). */
-  year: number | null;
+  /** Only for an earned `member_tenure`: full years (title) and the current sign-up date, already formatted (description). */
+  years: number | null;
   sinceLabel: string | null;
 };
 
 /** Every badge the association can grant, in display order. */
-export const BADGE_ORDER: readonly BadgeKey[] = ["member_year", "volunteer_egara_joga", "ludoteca_donor"];
+export const BADGE_ORDER: readonly BadgeKey[] = ["member_tenure", "volunteer_egara_joga", "ludoteca_donor"];
 
 /**
  * Full catalogue with earned badges first-class and the rest shown locked, so members see what they can get.
@@ -22,11 +22,12 @@ export function buildBadgeItems(badges: MemberBadge[], locale: string): BadgeIte
   const earned = new Map(badges.map((b) => [b.key, b] as const));
   return BADGE_ORDER.map((key) => {
     const badge = earned.get(key);
+    const tenure = badge?.key === "member_tenure" ? badge : null;
     return {
       key,
       earned: Boolean(badge),
-      year: badge?.key === "member_year" ? badge.year : null,
-      sinceLabel: badge?.key === "member_year" ? formatCalendarDate(badge.awardedAt, locale) : null,
+      years: tenure ? tenure.years : null,
+      sinceLabel: tenure ? formatCalendarDate(tenure.since, locale) : null,
     };
   });
 }
