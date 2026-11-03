@@ -41,7 +41,8 @@ test.describe('Member home (/profile)', () => {
     // The E2E member signs up on every run, so it is always in its first year.
     await expect(badges.getByText('1 any amb Darkstone').first()).toBeAttached()
     await expect(badges.getByText('Es desbloqueja quan facis el teu primer any.').first()).toBeAttached()
-    await expect(badges.getByText('0 de 3', { exact: false }).first()).toBeAttached()
+    // Nothing earned yet. The total is not pinned: e2e/admin/badges.spec.ts may add a catalogue badge in parallel.
+    await expect(badges.getByText(/^0 de \d+$/).first()).toBeAttached()
     await expect(badges.getByText('Voluntariat Egara Juga').first()).toBeAttached()
     await expect(badges.getByText('Donant de la ludoteca').first()).toBeAttached()
   })

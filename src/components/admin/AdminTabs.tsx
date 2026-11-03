@@ -4,15 +4,16 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
-export type AdminTabKey = "overview" | "members" | "activity" | "procedures" | "tools" | "roles";
+export type AdminTabKey = "overview" | "members" | "activity" | "badges" | "procedures" | "tools" | "roles";
 
 type AdminTab = { key: AdminTabKey; href: string; superadminOnly?: boolean };
 
-/** Order as in the mockups (README §4): Resum, Socis, Activitat, Procediments, Eines, Rols. */
+/** Order as in the mockups (README §4, badge catalogue S7.1): Resum, Socis, Activitat, Insígnies, Procediments, Eines, Rols. */
 export const ADMIN_TABS: readonly AdminTab[] = [
   { key: "overview", href: "/admin" },
   { key: "members", href: "/admin/members" },
   { key: "activity", href: "/admin/activity" },
+  { key: "badges", href: "/admin/badges" },
   { key: "procedures", href: "/admin/procedures" },
   { key: "tools", href: "/admin/tools" },
   { key: "roles", href: "/admin/roles", superadminOnly: true },
@@ -31,8 +32,8 @@ export function activeAdminTab(pathname: string): AdminTabKey | null {
 }
 
 /**
- * Pill tabs of the admin panel. Board members see five, superadmins six (Rols).
- * Desktop: one equal-width row; mobile: three columns, two rows (README §5).
+ * Pill tabs of the admin panel. Board members see six, superadmins seven (Rols).
+ * Desktop: one equal-width row (seven tabs from `lg`); narrower: three columns (README §5).
  */
 export default function AdminTabs({ isSuperadmin }: { isSuperadmin: boolean }) {
   const t = useTranslations("admin");
@@ -45,7 +46,7 @@ export default function AdminTabs({ isSuperadmin }: { isSuperadmin: boolean }) {
       <ul
         className={cn(
           "grid w-full grid-cols-3 gap-2",
-          isSuperadmin ? "md:w-[780px] md:grid-cols-6" : "md:w-[650px] md:grid-cols-5",
+          isSuperadmin ? "lg:w-[910px] lg:grid-cols-7" : "md:w-[780px] md:max-w-full md:grid-cols-6",
         )}
       >
         {tabs.map((tab) => {

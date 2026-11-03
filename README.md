@@ -68,6 +68,8 @@
 | `/admin/members` | Member list: search, state/role filters, sort, pagination; exports (CSV, e-mail lists, register) |
 | `/admin/members/[number]` | Member file: edit, reveal DNI/phone (audited), leave/rejoin, badges, card, access link, data export, role, anonymise |
 | `/admin/activity` | Audit log with filters |
+| `/admin/badges` | Badge catalogue: create, archive, restore, delete (superadmin, never awarded) |
+| `/admin/badges/[key]` | One badge: texts per language, icon, visibility, order, preview, holders, bulk award |
 | `/admin/procedures` | Written procedures (P-1 … P-7) |
 | `/admin/tools` | Cache refresh status and manual refresh, link to the event image tool |
 | `/admin/tools/event-images` | Event image generator (`/events/images` redirects here with a 308) |

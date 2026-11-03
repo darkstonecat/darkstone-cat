@@ -20,24 +20,32 @@ describe('AdminTabs', () => {
     nav.pathname = '/admin'
   })
 
-  it('shows five tabs to a board member, in the mockup order, without Rols', () => {
+  it('shows six tabs to a board member, in the mockup order (Insígnies after Activitat), without Rols', () => {
     render(<AdminTabs isSuperadmin={false} />)
     const links = within(screen.getByRole('navigation', { name: 'tabs_label' })).getAllByRole('link')
     expect(links.map((l) => l.getAttribute('href'))).toEqual([
       '/admin',
       '/admin/members',
       '/admin/activity',
+      '/admin/badges',
       '/admin/procedures',
       '/admin/tools',
     ])
+    expect(links[3]).toHaveTextContent('tab_badges')
   })
 
-  it('adds Rols for a superadmin (six tabs)', () => {
+  it('adds Rols for a superadmin (seven tabs)', () => {
     render(<AdminTabs isSuperadmin />)
     const links = screen.getAllByRole('link')
-    expect(links).toHaveLength(6)
-    expect(links[5]).toHaveAttribute('href', '/admin/roles')
-    expect(links[5]).toHaveTextContent('tab_roles')
+    expect(links).toHaveLength(7)
+    expect(links[6]).toHaveAttribute('href', '/admin/roles')
+    expect(links[6]).toHaveTextContent('tab_roles')
+  })
+
+  it('keeps Insígnies active on a badge page (nested path)', () => {
+    nav.pathname = '/admin/badges/ludoteca_donor'
+    render(<AdminTabs isSuperadmin={false} />)
+    expect(screen.getByRole('link', { name: 'tab_badges' })).toHaveAttribute('aria-current', 'page')
   })
 
   it('marks only the current tab with aria-current', () => {
