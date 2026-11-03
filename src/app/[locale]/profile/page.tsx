@@ -2,7 +2,7 @@ import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { getProfileData } from "@/lib/supabase/auth";
-import { getMemberBadges } from "@/lib/supabase/badges";
+import { getBadgeCatalogue, getMemberBadges } from "@/lib/supabase/badges";
 import { buildProfileChecklist } from "@/lib/profile/completion";
 import { buildBadgeItems } from "@/lib/member-home/badge-items";
 import NavBar from "@/components/NavBar";
@@ -52,7 +52,7 @@ export default async function ProfilePage({
   // Auth protection is handled by middleware (PROTECTED_ROUTES).
   // Do NOT redirect to /login here — it creates a loop when the middleware
   // and server component disagree about session state (cookie propagation race).
-  const [profile, badges] = await Promise.all([getProfileData(), getMemberBadges()]);
+  const [profile, badges, catalogue] = await Promise.all([getProfileData(), getMemberBadges(), getBadgeCatalogue()]);
   const member = profile?.member ?? null;
 
   const tNav = await getTranslations({ locale, namespace: "nav" });
@@ -90,7 +90,7 @@ export default async function ProfilePage({
               <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
                 {checklistVisible && <ProfileChecklist steps={checklist} />}
                 <BadgesSection
-                  items={buildBadgeItems(badges, locale)}
+                  items={buildBadgeItems(badges, catalogue, locale)}
                   className={checklistVisible ? "md:col-span-2" : "md:col-span-3"}
                 />
               </div>

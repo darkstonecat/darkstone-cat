@@ -4,6 +4,7 @@ import { render, screen, within, fireEvent, waitFor } from '@testing-library/rea
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, values?: Record<string, unknown>) =>
     values ? `${key}:${JSON.stringify(values)}` : key,
+  useLocale: () => 'ca',
 }))
 vi.mock('@/lib/admin/membership-actions', () => ({ leaveMember: vi.fn(), rejoinMember: vi.fn() }))
 vi.mock('@/lib/admin/member-actions', () => ({
@@ -61,6 +62,9 @@ const active: AdminMemberFileRow = {
       awarded_at: '2026-10-05T09:00:00Z',
       awarded_by: 'b1',
       awarded_by_name: 'Pau Ferrer',
+      name: { ca: 'Voluntariat Egara Juga' },
+      icon: 'how_to_reg',
+      archived: false,
     },
   ],
 }
@@ -100,7 +104,7 @@ const entry = (over: Partial<AdminActivityRow> = {}): AdminActivityRow => ({
 })
 
 const render_ = (member: AdminMemberFileRow, over: Partial<React.ComponentProps<typeof MemberFile>> = {}) =>
-  render(<MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" {...over} />)
+  render(<MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" badgeCatalogue={[]} {...over} />)
 
 describe('MemberFile, active member', () => {
   it('shows header, contact data, masked DNI and phone, badges and card', () => {
@@ -118,7 +122,7 @@ describe('MemberFile, active member', () => {
     expect(screen.getAllByRole('button', { name: /button_label/ })).toHaveLength(2)
 
     expect(screen.queryByText(/badge_member_tenure/)).not.toBeInTheDocument() // first year
-    expect(screen.getByText('badge_volunteer_egara_joga')).toBeInTheDocument()
+    expect(screen.getByText('Voluntariat Egara Juga')).toBeInTheDocument()
     expect(screen.getByText(/badge_awarded_by.*Pau Ferrer/)).toBeInTheDocument()
     expect(screen.getByText('chip_valid')).toBeInTheDocument()
     expect(screen.getByText('card_issued:{"date":"14/9/2026"}')).toBeInTheDocument()
@@ -141,7 +145,7 @@ describe('MemberFile, active member', () => {
   it('renders the export button only when the viewer may export', () => {
     const { rerender } = render_(active)
     expect(screen.getByRole('button', { name: 'button' })).toBeInTheDocument()
-    rerender(<MemberFile member={active} activity={[]} backHref="/admin/members" canExportData={false} canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" />)
+    rerender(<MemberFile member={active} activity={[]} backHref="/admin/members" canExportData={false} canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" badgeCatalogue={[]} />)
     expect(screen.queryByRole('button', { name: 'button' })).not.toBeInTheDocument()
   })
 
@@ -219,7 +223,7 @@ describe('MemberFile, former member', () => {
     const { rerender } = render_(active)
     fireEvent.click(screen.getByRole('button', { name: 'open' }))
     expect(screen.getByRole('form', { name: 'form_label' })).toBeInTheDocument()
-    rerender(<MemberFile member={former} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" />)
+    rerender(<MemberFile member={former} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" badgeCatalogue={[]} />)
     expect(screen.queryByRole('form')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'open' })).not.toBeInTheDocument()
   })
@@ -242,7 +246,7 @@ describe('MemberFile, former member', () => {
 
 describe('MemberFile, outcome notices and state changes', () => {
   const again = (member: AdminMemberFileRow) => (
-    <MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" />
+    <MemberFile member={member} activity={[]} backHref="/admin/members" canExportData canRevealFormerDni={false} canManageRoles={false} viewerId="viewer" today="2026-11-03" badgeCatalogue={[]} />
   )
 
   it('clears the "Dades desades" notice when the member becomes a former one', async () => {

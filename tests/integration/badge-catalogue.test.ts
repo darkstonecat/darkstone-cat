@@ -7,6 +7,7 @@ import {
   cleanupUsers,
   runSqlAsPostgres,
 } from '../helpers/supabase'
+import { BADGE_ICON_KEYS } from '@/lib/badges/catalogue'
 
 // Migration 20261103100000_badge_catalogue.sql: the badge catalogue (public.badges), the board
 // functions that manage it, archiving ("Desaparecen para todos"), bulk award and the audit
@@ -47,10 +48,6 @@ const keyFor = (name: string) => {
 }
 
 const texts = (ca: string, extra: Record<string, string> = {}) => ({ ca, ...extra })
-const ICON_KEYS = [
-  'star', 'how_to_reg', 'gift', 'dice', 'puzzle', 'trophy', 'volunteer', 'groups',
-  'school', 'celebration', 'book', 'medal', 'heart', 'handshake', 'brush', 'megaphone',
-]
 
 function create(
   client: SupabaseClient,
@@ -166,10 +163,10 @@ describe('public.badges (S1)', () => {
     ])
   })
 
-  it('pins the closed icon list', async () => {
+  it('pins the closed icon list to the app mirror (src/lib/badges/catalogue.ts)', async () => {
     const { data, error } = await runSqlAsPostgres<{ keys: string[] }>('SELECT public.badge_icon_keys() AS keys')
     expect(error).toBeNull()
-    expect(data![0].keys).toEqual(ICON_KEYS)
+    expect(data![0].keys).toEqual([...BADGE_ICON_KEYS])
   })
 
   it('members read the catalogue, anonymous visitors read nothing, nobody writes through the API', async () => {

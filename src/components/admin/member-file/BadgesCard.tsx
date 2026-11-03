@@ -1,11 +1,12 @@
 "use client";
 
 import { useId, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { MdAdd } from "react-icons/md";
 import { useRouter } from "@/i18n/routing";
 import { awardBadge, revokeBadge } from "@/lib/admin/member-actions";
-import { KNOWN_BADGE_KEYS, formatAdminTimestamp, type AdminMemberFileRow } from "@/lib/admin/member-file";
+import { formatAdminTimestamp, type AdminMemberFileRow } from "@/lib/admin/member-file";
+import { localize, type CatalogueBadge } from "@/lib/badges/catalogue";
 import { tenureYears } from "@/lib/member-tenure";
 import AdminDialog from "../AdminDialog";
 import Notice from "../Notice";
@@ -23,6 +24,8 @@ type BadgesCardProps = {
   >;
   /** Madrid calendar day (`YYYY-MM-DD`) the tenure badge is counted up to; computed by the server page. */
   today: string;
+  /** The non-archived catalogue: what the award dialog offers. */
+  catalogue: CatalogueBadge[];
 };
 
 /**
@@ -30,11 +33,12 @@ type BadgesCardProps = {
  * current sign-up, up to the leave date for a former member: never awarded or revoked. Awarding and revoking are for active members only (the database refuses a former one).
  * The outcome notice lives here so it survives the `router.refresh()` after each change.
  */
-export default function BadgesCard({ member, today }: BadgesCardProps) {
+export default function BadgesCard({ member, today, catalogue }: BadgesCardProps) {
   const t = useTranslations("admin.member_file");
   const tb = useTranslations("admin.member_file.badge_actions");
   const tErr = useTranslations("admin.member_file.errors");
   const router = useRouter();
+  const locale = useLocale();
   const former = member.state === "former";
   const badges = member.badges ?? [];
   const years = tenureYears(member.current_joined_on, former && member.left_on ? member.left_on : today);
@@ -42,7 +46,7 @@ export default function BadgesCard({ member, today }: BadgesCardProps) {
   const name = `${member.first_name} ${member.last_name}`.trim();
   const target = t("membership.target", { number: member.member_number, name });
   const held = new Map(badges.map((badge) => [badge.badge_key, badge]));
-  const allHeld = KNOWN_BADGE_KEYS.every((key) => held.has(key));
+  const allHeld = catalogue.every((badge) => held.has(badge.key));
 
   const [outcome, setOutcome] = useState<"awarded" | "revoked" | null>(null);
   const [awardOpen, setAwardOpen] = useState(false);
@@ -55,8 +59,10 @@ export default function BadgesCard({ member, today }: BadgesCardProps) {
   const noteId = useId();
   const reasonId = useId();
 
+  // The member file carries each held badge's name; the catalogue names the ones on offer.
+  const catalogueByKey = new Map(catalogue.map((badge) => [badge.key, badge]));
   const badgeName = (key: string) =>
-    (KNOWN_BADGE_KEYS as readonly string[]).includes(key) ? t(`badge_${key}`) : key;
+    localize(held.get(key)?.name, locale) || localize(catalogueByKey.get(key)?.name, locale) || key;
 
   function closeAward() {
     if (busy) return;
@@ -144,8 +150,15 @@ export default function BadgesCard({ member, today }: BadgesCardProps) {
           const date = formatAdminTimestamp(badge.awarded_at);
           return (
             <li key={badge.badge_key} className={`${ROW} sm:flex-row sm:items-center sm:justify-between sm:gap-4`}>
-              <div className="flex flex-col gap-0.5">
-                <span className="font-semibold text-stone-custom">{badgeName(badge.badge_key)}</span>
+              <div className={badge.archived ? "flex flex-col gap-0.5 opacity-60" : "flex flex-col gap-0.5"}>
+                <span className="flex flex-wrap items-center gap-2 font-semibold text-stone-custom">
+                  {badgeName(badge.badge_key)}
+                  {badge.archived && (
+                    <span className="rounded-full bg-stone-custom/10 px-2.5 py-0.5 text-xs font-bold text-stone-custom/75">
+                      {t("badge_archived")}
+                    </span>
+                  )}
+                </span>
                 <span className="text-[13px] text-stone-custom/65">
                   {date && badge.awarded_by_name
                     ? t("badge_awarded_by", { date, name: badge.awarded_by_name })
@@ -154,7 +167,7 @@ export default function BadgesCard({ member, today }: BadgesCardProps) {
                       : null}
                 </span>
               </div>
-              {!former && (
+              {!former && !badge.archived && (
                 <button
                   type="button"
                   onClick={() => {
@@ -204,7 +217,7 @@ export default function BadgesCard({ member, today }: BadgesCardProps) {
           <legend className="mb-2 text-sm font-semibold text-stone-custom">
             {tb("award_label")} <span aria-hidden="true" className="text-brand-red">*</span>
           </legend>
-          {KNOWN_BADGE_KEYS.map((key) => {
+          {catalogue.map(({ key, earnedText }) => {
             const existing = held.get(key);
             const since = existing ? formatAdminTimestamp(existing.awarded_at) : null;
             return (
@@ -222,9 +235,9 @@ export default function BadgesCard({ member, today }: BadgesCardProps) {
                   className="mt-0.5 size-4 accent-stone-custom"
                 />
                 <span className="flex flex-col">
-                  <span className="font-semibold">{t(`badge_${key}`)}</span>
+                  <span className="font-semibold">{badgeName(key)}</span>
                   <span className="text-[13px] text-stone-custom/65">
-                    {existing ? (since ? tb("held_since", { date: since }) : tb("held")) : tb(`caption_${key}`)}
+                    {existing ? (since ? tb("held_since", { date: since }) : tb("held")) : localize(earnedText, locale)}
                   </span>
                 </span>
               </label>

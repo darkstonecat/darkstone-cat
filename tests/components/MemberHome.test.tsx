@@ -68,10 +68,12 @@ describe('ProfileChecklist', () => {
 
 describe('BadgesSection', () => {
   const items: BadgeItem[] = [
-    { key: 'member_tenure', earned: true, years: 2, sinceLabel: '2/3/2024' },
-    { key: 'volunteer_egara_joga', earned: false, years: null, sinceLabel: null },
-    { key: 'ludoteca_donor', earned: false, years: null, sinceLabel: null },
+    { kind: 'tenure', key: 'member_tenure', icon: 'star', earned: true, years: 2, sinceLabel: '2/3/2024' },
+    { kind: 'catalogue', key: 'volunteer_egara_joga', icon: 'how_to_reg', earned: false, title: 'Voluntariat Egara Juga', description: 'Col·labora a la fira.' },
+    { kind: 'catalogue', key: 'ludoteca_donor', icon: 'gift', earned: false, title: 'Donant de la ludoteca', description: 'Dona un joc.' },
   ]
+  const lockAll = (list: BadgeItem[]): BadgeItem[] =>
+    list.map((i) => (i.kind === 'tenure' ? { ...i, earned: false, years: null, sinceLabel: null } : { ...i, earned: false }))
 
   it('counts earned badges and tells locked ones apart in text', () => {
     render(<BadgesSection items={items} />)
@@ -79,10 +81,13 @@ describe('BadgesSection', () => {
     expect(screen.getAllByText('badge_member_tenure(2)').length).toBeGreaterThan(0)
     expect(screen.getAllByText('badge_member_tenure_earned(2/3/2024)').length).toBeGreaterThan(0)
     expect(screen.getAllByText('badge_locked')).toHaveLength(4) // 2 locked x (grid + carousel)
+    // Catalogue badges show the texts the server resolved, as they come.
+    expect(screen.getAllByText('Donant de la ludoteca')).toHaveLength(2)
+    expect(screen.getAllByText('Dona un joc.')).toHaveLength(2)
   })
 
   it('is empty-safe and renders locked badges when nothing is earned', () => {
-    render(<BadgesSection items={items.map((i) => ({ ...i, earned: false, years: null, sinceLabel: null }))} />)
+    render(<BadgesSection items={lockAll(items)} />)
     expect(screen.getByText('badges_count(0,3)')).toBeInTheDocument()
     // Locked tenure: what the first anniversary brings, and how to get it.
     expect(screen.getAllByText('badge_member_tenure(1)').length).toBeGreaterThan(0)

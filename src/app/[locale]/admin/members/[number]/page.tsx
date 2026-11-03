@@ -14,6 +14,7 @@ import {
 } from "@/lib/admin/member-file";
 import MemberFile from "@/components/admin/member-file/MemberFile";
 import { madridToday } from "@/lib/admin/leave-dates";
+import { CATALOGUE_COLUMNS, toCatalogue } from "@/lib/badges/catalogue";
 
 // Personal data: never cached or prerendered.
 export const dynamic = "force-dynamic";
@@ -68,6 +69,16 @@ export default async function AdminMemberFilePage({
   }
   const activity = (activityError ? [] : (activityData ?? [])) as AdminActivityRow[];
 
+  // The award dialog offers the non-archived catalogue (RLS hides archived badges anyway).
+  const { data: catalogueRows, error: catalogueError } = await supabase
+    .from("badges")
+    .select(CATALOGUE_COLUMNS)
+    .is("archived_at", null);
+  if (catalogueError) {
+    console.error("[admin/member] badge catalogue failed code=%s", catalogueError.code ?? "unknown");
+  }
+  const badgeCatalogue = toCatalogue(catalogueError ? [] : catalogueRows);
+
   // D-D (provisional): a board member may export an active member's data, a former member's only a superadmin.
   const canExportData = member.state === "active" || isSuperadmin(actor.role);
 
@@ -81,6 +92,7 @@ export default async function AdminMemberFilePage({
       canManageRoles={isSuperadmin(actor.role)}
       viewerId={actor.id}
       today={madridToday()}
+      badgeCatalogue={badgeCatalogue}
     />
   );
 }

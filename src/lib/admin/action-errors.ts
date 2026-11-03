@@ -26,6 +26,7 @@ export type AdminActionError =
   | "no_value"
   | "badge_held"
   | "badge_not_held"
+  | "badge_archived"
   | "invalid_badge"
   // Leave and rejoin (A-6, A-7, M-1).
   | "self_target"
@@ -71,6 +72,7 @@ const PREFIXED_CODES: Record<string, AdminActionError> = {
   "admin:reason_too_long": "reason_too_long",
   "admin:badge_held": "badge_held",
   "admin:badge_not_held": "badge_not_held",
+  "admin:badge_archived": "badge_archived",
   // The BR-15 detector refusing the audit details: the only free text an A-4..A-9 action puts
   // there is a name (member.update before/after), e.g. a name shaped like a phone.
   "audit:sensitive_details": "invalid_name",

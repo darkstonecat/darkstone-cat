@@ -19,15 +19,39 @@ import AdminMemberFilePage from '@/app/[locale]/admin/members/[number]/page'
 
 const member = (over: Record<string, unknown> = {}) => ({ id: 'uuid-1', member_number: '000-203', state: 'active', ...over })
 
-function session(opts: { member?: unknown[]; memberError?: { code: string }; activity?: unknown[] }) {
+const CATALOGUE_ROW = {
+  key: 'ludoteca_donor',
+  name: { ca: 'Donant de la ludoteca' },
+  earned_text: { ca: 'Ha donat un joc.' },
+  locked_text: { ca: 'Dona un joc.' },
+  icon: 'gift',
+  sort_order: 20,
+  show_locked: true,
+}
+
+/** `from('badges').select(...).is('archived_at', null)` → the given answer. */
+function badgesTable(answer: { data: unknown[] | null; error: { code: string } | null }) {
+  const is = vi.fn(() => Promise.resolve(answer))
+  const select = vi.fn(() => ({ is }))
+  const from = vi.fn(() => ({ select }))
+  return { from, select, is }
+}
+
+function session(opts: {
+  member?: unknown[]
+  memberError?: { code: string }
+  activity?: unknown[]
+  catalogue?: { data: unknown[] | null; error: { code: string } | null }
+}) {
   const rpc = vi.fn((name: string) => {
     if (name === 'admin_get_member') {
       return Promise.resolve({ data: opts.member ?? [], error: opts.memberError ?? null })
     }
     return Promise.resolve({ data: opts.activity ?? [], error: null })
   })
-  mocks.createClient.mockResolvedValue({ rpc })
-  return rpc
+  const table = badgesTable(opts.catalogue ?? { data: [CATALOGUE_ROW], error: null })
+  mocks.createClient.mockResolvedValue({ rpc, from: table.from })
+  return Object.assign(rpc, { table })
 }
 
 const render = (number: string, search: Record<string, string> = {}) =>
@@ -124,9 +148,27 @@ describe('admin member file page', () => {
           : { data: null, error: { code: 'XX000' } }
       )
     )
-    mocks.createClient.mockResolvedValue({ rpc })
+    mocks.createClient.mockResolvedValue({ rpc, from: badgesTable({ data: [], error: null }).from })
     vi.spyOn(console, 'error').mockImplementation(() => {})
     const element: any = await render('000-203')
     expect(element.props.activity).toEqual([])
+  })
+
+  it('passes the non-archived badge catalogue, read with the session client', async () => {
+    const rpc = session({ member: [member()] })
+    const element: any = await render('000-203')
+    expect(rpc.table.from).toHaveBeenCalledWith('badges')
+    expect(rpc.table.is).toHaveBeenCalledWith('archived_at', null)
+    expect(element.props.badgeCatalogue).toEqual([
+      expect.objectContaining({ key: 'ludoteca_donor', icon: 'gift', name: { ca: 'Donant de la ludoteca' } }),
+    ])
+  })
+
+  it('still renders with an empty catalogue when the badge query fails', async () => {
+    session({ member: [member()], catalogue: { data: null, error: { code: 'XX000' } } })
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const element: any = await render('000-203')
+    expect(element.props.badgeCatalogue).toEqual([])
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('badge catalogue failed'), 'XX000')
   })
 })

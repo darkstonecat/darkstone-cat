@@ -32,11 +32,10 @@ describe('buildMemberBadges', () => {
     ])
   })
 
-  it('ignores unknown stored keys, including the retired "member_year"', () => {
+  it('keeps every stored key: the catalogue decides later what is shown', () => {
     const badges = buildMemberBadges('2024-01-10', [
-      { badge_key: 'made_up', awarded_at: '2025-01-01T00:00:00Z' },
-      { badge_key: 'member_year', awarded_at: '2025-01-01T00:00:00Z' },
+      { badge_key: 'brand_new', awarded_at: '2025-01-01T00:00:00Z' },
     ], TODAY)
-    expect(badges.map((b) => b.key)).toEqual(['member_tenure'])
+    expect(badges.map((b) => b.key)).toEqual(['member_tenure', 'brand_new'])
   })
 })

@@ -2,31 +2,19 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import {
-  MdChevronLeft,
-  MdChevronRight,
-  MdOutlineCardGiftcard,
-  MdOutlineHowToReg,
-  MdOutlineStarBorder,
-} from "react-icons/md";
-import type { IconType } from "react-icons";
-import type { BadgeItem, BadgeKey } from "@/lib/member-home/badge-items";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import type { BadgeItem } from "@/lib/member-home/badge-items";
+import { BADGE_ICONS } from "@/components/badges/badgeIcons";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { cn } from "@/lib/utils";
 
 /** Longest a smooth scroll between slides is expected to take before scroll syncing resumes. */
 const SCROLL_SETTLE_MS = 900;
 
-const ICONS: Record<BadgeKey, IconType> = {
-  member_tenure: MdOutlineStarBorder,
-  volunteer_egara_joga: MdOutlineHowToReg,
-  ludoteca_donor: MdOutlineCardGiftcard,
-};
-
 function useBadgeText() {
   const t = useTranslations("profile.home");
   return (item: BadgeItem) => {
-    if (item.key === "member_tenure") {
+    if (item.kind === "tenure") {
       // Locked: the first anniversary is what it brings.
       const title = t("badge_member_tenure", { years: item.earned && item.years ? item.years : 1 });
       const description =
@@ -35,15 +23,12 @@ function useBadgeText() {
           : t("badge_member_tenure_locked");
       return { title, description };
     }
-    return {
-      title: t(`badge_${item.key}`),
-      description: t(`badge_${item.key}_${item.earned ? "earned" : "locked"}`),
-    };
+    return { title: item.title, description: item.description };
   };
 }
 
 function BadgeCircle({ item, className }: { item: BadgeItem; className?: string }) {
-  const Icon = ICONS[item.key];
+  const Icon = BADGE_ICONS[item.icon];
   return (
     <span
       aria-hidden="true"

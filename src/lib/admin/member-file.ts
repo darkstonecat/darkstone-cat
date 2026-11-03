@@ -18,6 +18,10 @@ export type MemberBadgeEntry = {
   awarded_at: string | null;
   awarded_by: string | null;
   awarded_by_name: string | null;
+  /** From the catalogue (`admin_get_member` v2): `{ca, es?, en?}`, the icon key and whether it is archived. */
+  name?: unknown;
+  icon?: string | null;
+  archived?: boolean;
 };
 
 /**
@@ -83,9 +87,6 @@ export function backToListHref(raw: string | string[] | undefined): string {
   }
   return buildMembersHref(parseMembersParams(params));
 }
-
-/** Badge keys the member file can name; others fall back to the raw key. */
-export const KNOWN_BADGE_KEYS = ["volunteer_egara_joga", "ludoteca_donor"] as const;
 
 /** "2026-10-05T07:15:00+00:00" → "5/10/2026" in Madrid time (the mockup's d/m/yyyy). */
 export function formatAdminTimestamp(iso: string | null | undefined): string | null {

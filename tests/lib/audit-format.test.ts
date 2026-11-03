@@ -221,6 +221,18 @@ describe('describeAuditEntry', () => {
     }
   )
 
+  it('prefers the badge name stored in the entry over the key (catalogue badges, renamed ones)', () => {
+    expect(describeAuditEntry(row('badge.award', { badge: 'fira_2026', name: 'Voluntariat fira 2026' })).sentence).toEqual({
+      key: 'sentence.badge_award',
+      params: { number: '000-203', badge: 'Voluntariat fira 2026' },
+    })
+    // The stored name wins over the translated name of a known key: it is what the badge was called then.
+    expect(describeAuditEntry(row('badge.revoke', { badge: 'ludoteca_donor', name: 'Donant antic', awarded_on: '2026-09-02' })).sentence.params.badge).toBe('Donant antic')
+    // A blank or overlong stored name falls back to the key rules.
+    expect(describeAuditEntry(row('badge.award', { badge: 'ludoteca_donor', name: '  ' })).sentence.params.badge).toEqual({ i18n: 'badge.ludoteca_donor' })
+    expect(describeAuditEntry(row('badge.award', { badge: 'x_key', name: 'x'.repeat(61) })).sentence.params.badge).toBe('x_key')
+  })
+
   it('uses generic sentences when a whitelisted detail is missing or unknown', () => {
     expect(describeAuditEntry(row('badge.award', { badge: 'brand_new' })).sentence).toEqual({
       key: 'sentence.badge_award',

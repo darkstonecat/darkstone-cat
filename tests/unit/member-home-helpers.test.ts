@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { buildProfileChecklist } from '@/lib/profile/completion'
 import { buildBadgeItems } from '@/lib/member-home/badge-items'
+import type { CatalogueBadge } from '@/lib/badges/catalogue'
 
 const complete = {
   dni_nie_encrypted: 'enc',
@@ -55,30 +56,80 @@ describe('buildProfileChecklist', () => {
   })
 })
 
+const catalogue: CatalogueBadge[] = [
+  {
+    key: 'volunteer_egara_joga',
+    name: { ca: 'Voluntariat Egara Juga', es: 'Voluntariado Egara Juga' },
+    earnedText: { ca: 'Ha col·laborat.', es: 'Ha colaborado.' },
+    lockedText: { ca: 'Col·labora.' },
+    icon: 'how_to_reg',
+    sortOrder: 10,
+    showLocked: true,
+  },
+  {
+    key: 'ludoteca_donor',
+    name: { ca: 'Donant de la ludoteca' },
+    earnedText: { ca: 'Ha donat un joc.' },
+    lockedText: { ca: 'Dona un joc.' },
+    icon: 'gift',
+    sortOrder: 20,
+    showLocked: true,
+  },
+  {
+    key: 'secret_quest',
+    name: { ca: 'Missió secreta' },
+    earnedText: { ca: 'Has trobat la missió.' },
+    lockedText: { ca: 'No es mostra.' },
+    icon: 'puzzle',
+    sortOrder: 30,
+    showLocked: false,
+  },
+]
+
 describe('buildBadgeItems', () => {
-  it('lists the whole catalogue with unearned badges locked, tenure first', () => {
-    const items = buildBadgeItems([{ key: 'member_tenure', years: 2, since: '2024-03-02' }], 'ca')
+  it('lists tenure first, then the catalogue in its order, unearned badges locked', () => {
+    const items = buildBadgeItems([{ key: 'member_tenure', years: 2, since: '2024-03-02' }], catalogue, 'ca')
     expect(items.map((i) => [i.key, i.earned])).toEqual([
       ['member_tenure', true],
       ['volunteer_egara_joga', false],
       ['ludoteca_donor', false],
     ])
-    expect(items[0]).toMatchObject({ years: 2, sinceLabel: '2/3/2024' })
+    expect(items[0]).toMatchObject({ kind: 'tenure', icon: 'star', years: 2, sinceLabel: '2/3/2024' })
   })
 
-  it('marks stored badges as earned', () => {
-    const items = buildBadgeItems([
-      { key: 'member_tenure', years: 2, since: '2024-03-02' },
-      { key: 'ludoteca_donor', awardedAt: '2025-01-01T00:00:00Z' },
-    ], 'ca')
-    expect(items.find((i) => i.key === 'ludoteca_donor')?.earned).toBe(true)
-    expect(items.find((i) => i.key === 'volunteer_egara_joga')?.earned).toBe(false)
+  it('resolves names and texts in the locale, falling back to Catalan', () => {
+    const items = buildBadgeItems([{ key: 'volunteer_egara_joga', awardedAt: '2025-01-01T00:00:00Z' }], catalogue, 'es')
+    expect(items.find((i) => i.key === 'volunteer_egara_joga')).toEqual({
+      kind: 'catalogue',
+      key: 'volunteer_egara_joga',
+      icon: 'how_to_reg',
+      earned: true,
+      title: 'Voluntariado Egara Juga',
+      description: 'Ha colaborado.',
+    })
+    expect(items.find((i) => i.key === 'ludoteca_donor')).toMatchObject({
+      earned: false,
+      title: 'Donant de la ludoteca',
+      description: 'Dona un joc.',
+    })
+  })
+
+  it('hides a badge with show_locked off until the member earns it', () => {
+    expect(buildBadgeItems([], catalogue, 'ca').map((i) => i.key)).not.toContain('secret_quest')
+    const earned = buildBadgeItems([{ key: 'secret_quest', awardedAt: '2025-01-01T00:00:00Z' }], catalogue, 'ca')
+    expect(earned.find((i) => i.key === 'secret_quest')).toMatchObject({ earned: true, title: 'Missió secreta' })
+  })
+
+  it('drops stored badges missing from the catalogue (archived or unknown)', () => {
+    const items = buildBadgeItems([{ key: 'archived_one', awardedAt: '2025-01-01T00:00:00Z' }], catalogue, 'ca')
+    expect(items.map((i) => i.key)).toEqual(['member_tenure', 'volunteer_egara_joga', 'ludoteca_donor'])
   })
 
   it('is empty-safe: no badges means everything locked, tenure included', () => {
-    const items = buildBadgeItems([], 'ca')
+    const items = buildBadgeItems([], catalogue, 'ca')
     expect(items).toHaveLength(3)
-    expect(items[0].key).toBe('member_tenure')
-    expect(items.every((i) => !i.earned && i.years === null && i.sinceLabel === null)).toBe(true)
+    expect(items[0]).toMatchObject({ kind: 'tenure', earned: false, years: null, sinceLabel: null })
+    expect(items.every((i) => !i.earned)).toBe(true)
+    expect(buildBadgeItems([], [], 'ca').map((i) => i.key)).toEqual(['member_tenure'])
   })
 })

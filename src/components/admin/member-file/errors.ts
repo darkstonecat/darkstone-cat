@@ -18,6 +18,7 @@ const KNOWN_ERROR_KEYS = [
   "note_too_long",
   "badge_held",
   "badge_not_held",
+  "badge_archived",
   "invalid_badge",
   "send_failed",
   "invalid_role",

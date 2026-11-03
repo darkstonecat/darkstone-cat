@@ -101,6 +101,7 @@ function oneOf<T extends string>(allowed: readonly T[], value: unknown): T | nul
 const FIELDS = ["first_name", "last_name", "postal_code", "ludoya_username", "bgg_username", "phone", "dni"] as const;
 const NAME_FIELDS = ["first_name", "last_name"] as const;
 const REVEAL_FIELDS = ["dni", "phone"] as const;
+/** Badges of entries written before the catalogue (no `details.name`): named by translation. */
 const BADGES = ["volunteer_egara_joga", "ludoteca_donor"] as const;
 const ROLES = ["member", "admin", "board", "superadmin"] as const;
 const CHANNELS = ["form", "email", "in_person", "other"] as const;
@@ -112,7 +113,13 @@ const JOBS = ["ludoya", "bgg"] as const;
 const t = (key: string, params: AuditText["params"] = {}): AuditText => ({ key, params });
 const detail = (key: string, params: AuditText["params"] = {}) => t(`detail.${key}`, params);
 
-function badgeParam(raw: unknown): AuditParam | null {
+/**
+ * The badge as it was called when the entry was written (`details.name`, catalogue era), else the
+ * translated name of a pre-catalogue key, else the raw key.
+ */
+function badgeParam(raw: unknown, name?: unknown): AuditParam | null {
+  const stored = text(name, 60);
+  if (stored) return stored;
   const known = oneOf(BADGES, raw);
   if (known) return { i18n: `badge.${known}` };
   return text(raw, 60);
@@ -178,7 +185,7 @@ function describeKnown(action: AuditAction, row: AdminActivityRow, actor: AuditA
     }
     case "badge.award":
     case "badge.revoke": {
-      const badge = badgeParam(d.badge);
+      const badge = badgeParam(d.badge, d.name);
       const name = action === "badge.award" ? "badge_award" : "badge_revoke";
       const details: AuditText[] = [];
       const awardedOn = action === "badge.revoke" ? isoDate(d.awarded_on) : null;

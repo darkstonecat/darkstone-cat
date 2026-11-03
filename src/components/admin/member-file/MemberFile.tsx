@@ -17,6 +17,7 @@ import MemberDataExport from "./MemberDataExport";
 import MembershipActions from "./MembershipActions";
 import PersonalDataCard from "./PersonalDataCard";
 import RoleCard from "./RoleCard";
+import type { CatalogueBadge } from "@/lib/badges/catalogue";
 
 const NO_VALUE = "—";
 
@@ -35,6 +36,8 @@ type MemberFileProps = {
   viewerId: string;
   /** Madrid calendar day (`YYYY-MM-DD`) of the request, for the tenure badge. */
   today: string;
+  /** The non-archived badge catalogue, for the award dialog. */
+  badgeCatalogue: CatalogueBadge[];
 };
 
 const CARD = "rounded-2xl bg-brand-white p-5 md:p-8";
@@ -46,7 +49,7 @@ const CARD = "rounded-2xl bg-brand-white p-5 md:p-8";
  * live in `PersonalDataCard`, leave/rejoin in `MembershipActions`; badges, card
  * and access link in their own cards, role and anonymise in `RoleCard`.
  */
-export default function MemberFile({ member, activity, backHref, canExportData, canRevealFormerDni, canManageRoles, viewerId, today }: MemberFileProps) {
+export default function MemberFile({ member, activity, backHref, canExportData, canRevealFormerDni, canManageRoles, viewerId, today, badgeCatalogue }: MemberFileProps) {
   const t = useTranslations("admin.member_file");
   const tAdmin = useTranslations("admin");
   const former = member.state === "former";
@@ -129,7 +132,7 @@ export default function MemberFile({ member, activity, backHref, canExportData, 
       </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <BadgesCard key={`badges-${stateKey}`} member={member} today={today} />
+        <BadgesCard key={`badges-${stateKey}`} member={member} today={today} catalogue={badgeCatalogue} />
         <CardSection key={`card-${stateKey}`} member={member} />
       </div>
 

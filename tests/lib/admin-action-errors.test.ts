@@ -17,6 +17,7 @@ describe('adminDbErrorCode', () => {
     ['admin:reason_too_long: at most 500 characters', '22023', 'reason_too_long'],
     ['admin:badge_held: the member already holds this badge', '22023', 'badge_held'],
     ['admin:badge_not_held: the member does not hold this badge', '22023', 'badge_not_held'],
+    ['admin:badge_archived: the badge is archived', '22023', 'badge_archived'],
     ['admin:invalid_argument: unknown badge', '22023', 'invalid'],
     ['admin:invalid_argument: email cannot be edited', '22023', 'invalid'],
   ])('maps %s to %s', (message, code, expected) => {
