@@ -1,7 +1,7 @@
 /**
  * Stable error codes of the admin server actions (`src/lib/admin/member-actions.ts`,
  * `src/lib/admin/membership-actions.ts`, `src/lib/admin/access-actions.ts`,
- * `src/lib/admin/superadmin-actions.ts`) and the mapping from the database errors behind them.
+ * `src/lib/admin/superadmin-actions.ts`, `src/lib/admin/badge-actions.ts`) and the mapping from the database errors behind them.
  * Pure, so client and server can import it.
  *
  * The admin functions raise `<prefix>:<code>: <text>` (migrations 20261005100200, 20261005100400,
@@ -28,6 +28,10 @@ export type AdminActionError =
   | "badge_not_held"
   | "badge_archived"
   | "invalid_badge"
+  // Badge catalogue (20261103100000_badge_catalogue.sql).
+  | "badge_exists"
+  | "badge_in_use"
+  | "badge_text_sensitive"
   // Leave and rejoin (A-6, A-7, M-1).
   | "self_target"
   | "role_held"
@@ -73,6 +77,8 @@ const PREFIXED_CODES: Record<string, AdminActionError> = {
   "admin:badge_held": "badge_held",
   "admin:badge_not_held": "badge_not_held",
   "admin:badge_archived": "badge_archived",
+  "admin:badge_exists": "badge_exists",
+  "admin:badge_in_use": "badge_in_use",
   // The BR-15 detector refusing the audit details: the only free text an A-4..A-9 action puts
   // there is a name (member.update before/after), e.g. a name shaped like a phone.
   "audit:sensitive_details": "invalid_name",
@@ -137,6 +143,17 @@ export function adminDbErrorCode(error: DbError): AdminActionError {
   // Plain Postgres "permission denied" (no EXECUTE grant).
   if (!match && error.code === "42501") return "forbidden";
   return "failed";
+}
+
+/**
+ * `adminDbErrorCode` for the badge catalogue actions. The BR-15 detector refusing the audit
+ * details there means a badge name (stored in every badge entry) looks like a DNI or phone, so
+ * it gets its own code instead of the member actions' `invalid_name`.
+ */
+export function badgeDbErrorCode(error: DbError): AdminActionError {
+  const message = error && typeof error === "object" && typeof error.message === "string" ? error.message : "";
+  if (PREFIX_RE.exec(message)?.[1] === "audit:sensitive_details") return "badge_text_sensitive";
+  return adminDbErrorCode(error);
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

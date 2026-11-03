@@ -1470,7 +1470,7 @@
         "member_reveal_sensitive": "Dada sensible mostrada",
         "membership_leave": "Baixa",
         "membership_rejoin": "Reincorporació",
-        "badge__": "Insígnies atorgades i retirades",
+        "badge__": "Insígnies: catàleg, atorgades i retirades",
         "card_regenerate": "Carnet regenerat",
         "member_send_access_link": "Enllaç d'accés enviat",
         "export_members_csv": "Llistat de socis",
@@ -1532,6 +1532,16 @@
         "account_purge_unconfirmed": "ha esborrat {count, plural, one {# alta sense confirmar} other {# altes sense confirmar}}",
         "account_purge_unconfirmed_generic": "ha esborrat altes sense confirmar",
         "ops_cache_refresh": "ha actualitzat la memòria cau",
+        "badge_create": "ha creat la insígnia «{badge}»",
+        "badge_create_generic": "ha creat una insígnia",
+        "badge_update": "ha editat la insígnia «{badge}»",
+        "badge_update_generic": "ha editat una insígnia",
+        "badge_archive": "ha arxivat la insígnia «{badge}»",
+        "badge_archive_generic": "ha arxivat una insígnia",
+        "badge_restore": "ha restaurat la insígnia «{badge}»",
+        "badge_restore_generic": "ha restaurat una insígnia",
+        "badge_delete": "ha esborrat la insígnia «{badge}»",
+        "badge_delete_generic": "ha esborrat una insígnia",
         "unknown": "ha fet l'acció «{action}»",
         "unknown_target": "ha fet l'acció «{action}» sobre el soci {number}"
       },
@@ -1555,7 +1565,8 @@
         "unconfirmed_policy": "Més de 30 dies sense confirmar · cap adreça al registre",
         "refresh_ok": "Correcte",
         "refresh_failed": "Amb errors",
-        "jobs": "{jobs}"
+        "jobs": "{jobs}",
+        "active_holders": "{count, plural, one {# soci actiu la deixa de veure} other {# socis actius la deixen de veure}}"
       },
       "field": {
         "first_name": "Nom",
@@ -1564,7 +1575,13 @@
         "ludoya_username": "usuari de Ludoya",
         "bgg_username": "usuari de BGG",
         "phone": "telèfon",
-        "dni": "DNI"
+        "dni": "DNI",
+        "badge_name": "nom",
+        "badge_earned_text": "text quan la té",
+        "badge_locked_text": "text quan encara no la té",
+        "badge_icon": "icona",
+        "badge_sort_order": "ordre",
+        "badge_show_locked": "visible bloquejada"
       },
       "badge": {
         "volunteer_egara_joga": "Voluntariat Egara Juga",

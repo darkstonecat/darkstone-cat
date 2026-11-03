@@ -27,6 +27,8 @@ const row = (action: string, details: unknown = {}, over: Partial<AdminActivityR
   ...over,
 })
 
+const NO_TARGET = { target_member_number: null, target_name: null, target_member_id: null }
+
 // One realistic entry per action key (the shapes written by the database functions and actions).
 const SAMPLES: Record<string, AdminActivityRow> = {
   'member.update': row('member.update', {
@@ -50,6 +52,12 @@ const SAMPLES: Record<string, AdminActivityRow> = {
   'member.purge': row('member.purge', { left_on: '2026-01-02', purge_on: '2029-01-02', badges_deleted: 1, account_deleted: true }, { actor_id: null, actor_name: null, actor_member_number: null, actor_role: null }),
   'account.purge_unconfirmed': row('account.purge_unconfirmed', { accounts_deleted: 2 }, { actor_id: null, actor_name: null, actor_member_number: null, actor_role: null, target_member_number: null, target_name: null, target_member_id: null }),
   'ops.cache_refresh': row('ops.cache_refresh', { jobs: ['ludoya', 'bgg'], ok: true }, { target_member_number: null, target_name: null, target_member_id: null }),
+  // Badge catalogue (20261103100000_badge_catalogue.sql): no target member.
+  'badge.create': row('badge.create', { badge: 'fira_2026', name: 'Fira 2026' }, NO_TARGET),
+  'badge.update': row('badge.update', { badge: 'fira_2026', name: 'Fira 2026', fields: ['name', 'icon'] }, NO_TARGET),
+  'badge.archive': row('badge.archive', { badge: 'fira_2026', name: 'Fira 2026', active_holders: 12 }, NO_TARGET),
+  'badge.restore': row('badge.restore', { badge: 'fira_2026', name: 'Fira 2026' }, NO_TARGET),
+  'badge.delete': row('badge.delete', { badge: 'fira_2026', name: 'Fira 2026' }, NO_TARGET),
 }
 
 function lookup(messages: unknown, path: string): unknown {
@@ -67,9 +75,9 @@ function collectKeys(text: AuditText): string[] {
 }
 
 describe('describeAuditEntry', () => {
-  it('has a sample for every one of the 18 action keys', () => {
+  it('has a sample for every one of the 23 action keys', () => {
     expect(Object.keys(SAMPLES).sort()).toEqual([...AUDIT_ACTIONS].sort())
-    expect(AUDIT_ACTIONS).toHaveLength(18)
+    expect(AUDIT_ACTIONS).toHaveLength(23)
   })
 
   it.each(Object.keys(SAMPLES))('%s gets its own sentence, not the generic one', (action) => {
@@ -92,7 +100,7 @@ describe('describeAuditEntry', () => {
     }
     for (const messages of [ca, es, en]) {
       const activity = (messages as any).admin.activity
-      for (const key of ['sentence.unknown', 'sentence.unknown_target', 'sentence.badge_award_generic', 'sentence.role_grant_generic', 'sentence.member_reveal_sensitive_generic', 'sentence.account_purge_unconfirmed_generic']) {
+      for (const key of ['sentence.unknown', 'sentence.unknown_target', 'sentence.badge_award_generic', 'sentence.badge_create_generic', 'sentence.badge_update_generic', 'sentence.badge_archive_generic', 'sentence.badge_restore_generic', 'sentence.badge_delete_generic', 'field.badge_name', 'field.badge_earned_text', 'field.badge_locked_text', 'field.badge_icon', 'field.badge_sort_order', 'field.badge_show_locked', 'sentence.role_grant_generic', 'sentence.member_reveal_sensitive_generic', 'sentence.account_purge_unconfirmed_generic']) {
         expect(lookup(activity, key), key).toBeTypeOf('string')
       }
     }
@@ -231,6 +239,54 @@ describe('describeAuditEntry', () => {
     // A blank or overlong stored name falls back to the key rules.
     expect(describeAuditEntry(row('badge.award', { badge: 'ludoteca_donor', name: '  ' })).sentence.params.badge).toEqual({ i18n: 'badge.ludoteca_donor' })
     expect(describeAuditEntry(row('badge.award', { badge: 'x_key', name: 'x'.repeat(61) })).sentence.params.badge).toBe('x_key')
+  })
+
+  it('renders the catalogue actions with the stored name and no target member (S7.7)', () => {
+    expect(describeAuditEntry(SAMPLES['badge.create'])).toMatchObject({
+      sentence: { key: 'sentence.badge_create', params: { badge: 'Fira 2026' } },
+      details: [],
+    })
+    expect(describeAuditEntry(SAMPLES['badge.update'])).toMatchObject({
+      sentence: { key: 'sentence.badge_update', params: { badge: 'Fira 2026' } },
+      details: [{ key: 'detail.fields', params: { fields: [{ i18n: 'field.badge_name' }, { i18n: 'field.badge_icon' }] } }],
+    })
+    expect(describeAuditEntry(SAMPLES['badge.archive'])).toMatchObject({
+      sentence: { key: 'sentence.badge_archive', params: { badge: 'Fira 2026' } },
+      details: [{ key: 'detail.active_holders', params: { count: 12 } }],
+    })
+    expect(describeAuditEntry(SAMPLES['badge.restore']).sentence).toEqual({ key: 'sentence.badge_restore', params: { badge: 'Fira 2026' } })
+    expect(describeAuditEntry(SAMPLES['badge.delete']).sentence).toEqual({ key: 'sentence.badge_delete', params: { badge: 'Fira 2026' } })
+    for (const action of ['badge.create', 'badge.update', 'badge.archive', 'badge.restore', 'badge.delete']) {
+      expect(describeAuditEntry(SAMPLES[action]).sentence.params).not.toHaveProperty('number')
+    }
+  })
+
+  it('falls back to the key, then to a generic sentence, for the catalogue actions', () => {
+    expect(describeAuditEntry(row('badge.archive', { badge: 'fira_2026' }, NO_TARGET)).sentence).toEqual({
+      key: 'sentence.badge_archive',
+      params: { badge: 'fira_2026' },
+    })
+    expect(describeAuditEntry(row('badge.delete', { badge: 'ludoteca_donor' }, NO_TARGET)).sentence.params.badge).toEqual({ i18n: 'badge.ludoteca_donor' })
+    for (const action of ['badge.create', 'badge.update', 'badge.archive', 'badge.restore', 'badge.delete']) {
+      expect(describeAuditEntry(row(action, {}, NO_TARGET)).sentence).toEqual({ key: `sentence.${action.replace('.', '_')}_generic`, params: {} })
+    }
+    // Unknown fields, a negative or non-integer holder count and the absent detail are not shown.
+    expect(describeAuditEntry(row('badge.update', { name: 'Fira', fields: ['key', 'archived_at'] }, NO_TARGET)).details).toEqual([])
+    expect(describeAuditEntry(row('badge.archive', { name: 'Fira', active_holders: -1 }, NO_TARGET)).details).toEqual([])
+    expect(describeAuditEntry(row('badge.archive', { name: 'Fira', active_holders: 0 }, NO_TARGET)).details).toEqual([
+      { key: 'detail.active_holders', params: { count: 0 } },
+    ])
+  })
+
+  it('keeps rendering award and revoke with the target member', () => {
+    expect(describeAuditEntry(SAMPLES['badge.award']).sentence).toEqual({
+      key: 'sentence.badge_award',
+      params: { number: '000-203', badge: { i18n: 'badge.ludoteca_donor' } },
+    })
+    expect(describeAuditEntry(SAMPLES['badge.revoke'])).toMatchObject({
+      sentence: { key: 'sentence.badge_revoke', params: { number: '000-203', badge: { i18n: 'badge.volunteer_egara_joga' } } },
+      details: [{ key: 'detail.awarded_on', params: { date: '2/9/2026' } }],
+    })
   })
 
   it('uses generic sentences when a whitelisted detail is missing or unknown', () => {

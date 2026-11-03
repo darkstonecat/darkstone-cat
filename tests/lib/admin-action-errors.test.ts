@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { adminDbErrorCode, isMemberId } from '@/lib/admin/action-errors'
+import { adminDbErrorCode, badgeDbErrorCode, isMemberId } from '@/lib/admin/action-errors'
 
 // Error shapes as supabase-js returns them for an RPC that raised: `code` is the SQLSTATE and
 // `message` carries the `prefix:code: text` the T7/T7b/T8 functions raise.
@@ -166,6 +166,36 @@ describe('adminDbErrorCode · roles, anonymise and access link prefixes (T8, T3)
     ['wrapped: role_guard:last_superadmin: lookalike', '23514'],
   ])('keeps the boundary and own-key rules: %s is failed', (message, code) => {
     expect(adminDbErrorCode(err(message, code))).toBe('failed')
+  })
+})
+
+describe('badge catalogue codes (T3a)', () => {
+  it.each([
+    ['admin:badge_exists: a badge with this key already exists', 'badge_exists'],
+    ['admin:badge_in_use: the badge was awarded; archive it instead', 'badge_in_use'],
+    ['admin:badge_archived: the badge is already archived', 'badge_archived'],
+  ])('adminDbErrorCode maps %s to %s', (message, expected) => {
+    expect(adminDbErrorCode(err(message))).toBe(expected)
+  })
+
+  it('badgeDbErrorCode maps a badge text the BR-15 detector refuses to badge_text_sensitive', () => {
+    expect(badgeDbErrorCode(err('audit:sensitive_details: details hold a DNI or phone', '23514'))).toBe('badge_text_sensitive')
+    // The member actions keep their own mapping: there the only free text is a name.
+    expect(adminDbErrorCode(err('audit:sensitive_details: details hold a DNI or phone', '23514'))).toBe('invalid_name')
+  })
+
+  it.each([
+    ['admin:badge_exists: lookalike', '22023', 'badge_exists'],
+    ['admin:not_found: unknown badge', '22023', 'not_found'],
+    ['admin:forbidden: superadmin role required', '42501', 'forbidden'],
+    ['audit:sensitive_details2: lookalike', '23514', 'failed'],
+    ['wrapped: audit:sensitive_details: lookalike', '23514', 'failed'],
+  ])('badgeDbErrorCode falls back to adminDbErrorCode for %s', (message, code, expected) => {
+    expect(badgeDbErrorCode(err(message, code))).toBe(expected)
+  })
+
+  it('badgeDbErrorCode answers failed for a missing error', () => {
+    expect(badgeDbErrorCode(null)).toBe('failed')
   })
 })
 

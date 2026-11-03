@@ -1470,7 +1470,7 @@
         "member_reveal_sensitive": "Sensitive data shown",
         "membership_leave": "Leaving",
         "membership_rejoin": "Rejoining",
-        "badge__": "Badges awarded and removed",
+        "badge__": "Badges: catalogue, awarded and removed",
         "card_regenerate": "Card regenerated",
         "member_send_access_link": "Access link sent",
         "export_members_csv": "Member list",
@@ -1532,6 +1532,16 @@
         "account_purge_unconfirmed": "deleted {count, plural, one {# unconfirmed sign-up} other {# unconfirmed sign-ups}}",
         "account_purge_unconfirmed_generic": "deleted unconfirmed sign-ups",
         "ops_cache_refresh": "refreshed the cache",
+        "badge_create": "created the badge “{badge}”",
+        "badge_create_generic": "created a badge",
+        "badge_update": "edited the badge “{badge}”",
+        "badge_update_generic": "edited a badge",
+        "badge_archive": "archived the badge “{badge}”",
+        "badge_archive_generic": "archived a badge",
+        "badge_restore": "restored the badge “{badge}”",
+        "badge_restore_generic": "restored a badge",
+        "badge_delete": "deleted the badge “{badge}”",
+        "badge_delete_generic": "deleted a badge",
         "unknown": "did the action “{action}”",
         "unknown_target": "did the action “{action}” on member {number}"
       },
@@ -1555,7 +1565,8 @@
         "unconfirmed_policy": "Over 30 days unconfirmed · no address in the log",
         "refresh_ok": "Succeeded",
         "refresh_failed": "With errors",
-        "jobs": "{jobs}"
+        "jobs": "{jobs}",
+        "active_holders": "{count, plural, one {# active member stops seeing it} other {# active members stop seeing it}}"
       },
       "field": {
         "first_name": "First name",
@@ -1564,7 +1575,13 @@
         "ludoya_username": "Ludoya username",
         "bgg_username": "BGG username",
         "phone": "phone",
-        "dni": "ID number"
+        "dni": "ID number",
+        "badge_name": "name",
+        "badge_earned_text": "text when earned",
+        "badge_locked_text": "text when not yet earned",
+        "badge_icon": "icon",
+        "badge_sort_order": "order",
+        "badge_show_locked": "shown locked"
       },
       "badge": {
         "volunteer_egara_joga": "Egara Juga volunteer",

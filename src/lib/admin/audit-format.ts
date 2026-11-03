@@ -13,7 +13,10 @@
 
 import { formatAdminDate } from "./members-list";
 
-/** The 18 action keys of spec §5.1 (the `audit_log` CHECK). */
+/**
+ * The 18 action keys of spec §5.1 plus the 5 badge catalogue actions
+ * (20261103100000_badge_catalogue.sql): the `audit_log` CHECK.
+ */
 export const AUDIT_ACTIONS = [
   "member.update",
   "member.reveal_sensitive",
@@ -33,6 +36,11 @@ export const AUDIT_ACTIONS = [
   "member.purge",
   "account.purge_unconfirmed",
   "ops.cache_refresh",
+  "badge.create",
+  "badge.update",
+  "badge.archive",
+  "badge.restore",
+  "badge.delete",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -103,6 +111,8 @@ const NAME_FIELDS = ["first_name", "last_name"] as const;
 const REVEAL_FIELDS = ["dni", "phone"] as const;
 /** Badges of entries written before the catalogue (no `details.name`): named by translation. */
 const BADGES = ["volunteer_egara_joga", "ludoteca_donor"] as const;
+/** `admin_update_badge` fields, in the order they are listed. */
+const BADGE_FIELDS = ["name", "earned_text", "locked_text", "icon", "sort_order", "show_locked"] as const;
 const ROLES = ["member", "admin", "board", "superadmin"] as const;
 const CHANNELS = ["form", "email", "in_person", "other"] as const;
 const EMAIL_LISTS = ["association", "newsletter"] as const;
@@ -193,6 +203,27 @@ function describeKnown(action: AuditAction, row: AdminActivityRow, actor: AuditA
       return badge
         ? { sentence: sentence(name, { number, badge }), details }
         : { sentence: sentence(`${name}_generic`, { number }), details };
+    }
+    case "badge.create":
+    case "badge.update":
+    case "badge.archive":
+    case "badge.restore":
+    case "badge.delete": {
+      // Catalogue changes have no target member: the badge is named by its stored Catalan name.
+      const badge = badgeParam(d.badge, d.name);
+      const name = action.replace(".", "_");
+      const details: AuditText[] = [];
+      if (action === "badge.update" && Array.isArray(d.fields)) {
+        const fields = BADGE_FIELDS.filter((field) => (d.fields as unknown[]).includes(field));
+        if (fields.length > 0) {
+          details.push(detail("fields", { fields: fields.map((f) => ({ i18n: `field.badge_${f}` })) }));
+        }
+      }
+      const holders = action === "badge.archive" ? count(d.active_holders) : null;
+      if (holders !== null) details.push(detail("active_holders", { count: holders }));
+      return badge
+        ? { sentence: sentence(name, { badge }), details }
+        : { sentence: sentence(`${name}_generic`), details };
     }
     case "card.regenerate":
       return { sentence: sentence("card_regenerate", { number }), details: [detail("card_old_invalid")] };

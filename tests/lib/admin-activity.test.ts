@@ -46,7 +46,7 @@ describe('parseActivityParams', () => {
     for (const action of ACTION_FILTERS) expect(parseActivityParams({ action }).action).toBe(action)
     // Every one of the 18 keys is reachable from some option.
     const covered = AUDIT_ACTIONS.filter((key) => ACTION_FILTERS.some((o) => o === key || (o.endsWith('.*') && key.startsWith(o.slice(0, -1)))))
-    expect(covered).toHaveLength(18)
+    expect(covered).toHaveLength(AUDIT_ACTIONS.length)
   })
 
   it('accepts the actor kinds and UUIDs only', () => {

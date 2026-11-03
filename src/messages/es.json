@@ -1470,7 +1470,7 @@
         "member_reveal_sensitive": "Dato sensible mostrado",
         "membership_leave": "Baja",
         "membership_rejoin": "Reincorporación",
-        "badge__": "Insignias otorgadas y retiradas",
+        "badge__": "Insignias: catálogo, otorgadas y retiradas",
         "card_regenerate": "Carnet regenerado",
         "member_send_access_link": "Enlace de acceso enviado",
         "export_members_csv": "Listado de socios",
@@ -1532,6 +1532,16 @@
         "account_purge_unconfirmed": "ha borrado {count, plural, one {# alta sin confirmar} other {# altas sin confirmar}}",
         "account_purge_unconfirmed_generic": "ha borrado altas sin confirmar",
         "ops_cache_refresh": "ha actualizado la caché",
+        "badge_create": "ha creado la insignia «{badge}»",
+        "badge_create_generic": "ha creado una insignia",
+        "badge_update": "ha editado la insignia «{badge}»",
+        "badge_update_generic": "ha editado una insignia",
+        "badge_archive": "ha archivado la insignia «{badge}»",
+        "badge_archive_generic": "ha archivado una insignia",
+        "badge_restore": "ha restaurado la insignia «{badge}»",
+        "badge_restore_generic": "ha restaurado una insignia",
+        "badge_delete": "ha borrado la insignia «{badge}»",
+        "badge_delete_generic": "ha borrado una insignia",
         "unknown": "ha hecho la acción «{action}»",
         "unknown_target": "ha hecho la acción «{action}» sobre el socio {number}"
       },
@@ -1555,7 +1565,8 @@
         "unconfirmed_policy": "Más de 30 días sin confirmar · ninguna dirección en el registro",
         "refresh_ok": "Correcto",
         "refresh_failed": "Con errores",
-        "jobs": "{jobs}"
+        "jobs": "{jobs}",
+        "active_holders": "{count, plural, one {# socio activo deja de verla} other {# socios activos dejan de verla}}"
       },
       "field": {
         "first_name": "Nombre",
@@ -1564,7 +1575,13 @@
         "ludoya_username": "usuario de Ludoya",
         "bgg_username": "usuario de BGG",
         "phone": "teléfono",
-        "dni": "DNI"
+        "dni": "DNI",
+        "badge_name": "nombre",
+        "badge_earned_text": "texto cuando la tiene",
+        "badge_locked_text": "texto cuando aún no la tiene",
+        "badge_icon": "icono",
+        "badge_sort_order": "orden",
+        "badge_show_locked": "visible bloqueada"
       },
       "badge": {
         "volunteer_egara_joga": "Voluntariado Egara Juga",

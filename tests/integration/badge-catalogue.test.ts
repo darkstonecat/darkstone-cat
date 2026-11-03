@@ -516,3 +516,113 @@ describe('admin_get_member() badges (S3)', () => {
     expect(badge).toMatchObject({ badge_key: key, name: { ca: 'A la fitxa' }, icon: 'medal', archived: true })
   })
 })
+
+// ---------------------------------------------------------------------------------------------
+// Migration 20261103110000_badge_holders.sql (T3a, S7.3): the holders of one badge.
+describe('admin_list_badge_holders() (S7.3)', () => {
+  const holders = (client: SupabaseClient, key: string | null) => client.rpc('admin_list_badge_holders', { p_key: key })
+  const extra = {} as Record<'purged' | 'unconfirmed', { id: string }>
+
+  beforeAll(async () => {
+    extra.purged = await createTestUser(`bc-purged@${DOMAIN}`, password, { first_name: 'Nompurged', last_name: 'Cataleg' })
+    userIds.push(extra.purged.id)
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email: `bc-unconfirmed@${DOMAIN}`,
+      password,
+      email_confirm: false,
+      user_metadata: { first_name: 'Nomunconfirmed', last_name: 'Cataleg' },
+    })
+    expect(error).toBeNull()
+    extra.unconfirmed = { id: data.user!.id }
+    userIds.push(extra.unconfirmed.id)
+  })
+
+  it('lists active holders first, then former ones, newest award first, without personal data', async () => {
+    const key = keyFor('holders')
+    expect((await create(board, key)).error).toBeNull()
+    // Awarded directly (the functions refuse former members), with fixed dates to pin the order.
+    const rows = [
+      { member_id: users.holderA.id, awarded_at: '2026-01-01T10:00:00Z' },
+      { member_id: users.holderB.id, awarded_at: '2026-03-01T10:00:00Z' },
+      { member_id: users.former.id, awarded_at: '2026-05-01T10:00:00Z' },
+      { member_id: extra.purged.id, awarded_at: '2026-04-01T10:00:00Z' },
+      { member_id: extra.unconfirmed.id, awarded_at: '2026-04-02T10:00:00Z' },
+    ]
+    const { error: insertError } = await supabaseAdmin
+      .from('member_badges')
+      .insert(rows.map((r) => ({ ...r, badge_key: key })))
+    expect(insertError).toBeNull()
+    expect(
+      (await supabaseAdmin
+        .from('members')
+        .update({ left_on: '2022-01-10', left_by: 'self', purged_at: new Date().toISOString() })
+        .eq('id', extra.purged.id)).error
+    ).toBeNull()
+
+    const { data, error } = await holders(board, key)
+    expect(error).toBeNull()
+    const { data: numbers } = await supabaseAdmin
+      .from('members')
+      .select('id, member_number')
+      .in('id', [users.holderA.id, users.holderB.id, users.former.id])
+    const numberOf = (id: string) => numbers!.find((n) => n.id === id)!.member_number
+
+    expect(data).toEqual([
+      {
+        member_id: users.holderB.id,
+        member_number: numberOf(users.holderB.id),
+        first_name: 'NomholderB',
+        last_name: 'Cataleg',
+        state: 'active',
+        awarded_at: '2026-03-01T10:00:00+00:00',
+      },
+      {
+        member_id: users.holderA.id,
+        member_number: numberOf(users.holderA.id),
+        first_name: 'NomholderA',
+        last_name: 'Cataleg',
+        state: 'active',
+        awarded_at: '2026-01-01T10:00:00+00:00',
+      },
+      {
+        member_id: users.former.id,
+        member_number: numberOf(users.former.id),
+        first_name: 'Nomformer',
+        last_name: 'Cataleg',
+        state: 'former',
+        awarded_at: '2026-05-01T10:00:00+00:00',
+      },
+    ])
+  })
+
+  it('still lists the holders of an archived badge, and an empty list for a badge nobody holds', async () => {
+    const key = keyFor('holders_archived')
+    expect((await create(board, key)).error).toBeNull()
+    expect((await holders(board, key)).data).toEqual([])
+    expect((await award(board, users.holderC.id, key)).error).toBeNull()
+    expect((await archive(board, key)).error).toBeNull()
+    const { data, error } = await holders(board, key)
+    expect(error).toBeNull()
+    expect((data as Array<{ member_id: string }>).map((r) => r.member_id)).toEqual([users.holderC.id])
+  })
+
+  it('answers not_found for an unknown or missing key and forbidden for a plain member or a visitor', async () => {
+    expectError((await holders(board, `${RUN}_never_created`)).error, '22023', 'admin:not_found')
+    expectError((await holders(board, null)).error, '22023', 'admin:not_found')
+    expectError((await holders(member, 'ludoteca_donor')).error, '42501', 'admin:forbidden')
+    expect((await holders(anon, 'ludoteca_donor')).error?.code).toBe('42501')
+  })
+
+  it('is executable by authenticated only (not anon, not service_role)', async () => {
+    const { data, error } = await runSqlAsPostgres<{ role: string; allowed: boolean }>(
+      `SELECT r AS role, has_function_privilege(r, 'public.admin_list_badge_holders(text)', 'EXECUTE') AS allowed
+       FROM unnest(ARRAY['anon', 'authenticated', 'service_role']) AS r ORDER BY r`
+    )
+    expect(error).toBeNull()
+    expect(data).toEqual([
+      { role: 'anon', allowed: false },
+      { role: 'authenticated', allowed: true },
+      { role: 'service_role', allowed: false },
+    ])
+  })
+})

@@ -1,9 +1,10 @@
 /**
  * V-4 activity log: URL parameters, their sanitiser and the arguments of `admin_list_activity`.
  *
- * Nothing from the URL reaches the RPC unchecked: the action must be one of the 18 keys or a
- * group, the actor a UUID or `system` / `self`, the member a member number, the dates real
- * `YYYY-MM-DD` days and the cursor a plain integer. Pure module (no `server-only`).
+ * Nothing from the URL reaches the RPC unchecked: the action must be one of the `AUDIT_ACTIONS`
+ * keys or a group (the badge catalogue actions are inside `badge.*`), the actor a UUID or
+ * `system` / `self`, the member a member number, the dates real `YYYY-MM-DD` days and the cursor
+ * a plain integer. Pure module (no `server-only`).
  */
 
 import { AUDIT_ACTIONS } from "./audit-format";
