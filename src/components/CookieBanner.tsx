@@ -37,6 +37,9 @@ export default function CookieBanner() {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // Keys belong to the banner only while focus is in it: Escape in another dialog (a document,
+      // an admin dialog) must close that dialog, not reject cookies.
+      if (!bannerRef.current?.contains(document.activeElement)) return
       if (e.key === 'Escape') {
         handleDismiss('reject')
         return
@@ -73,6 +76,10 @@ export default function CookieBanner() {
   useEffect(() => {
     if (!showBanner) return
     const timer = setTimeout(() => {
+      // Do not pull focus out of another open dialog (e.g. a document opened from `?doc=`).
+      const active = document.activeElement
+      const otherDialog = active?.closest('[aria-modal="true"]')
+      if (otherDialog && otherDialog !== bannerRef.current) return
       acceptBtnRef.current?.focus()
     }, 1800) // after entry animation (1.2s delay + 0.5s duration)
     document.addEventListener('keydown', handleKeyDown)
