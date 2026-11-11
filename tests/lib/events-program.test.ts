@@ -148,6 +148,50 @@ describe("layoutProgram", () => {
     expect(slots.days[0].groups.map((g) => g.items.length)).toEqual([5, 4]);
   });
 
+  describe("card order", () => {
+    const SLOT = "2026-12-04T15:00:00Z";
+    const kinds = (items: ProgramItem[]) => items.map((i) => i.id);
+
+    it("orders a start-time row by variant: tournaments, plays with a cover, plays without, activities", () => {
+      const nodes = [
+        node({ id: "activity", kind: "meetup", game: null, startsAt: SLOT }),
+        node({ id: "bare-play", startsAt: SLOT }),
+        node({ id: "cover-play", startsAt: SLOT, coverUrl: "https://img.example/a.jpg" }),
+        node({ id: "tournament", kind: "tournament", startsAt: SLOT }),
+        node({ id: "cover-play-2", startsAt: SLOT, coverUrl: "https://img.example/b.jpg" }),
+        ...Array.from({ length: PROGRAM_SLOT_THRESHOLD }, (_, i) => node({ id: `later${i}`, startsAt: "2026-12-04T17:00:00Z" })),
+      ];
+      const [first] = layoutProgram(classifyProgram(nodes, SESSION), SESSION).days[0].groups;
+      expect(kinds(first.items)).toEqual(["tournament", "cover-play", "cover-play-2", "bare-play", "activity"]);
+    });
+
+    it("keeps the grid in start order whatever the variant", () => {
+      const nodes = [
+        node({ id: "early-activity", kind: "meetup", game: null, startsAt: "2026-12-04T15:00:00Z" }),
+        node({ id: "late-tournament", kind: "tournament", startsAt: "2026-12-04T16:00:00Z" }),
+      ];
+      const day = layoutProgram(classifyProgram(nodes, SESSION), SESSION).days[0];
+      expect(day.mode).toBe("grid");
+      expect(kinds(day.groups[0].items)).toEqual(["early-activity", "late-tournament"]);
+    });
+
+    it("orders each always-open group by variant, demos last", () => {
+      const nodes = [
+        node({
+          id: "zone",
+          kind: "meetup",
+          game: null,
+          children: [
+            node({ id: "demo", kind: "meetup", game: null, alwaysOpen: true }),
+            node({ id: "open-play", startsAt: null, endsAt: null }),
+          ],
+        }),
+      ];
+      const [group] = layoutProgram(classifyProgram(nodes, SESSION), SESSION).alwaysOpen;
+      expect(kinds(group.items)).toEqual(["open-play", "demo"]);
+    });
+  });
+
   it("returns no days for an event without timed items", () => {
     const layout = layoutProgram([], SESSION);
     expect(layout).toEqual({ multiDay: false, days: [], alwaysOpen: [], counts: { plays: 0, tournaments: 0, activities: 0, demos: 0 } });

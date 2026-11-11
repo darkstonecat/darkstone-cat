@@ -7,6 +7,9 @@
 // - When any day has more than PROGRAM_SLOT_THRESHOLD timed items, every day
 //   of the event is grouped by start time, so the whole program reads the same
 //   way; otherwise each day is one grid sorted by start.
+// - Inside a start-time row and an always-open group, cards go by variant:
+//   tournaments, plays with a cover, plays without, activities, demos. Equal
+//   variants keep their order. The grid stays in start order.
 // - Always-open items are grouped by zone in tree order, zone-less ones last.
 
 import { madridDay } from "../madrid-day";
@@ -30,13 +33,29 @@ export function countItems(items: readonly ProgramItem[]): ProgramCounts {
 
 const startOf = (item: ProgramItem) => Date.parse(item.startsAt!);
 
+function variantRank(item: ProgramItem): number {
+  switch (item.kind) {
+    case "tournament":
+      return 0;
+    case "play":
+      return item.coverUrl ? 1 : 2;
+    case "activity":
+      return 3;
+    case "demo":
+      return 4;
+  }
+}
+
+/** Cards by variant (Array.prototype.sort is stable, so equal variants keep their order). */
+const byVariant = <T extends ProgramItem>(items: T[]): T[] => [...items].sort((a, b) => variantRank(a) - variantRank(b));
+
 function groupByStart<T extends ProgramItem>(items: T[]): ProgramDay<T>["groups"] {
   const groups = new Map<number, T[]>();
   for (const item of items) {
     const minute = Math.floor(startOf(item) / MINUTE) * MINUTE;
     groups.set(minute, [...(groups.get(minute) ?? []), item]);
   }
-  return [...groups.entries()].map(([minute, group]) => ({ startsAt: new Date(minute).toISOString().replace(".000Z", "Z"), items: group }));
+  return [...groups.entries()].map(([minute, group]) => ({ startsAt: new Date(minute).toISOString().replace(".000Z", "Z"), items: byVariant(group) }));
 }
 
 function layoutDay<T extends ProgramItem>(day: string, items: T[], mode: ProgramDay["mode"]): ProgramDay<T> {
@@ -51,7 +70,7 @@ function layoutDay<T extends ProgramItem>(day: string, items: T[], mode: Program
 function alwaysOpenGroups<T extends ProgramItem>(items: T[]): AlwaysOpenGroup<T>[] {
   const zones = new Map<string | null, T[]>();
   for (const item of items) zones.set(item.zone, [...(zones.get(item.zone) ?? []), item]);
-  const groups = [...zones.entries()].map(([zone, group]) => ({ zone, items: group }));
+  const groups = [...zones.entries()].map(([zone, group]) => ({ zone, items: byVariant(group) }));
   return [...groups.filter((g) => g.zone !== null), ...groups.filter((g) => g.zone === null)];
 }
 
