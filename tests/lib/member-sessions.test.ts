@@ -155,3 +155,29 @@ describe("fetchMemberAreaSessions", () => {
     expect(sessions.map((s) => s.id)).toEqual(["run"]);
   });
 });
+
+describe("withCovers sub-events", () => {
+  async function egara() {
+    const sessions = await withCovers(await fetchMemberAreaSessions(), Infinity);
+    return sessions.find((s) => s.title === "Egara Juga 2026")!;
+  }
+  type Covered = Awaited<ReturnType<typeof egara>>["subEvents"][number];
+  const flatten = (nodes: Covered[]): Covered[] => nodes.flatMap((n) => [n, ...flatten(n.children)]);
+
+  it("puts a cover on every node of the tree, Ludoya images as fallback", async () => {
+    const nodes = flatten((await egara()).subEvents);
+    const mundodisco = nodes.find((n) => n.title.startsWith("Mundodisco"))!;
+    expect(mundodisco.coverUrl).toBe(mundodisco.game!.imageUrl);
+    const demo = nodes.find((n) => n.title === "Fearsome Floors")!;
+    expect(demo.coverUrl).toBe(demo.imageUrl);
+  });
+
+  it("uses the BGG cover for a nested play when name and year agree", async () => {
+    const plain = flatten((await egara()).subEvents).find((n) => n.title.startsWith("Mundodisco"))!;
+    bgg.fetchBggCollection.mockResolvedValue({
+      games: [collectionGame({ id: "9", name: plain.game!.name, year: plain.game!.yearPublished, image: "https://bgg.example/mundodisco.jpg" })],
+    });
+    const covered = flatten((await egara()).subEvents).find((n) => n.id === plain.id)!;
+    expect(covered.coverUrl).toBe("https://bgg.example/mundodisco.jpg");
+  });
+});

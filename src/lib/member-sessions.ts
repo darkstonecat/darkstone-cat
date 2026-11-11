@@ -13,6 +13,7 @@ import { ludoyaConfig, MEMBER_AREA_LIMITS } from "./ludoya/config";
 import { describeError } from "./ludoya/client";
 import { fetchSessions } from "./ludoya/sessions";
 import type { LudoyaSession, LudoyaSessionPlay } from "./ludoya/types";
+import { applyCovers, collectCoverRequests, type CoveredSubEvent, type CoverRequest } from "./sub-event-covers";
 
 /**
  * The agenda and every calendar month share ONE events request: the same URL
@@ -34,8 +35,10 @@ export interface MemberSessionPlay extends LudoyaSessionPlay {
   coverUrl: string | null;
 }
 
-export interface MemberSession extends Omit<LudoyaSession, "plannedPlays"> {
+export interface MemberSession extends Omit<LudoyaSession, "plannedPlays" | "subEvents"> {
   plannedPlays: MemberSessionPlay[];
+  /** The sub-event tree with a cover on every node (null → placeholder). */
+  subEvents: CoveredSubEvent[];
 }
 
 async function loadCollection(): Promise<BggGame[]> {
@@ -55,7 +58,7 @@ async function loadCollection(): Promise<BggGame[]> {
  */
 export const COVER_BUDGET_MS = 2_500;
 
-async function resolveCoversWithin(shown: LudoyaSessionPlay[], budgetMs: number) {
+async function resolveCoversWithin(shown: CoverRequest[], budgetMs: number) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<Map<string, string | null>>((resolve) => {
     timer = setTimeout(() => {
@@ -74,12 +77,19 @@ async function resolveCoversWithin(shown: LudoyaSessionPlay[], budgetMs: number)
   }
 }
 
+/** Tree requests minus the direct plays, which keep their own (capped) lookup. */
+function treeRequests(session: LudoyaSession): CoverRequest[] {
+  const direct = new Set(session.plannedPlays.map((p) => p.id));
+  return collectCoverRequests(session.subEvents).filter((r) => !direct.has(r.id));
+}
+
 /**
- * Adds a cover to every play; only the first `playsPerSession` plays of each
- * session are looked up on BGG, the rest keep Ludoya's image.
+ * Adds a cover to every play and every node of the sub-event tree, in one BGG
+ * lookup under `COVER_BUDGET_MS`. Only the first `playsPerSession` direct plays
+ * of each session are looked up; the rest keep Ludoya's image.
  */
 export async function withCovers(sessions: LudoyaSession[], playsPerSession: number): Promise<MemberSession[]> {
-  const shown = sessions.flatMap((s) => s.plannedPlays.slice(0, playsPerSession));
+  const shown: CoverRequest[] = sessions.flatMap((s) => [...s.plannedPlays.slice(0, playsPerSession), ...treeRequests(s)]);
   const covers = shown.length > 0 ? await resolveCoversWithin(shown, COVER_BUDGET_MS) : new Map<string, string | null>();
 
   return sessions.map((session) => ({
@@ -88,5 +98,6 @@ export async function withCovers(sessions: LudoyaSession[], playsPerSession: num
       ...play,
       coverUrl: covers.get(play.id) ?? play.imageUrl,
     })),
+    subEvents: applyCovers(session.subEvents, covers),
   }));
 }
