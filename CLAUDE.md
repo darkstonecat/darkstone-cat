@@ -378,6 +378,8 @@ Migrations: new `CHECK` constraints are added `NOT VALID` (length-only) so legac
 | `LUDOYA_MOCK_NOW` | Optional, tests only. An ISO instant used as the `/events` "now" when `LUDOYA_MOCK=1` (ignored otherwise); the Playwright server sets it |
 | `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` | Optional. `1` advertises the member area: the NavBar login button (and its loading placeholder) and the `/login` sign-up card linking to `/register`. Unset or anything else hides them: visitors see no login button, the card links to the Google Form (`MEMBERSHIP_FORM_URL` in `src/lib/member-area.ts`), and `/login`, `/register` stay reachable by direct URL; a signed-in member still gets the user pill. Inlined at build time: set it in Vercel and redeploy. The Playwright server sets it to `1` |
 
+**Production build check**: `next.config.ts` calls `assertProductionEnv` (`src/lib/production-env.ts`) when `VERCEL_ENV=production`. The build fails, and Vercel keeps the previous deployment live, when `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ENCRYPTION_KEY` (64 hex), `LUDOYA_API_KEY`, `CRON_SECRET`, `SMTP_USER` or `SMTP_PASSWORD` is missing, or when `LUDOYA_MOCK`, `LUDOYA_MOCK_NOW` or `CONTACT_ALLOW_LOCALHOST` is set. Add a variable there when production starts depending on it.
+
 ## Translation Key Namespaces
 
 `nav`, `hero`, `about`, `about_page`, `activities`, `schedule`, `join_us`, `location`, `footer`, `ludoteca`, `contact_page`, `events`, `event_images`, `faq`, `cookies`, `cookie_policy`, `conduct`, `legal`, `legal_notice`, `privacy`, `privacy_policy`, `data_protection`, `documents`, `error_page`, `not_found`, `metadata`, `auth`, `verify`, `profile`, `admin`, `collaborators`

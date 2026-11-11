@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 import { execSync } from "child_process";
 import createNextIntlPlugin from 'next-intl/plugin';
 import withBundleAnalyzer from '@next/bundle-analyzer';
+import { assertProductionEnv } from './src/lib/production-env';
+
+assertProductionEnv(process.env);
 
 const gitSha = process.env.VERCEL_GIT_COMMIT_SHA
   ?? (() => { try { return execSync("git rev-parse HEAD").toString().trim(); } catch { return "unknown"; } })();
