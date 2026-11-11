@@ -43,12 +43,12 @@
 | `/about` | Origin story, mission, and values |
 | `/ludoteca` | Game library with filters, search, and BGG data |
 | `/contact` | Contact form |
-| `/events` | The public agenda from Ludoya: special banners, month calendar, collapsible session cards with seat counters (spec: `docs/events-page.md`) |
+| `/events` | The public agenda from Ludoya: special banners, month calendar, collapsible session cards with seat counters (spec: `docs/features/events/spec.md`) |
 | `/faq` | Frequently asked questions |
 | `/legal` | Terms & conditions |
 | `/privacy` | Privacy policy |
 | `/cookies` | Cookie policy |
-| `/login` | Login form (not linked from the navbar until the member area is public, see `docs/member-area-launch.md`) |
+| `/login` | Login form (not linked from the navbar until the member area is public, see `docs/operations/member-area-launch.md`) |
 | `/register` | Registration form (direct URL only until the member area is public) |
 | `/forgot-password` | Password recovery |
 | `/reset-password` | Set new password (protected) |
@@ -113,6 +113,8 @@ src/
 ├── lib/                    # Utilities (cn, API helpers)
 └── styles/                 # Global CSS, Tailwind tokens, brand colors
 ```
+
+`docs/` holds the versioned project docs in subfolders (`features/`, `integrations/`, `operations/`); start at the index `docs/README.md`. Notes that must stay on one machine go in `docs/_local/`, which is gitignored.
 
 ## Getting Started
 
@@ -191,9 +193,9 @@ CI runs all tests automatically via GitHub Actions on push/PR to `main`.
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID |
 | `BGG_USERNAME` | BoardGameGeek username for the ludoteca collection |
 | `BGG_API_KEY` | BoardGameGeek XML API key |
-| `LUDOYA_API_KEY` | Ludoya public API key (server-side only), see `docs/ludoya-api-reference.md` |
+| `LUDOYA_API_KEY` | Ludoya public API key (server-side only), see `docs/integrations/ludoya-api.md` |
 | `CRON_SECRET` | Bearer secret for `/api/cron/refresh` (same value in Vercel Production and the GitHub repository secret) |
-| `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` | Optional. `1` shows the navbar login button and links `/login` to `/register`; unset hides them (sign-up links go to the Google Form, the pages stay reachable by direct URL). Build-time: redeploy after changing it. Launch steps: `docs/member-area-launch.md` |
+| `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` | Optional. `1` shows the navbar login button and links `/login` to `/register`; unset hides them (sign-up links go to the Google Form, the pages stay reachable by direct URL). Build-time: redeploy after changing it. Launch steps: `docs/operations/member-area-launch.md` |
 
 ### Development without API keys
 
@@ -217,7 +219,7 @@ The events page can run offline with `LUDOYA_MOCK=1`, which reads JSON fixtures 
 
 `npm run lighthouse` audits 17 pages (Catalan locale) on mobile and desktop, 34 audits in all, from a local production build; `npm run lighthouse:prod` runs the same set against darkstone.cat. The pages are listed in `scripts/lighthouse/config.mjs` and the report lands in `audits/lighthouse/<timestamp>/REPORT.md`. The audits run without a session, so the protected pages (`/profile`, `/profile/edit`, `/profile/card`, `/admin`, `/admin/members`) measure the redirect to `/login`.
 
-Last measured for `/events` (11 November 2026, local production build, live data): desktop performance 99, accessibility 100, best practices 96, SEO 92; mobile performance 84–95 between runs, accessibility 100. Details in `docs/events-page.md`.
+Last measured for `/events` (11 November 2026, local production build, live data): desktop performance 99, accessibility 100, best practices 96, SEO 92; mobile performance 84–95 between runs, accessibility 100. Details in `docs/features/events/spec.md`.
 
 Known audit limitations, to ignore in future audits:
 
@@ -237,8 +239,8 @@ Public endpoints and server actions share one limiter, `allowRequestShared()` in
 
 ## Future Improvements
 
-- **"Afegeix al calendari" (`.ics`) on `/events`**: deferred (`docs/events-page.md`).
-- **Members-only Ludoya sessions (`ONLY_GROUP`)**: hidden everywhere until a board-approved member state exists (`docs/admin-panel/spec.md`, BR-19).
+- **"Afegeix al calendari" (`.ics`) on `/events`**: deferred (`docs/features/events/spec.md`).
+- **Members-only Ludoya sessions (`ONLY_GROUP`)**: hidden everywhere until a board-approved member state exists (`docs/features/admin-panel/spec.md`, BR-19).
 - **Speed Insights**: mounted, but it stores nothing until the project is on a paid Vercel plan.
 
 ---

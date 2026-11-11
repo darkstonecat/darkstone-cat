@@ -63,8 +63,8 @@ audits/
 /data/
 .env*
 
-# Docs not included by default
-/docs/
+# Local-only docs (drafts, private notes); everything else in docs/ is versioned
+/docs/_local/
 
 # CodeGraph local index
 /.codegraph/

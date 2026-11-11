@@ -251,7 +251,7 @@ function finish() {
   }
   console.log(`${failures.length} check(s) failed:`);
   for (const f of failures) console.log(`  - ${f}`);
-  console.log("\nSee docs/ludoya-api-reference.md for how to investigate.");
+  console.log("\nSee docs/integrations/ludoya-api.md for how to investigate.");
   process.exitCode = 1;
 }
 

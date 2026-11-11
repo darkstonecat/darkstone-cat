@@ -2,7 +2,7 @@
 
 Base URL: `https://api.ludoya.com/public/v1` (sandbox: `https://api.dev.ludoya.com`, needs a sandbox key).
 
-Authentication: header `X-Api-Key: ldy_...`, scoped to the organisation that owns the key (so no request names it). **Server-side credential**: never send it from a browser, never log it. Business plan: 100 requests/minute, no daily cap. Vendor documentation: `docs/ludoya-api-reference-official.md` and `GET /public/v1/openapi.json` (unauthenticated).
+Authentication: header `X-Api-Key: ldy_...`, scoped to the organisation that owns the key (so no request names it). **Server-side credential**: never send it from a browser, never log it. Business plan: 100 requests/minute, no daily cap. Vendor documentation: the OpenAPI spec at [`https://api.ludoya.com/public/v1/openapi.json`](https://api.ludoya.com/public/v1/openapi.json) (unauthenticated; the sandbox serves the same path on `api.dev.ludoya.com`).
 
 Conventions from the vendor: ISO-8601 instants, IANA time zones, `pagination=size,pageIndex`, errors as `{ "message", "code" }` with `code` in `validation_failed | unauthorized | forbidden | not_found | conflict | rate_limited`, responses carry `Cache-Control: private, max-age=30` and `X-RateLimit-*` headers, a 429 carries `Retry-After`.
 
@@ -25,7 +25,7 @@ Code lives in `src/lib/ludoya/`; only `normalize.ts` knows raw shapes.
 | `types.ts` | Public types. Independent from Ludoya's shapes. |
 | `index.ts` | `fetchUpcomingEvents()` for the admin event images (long cache, `PUBLIC` events only, stripped to `LudoyaEvent`). |
 
-The `/events` agenda data lives outside the adapter: `src/lib/member-sessions.ts` (`fetchMemberAreaSessions`, cache 60 s, and `withCovers`, BGG covers through `src/lib/game-matching.ts`) feeds `src/lib/events/agenda.ts` and `src/lib/events/calendar.ts` (page spec: `docs/events-page.md`). Username checks are server actions in `src/lib/profile/username-checks.ts`.
+The `/events` agenda data lives outside the adapter: `src/lib/member-sessions.ts` (`fetchMemberAreaSessions`, cache 60 s, and `withCovers`, BGG covers through `src/lib/game-matching.ts`) feeds `src/lib/events/agenda.ts` and `src/lib/events/calendar.ts` (page spec: `docs/features/events/spec.md`). Username checks are server actions in `src/lib/profile/username-checks.ts`.
 
 ### Fetch flow
 

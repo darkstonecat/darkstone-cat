@@ -2,7 +2,7 @@ name: Ludoya API check
 
 # Detect changes in Ludoya's public API (v1) before the site breaks.
 # Runs every Monday morning and on demand. A failing run means Ludoya
-# changed something or the key was revoked: see docs/ludoya-api-reference.md.
+# changed something or the key was revoked: see docs/integrations/ludoya-api.md.
 # Needs the LUDOYA_API_KEY repository secret.
 
 on:

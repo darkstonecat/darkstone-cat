@@ -188,7 +188,7 @@ Notes on the remaining points, all from a local production build with live data:
 ## 10. Out of scope and follow-ups
 
 - **"Afegeix al calendari" (`.ics`)**: deferred by the user.
-- **Members-only sessions (`ONLY_GROUP`)** stay hidden everywhere until a board-approved member state exists (`docs/admin-panel/spec.md`, BR-19).
+- **Members-only sessions (`ONLY_GROUP`)** stay hidden everywhere until a board-approved member state exists (`docs/features/admin-panel/spec.md`, BR-19).
 - **Mobile LCP**: bound by the framework's render-blocking CSS, not by this page's code.
 
 ## 11. Delivery

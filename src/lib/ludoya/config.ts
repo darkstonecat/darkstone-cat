@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 // Everything Ludoya may change on their side lives here: hosts and endpoint
 // paths. The organisation is implied by the API key, so there is no group id.
-// See docs/ludoya-api-reference.md.
+// See docs/integrations/ludoya-api.md.
 
 function env(key: string, fallback: string): string {
   const value = process.env[key]?.trim();
