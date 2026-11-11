@@ -53,7 +53,7 @@
 | `/forgot-password` | Password recovery |
 | `/reset-password` | Set new password (protected) |
 | `/profile` | "La meva zona": member home with checklist, badges and this week's sessions from Ludoya (protected) |
-| `/profile/details` | Profile details: hero, tabs and account (protected) |
+| `/profile/details` | Profile details: hero, tabs, account and member benefits (protected) |
 | `/profile/edit` | Profile edit form (protected) |
 | `/profile/card` | Member card with a real QR, image download (protected) |
 | `/verify/[token]` | Public member card check from the QR (valid + member number only, `noindex`) |
@@ -70,6 +70,7 @@ The code of conduct and the data protection policy have no page of their own: th
 | `/admin/activity` | Audit log with filters |
 | `/admin/badges` | Badge catalogue: create, archive, restore, delete (superadmin, never awarded) |
 | `/admin/badges/[key]` | One badge: texts per language, icon, visibility, order, preview, holders, bulk award |
+| `/admin/benefits` | Member benefits: create, edit (texts, link, discount code, logo, order), archive, restore |
 | `/admin/procedures` | Written procedures (P-1 … P-7) |
 | `/admin/tools` | Cache refresh status and manual refresh, link to the event image tool |
 | `/admin/tools/event-images` | Event image generator (`/events/images` redirects here with a 308) |

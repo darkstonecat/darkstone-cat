@@ -17,11 +17,11 @@ Branch: `feat/member-benefits` (from `develop`). Delivery: `ask-on-risk`, `featu
 
 | ID | Specs | Route | Status | Commit |
 |---|---|---|---|---|
-| T1 | S1 | inline | pending | |
-| T2 | S3, S4 | inline (Risk: item 2, RLS and grants) | pending | |
-| T3 | S2, S5, S6 | inline | pending | |
-| T4 | S4, S5, S7 | inline | pending | |
-| T5 | all | inline (docs CLAUDE.md, README, E2E) | pending | |
+| T1 | S1, S2 | inline | done (tsc, lint, 1951 unit tests) | 3882def |
+| T2 | S3, S4 | inline (Risk: item 2, RLS and grants) | done (12 integration tests; RLS mutation check fails without `has_role`; integration suite 562) | 90d5b77 |
+| T3 | S2, S5, S6 | inline | done (RED then GREEN on `toBenefitViews`; card tests; unit 1962) | 3996864 |
+| T4 | S4, S5, S7 | inline | done (parsers, actions, page, list/dialog tests; unit 2004) | be9ed45 |
+| T5 | all | inline (docs CLAUDE.md, README, E2E) | done (E2E admin flow + profile card + code absent from public pages) | see Log |
 
 ## Log
 
@@ -31,3 +31,4 @@ Branch: `feat/member-benefits` (from `develop`). Delivery: `ask-on-risk`, `featu
 - L4 (2026-11-11, user, code source): "Editable desde una vista de admin en la DB, posible tabla beneficios por ser socio, por ahora solo este con el código DARKSTONE. En el perfil podria haber una tarjeta nueva de Benificios por ser socios con estas entradas, ahora con la de outlet games, código descuento, link a la tienda, imagen de esta."
 - L5 (2026-11-11, user, image): "Pick a collaborator logo (Recommended)".
 - L6: production runs without `NEXT_PUBLIC_MEMBER_AREA_PUBLIC`, so most members cannot reach the profile yet; the migration needs the user's go-ahead before production.
+- L7 (2026-11-11): T1-T5 implemented inline (no writer reason). Assumption kept: no hard delete (archive only). Migration applied to the LOCAL Supabase only; production still pending the user's go-ahead. RDD is off (global), so no native review; one independent verifier runs at the end for Risk item 2.
