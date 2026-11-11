@@ -2,7 +2,6 @@ import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { getProfileData } from "@/lib/supabase/auth";
-import { getMemberBenefits } from "@/lib/supabase/benefits";
 import { maskEncryptedField } from "@/lib/profile/masked-field";
 import { maskDni, maskPhone } from "@/lib/profile/mask";
 import NavBar from "@/components/NavBar";
@@ -14,7 +13,6 @@ import MemberDataCard from "@/components/profile/MemberDataCard";
 import NewsletterSwitch from "@/components/profile/NewsletterSwitch";
 import AccountActions from "@/components/profile/AccountActions";
 import DocumentList from "@/components/documents/DocumentList";
-import BenefitsCard from "@/components/profile/BenefitsCard";
 
 export const revalidate = false;
 
@@ -49,7 +47,6 @@ export default async function ProfileDetailsPage({
   // Auth protection is handled by middleware (PROTECTED_ROUTES), see /profile.
   const profile = await getProfileData();
   const member = profile?.member ?? null;
-  const benefits = member ? await getMemberBenefits(locale) : [];
 
   const tNav = await getTranslations({ locale, namespace: "nav" });
   const tMeta = await getTranslations({ locale, namespace: "metadata" });
@@ -126,8 +123,6 @@ export default async function ProfileDetailsPage({
                   <AccountActions email={profile.email} memberNumber={member.member_number} />
                 </section>
               </div>
-
-              <BenefitsCard benefits={benefits} />
 
               <section aria-labelledby="documents-title" className={`${cardClass} lg:col-span-3`}>
                 <h2 id="documents-title" className={titleClass}>

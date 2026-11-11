@@ -8,7 +8,7 @@ type Status = "idle" | "copied" | "failed";
 
 /** Copies a discount code and says so for two seconds (also to screen readers). */
 export default function CopyCodeButton({ code, label }: { code: string; label: string }) {
-  const t = useTranslations("profile.details");
+  const t = useTranslations("profile.home");
   const [status, setStatus] = useState<Status>("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 

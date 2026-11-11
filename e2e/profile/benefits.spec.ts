@@ -3,11 +3,19 @@ import { PAGES } from '../helpers/constants'
 import { expectHydrated } from '../helpers/hydration'
 
 // Member benefits card (odd/tasks/member-benefits.md S6): the seeded Outlet Games benefit with its
-// code, only inside the member area. Other benefits may appear while the admin flow runs.
+// code, as the first card of the member home (/profile), only inside the member area. Other benefits may appear while the admin flow runs.
 test.describe('Member benefits card (S6)', () => {
   test('an active member sees Outlet Games with the code and the shop link', async ({ memberPage: page }) => {
-    await page.goto(PAGES.profileDetails)
+    await page.goto(PAGES.profile)
     const card = page.getByRole('region', { name: 'Beneficis per ser soci' })
+    // First card of the home content: it comes before the badges in the page.
+    const badges = page.getByRole('region', { name: 'Les teves insígnies' })
+    await expect(badges).toBeVisible()
+    const cardFirst = await card.evaluate(
+      (node, other) => Boolean(node.compareDocumentPosition(other as Node) & Node.DOCUMENT_POSITION_FOLLOWING),
+      await badges.elementHandle()
+    )
+    expect(cardFirst).toBe(true)
     const outlet = card.getByRole('listitem').filter({ has: page.getByRole('heading', { name: 'Outlet Games' }) })
     await expect(outlet.getByText('DARKSTONE', { exact: true })).toBeVisible()
     await expect(outlet.getByRole('img', { name: 'Outlet Games' })).toBeVisible()
@@ -17,6 +25,12 @@ test.describe('Member benefits card (S6)', () => {
 
     const copy = outlet.getByRole('button', { name: 'Copia el codi de Outlet Games' })
     await expectHydrated(copy)
+  })
+
+  test('the profile details page no longer shows the card', async ({ memberPage: page }) => {
+    await page.goto(PAGES.profileDetails)
+    await expect(page.getByRole('heading', { name: 'On jugues' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Beneficis per ser soci' })).toHaveCount(0)
   })
 
   test('the code is not on public pages', async ({ page }) => {

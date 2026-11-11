@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { getProfileData } from "@/lib/supabase/auth";
 import { getBadgeCatalogue, getMemberBadges } from "@/lib/supabase/badges";
+import { getMemberBenefits } from "@/lib/supabase/benefits";
 import { buildProfileChecklist } from "@/lib/profile/completion";
 import { buildBadgeItems } from "@/lib/member-home/badge-items";
 import NavBar from "@/components/NavBar";
@@ -13,6 +14,7 @@ import ProfileChecklist from "@/components/profile/ProfileChecklist";
 import BadgesSection from "@/components/profile/BadgesSection";
 import SessionsSection from "@/components/profile/SessionsSection";
 import CalendarSection from "@/components/profile/CalendarSection";
+import BenefitsCard from "@/components/profile/BenefitsCard";
 import { parseMonthParam } from "@/lib/member-home/month-grid";
 
 export const revalidate = false;
@@ -52,7 +54,13 @@ export default async function ProfilePage({
   // Auth protection is handled by middleware (PROTECTED_ROUTES).
   // Do NOT redirect to /login here — it creates a loop when the middleware
   // and server component disagree about session state (cookie propagation race).
-  const [profile, badges, catalogue] = await Promise.all([getProfileData(), getMemberBadges(), getBadgeCatalogue()]);
+  const [profile, badges, catalogue, benefits] = await Promise.all([
+    getProfileData(),
+    getMemberBadges(),
+    getBadgeCatalogue(),
+    // RLS returns rows only to an active member; empty for anyone else or on error.
+    getMemberBenefits(locale),
+  ]);
   const member = profile?.member ?? null;
 
   const tNav = await getTranslations({ locale, namespace: "nav" });
@@ -87,6 +95,7 @@ export default async function ProfilePage({
 
           <div className="flex-1 bg-brand-beige px-4 py-6 md:px-12 md:pt-12 md:pb-20">
             <div className="mx-auto flex max-w-[1120px] flex-col gap-5 md:gap-7">
+              <BenefitsCard benefits={benefits} />
               <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
                 {checklistVisible && <ProfileChecklist steps={checklist} />}
                 <BadgesSection

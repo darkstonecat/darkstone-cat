@@ -7,14 +7,14 @@ import CopyCodeButton from "./CopyCodeButton";
 
 /**
  * "Beneficis per ser soci": perks for active members (logo, text, discount code, shop link).
- * Rendered only inside the member area; nothing when there are no benefits.
+ * First card of the member home (`/profile`); nothing when there are no benefits.
  */
 export default function BenefitsCard({ benefits }: { benefits: BenefitView[] }) {
-  const t = useTranslations("profile.details");
+  const t = useTranslations("profile.home");
   if (benefits.length === 0) return null;
 
   return (
-    <section aria-labelledby="benefits-title" className="rounded-2xl bg-brand-white p-5 sm:p-8 lg:col-span-3">
+    <section aria-labelledby="benefits-title" className="rounded-2xl bg-brand-white p-5 sm:p-8">
       <h2 id="benefits-title" className="text-[22px] font-bold text-stone-custom">
         {t("benefits_title")}
       </h2>
