@@ -43,7 +43,7 @@
 | `/about` | Origin story, mission, and values |
 | `/ludoteca` | Game library with filters, search, and BGG data |
 | `/contact` | Contact form |
-| `/events` | The public agenda from Ludoya: special banners, month calendar, collapsible session cards with seat counters |
+| `/events` | The public agenda from Ludoya: special banners, month calendar, collapsible session cards with seat counters (spec: `docs/events-page.md`) |
 | `/faq` | Frequently asked questions |
 | `/legal` | Terms & conditions |
 | `/privacy` | Privacy policy |
@@ -89,7 +89,6 @@ src/
 │   ├── api/contact/        # Contact form API endpoint
 │   ├── api/events/         # Events calendar month + shareable event image generation
 │   ├── api/members/        # Member card image (with QR)
-│   ├── api/profile/        # Member home calendar months
 │   ├── api/cron/           # Scheduled cache refresh (Bearer CRON_SECRET)
 │   ├── auth/               # Email confirm, password recovery and magic-link callbacks
 │   ├── sitemap.ts          # Dynamic sitemap generation
@@ -218,7 +217,7 @@ The events page can run offline with `LUDOYA_MOCK=1`, which reads JSON fixtures 
 
 The project maintains near-perfect Lighthouse scores across all 11 pages (100/100/100/100 on desktop, 91–100 Performance on mobile with 100 Accessibility/Best Practices/SEO).
 
-Known audit limitations caused by Next.js framework constraints and expected page complexity are documented in [`docs/AUDIT.md`](docs/AUDIT.md).
+Known audit limitations come from Next.js framework constraints (legacy JS polyfills, bfcache, render-blocking CSS, network chains, unused shared chunks) and expected page complexity (ludoteca LCP, heavy animation pages, the `/events` mobile LCP). The former `AUDIT.md` with the details was removed in `f3eea9c`; its content is in the git history.
 
 ## Future Improvements
 

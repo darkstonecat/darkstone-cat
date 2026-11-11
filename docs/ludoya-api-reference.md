@@ -23,9 +23,9 @@ Code lives in `src/lib/ludoya/`; only `normalize.ts` knows raw shapes.
 | `sessions.ts` | `fetchSessions()` and `madridDay()`. |
 | `username.ts` | `lookupLudoyaUsername()`. |
 | `types.ts` | Public types. Independent from Ludoya's shapes. |
-| `index.ts` | `fetchUpcomingEvents()` for `/events` and event images (long cache, `PUBLIC` events only, stripped to `LudoyaEvent`). |
+| `index.ts` | `fetchUpcomingEvents()` for the admin event images (long cache, `PUBLIC` events only, stripped to `LudoyaEvent`). |
 
-The `/events` agenda data lives outside the adapter: `src/lib/member-sessions.ts` (`fetchMemberAreaSessions`, cache 60 s, and `withCovers`, BGG covers through `src/lib/game-matching.ts`) feeds `src/lib/events/agenda.ts` and `src/lib/events/calendar.ts`. Username checks are server actions in `src/lib/profile/username-checks.ts`.
+The `/events` agenda data lives outside the adapter: `src/lib/member-sessions.ts` (`fetchMemberAreaSessions`, cache 60 s, and `withCovers`, BGG covers through `src/lib/game-matching.ts`) feeds `src/lib/events/agenda.ts` and `src/lib/events/calendar.ts` (page spec: `docs/events-page.md`). Username checks are server actions in `src/lib/profile/username-checks.ts`.
 
 ### Fetch flow
 
@@ -37,14 +37,14 @@ GET /locations                          (cached 1 h, optional)
   → the location with isDefault = true is the usual venue
 ```
 
-There is no per-event children request any more. For months that already started, the calendar adds `pastLimit=200` (most recent past events). `pastLimit` counts sub-events too (checked live, Sep 2026: 60 returned ~19 sessions, 200 ~48), so it is a cap: months further back than that can be incomplete.
+There is no per-event children request any more. The `/events` request always carries `pastLimit=200` (most recent past events), so a multi-day event that already started is not lost; the agenda drops whatever already ended. `pastLimit` counts sub-events too (checked live, Sep 2026: 60 returned ~19 sessions, 200 ~48), so it is a cap: months further back than that can be incomplete.
 
 ### Cache and resilience
 
 | Data | `revalidate` |
 |---|---|
-| `/events`, event images | 86400 s |
-| Member home sessions and month | 60 s |
+| `/events` agenda and calendar (`fetchMemberAreaSessions`) | 60 s |
+| Admin event images (`fetchUpcomingEvents`) | 86400 s |
 | Locations | 3600 s |
 | Username checks | 0 (never cached) |
 
@@ -157,7 +157,7 @@ Many `ludoya-only` entries in production mean BGG is failing or names diverge; a
 
 ## Known behaviour
 
-- **Visibility.** The organisation key returns every visibility, and each play has its own (independent of its session's). `/events` and event images list `PUBLIC` sessions and plays only; the member home (La meva zona) is `PUBLIC` only too until a board-approved member state exists (`ONLY_GROUP` stays hidden). A missing or unrecognised visibility is skipped with a warning, never assumed public.
+- **Visibility.** The organisation key returns every visibility, and each play has its own (independent of its session's). `/events` and the event images list `PUBLIC` sessions and plays only; `ONLY_GROUP` stays hidden until a board-approved member state exists. The member home no longer shows sessions. A missing or unrecognised visibility is skipped with a warning, never assumed public.
 - **Nullable dates.** `startsAt`/`endsAt` are nullable in the OpenAPI; an item with a null date is skipped with a warning instead of failing the feed.
 - **DST.** Classification of regular sessions converts with `timeZone` (Fri 16:00–20:30, Sat 10:00–13:30 local).
 - **Zero-length events.** Some special events have `startsAt === endsAt`.

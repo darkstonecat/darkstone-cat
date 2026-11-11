@@ -32,7 +32,7 @@ Use the direct URLs on `https://www.darkstone.cat`:
    `/auth/magic-link` and signs in.
 4. **Password reset** from `/forgot-password`: the mail link goes through
    `/auth/callback` to `/reset-password`, and the new password works.
-5. **Member area**: `/profile` (sessions, calendar, badges),
+5. **Member area**: `/profile` (checklist, badges, benefits),
    `/profile/details`, `/profile/edit`, `/profile/card` (download, QR opens
    `/verify/<token>` with "Carnet vàlid").
 6. **Sign-out** from the NavBar ends the session.
