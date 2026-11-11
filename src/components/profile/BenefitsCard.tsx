@@ -7,7 +7,7 @@ import CopyCodeButton from "./CopyCodeButton";
 
 /**
  * "Beneficis per ser soci": perks for active members (logo, text, discount code, shop link).
- * Member home (`/profile`), right above "Properes sessions"; nothing when there are no benefits.
+ * Member home (`/profile`), the last section after the badges; nothing when there are no benefits.
  */
 export default function BenefitsCard({ benefits }: { benefits: BenefitView[] }) {
   const t = useTranslations("profile.home");
