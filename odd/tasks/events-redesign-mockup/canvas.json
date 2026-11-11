@@ -1,0 +1,77 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-11T15:00:00Z"
+  },
+  "title": "Esdeveniments — nova vista",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 3900,
+      "title": "B · Escriptori — Calendari lateral + línia de temps",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "B-mobile.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 390,
+      "h": 5600,
+      "title": "B · Mòbil",
+      "is_interactive": true
+    },
+    "Seats.dc.html": {
+      "x": 0,
+      "y": 4220,
+      "w": 1200,
+      "h": 760,
+      "title": "Comptador de places — casos"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "B-mobile.dc.html",
+    "Seats.dc.html"
+  ],
+  "notes": {
+    "titleB": {
+      "x": 0,
+      "y": -300,
+      "text": "Proposta B — Calendari a l'esquerra, línia de temps i bàner per especial",
+      "kind": "title1",
+      "maxW": 1910
+    },
+    "ux": {
+      "x": 1990,
+      "y": 0,
+      "w": 480,
+      "size": "m",
+      "fill": "orange",
+      "text": "Recorregut del visitant\n\n1. «Què fan i quan?» → capçalera curta: horari, lloc, gratuït.\n2. «Hi ha alguna cosa especial?» → un bàner compacte per especial, amb els dies que falten. Clic → la fitxa completa dins la línia de temps.\n3. «Què es juga aquesta setmana?» → sessions desplegades amb portades i places.\n4. «I més endavant?» → calendari a l'esquerra: un clic en un dia salta a aquell dia de la línia de temps.\n5. «M'hi apunto» → botó a cada partida (Ludoya)."
+    },
+    "rules": {
+      "x": 1990,
+      "y": 700,
+      "w": 480,
+      "size": "m",
+      "fill": "blue",
+      "text": "Regles perquè sigui factible\n\n• Totes les fitxes (sessions i especials) tenen el mateix format i es poden plegar.\n• Per defecte: aquesta setmana oberta, setmanes següents plegades, especials sempre oberts.\n• Plegada, la fitxa mostra el resum: partides, places lliures i miniatures de les portades.\n• «Desplega-ho tot / Plega-ho tot» a cada setmana següent.\n• Clicar un dia del calendari o un bàner obre la fitxa i hi salta.\n• Bàners: només especials futurs dins 12 mesos, màxim 3. Cap especial → cap bàner.\n• Compte enrere: «Falten N dies», «Demà», «Avui», «En curs».\n• Canviar de mes no mou la llista; un dia fora del que hi ha carregat obre Ludoya.\n• Sense barra d'enllaços: la pàgina es llegeix d'un cop d'ull. Mòbil: tira horitzontal amb els dies amb esdeveniments (~80 px) i «Veure el mes» desplega el calendari sencer; així les partides del proper dia queden just després dels bàners.\n• El lloc només surt quan no és el local habitual (Ca N'Aurell, ja és a la capçalera); Ludoya ho indica amb isDefault.\n• «Falten N dies» només als especials (bàner i fitxa), mai a les sessions recurrents.\n• «Afegeix al calendari» (.ics): ajornat, fora d'aquesta entrega.\n• Línia de temps: aquesta setmana + 3 següents, més els especials dels propers 12 mesos. Calendari fins a 6 mesos endavant.\n• Les seccions «Properes sessions» i calendari de La meva zona s'eliminen: /events és l'únic lloc."
+    },
+    "tweak": {
+      "x": 1990,
+      "y": 1400,
+      "w": 480,
+      "size": "m",
+      "fill": "green",
+      "text": "Prova-ho amb Play: plega i desplega fitxes, clica un dia del calendari (obre la fitxa plegada) o usa «Desplega-ho tot». A Tweaks, «specials» = 2 mostra dos bàners (el segon és d'exemple)."
+    }
+  },
+  "designSystems": []
+}

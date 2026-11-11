@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>Esdeveniments — Proposta B escriptori</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#EEE8DC}
+a{color:#A04500}a:hover{color:#B54F00}
+html{scroll-behavior:smooth}
+</style>
+</helmet>
+<div style="font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: #EEE8DC; color: #1C1917; min-height: 100vh">
+
+  <header style="background: #1C1917; color: #FAFAF9">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 18px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+      <span style="font-weight: 800; letter-spacing: 0.14em; font-size: 15px">DARKSTONE</span>
+      <nav aria-label="Principal" style="display: flex; flex-wrap: wrap; gap: 24px; font-size: 14px">
+        <a href="#" style="color: #D6D3D1; text-decoration: none">Qui som</a>
+        <a href="#" style="color: #D6D3D1; text-decoration: none">Ludoteca</a>
+        <a href="#" style="color: #FAFAF9; text-decoration: none; font-weight: 700; border-bottom: 2px solid #E07A2E; padding-bottom: 2px">Esdeveniments</a>
+        <a href="#" style="color: #D6D3D1; text-decoration: none">FAQ</a>
+        <a href="#" style="color: #D6D3D1; text-decoration: none">Contacte</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Capçalera curta + bàners d'especials -->
+  <section style="background: #1C1917; color: #FAFAF9; padding: 28px 24px 32px">
+    <div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <h1 style="margin: 0; font-size: 44px; line-height: 1.05; font-weight: 800; letter-spacing: -0.02em">Esdeveniments</h1>
+          <p style="margin: 0; font-size: 17px; color: #D6D3D1">Vine a jugar amb nosaltres! Jocs de taula, rol i cartes, obert a tothom.</p>
+        </div>
+        <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; font-size: 14px">
+          <li style="display: inline-flex; align-items: center; gap: 8px; background: #292524; border-radius: 999px; padding: 8px 14px">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+            Dv 16:00–20:30 · Ds 10:00–13:30
+          </li>
+          <li style="display: inline-flex; align-items: center; gap: 8px; background: #292524; border-radius: 999px; padding: 8px 14px">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+            <a href="#" style="color: #FAFAF9; text-decoration: none">Centre Cívic Ca N'Aurell ↗</a>
+          </li>
+          <li style="display: inline-flex; align-items: center; gap: 8px; background: #292524; border-radius: 999px; padding: 8px 14px">Gratuït · no cal ser soci</li>
+        </ul>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <sc-for list="{{banners}}" as="b" hint-placeholder-count="1">
+          <a href="{{b.href}}" style="display: flex; align-items: stretch; background: #FAFAF9; color: #1C1917; border-radius: 18px; overflow: hidden; text-decoration: none; min-height: 112px">
+            <span style="width: 180px; flex-shrink: 0; background: {{b.imgBg}}; display: flex; align-items: flex-end; padding: 10px; box-sizing: border-box; color: #FCD9BD; font-size: 11px; letter-spacing: 0.08em">[IMATGE]</span>
+            <span style="flex: 1; min-width: 0; padding: 16px 22px; display: flex; flex-direction: column; justify-content: center; gap: 4px">
+              <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; color: #A04500">
+                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="#A04500"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.6 1.3 6.5L12 17.2l-5.9 3.2 1.3-6.5L2.5 9.3l6.6-.8z"></path></svg>
+                ESDEVENIMENT ESPECIAL
+              </span>
+              <span style="font-size: 24px; font-weight: 800; line-height: 1.15">{{b.title}}</span>
+              <span style="font-size: 15px; color: #57534E">{{b.meta}}</span>
+            </span>
+            <span style="flex-shrink: 0; padding: 16px 22px; display: flex; align-items: center; gap: 18px; border-left: 1px solid #E7E5E4">
+              <span style="display: flex; flex-direction: column; align-items: center; line-height: 1">
+                <span style="font-size: 12px; font-weight: 700; color: #57534E">Falten</span>
+                <strong style="font-size: 40px; font-weight: 900; color: #A04500">{{b.days}}</strong>
+                <span style="font-size: 12px; font-weight: 700; color: #57534E">dies</span>
+              </span>
+              <span style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 12px; background: #1C1917; color: #FFFFFF; font-size: 14px; font-weight: 700">{{b.cta}}</span>
+            </span>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+
+  <div style="max-width: 1240px; margin: 0 auto; padding: 36px 24px 72px; display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start">
+
+    <!-- Lateral fix: calendari -->
+    <aside aria-label="Calendari" style="flex: 1 1 300px; max-width: 330px; position: sticky; top: 24px; display: flex; flex-direction: column; gap: 14px">
+      <div style="background: #FFFFFF; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <button type="button" aria-label="Mes anterior" style="width: 44px; height: 44px; border-radius: 999px; border: 1px solid #D6D3D1; background: #FFFFFF; font-size: 18px; cursor: pointer">‹</button>
+          <strong style="font-size: 16px">Novembre 2026</strong>
+          <button type="button" aria-label="Mes següent" style="width: 44px; height: 44px; border-radius: 999px; border: 1px solid #D6D3D1; background: #FFFFFF; font-size: 18px; cursor: pointer">›</button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px">
+          <sc-for list="{{weekdays}}" as="w" hint-placeholder-count="7">
+            <span style="height: 26px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #57534E">{{w}}</span>
+          </sc-for>
+          <sc-for list="{{cells}}" as="c" hint-placeholder-count="42">
+            <span style="display: flex">
+              <sc-if value="{{c.link}}" hint-placeholder-val="{{ false }}">
+                <a href="{{c.href}}" aria-label="{{c.aria}}" onClick="{{c.open}}" style="flex: 1; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; text-decoration: none; {{c.style}}">{{c.day}}</a>
+              </sc-if>
+              <sc-if value="{{c.plain}}" hint-placeholder-val="{{ true }}">
+                <span style="flex: 1; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; {{c.style}}">{{c.day}}</span>
+              </sc-if>
+            </span>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: #57534E; padding-top: 4px">
+          <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #1C1917"></span>Sessió</span>
+          <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #B54F00"></span>Especial</span>
+          <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; box-shadow: inset 0 0 0 2px #1C1917"></span>Avui</span>
+        </div>
+        <p style="margin: 0; font-size: 12px; color: #57534E">Clica un dia per anar-hi.</p>
+      </div>
+
+      <div style="background: #1C1917; color: #FAFAF9; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+        <strong style="font-size: 16px">Com funciona</strong>
+        <ol style="margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.45; color: #D6D3D1">
+          <li>Tria una partida i apunta-t'hi a Ludoya.</li>
+          <li>O proposa'n una amb el joc que vulguis.</li>
+          <li>O vine sense apuntar-te i tria un joc de la ludoteca.</li>
+        </ol>
+        <a href="#" style="font-size: 14px; font-weight: 700; color: #E07A2E">Preguntes freqüents →</a>
+      </div>
+    </aside>
+
+    <!-- Línia de temps: totes les fitxes són desplegables -->
+    <main style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column">
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+        <div id="{{g.anchor}}" style="display: flex; flex-direction: column; scroll-margin-top: 24px">
+          <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 16px 84px">
+            <span style="display: flex; flex-direction: column; gap: 2px">
+              <sc-if value="{{g.isFirst}}" hint-placeholder-val="{{ true }}">
+                <h2 style="margin: 0; font-size: 30px; font-weight: 800">{{g.title}}</h2>
+              </sc-if>
+              <sc-if value="{{g.notFirst}}" hint-placeholder-val="{{ false }}">
+                <h2 style="margin: 0; font-size: 20px; font-weight: 800">{{g.title}}</h2>
+              </sc-if>
+              <span style="font-size: 14px; color: #57534E">{{g.summary}}</span>
+            </span>
+            <sc-if value="{{g.notFirst}}" hint-placeholder-val="{{ false }}">
+              <button type="button" onClick="{{g.toggleAll}}" style="min-height: 44px; padding: 0 12px; border: 0; background: transparent; color: #A04500; font-size: 14px; font-weight: 700; cursor: pointer">{{g.toggleAllLabel}}</button>
+            </sc-if>
+          </div>
+
+          <sc-for list="{{g.events}}" as="e" hint-placeholder-count="2">
+            <div id="{{e.anchor}}" style="display: flex; gap: 20px; scroll-margin-top: 24px">
+              <div style="width: 64px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center">
+                <span style="width: 64px; height: 64px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; {{e.tileStyle}}"><span style="font-size: 11px; font-weight: 700">{{e.weekday}}</span><span style="font-size: 24px; font-weight: 800">{{e.day}}</span></span>
+                <span style="flex: 1; width: 2px; background: #D6D3D1; margin-top: 8px"></span>
+              </div>
+
+              <!-- Sessió -->
+              <sc-if value="{{e.isSession}}" hint-placeholder-val="{{ true }}">
+                <article style="flex: 1; min-width: 0; background: #FFFFFF; border-radius: 22px; margin-bottom: 20px; overflow: hidden">
+                  <div style="padding: 20px 22px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px">
+                    <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                      <h3 style="margin: 0; font-size: 22px; font-weight: 800">{{e.title}}</h3>
+                      <span style="font-size: 15px; color: #57534E">{{e.when}}</span>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+                      <sc-if value="{{e.showStack}}" hint-placeholder-val="{{ false }}">
+                        <span aria-hidden="true" style="display: flex; padding-left: 10px">
+                          <sc-for list="{{e.plays}}" as="p" hint-placeholder-count="3">
+                            <span style="width: 36px; height: 36px; margin-left: -10px; border-radius: 8px; border: 2px solid #FFFFFF; background: {{p.coverBg}}"></span>
+                          </sc-for>
+                        </span>
+                      </sc-if>
+                      <span style="display: flex; flex-direction: column; font-size: 14px; min-width: 120px">
+                        <strong>{{e.playsText}}</strong>
+                        <span style="font-weight: 700; {{e.freeStyle}}">{{e.freeText}}</span>
+                      </span>
+                      <button type="button" onClick="{{e.toggle}}" aria-expanded="{{e.expandedAttr}}" aria-controls="{{e.panelId}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; width: 150px; border-radius: 12px; border: 1px solid #D6D3D1; background: #FFFFFF; color: #1C1917; font-size: 14px; font-weight: 700; cursor: pointer">{{e.toggleLabel}} <span aria-hidden="true">{{e.chevron}}</span></button>
+                    </div>
+                  </div>
+                  <sc-if value="{{e.open}}" hint-placeholder-val="{{ true }}">
+                    <div id="{{e.panelId}}" style="border-top: 1px solid #E7E5E4; padding: 18px 22px 22px">
+                      <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px">
+                        <sc-for list="{{e.plays}}" as="p" hint-placeholder-count="4">
+                          <li style="display: flex; flex-direction: column; gap: 8px">
+                            <span style="aspect-ratio: 3 / 4; border-radius: 14px; background: {{p.coverBg}}; position: relative; display: block">
+                              <span style="position: absolute; left: 0; right: 0; bottom: 0; padding: 10px; background: rgba(28,25,23,0.8); color: #FAFAF9; border-radius: 0 0 14px 14px; display: flex; flex-direction: column; gap: 3px">
+                                <span style="font-size: 11px; font-weight: 700; color: #E07A2E">{{p.time}}</span>
+                                <span style="font-size: 14px; font-weight: 800; line-height: 1.2">{{p.name}}</span>
+                              </span>
+                            <div role="img" aria-label="{{p.aria}}" style="position: absolute; top: 8px; left: 8px; right: 8px; background: rgba(250,250,249,0.96); border-radius: 12px; padding: 5px 8px; box-shadow: 0 1px 3px rgba(28,25,23,0.25); display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 6px; color: #1C1917; white-space: nowrap">
+                <sc-if value="{{p.isChairs}}" hint-placeholder-val="{{ true }}">
+                  <span style="display: flex; flex-wrap: nowrap; align-items: center; gap: 1px; min-width: 0; overflow: hidden">
+                    <sc-for list="{{p.seats}}" as="st" hint-placeholder-count="4">
+                      <sc-if value="{{st.taken}}" hint-placeholder-val="{{ true }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24"><path d="M7 3h10v9H7z" fill="#1C1917"></path><path d="M5 12h14v3H5z" fill="#1C1917"></path><path d="M6.5 15v6M17.5 15v6" stroke="#1C1917" stroke-width="2" stroke-linecap="round"></path></svg></sc-if>
+                      <sc-if value="{{st.needed}}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B54F00" stroke-width="1.7" stroke-linejoin="round"><path d="M7 3h10v9H7z"></path><path d="M5 12h14v3H5z"></path><path d="M6.5 15v6M17.5 15v6" stroke-linecap="round"></path></svg></sc-if>
+                      <sc-if value="{{st.free}}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#78716C" stroke-width="1.7" stroke-linejoin="round"><path d="M7 3h10v9H7z"></path><path d="M5 12h14v3H5z"></path><path d="M6.5 15v6M17.5 15v6" stroke-linecap="round"></path></svg></sc-if>
+                      <sc-if value="{{st.ellipsis}}" hint-placeholder-val="{{ false }}"><span style="padding: 0 2px; font-size: 15px; font-weight: 800; line-height: 1; color: #57534E">…</span></sc-if>
+                    </sc-for>
+                  </span>
+                </sc-if>
+                <sc-if value="{{p.isSegments}}" hint-placeholder-val="{{ false }}">
+                  <span style="flex: 1; display: flex; gap: 2px">
+                    <sc-for list="{{p.segs}}" as="sg" hint-placeholder-count="12">
+                      <span style="flex: 1; height: 10px; border-radius: 2px; {{sg.style}}"></span>
+                    </sc-for>
+                  </span>
+                </sc-if>
+                <sc-if value="{{p.isBar}}" hint-placeholder-val="{{ false }}">
+                  <span style="flex: 1; height: 10px; border-radius: 999px; background: #BDB7B0; overflow: hidden; display: flex"><span style="height: 100%; background: #1C1917; {{p.barStyle}}"></span></span>
+                </sc-if>
+                <sc-if value="{{p.isOpen}}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M16 14.2a5 5 0 0 1 5.5 5"></path></svg></sc-if>
+                <strong style="flex-shrink: 0; font-size: 14px; white-space: nowrap">{{p.countText}}</strong>
+              </div>
+</span>
+              <span style="font-size: 12px; font-weight: 700; {{p.statusStyle}}">{{p.status}}</span>
+                            <a href="#" style="display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; {{p.btnStyle}}">{{p.btn}}</a>
+                          </li>
+                        </sc-for>
+                        <li style="display: flex; flex-direction: column; gap: 8px">
+                          <a href="#" style="aspect-ratio: 3 / 4; border-radius: 14px; border: 2px dashed #E9B98F; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-decoration: none; color: #A04500; padding: 12px; text-align: center; box-sizing: border-box">
+                            <span style="font-size: 32px; font-weight: 300">+</span>
+                            <strong style="font-size: 14px; color: #1C1917">Proposa una partida</strong>
+                            <span style="font-size: 12px; color: #57534E">{{e.proposeHint}}</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </sc-if>
+                </article>
+              </sc-if>
+
+              <!-- Especial -->
+              <sc-if value="{{e.isSpecial}}" hint-placeholder-val="{{ false }}">
+                <article style="flex: 1; min-width: 0; background: #1C1917; color: #FAFAF9; border-radius: 22px; margin-bottom: 20px; overflow: hidden">
+                  <div style="padding: 20px 22px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px">
+                    <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                      <span style="font-size: 13px; font-weight: 800; color: #E07A2E">★ ESPECIAL · {{e.countdown}}</span>
+                      <h3 style="margin: 0; font-size: 24px; font-weight: 800">{{e.title}}</h3>
+                      <span style="font-size: 15px; color: #D6D3D1">{{e.when}} · {{e.place}}</span>
+                    </div>
+                    <button type="button" onClick="{{e.toggle}}" aria-expanded="{{e.expandedAttr}}" aria-controls="{{e.panelId}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; width: 150px; border-radius: 12px; border: 1px solid #57534E; background: transparent; color: #FAFAF9; font-size: 14px; font-weight: 700; cursor: pointer">{{e.toggleLabel}} <span aria-hidden="true">{{e.chevron}}</span></button>
+                  </div>
+                  <sc-if value="{{e.open}}" hint-placeholder-val="{{ true }}">
+                    <div id="{{e.panelId}}" style="border-top: 1px solid #44403C; display: flex; flex-wrap: wrap">
+                      <div style="flex: 1 1 260px; min-height: 260px; background: #8A3D12; display: flex; align-items: flex-end; padding: 16px; box-sizing: border-box">
+                        <span style="font-size: 12px; letter-spacing: 0.1em; color: #FCD9BD">[IMATGE DE L'ESDEVENIMENT]</span>
+                      </div>
+                      <div style="flex: 1 1 360px; min-width: 0; padding: 22px; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box">
+                        <span style="font-size: 15px"><strong>Dissabte 28 i diumenge 29 de novembre</strong><span style="color: #D6D3D1"> · 10:00 – 17:00</span></span>
+                        <span style="font-size: 15px"><strong>Recinte Firal de Terrassa</strong> · <span style="color: #E07A2E">fora del local habitual</span> · <a href="#" style="color: #E07A2E">Com arribar-hi ↗</a></span>
+                        <span style="font-size: 15px; color: #D6D3D1">21 apuntats · places sense límit</span>
+                        <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #D6D3D1">[Descripció completa des de Ludoya: programa, activitats, a qui va adreçat…]</p>
+                        <p style="margin: 0; font-size: 13px; color: #A8A29E">Partides programades: encara cap. <a href="#" style="color: #E07A2E; font-weight: 700">Proposa'n una ↗</a></p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px">
+                          <a href="#" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border-radius: 14px; background: #B54F00; color: #FFFFFF; font-size: 15px; font-weight: 700; text-decoration: none">Apunta't a Ludoya ↗</a>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+                </article>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+
+      <a href="#" style="align-self: flex-start; margin-left: 84px; display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; font-weight: 700; color: #A04500">Veure més dates a Ludoya ↗</a>
+    </main>
+  </div>
+
+  <footer style="background: #1C1917; color: #A8A29E; padding: 28px 24px; font-size: 13px; text-align: center">Footer actual del web</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"specials":{"editor":"enum","options":["1","2"],"default":"1","section":"Proposta"},"$preview":{"width":1440,"height":3900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { open: {} };
+  }
+  isOpen(id, def) {
+    return Object.prototype.hasOwnProperty.call(this.state.open, id) ? this.state.open[id] : def;
+  }
+  setOpen(ids, value) {
+    var next = Object.assign({}, this.state.open);
+    ids.forEach(function (id) { next[id] = value; });
+    this.setState({ open: next });
+  }
+  renderVals() {
+    var self = this;
+    var SUF = '';
+    var COVERS = ['#4E6145', '#6B4636', '#3B4A63', '#7A5A2A', '#4C3D5C', '#2E524E', '#7F4536'];
+    var ci = 0;
+    function play(time, name, taken, cap, min) {
+      var full = cap !== null && taken >= cap;
+      var free = cap === null ? null : cap - taken;
+      var needMin = min && taken < min ? min - taken : 0;
+      var mode = cap === null ? 'open' : (cap <= 8 ? 'chairs' : (cap <= 20 ? 'segments' : 'bar'));
+      var seats = [], segs = [];
+      if (mode === 'chairs') for (var i = 0; i < cap; i++) {
+        var t = i < taken, need = !t && i < taken + needMin;
+        seats.push({ taken: t, needed: need, free: !t && !need, ellipsis: false });
+      }
+      var SEAT_MAX = 6;
+      if (seats.length > SEAT_MAX) {
+        seats = seats.slice(0, SEAT_MAX - 1);
+        seats.push({ taken: false, needed: false, free: false, ellipsis: true });
+      }
+      if (mode === 'segments') for (var j = 0; j < cap; j++) {
+        segs.push({ style: j < taken ? 'background:#1C1917' : (j < taken + needMin ? 'background:#F0C29C' : 'background:#BDB7B0') });
+      }
+      var status = full ? 'Completa' : (needMin ? (needMin === 1 ? 'Falta 1 per començar' : 'Falten ' + needMin + ' per començar') : (free === null ? 'Sense límit de places' : (free === 1 ? 'Queda 1 plaça' : 'Queden ' + free + ' places')));
+      return {
+        time: time, name: name, coverBg: COVERS[ci++ % COVERS.length],
+        isChairs: mode === 'chairs', isSegments: mode === 'segments', isBar: mode === 'bar', isOpen: mode === 'open',
+        seats: seats, segs: segs, barStyle: cap ? 'width:' + Math.round(taken / cap * 100) + '%' : '',
+        countText: cap === null ? taken + ' apuntats' : taken + '/' + cap,
+        aria: cap === null ? taken + ' persones apuntades, sense límit' : taken + ' de ' + cap + ' places ocupades' + (needMin ? ', en falten ' + needMin + ' per començar' : ''),
+        status: status, statusStyle: full ? 'color:#57534E' : 'color:#A04500',
+        btn: full ? 'A la cua ↗' : 'Apunta\u2019t ↗',
+        btnStyle: full ? 'border:1px solid #A8A29E;color:#1C1917' : 'background:#1C1917;color:#FFFFFF'
+      };
+    }
+    var banners = [{ title: 'Egara Juga 2026', meta: "Ds 28 i dg 29 de novembre · Recinte Firal de Terrassa", days: '17', cta: 'Més informació ↓', href: '#egara' + SUF, imgBg: '#8A3D12' }];
+    if (String(this.props.specials || '1') === '2') {
+      banners.push({ title: '[Segon esdeveniment especial]', meta: "Ds 19 de desembre · [Lloc]", days: '38', cta: 'Veure a Ludoya ↗', href: '#', imgBg: '#3B4A63' });
+    }
+
+    var CUR = 'background:#1C1917;color:#FAFAF9';
+    var LATER = 'background:#FFFFFF;border:1px solid #D6D3D1;color:#1C1917';
+    var SPEC = 'background:#B54F00;color:#FFFFFF';
+    function session(id, weekday, day, def, countdown, title, when, plays, freeText, tile) {
+      return { id: id, kind: 's', weekday: weekday, day: day, def: def, countdown: countdown, title: title, when: when, plays: plays, freeText: freeText, tile: tile };
+    }
+    var groups = [
+      { anchor: 'setmana' + SUF, title: 'Aquesta setmana', summary: "9 – 15 de novembre · 7 partides · 10 places lliures", isFirst: true, events: [
+        session('dia-13', 'DV', '13', true, 'Falten 2 dies', 'Divendres de jocs!', "Divendres 13 · 16:00 – 20:30",
+          [play('16:00', 'Emberleaf', 3, 4), play('16:15', 'Signorie', 2, 4, 3), play('16:45', 'Forest Shuffle: Smoky Mountains', 5, 5), play('18:15', 'Fábricas Fantásticas', 5, 5)], '3 places lliures', CUR),
+        session('dia-14', 'DS', '14', true, 'Falten 3 dies', 'Dissabtes de jocs!', "Dissabte 14 · 10:00 – 13:30",
+          [play('10:00', 'Ostia', 2, 4), play('10:00', 'Marvel Champions: El Juego de Cartas', 4, 4), play('10:00', 'Dungeons & Dragons (5a edició)', 3, 8)], '7 places lliures', CUR)
+      ] },
+      { anchor: 'setmana-16' + SUF, title: "Setmana del 16 al 22 de novembre", summary: '2 sessions · 1 partida', isFirst: false, events: [
+        session('dia-20', 'DV', '20', false, 'Falten 9 dies', 'Divendres de jocs!', "Divendres 20 · 16:00 – 20:30", [], '', LATER),
+        session('dia-21', 'DS', '21', false, 'Falten 10 dies', 'Dissabtes de jocs!', "Dissabte 21 · 10:00 – 13:30", [play('10:00', 'Dungeons & Dragons (5a edició)', 2, 8, 3)], '6 places lliures', LATER)
+      ] },
+      { anchor: 'setmana-23' + SUF, title: "Setmana del 23 al 29 de novembre", summary: '1 sessió · 1 esdeveniment especial', isFirst: false, events: [
+        session('dia-27', 'DV', '27', false, 'Falten 16 dies', 'Divendres de jocs!', "Divendres 27 · 16:00 – 20:30", [], '', LATER),
+        { id: 'egara', kind: 'x', weekday: 'DS–DG', day: '28', def: true, countdown: 'Falten 17 dies', title: 'Egara Juga 2026', when: "Ds 28 i dg 29 de novembre", place: 'Recinte Firal de Terrassa', plays: [], tile: SPEC }
+      ] }
+    ];
+
+    var dayToEvent = {};
+    var outGroups = groups.map(function (g) {
+      var ids = g.events.map(function (e) { return e.id; });
+      var allOpen = g.events.every(function (e) { return self.isOpen(e.id, e.def); });
+      var events = g.events.map(function (e) {
+        var open = self.isOpen(e.id, e.def);
+        var special = e.kind === 'x';
+        dayToEvent[e.day] = e.id;
+        if (special) dayToEvent['29'] = e.id;
+        var n = e.plays.length;
+        return {
+          anchor: e.id + SUF, panelId: 'panel-' + e.id + SUF, tileStyle: e.tile, weekday: e.weekday, day: e.day,
+          isSession: !special, isSpecial: special, countdown: e.countdown, title: e.title, when: e.when, place: e.place || '',
+          plays: e.plays, showStack: !open && n > 0,
+          playsText: n === 0 ? 'Encara sense partides' : (n === 1 ? '1 partida' : n + ' partides'),
+          freeText: n === 0 ? 'Proposa’n una' : e.freeText,
+          freeStyle: n === 0 ? 'color:#57534E' : 'color:#A04500',
+          proposeHint: n === 0 ? 'Sigues el primer!' : 'No hi és el teu joc?',
+          open: open, expandedAttr: open ? 'true' : 'false',
+          toggle: function () { self.setOpen([e.id], !open); },
+          toggleLabel: open ? 'Amaga' : (special ? 'Veure detalls' : 'Veure partides'),
+          chevron: open ? '▴' : '▾'
+        };
+      });
+      return {
+        anchor: g.anchor, title: g.title, summary: g.summary, isFirst: g.isFirst, notFirst: !g.isFirst, events: events,
+        toggleAll: function () { self.setOpen(ids, !allOpen); },
+        toggleAllLabel: allOpen ? 'Plega-ho tot' : 'Desplega-ho tot'
+      };
+    });
+
+    var past = { 6: 1, 7: 1 };
+    var cells = [];
+    var d = new Date(Date.UTC(2026, 9, 26));
+    for (var k = 0; k < 42; k++) {
+      var m = d.getUTCMonth() + 1, day = d.getUTCDate();
+      var inMonth = m === 11, today = inMonth && day === 11;
+      var target = inMonth ? dayToEvent[String(day)] : null;
+      var style = 'color:#1C1917';
+      if (!inMonth) style = 'color:#A8A29E';
+      else if (target === 'egara') style = 'background:#B54F00;color:#FFFFFF;font-weight:800';
+      else if (past[day]) style = 'background:#1C1917;color:#FFFFFF;opacity:0.35';
+      else if (target) style = 'background:#1C1917;color:#FFFFFF;font-weight:700';
+      if (today) style += ';box-shadow:inset 0 0 0 2px #1C1917;font-weight:800';
+      (function (t, dd) {
+        cells.push({
+          day: dd, style: style, link: !!t, plain: !t, href: t ? '#' + t + SUF : '',
+          aria: t ? dd + ' de novembre, ' + (t === 'egara' ? 'Egara Juga 2026' : 'sessió oberta') : '',
+          open: function () { if (t) self.setOpen([t], true); }
+        });
+      })(target, day);
+      d = new Date(d.getTime() + 86400000);
+    }
+    return { banners: banners, groups: outGroups, cells: cells, weekdays: ['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg'] };
+  }
+}
+</script>
+</body>
+</html>

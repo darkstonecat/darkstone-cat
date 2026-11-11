@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>Comptador de places</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1200px; height: 760px; box-sizing: border-box; padding: 40px; background: #EEE8DC; color: #1C1917; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; gap: 24px">
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <h1 style="margin: 0; font-size: 30px; font-weight: 800">Comptador de places: tots els casos</h1>
+    <p style="margin: 0; font-size: 15px; color: #57534E; max-width: 900px">Fins a 8 places: cadires en una sola línia (negra = ocupada, contorn gris = lliure, contorn taronja = falta per arribar al mínim); si no caben (més de 6 a l'escriptori, 5 al mòbil) es retallen amb «…» i el comptador X/N queda sempre a la dreta. De 9 a 20: barra amb un segment per plaça. Més de 20: barra contínua. Sense límit: icona de persones i nombre d'apuntats.</p>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px">
+    <sc-for list="{{cases}}" as="p" hint-placeholder-count="10">
+      <div style="background: #FFFFFF; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.06em; color: #57534E; text-transform: uppercase">{{p.label}}</span>
+        <div style="position: relative; aspect-ratio: 4 / 3; border-radius: 12px; background: #4E6145; display: flex; align-items: flex-end; padding: 10px; box-sizing: border-box"><span style="font-size: 15px; font-weight: 800; color: #FAFAF9">{{p.name}}</span><div role="img" aria-label="{{p.aria}}" style="position: absolute; top: 8px; left: 8px; right: 8px; background: rgba(250,250,249,0.96); border-radius: 12px; padding: 5px 8px; box-shadow: 0 1px 3px rgba(28,25,23,0.25); display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 6px; color: #1C1917; white-space: nowrap">
+                <sc-if value="{{p.isChairs}}" hint-placeholder-val="{{ true }}">
+                  <span style="display: flex; flex-wrap: nowrap; align-items: center; gap: 1px; min-width: 0; overflow: hidden">
+                    <sc-for list="{{p.seats}}" as="st" hint-placeholder-count="4">
+                      <sc-if value="{{st.taken}}" hint-placeholder-val="{{ true }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24"><path d="M7 3h10v9H7z" fill="#1C1917"></path><path d="M5 12h14v3H5z" fill="#1C1917"></path><path d="M6.5 15v6M17.5 15v6" stroke="#1C1917" stroke-width="2" stroke-linecap="round"></path></svg></sc-if>
+                      <sc-if value="{{st.needed}}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B54F00" stroke-width="1.7" stroke-linejoin="round"><path d="M7 3h10v9H7z"></path><path d="M5 12h14v3H5z"></path><path d="M6.5 15v6M17.5 15v6" stroke-linecap="round"></path></svg></sc-if>
+                      <sc-if value="{{st.free}}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#78716C" stroke-width="1.7" stroke-linejoin="round"><path d="M7 3h10v9H7z"></path><path d="M5 12h14v3H5z"></path><path d="M6.5 15v6M17.5 15v6" stroke-linecap="round"></path></svg></sc-if>
+                      <sc-if value="{{st.ellipsis}}" hint-placeholder-val="{{ false }}"><span style="padding: 0 2px; font-size: 15px; font-weight: 800; line-height: 1; color: #57534E">…</span></sc-if>
+                    </sc-for>
+                  </span>
+                </sc-if>
+                <sc-if value="{{p.isSegments}}" hint-placeholder-val="{{ false }}">
+                  <span style="flex: 1; display: flex; gap: 2px">
+                    <sc-for list="{{p.segs}}" as="sg" hint-placeholder-count="12">
+                      <span style="flex: 1; height: 10px; border-radius: 2px; {{sg.style}}"></span>
+                    </sc-for>
+                  </span>
+                </sc-if>
+                <sc-if value="{{p.isBar}}" hint-placeholder-val="{{ false }}">
+                  <span style="flex: 1; height: 10px; border-radius: 999px; background: #BDB7B0; overflow: hidden; display: flex"><span style="height: 100%; background: #1C1917; {{p.barStyle}}"></span></span>
+                </sc-if>
+                <sc-if value="{{p.isOpen}}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1917" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M16 14.2a5 5 0 0 1 5.5 5"></path></svg></sc-if>
+                <strong style="flex-shrink: 0; font-size: 14px; white-space: nowrap">{{p.countText}}</strong>
+              </div>
+</div>
+              <span style="font-size: 12px; font-weight: 700; {{p.statusStyle}}">{{p.status}}</span>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display: flex; flex-wrap: wrap; gap: 24px; font-size: 13px; color: #57534E">
+    <span>Ordre de l'estat: Completa → Falta N per començar → Queda 1 plaça → Queden N places → Sense límit.</span>
+    <span>Lectors de pantalla: «3 de 4 places ocupades, en falta 1 per començar».</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var COVERS = ['#4E6145'];
+    var ci = 0;
+    function play(time, name, taken, cap, min) {
+      var full = cap !== null && taken >= cap;
+      var free = cap === null ? null : cap - taken;
+      var needMin = min && taken < min ? min - taken : 0;
+      var mode = cap === null ? 'open' : (cap <= 8 ? 'chairs' : (cap <= 20 ? 'segments' : 'bar'));
+      var seats = [], segs = [];
+      if (mode === 'chairs') for (var i = 0; i < cap; i++) {
+        var t = i < taken, need = !t && i < taken + needMin;
+        seats.push({ taken: t, needed: need, free: !t && !need, ellipsis: false });
+      }
+      var SEAT_MAX = 6;
+      if (seats.length > SEAT_MAX) {
+        seats = seats.slice(0, SEAT_MAX - 1);
+        seats.push({ taken: false, needed: false, free: false, ellipsis: true });
+      }
+      if (mode === 'segments') for (var j = 0; j < cap; j++) {
+        segs.push({ style: j < taken ? 'background:#1C1917' : (j < taken + needMin ? 'background:#F0C29C' : 'background:#BDB7B0') });
+      }
+      var status = full ? 'Completa' : (needMin ? (needMin === 1 ? 'Falta 1 per començar' : 'Falten ' + needMin + ' per començar') : (free === null ? 'Sense límit de places' : (free === 1 ? 'Queda 1 plaça' : 'Queden ' + free + ' places')));
+      return {
+        time: time, name: name, coverBg: COVERS[ci++ % COVERS.length],
+        isChairs: mode === 'chairs', isSegments: mode === 'segments', isBar: mode === 'bar', isOpen: mode === 'open',
+        seats: seats, segs: segs, barStyle: cap ? 'width:' + Math.round(taken / cap * 100) + '%' : '',
+        countText: cap === null ? taken + ' apuntats' : taken + '/' + cap,
+        aria: cap === null ? taken + ' persones apuntades, sense límit' : taken + ' de ' + cap + ' places ocupades' + (needMin ? ', en falten ' + needMin + ' per començar' : ''),
+        status: status, statusStyle: full ? 'color:#57534E' : 'color:#A04500',
+        btn: full ? 'A la cua ↗' : 'Apunta\u2019t ↗',
+        btnStyle: full ? 'border:1px solid #A8A29E;color:#1C1917' : 'background:#1C1917;color:#FFFFFF'
+      };
+    }
+    function c(label, name, taken, cap, min) { var p = play('', name, taken, cap, min); p.label = label; return p; }
+    return { cases: [
+      c('Buida', 'Azul', 0, 4),
+      c('Mínim no assolit', 'Signorie (mín. 3)', 2, 4, 3),
+      c('Queda 1', 'Emberleaf', 3, 4),
+      c('Completa', 'Forest Shuffle', 5, 5),
+      c('Taula de rol', 'D&D 5a edició', 3, 8),
+      c('Rol, sense mínim', 'Partida d\u2019iniciació', 1, 6, 3),
+      c('9–20 places', 'Torneig de Carcassonne', 12, 16),
+      c('9–20, gairebé plena', 'Werewolf', 17, 18),
+      c('Més de 20', 'Jornada de demos', 45, 60),
+      c('Sense límit', 'Egara Juga 2026', 21, null)
+    ] };
+  }
+}
+</script>
+</body>
+</html>
