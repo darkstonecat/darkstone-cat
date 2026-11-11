@@ -32,7 +32,7 @@ export function logAdminFailure(action: string, code: string | null | undefined)
 }
 
 export function revalidateMemberPages(): void {
-  revalidatePath("/[locale]/admin/members", "page");
+  revalidatePath("/[locale]/admin/members/(list)", "page");
   revalidatePath("/[locale]/admin/members/[number]", "page");
 }
 

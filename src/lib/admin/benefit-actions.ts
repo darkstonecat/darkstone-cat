@@ -44,7 +44,7 @@ function invalid(field: BenefitField | null): BenefitActionFail {
 
 function revalidateBenefitPages(): void {
   revalidatePath("/[locale]/admin/benefits", "page");
-  revalidatePath("/[locale]/profile/details", "page");
+  revalidatePath("/[locale]/profile", "page");
 }
 
 /** "Nou benefici": placed last. Returns the new id. */

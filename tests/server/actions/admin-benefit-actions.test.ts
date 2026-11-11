@@ -40,7 +40,7 @@ const INPUT = {
 }
 const PAGES = [
   ['/[locale]/admin/benefits', 'page'],
-  ['/[locale]/profile/details', 'page'],
+  ['/[locale]/profile', 'page'],
 ]
 
 let consoleSpies: MockInstance[]

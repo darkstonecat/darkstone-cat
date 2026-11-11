@@ -40,7 +40,8 @@ export async function saveResponseAsFile(res: Response, fallbackName: string): P
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // Revoking in the same tick cancels the download in some Safari and Firefox versions.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /** POST with a JSON body, as every export route requires (same-origin, no GET). */

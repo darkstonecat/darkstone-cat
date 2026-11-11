@@ -122,7 +122,8 @@ export default function LoginForm() {
     // Hard navigation to ensure cookies are fully set before SSR reads them.
     // Using router.replace() here causes repeated RSC fetches due to
     // token refresh race between client-side Supabase and the middleware.
-    window.location.href = safeRedirectPath(redirect, window.location.origin);
+    const prefix = locale === "ca" ? "" : `/${locale}`;
+    window.location.href = safeRedirectPath(redirect, window.location.origin, `${prefix}/profile`);
   }
 
   async function handleMagicLink() {

@@ -196,7 +196,7 @@ describe('updateMember (A-4)', () => {
   it('revalidates the admin member pages after a change', async () => {
     db.result = { data: ['first_name'], error: null }
     await updateMember(TARGET, valid)
-    expect(db.revalidatePath).toHaveBeenCalledWith('/[locale]/admin/members', 'page')
+    expect(db.revalidatePath).toHaveBeenCalledWith('/[locale]/admin/members/(list)', 'page')
     expect(db.revalidatePath).toHaveBeenCalledWith('/[locale]/admin/members/[number]', 'page')
   })
 

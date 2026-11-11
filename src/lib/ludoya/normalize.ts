@@ -268,10 +268,17 @@ export function parseSessionsResponse(
   const sessions: LudoyaSession[] = [];
   const playsByParent = new Map<string, LudoyaSessionPlay[]>();
   const subEventsByParent = new Map<string, LudoyaSubEvent[]>();
+  // An event running now may come back in both lists; the future copy wins.
+  const seenIds = new Set<string>();
 
   elements.forEach(({ item, ctx }) => {
     if (!isObject(item)) throw new LudoyaShapeError(ctx, "object", item);
     if (optionalBoolean(item, "canceled", ctx) || optionalBoolean(item, "draft", ctx)) return;
+    const itemId = optionalString(item, "id", ctx);
+    if (itemId) {
+      if (seenIds.has(itemId)) return;
+      seenIds.add(itemId);
+    }
 
     const type = requireString(item, "type", ctx);
     const parentId = optionalString(item, "parentId", ctx);

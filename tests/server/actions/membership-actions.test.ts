@@ -194,7 +194,7 @@ describe('leaveMember (A-6)', () => {
   it('revalidates the admin member pages after a leave', async () => {
     db.result = { data: [leaveRow], error: null }
     await leaveMember(TARGET, REASON)
-    expect(db.revalidatePath).toHaveBeenCalledWith('/[locale]/admin/members', 'page')
+    expect(db.revalidatePath).toHaveBeenCalledWith('/[locale]/admin/members/(list)', 'page')
     expect(db.revalidatePath).toHaveBeenCalledWith('/[locale]/admin/members/[number]', 'page')
   })
 

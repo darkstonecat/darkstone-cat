@@ -52,7 +52,7 @@ const BADGE_PAGES = [
   ['/[locale]/admin/badges/[key]', 'page'],
 ]
 const MEMBER_PAGES = [
-  ['/[locale]/admin/members', 'page'],
+  ['/[locale]/admin/members/(list)', 'page'],
   ['/[locale]/admin/members/[number]', 'page'],
 ]
 

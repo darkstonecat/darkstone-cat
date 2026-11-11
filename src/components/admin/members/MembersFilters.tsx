@@ -7,6 +7,7 @@ import {
   MEMBER_ROLE_FILTERS,
   MEMBER_SORTS,
   MEMBER_STATES,
+  buildMembersHref,
   MAX_SEARCH_LENGTH,
   DEFAULT_PAGE_SIZE,
   type MembersQuery,
@@ -29,8 +30,9 @@ export default function MembersFilters({ query }: { query: MembersQuery }) {
 
   const submit = () => formRef.current?.requestSubmit();
 
+  // Uncontrolled fields: a new query (e.g. the "Socis" tab link) must remount them.
   return (
-    <form ref={formRef} method="get" role="search" className="flex flex-col gap-4">
+    <form key={buildMembersHref(query)} ref={formRef} method="get" role="search" className="flex flex-col gap-4">
       {/* Sort is chosen with the table headers on desktop and the select below on mobile. */}
       <input ref={sortRef} type="hidden" name="sort" value={query.sort} readOnly />
       {query.pp !== DEFAULT_PAGE_SIZE && <input type="hidden" name="pp" value={query.pp} />}

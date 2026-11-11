@@ -126,7 +126,7 @@ describe('setMemberRole (S-1, S-2)', () => {
   it('revalidates the member pages and the roles page', async () => {
     db.result = { data: [{ action: 'role.grant', role: 'superadmin', role_since: null }], error: null }
     await setMemberRole(TARGET, 'superadmin')
-    expect(db.revalidatePath).toHaveBeenCalledWith('/[locale]/admin/members', 'page')
+    expect(db.revalidatePath).toHaveBeenCalledWith('/[locale]/admin/members/(list)', 'page')
     expect(db.revalidatePath).toHaveBeenCalledWith('/[locale]/admin/members/[number]', 'page')
     expect(db.revalidatePath).toHaveBeenCalledWith('/[locale]/admin/roles', 'page')
   })

@@ -15,9 +15,13 @@ export const eventAnchor = (eventId: string) => `${ANCHOR_PREFIX}${eventId}`;
 /** Event id named by a `#event-<id>` hash, or null. */
 export function eventIdFromHash(hash: string): string | null {
   const value = hash.startsWith("#") ? hash.slice(1) : hash;
-  return value.startsWith(ANCHOR_PREFIX) && value.length > ANCHOR_PREFIX.length
-    ? decodeURIComponent(value.slice(ANCHOR_PREFIX.length))
-    : null;
+  if (!value.startsWith(ANCHOR_PREFIX) || value.length <= ANCHOR_PREFIX.length) return null;
+  try {
+    return decodeURIComponent(value.slice(ANCHOR_PREFIX.length));
+  } catch {
+    // A shared link with broken percent-encoding names no event.
+    return null;
+  }
 }
 
 /** Google Maps search for a place that is not the usual venue. */

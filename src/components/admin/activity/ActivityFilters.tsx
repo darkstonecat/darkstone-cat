@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { MdFilterList } from "react-icons/md";
 import { Link } from "@/i18n/routing";
-import { ACTION_FILTERS, type ActivityQuery } from "@/lib/admin/activity";
+import { ACTION_FILTERS, buildActivityHref, type ActivityQuery } from "@/lib/admin/activity";
 import { adminButtonClass } from "../adminButtons";
 
 const fieldClass =
@@ -29,7 +29,8 @@ export default function ActivityFilters({
       <h2 id="activity-filters" className="text-[22px] font-bold text-stone-custom">
         {t("filters_title")}
       </h2>
-      <form method="get" role="search" className="mt-5 flex flex-col gap-4">
+      {/* Uncontrolled fields: a new query (e.g. the tab link) must remount them. */}
+      <form key={buildActivityHref(query)} method="get" role="search" className="mt-5 flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="activity-from" className={labelClass}>

@@ -112,6 +112,23 @@ describe("parseSessionsResponse", () => {
     });
   });
 
+  it("keeps one copy of an event returned in both the future and the past list", () => {
+    const running = {
+      id: "run",
+      type: "MEETUP",
+      visibility: "PUBLIC",
+      title: "Weekend",
+      startsAt: "2026-11-01T10:00:00Z",
+      endsAt: "2026-11-02T20:00:00Z",
+    };
+    const raw = {
+      futureEvents: { elements: [running] },
+      pastEvents: { elements: [{ ...running, title: "Weekend (past copy)" }] },
+    };
+    const sessions = parseSessionsResponse(raw, { includePast: true, now: new Date("2026-11-01T12:00:00Z") });
+    expect(sessions.map((s) => [s.id, s.title])).toEqual([["run", "Weekend"]]);
+  });
+
   it("drops special events further than 12 months away and cancelled ones", () => {
     const raw = {
       futureEvents: {
