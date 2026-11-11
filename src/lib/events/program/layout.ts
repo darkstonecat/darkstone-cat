@@ -9,7 +9,7 @@
 // - Always-open items are grouped by zone in tree order, zone-less ones last.
 
 import { madridDay } from "../madrid-day";
-import type { AlwaysOpenGroup, ProgramCounts, ProgramDay, ProgramEvent, ProgramItem, ProgramLayout } from "./types";
+import type { AlwaysOpenGroup, ProgramCounts, ProgramDay, ProgramEvent, ProgramItem, ProgramLayout, SeatedItem } from "./types";
 
 /** More timed items than this in one day are grouped by start time. */
 export const PROGRAM_SLOT_THRESHOLD = 8;
@@ -69,4 +69,14 @@ export function layoutProgram<T extends ProgramItem>(items: readonly T[], event:
     alwaysOpen: alwaysOpenGroups(items.filter((item) => item.placement === "alwaysOpen")),
     counts: countItems(items),
   };
+}
+
+/** Every item of a layout: the days in order, then the always-open block. */
+export function programItems<T extends ProgramItem>(layout: ProgramLayout<T>): T[] {
+  return [...layout.days.flatMap((d) => d.groups.flatMap((g) => g.items)), ...layout.alwaysOpen.flatMap((g) => g.items)];
+}
+
+/** The items that have seats (plays and tournaments). */
+export function seatedItems<T extends ProgramItem>(layout: ProgramLayout<T>): Extract<T, SeatedItem>[] {
+  return programItems(layout).filter((item): item is Extract<T, SeatedItem> => item.kind === "play" || item.kind === "tournament");
 }

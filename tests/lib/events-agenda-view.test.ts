@@ -6,9 +6,12 @@ import {
   summarizeEvent,
   weekSummary,
   madridWeekStart,
+  programItems,
   toAgenda,
 } from "@/lib/events/agenda-view";
+import type { ProgramItem, ProgramLayout } from "@/lib/events/program";
 import type { MemberSession, MemberSessionPlay } from "@/lib/member-sessions";
+import type { CoveredSubEvent } from "@/lib/sub-event-covers";
 
 const USUAL = { id: "loc-1", name: "Centre Cívic Ca N'Aurell", address: "Plaça del Tint, 4", isUsual: true };
 const OTHER = { id: "loc-2", name: "Ateneu", address: "Carrer Major, 1", isUsual: false };
@@ -52,8 +55,39 @@ const session = (over: Partial<MemberSession> = {}): MemberSession => ({
   queuedParticipantCount: null,
   organizerName: "Session Host",
   plannedPlays: [play()],
-  subEvents: [],
+  subEvents: [node()],
   ...over,
+});
+
+const node = (over: Partial<CoveredSubEvent> = {}): CoveredSubEvent => ({
+  id: "p1",
+  kind: "play",
+  title: "Emberleaf",
+  startsAt: "2026-11-13T17:00:00Z",
+  endsAt: "2026-11-13T19:00:00Z",
+  alwaysOpen: false,
+  game: { name: "Emberleaf", yearPublished: 2024, imageUrl: null, slug: "emberleaf" },
+  imageUrl: null,
+  coverUrl: "https://bgg.example/emberleaf.jpg",
+  place: OTHER,
+  participantCount: 3,
+  capacity: 4,
+  minParticipants: 2,
+  organizerName: "Secret Organizer",
+  attendance: "rsvp",
+  tournamentFormat: null,
+  visibility: "PUBLIC",
+  ludoyaUrl: "https://ludoya.example/p1",
+  children: [],
+  ...over,
+});
+
+/** A one-day program holding these items in one grid. */
+const programOf = (items: ProgramItem[]): ProgramLayout => ({
+  multiDay: false,
+  days: [{ day: "2026-11-13", mode: "grid", groups: [{ startsAt: null, items }], counts: { plays: items.length, tournaments: 0, activities: 0, demos: 0 } }],
+  alwaysOpen: [],
+  counts: { plays: items.length, tournaments: 0, activities: 0, demos: 0 },
 });
 
 // Wednesday 11 November 2026, 12:00 in Madrid.
@@ -138,7 +172,11 @@ describe("toAgenda", () => {
       session({ id: "group", visibility: "ONLY_GROUP" }),
       session({
         id: "public",
-        plannedPlays: [play({ id: "open" }), play({ id: "hidden", visibility: "ONLY_GROUP" })],
+        subEvents: [
+          node({ id: "open" }),
+          node({ id: "hidden", visibility: "ONLY_GROUP" }),
+          node({ id: "zone", kind: "meetup", visibility: "ONLY_GROUP", children: [node({ id: "inside" })] }),
+        ],
       }),
     ];
 
@@ -146,7 +184,7 @@ describe("toAgenda", () => {
     const events = weeks.flatMap((w) => w.events);
 
     expect(events.map((e) => e.id)).toEqual(["public"]);
-    expect(events[0].plays.map((p) => p.id)).toEqual(["open"]);
+    expect(programItems(events[0].program).map((p) => p.id)).toEqual(["open"]);
   });
 
   it("never carries organizer names, visibility or raw place of the usual venue", () => {
@@ -174,8 +212,8 @@ describe("toAgenda", () => {
       ["away", { name: "Ateneu", address: "Carrer Major, 1" }],
       ["unknown", null],
     ]);
-    expect(events[0].plays[0].place).toBeNull();
-    expect(events[1].plays[0].place).toEqual({ name: "Ateneu", address: "Carrer Major, 1" });
+    // Program items carry no place at all.
+    expect(programItems(events[1].program)[0]).not.toHaveProperty("place");
   });
 
   it("gives a countdown to specials only", () => {
@@ -192,24 +230,30 @@ describe("toAgenda", () => {
     ]);
   });
 
-  it("keeps play seats and the cover, and falls back to Ludoya's image", () => {
-    const sessions = [session({ plannedPlays: [play(), play({ id: "p2", coverUrl: null })] })];
+  it("builds the program from the sub-event tree with seats and the resolved cover", () => {
+    const sessions = [session({ subEvents: [node(), node({ id: "p2", coverUrl: null, startsAt: "2026-11-13T18:00:00Z" })] })];
 
-    const [first, second] = toAgenda(sessions, NOW).weeks[0].events[0].plays;
+    const { program } = toAgenda(sessions, NOW).weeks[0].events[0];
+    const [first, second] = programItems(program);
 
     expect(first).toEqual({
+      kind: "play",
       id: "p1",
+      title: "Emberleaf",
       gameName: "Emberleaf",
+      zone: null,
       coverUrl: "https://bgg.example/emberleaf.jpg",
       startsAt: "2026-11-13T17:00:00Z",
       endsAt: "2026-11-13T19:00:00Z",
-      place: null,
+      placement: "timed",
       participantCount: 3,
       capacity: 4,
       minParticipants: 2,
       ludoyaUrl: "https://ludoya.example/p1",
     });
-    expect(second.coverUrl).toBe("https://ludoya.example/emberleaf.jpg");
+    // No cover anywhere: the card draws the placeholder.
+    expect(second.coverUrl).toBeNull();
+    expect(program.days).toHaveLength(1);
   });
 
   it("lists at most three upcoming specials for the banners, soonest first", () => {
@@ -240,31 +284,38 @@ describe("toAgenda", () => {
 });
 
 describe("summarizeEvent", () => {
-  const p = (taken: number, capacity: number | null) => ({ participantCount: taken, capacity });
+  const p = (taken: number, capacity: number | null, kind: "play" | "tournament" = "play"): ProgramItem =>
+    ({ kind, id: `${taken}-${capacity}`, title: "x", gameName: null, zone: null, coverUrl: null, startsAt: null, endsAt: null, ludoyaUrl: "", placement: "timed", participantCount: taken, capacity, minParticipants: null, format: null, tickets: false }) as ProgramItem;
+  const activity = { kind: "activity", id: "a", title: "Talk", zone: null, coverUrl: null, startsAt: null, endsAt: null, ludoyaUrl: "", placement: "timed" } as ProgramItem;
 
   it("says there are no plays yet", () => {
-    expect(summarizeEvent({ plays: [] })).toEqual({ playCount: 0, availability: { kind: "none" } });
+    expect(summarizeEvent({ program: programOf([]) })).toEqual({ playCount: 0, availability: { kind: "none" } });
   });
 
-  it("adds up the free seats of every play", () => {
-    expect(summarizeEvent({ plays: [p(3, 4), p(2, 4), p(5, 5)] })).toEqual({ playCount: 3, availability: { kind: "seats", free: 3 } });
+  it("adds up the free seats of every play and tournament, ignoring activities", () => {
+    expect(summarizeEvent({ program: programOf([p(3, 4), p(2, 4, "tournament"), p(5, 5), activity]) })).toEqual({
+      playCount: 3,
+      availability: { kind: "seats", free: 3 },
+    });
   });
 
   it("says unlimited when the only room left is a play without limit", () => {
-    expect(summarizeEvent({ plays: [p(5, 5), p(9, null)] }).availability).toEqual({ kind: "unlimited" });
+    expect(summarizeEvent({ program: programOf([p(5, 5), p(9, null)]) }).availability).toEqual({ kind: "unlimited" });
   });
 
   it("says all full when every play is full", () => {
-    expect(summarizeEvent({ plays: [p(5, 5), p(6, 4)] }).availability).toEqual({ kind: "all_full" });
+    expect(summarizeEvent({ program: programOf([p(5, 5), p(6, 4)]) }).availability).toEqual({ kind: "all_full" });
   });
 });
 
 describe("weekSummary", () => {
   it("counts sessions, plays, specials and free seats of a week", () => {
+    const seat = (taken: number, capacity: number | null) =>
+      ({ kind: "play", id: `${taken}`, title: "x", gameName: null, zone: null, coverUrl: null, startsAt: null, endsAt: null, ludoyaUrl: "", placement: "timed", participantCount: taken, capacity, minParticipants: null }) as ProgramItem;
     const events = [
-      { type: "regular" as const, plays: [{ participantCount: 3, capacity: 4 }, { participantCount: 1, capacity: 4 }] },
-      { type: "regular" as const, plays: [] },
-      { type: "special" as const, plays: [{ participantCount: 2, capacity: null }] },
+      { type: "regular" as const, program: programOf([seat(3, 4), seat(1, 4)]) },
+      { type: "regular" as const, program: programOf([]) },
+      { type: "special" as const, program: programOf([seat(2, null)]) },
     ];
 
     expect(weekSummary(events)).toEqual({ sessions: 2, specials: 1, plays: 3, free: 4 });

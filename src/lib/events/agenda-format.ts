@@ -5,14 +5,29 @@
 // text of the agenda is formatted here, on the server, and the client
 // components only print it. Pure: no React, no server-only imports.
 
-import type { Agenda, AgendaEvent, AgendaPlay, AgendaWeek } from "./agenda-view";
+import type { Agenda, AgendaEvent, AgendaWeek } from "./agenda-view";
+import type { AlwaysOpenGroup, ProgramDay, ProgramGroup, ProgramItem, ProgramLayout } from "./program";
 
 const TIME_ZONE = "Europe/Madrid";
 const INTL_LOCALES: Record<string, string> = { ca: "ca-ES", es: "es-ES", en: "en-GB" };
 
-export interface PlayView extends AgendaPlay {
-  /** "16:15" */
-  time: string;
+/** A program item with its hours: "10:00 – 14:00", "16:15" without an end, null when undated. */
+export type ItemView = ProgramItem & { time: string | null };
+
+export interface GroupView extends ProgramGroup<ItemView> {
+  /** "10:00" in slots mode; null for a day's single grid. */
+  time: string | null;
+}
+
+export interface DayView extends Omit<ProgramDay<ItemView>, "groups"> {
+  /** "Dissabte 28 de novembre" */
+  title: string;
+  groups: GroupView[];
+}
+
+export interface ProgramView extends Omit<ProgramLayout<ItemView>, "days" | "alwaysOpen"> {
+  days: DayView[];
+  alwaysOpen: AlwaysOpenGroup<ItemView>[];
 }
 
 /**
@@ -24,7 +39,7 @@ export interface EventTile {
   gap: boolean;
 }
 
-export interface EventView extends Omit<AgendaEvent, "plays"> {
+export interface EventView extends Omit<AgendaEvent, "program"> {
   tile: EventTile;
   /** "Divendres 13 de novembre", or a range for a multi-day event. */
   dates: string;
@@ -32,7 +47,7 @@ export interface EventView extends Omit<AgendaEvent, "plays"> {
   time: string;
   /** `dates · time` */
   when: string;
-  plays: PlayView[];
+  program: ProgramView;
 }
 
 /** Values of the week title message ("Setmana del 16 al 22 de novembre"). */
@@ -127,13 +142,38 @@ export function formatAgenda(agenda: Agenda, locale: string, now: Date = new Dat
     return { days: [tileDay(start), tileDay(end)], gap: nextDay(first) !== last };
   }
 
+  const dayTitle = (instant: Date) => capitalize(longDate.format(instant).replace(",", ""));
+
+  function itemTime(item: ProgramItem): string | null {
+    if (item.startsAt === null) return null;
+    const start = clock.format(new Date(item.startsAt));
+    return item.endsAt === null ? start : `${start} – ${clock.format(new Date(item.endsAt))}`;
+  }
+
+  function formatProgram(program: ProgramLayout): ProgramView {
+    const item = (i: ProgramItem): ItemView => ({ ...i, time: itemTime(i) });
+    return {
+      ...program,
+      days: program.days.map((day) => ({
+        ...day,
+        title: dayTitle(dayInstant(day.day)),
+        groups: day.groups.map((group) => ({
+          startsAt: group.startsAt,
+          time: group.startsAt === null ? null : clock.format(new Date(group.startsAt)),
+          items: group.items.map(item),
+        })),
+      })),
+      alwaysOpen: program.alwaysOpen.map((group) => ({ zone: group.zone, items: group.items.map(item) })),
+    };
+  }
+
   function formatEvent(event: AgendaEvent): EventView {
     const start = new Date(event.startsAt);
     const end = new Date(event.endsAt);
     const multiDay = calendarDay.format(start) !== calendarDay.format(end);
     const dates = multiDay
       ? capitalize(plainSpaces(shortRange.formatRange(start, end)))
-      : capitalize(longDate.format(start).replace(",", ""));
+      : dayTitle(start);
     const time = `${clock.format(start)} – ${clock.format(end)}`;
     return {
       ...event,
@@ -141,7 +181,7 @@ export function formatAgenda(agenda: Agenda, locale: string, now: Date = new Dat
       dates,
       time,
       when: `${dates} · ${time}`,
-      plays: event.plays.map((play) => ({ ...play, time: clock.format(new Date(play.startsAt)) })),
+      program: formatProgram(event.program),
     };
   }
 

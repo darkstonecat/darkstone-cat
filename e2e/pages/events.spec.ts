@@ -12,7 +12,8 @@ import { expectHydrated } from '../helpers/hydration'
 
 const card = (page: Page, title: string, nth = 0) =>
   page.locator('article').filter({ has: page.getByRole('heading', { level: 3, name: title }) }).nth(nth)
-const toggle = (page: Page, title: string, nth = 0) => card(page, title, nth).locator('button[aria-expanded]')
+// The card's own toggle controls its panel (`event-<id>-panel`); program sections have their own toggles.
+const toggle = (page: Page, title: string, nth = 0) => card(page, title, nth).locator('button[aria-controls$="-panel"]')
 
 /** scrollY once a smooth scroll has stopped moving. */
 async function settledScrollY(page: Page) {
@@ -170,6 +171,44 @@ test.describe('Events page (/events)', () => {
     await openEvents(page)
     const tile = page.locator('[id^="event-"]').filter({ has: card(page, 'Egara Juga 2026') }).locator('[data-timeline-tile]')
     await expect(tile).toHaveText(/DS\s*28\s*DG\s*29/)
+  })
+
+  test('a special shows its whole program: one section per day, tournaments, the always-open block', async ({ page }) => {
+    await openEvents(page)
+    const egara = card(page, 'Egara Juga 2026')
+    const section = (name: RegExp) => egara.getByRole('button', { name })
+
+    // Count chips of the whole tree (drafts left out).
+    await expect(egara.locator('[data-program-counts] li')).toHaveText(['8 partides', '3 tornejos', '3 activitats', '13 demos'])
+
+    // Every day is visible and open; Saturday (9 items) goes by start time.
+    const saturday = section(/Dissabte 28 de novembre/)
+    await expect(saturday).toHaveAttribute('aria-expanded', 'true')
+    await expect(section(/Diumenge 29 de novembre/)).toHaveAttribute('aria-expanded', 'true')
+    await expect(egara.locator('[data-program-slot] time')).toHaveText(['10:00', '16:00', '18:00'])
+
+    // A play inside a meetup zone, and a tournament with its format.
+    await expect(egara.getByText('Aquí nunca hubo campanas · Partides de ROL')).toBeVisible()
+    await expect(egara.locator('[data-item-badge="tournament"]').first()).toHaveText(/Torneig · Eliminatòria per taules/)
+    await expect(egara.getByRole('link', { name: /^Entrada/ }).first()).toBeVisible()
+
+    // Always-open demos grouped by zone, A Risk Cat under "Altres activitats".
+    const open = section(/Tot l’esdeveniment/)
+    await expect(open).toHaveAttribute('aria-expanded', 'true')
+    await expect(egara.getByText('Sempre obert · sense hora')).toBeVisible()
+    const others = egara.locator('[data-always-open-group]').last()
+    await expect(others).toContainText('Altres activitats')
+    await expect(others.getByRole('link', { name: /A Risk Cat/ })).toBeVisible()
+
+    // Drafts never reach the page.
+    await expect(egara).not.toContainText(/Clocktower|BOTC|Brass|Plakks|Paraulògic/)
+
+    // A day and the always-open block fold.
+    await saturday.click()
+    await expect(saturday).toHaveAttribute('aria-expanded', 'false')
+    await expect(egara.getByText('Aquí nunca hubo campanas · Partides de ROL')).toBeHidden()
+    await open.click()
+    await expect(egara.getByText('Sempre obert · sense hora')).toBeHidden()
   })
 
   test('the calendar route answers public months only', async ({ request }) => {

@@ -13,24 +13,19 @@ vi.mock('next/image', () => ({
 }))
 
 import SeatPill from '@/components/events/SeatPill'
-import PlayCard from '@/components/events/PlayCard'
-import type { AgendaPlay } from '@/lib/events/agenda-view'
+import ItemCard from '@/components/events/program/ItemCard'
+import type { ItemView } from '@/lib/events/agenda-format'
+import { playView } from '../../helpers/program-view'
 
 const MESSAGES = { ca, es, en }
 
-const play = (over: Partial<AgendaPlay> = {}): AgendaPlay => ({
-  id: 'p1',
-  gameName: 'Signorie',
-  coverUrl: null,
-  startsAt: '2026-11-13T17:00:00Z',
-  endsAt: null,
-  place: null,
-  participantCount: 3,
-  capacity: 4,
-  minParticipants: 4,
-  ludoyaUrl: 'https://ludoya.test/events/p1',
-  ...over,
-})
+const play = (over: Partial<ItemView> = {}): ReturnType<typeof playView> =>
+  playView({ title: 'Signorie', gameName: 'Signorie', coverUrl: null, minParticipants: 4, ...over })
+const PlayCard = ({ play: item }: { play: ItemView; time?: string }) => (
+  <ul>
+    <ItemCard item={item} />
+  </ul>
+)
 
 const renderIn = (locale: keyof typeof MESSAGES, ui: React.ReactNode) =>
   render(
@@ -60,7 +55,7 @@ describe('seat texts with the real messages', () => {
     const { rerender } = renderIn('ca', <PlayCard play={play({ participantCount: 1, minParticipants: 3 })} time="18:00" />)
     expect(screen.queryByText('Falten 2 per començar')).toBeNull()
 
-    const again = (p: AgendaPlay) =>
+    const again = (p: ItemView) =>
       rerender(
         <NextIntlClientProvider locale="ca" messages={ca}>
           <PlayCard play={p} time="18:00" />

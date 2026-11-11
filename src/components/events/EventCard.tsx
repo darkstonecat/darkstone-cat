@@ -4,9 +4,11 @@ import { useTranslations } from "next-intl";
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import { cn } from "@/lib/utils";
 import type { EventView } from "@/lib/events/agenda-format";
-import { summarizeEvent, type AgendaPlace } from "@/lib/events/agenda-view";
+import { programItems, summarizeEvent, type AgendaPlace } from "@/lib/events/agenda-view";
 import { countdownText, directionsUrl, eventAnchor } from "@/lib/events/links";
-import PlayCard from "./PlayCard";
+import EventProgram from "./program/EventProgram";
+import ProposeTile from "./program/ProposeTile";
+import { useCountsSummary } from "./program/useCountsSummary";
 
 /** Covers in the collapsed session summary. */
 const STACK_COVERS = 4;
@@ -76,46 +78,12 @@ function ToggleButton({ open, special, panelId, onToggle }: { open: boolean; spe
   );
 }
 
-function PlaysGrid({ event, dark = false }: { event: EventView; dark?: boolean }) {
-  const t = useTranslations("events");
-  return (
-    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))]">
-      {event.plays.map((play) => (
-        <PlayCard key={play.id} play={play} time={play.time} dark={dark} />
-      ))}
-      <li className="flex flex-col gap-2">
-        <a
-          href={event.ludoyaUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          // Hover and keyboard focus share one look: solid orange border, tinted fill, bigger "+".
-          className={cn(
-            "group flex aspect-[3/4] flex-col items-center justify-center gap-2 rounded-[14px] border-2 border-dashed p-3 text-center transition-colors",
-            "hover:border-solid hover:border-brand-orange focus-visible:border-solid focus-visible:border-brand-orange",
-            dark
-              ? "border-stone-600 text-brand-orange-light hover:bg-white/5 focus-visible:bg-white/5"
-              : "border-[#E9B98F] text-brand-orange-text hover:bg-brand-orange/5 focus-visible:bg-brand-orange/5"
-          )}
-        >
-          <span
-            aria-hidden="true"
-            className="text-[32px] font-light transition-transform duration-200 group-hover:scale-125 group-focus-visible:scale-125"
-          >
-            +
-          </span>
-          <strong className={cn("text-sm", dark ? "text-stone-white-hover" : "text-stone-custom")}>{t("propose_title")}</strong>
-          <span className={cn("text-xs", dark ? "text-stone-white-base" : "text-stone-600")}>{event.plays.length === 0 ? t("propose_hint_first") : t("propose_hint")}</span>
-          <span className="sr-only">{t("new_tab")}</span>
-        </a>
-      </li>
-    </ul>
-  );
-}
-
 function SessionSummary({ event, open }: { event: EventView; open: boolean }) {
   const t = useTranslations("events");
   const { playCount, availability } = summarizeEvent(event);
-  const covers = event.plays.filter((p) => p.coverUrl).slice(0, STACK_COVERS);
+  const covers = programItems(event.program)
+    .filter((item) => item.coverUrl)
+    .slice(0, STACK_COVERS);
   const freeText =
     availability.kind === "none"
       ? t("propose_short")
@@ -128,9 +96,9 @@ function SessionSummary({ event, open }: { event: EventView; open: boolean }) {
     <>
       {!open && covers.length > 0 && (
         <span aria-hidden="true" className="flex pl-2.5">
-          {covers.map((play) => (
-            <span key={play.id} className="relative -ml-2.5 size-9 overflow-hidden rounded-lg border-2 border-white bg-stone-custom">
-              <Image src={play.coverUrl!} alt="" fill quality={60} sizes="36px" className="object-cover" />
+          {covers.map((item) => (
+            <span key={item.id} className="relative -ml-2.5 size-9 overflow-hidden rounded-lg border-2 border-white bg-stone-custom">
+              <Image src={item.coverUrl!} alt="" fill quality={60} sizes="36px" className="object-cover" />
             </span>
           ))}
         </span>
@@ -160,7 +128,7 @@ function SessionCard({ event, open, onToggle, panelId }: EventCardProps & { pane
         </div>
       </div>
       <div id={panelId} hidden={!open} className="border-t border-stone-200 px-5 pt-[18px] pb-[22px] sm:px-[22px]">
-        <PlaysGrid event={event} />
+        <EventProgram program={event.program} trailing={<ProposeTile href={event.ludoyaUrl} first={summarizeEvent(event).playCount === 0} />} />
       </div>
     </article>
   );
@@ -168,6 +136,8 @@ function SessionCard({ event, open, onToggle, panelId }: EventCardProps & { pane
 
 function SpecialCard({ event, open, onToggle, panelId }: EventCardProps & { panelId: string }) {
   const t = useTranslations("events");
+  const countsSummary = useCountsSummary();
+  const hasItems = programItems(event.program).length > 0;
   return (
     <article className="mb-5 min-w-0 flex-1 overflow-hidden rounded-[22px] bg-stone-custom text-stone-white-hover">
       <div className="flex flex-wrap items-center justify-between gap-3.5 px-5 py-5 sm:px-[22px]">
@@ -204,10 +174,19 @@ function SpecialCard({ event, open, onToggle, panelId }: EventCardProps & { pane
                 ? t("capacity_unlimited")
                 : t("capacity_left", { count: Math.max(event.capacity - event.participantCount, 0) })}
             </span>
+            {hasItems && (
+              <ul data-program-counts className="flex flex-wrap gap-2">
+                {countsSummary(event.program.counts).map((part) => (
+                  <li key={part} className="rounded-full bg-stone-800 px-3 py-1.5 text-[13px]">
+                    {part}
+                  </li>
+                ))}
+              </ul>
+            )}
             {event.description && (
               <p className="text-sm leading-relaxed whitespace-pre-line text-stone-white-base">{event.description}</p>
             )}
-            {event.plays.length === 0 && (
+            {!hasItems && (
               <p className="text-[13px] text-stone-400">
                 {t("special_plays_none")}{" "}
                 <a href={event.ludoyaUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-brand-orange-light underline underline-offset-2">
@@ -229,10 +208,14 @@ function SpecialCard({ event, open, onToggle, panelId }: EventCardProps & { pane
             </div>
           </div>
         </div>
-        {event.plays.length > 0 && (
+        {hasItems && (
           // Same insets as the session panel, so the play cards get the same size.
           <div className="px-5 py-5 pb-[22px] sm:px-[22px] sm:pt-[22px]">
-            <PlaysGrid event={event} dark />
+            <EventProgram
+              program={event.program}
+              dark
+              trailing={<ProposeTile href={event.ludoyaUrl} first={summarizeEvent(event).playCount === 0} dark />}
+            />
           </div>
         )}
       </div>
@@ -242,7 +225,7 @@ function SpecialCard({ event, open, onToggle, panelId }: EventCardProps & { pane
 
 /**
  * One event of the timeline: the date tile on the left and a collapsible card.
- * Sessions are white with the plays grid; special events are dark with their
+ * Sessions are white with their program; special events are dark with their
  * image, description and the Ludoya sign-up.
  */
 export default function EventCard(props: EventCardProps) {

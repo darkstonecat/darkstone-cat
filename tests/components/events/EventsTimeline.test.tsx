@@ -20,22 +20,8 @@ vi.mock('@/i18n/routing', () => ({
 
 import EventsTimeline from '@/components/events/EventsTimeline'
 import EventsHeader from '@/components/events/EventsHeader'
-import type { EventView, PlayView, WeekView } from '@/lib/events/agenda-format'
-
-const play = (over: Partial<PlayView> = {}): PlayView => ({
-  id: 'p1',
-  gameName: 'Emberleaf',
-  coverUrl: 'https://img.test/emberleaf.jpg',
-  startsAt: '2026-11-13T15:00:00Z',
-  endsAt: null,
-  place: null,
-  participantCount: 3,
-  capacity: 4,
-  minParticipants: null,
-  ludoyaUrl: 'https://ludoya.test/p1',
-  time: '16:00',
-  ...over,
-})
+import type { EventView, WeekView } from '@/lib/events/agenda-format'
+import { activityView, dayView, demoView, playView as play, programView, tournamentView } from '../../helpers/program-view'
 
 const event = (over: Partial<EventView> = {}): EventView => ({
   id: 'fri',
@@ -50,7 +36,7 @@ const event = (over: Partial<EventView> = {}): EventView => ({
   participantCount: 3,
   capacity: null,
   countdown: null,
-  plays: [play(), play({ id: 'p2', gameName: 'Signorie', participantCount: 2 })],
+  program: programView([play(), play({ id: 'p2', title: 'Signorie', gameName: 'Signorie', participantCount: 2 })]),
   tile: { days: [{ weekday: 'DV', day: '13' }], gap: false },
   dates: 'Divendres 13 de novembre',
   time: '16:00 – 20:30',
@@ -67,7 +53,7 @@ const egara = event({
   capacity: null,
   countdown: { kind: 'days', days: 17 },
   place: { name: 'Recinte Firal', address: 'Carrer Firal, 1' },
-  plays: [],
+  program: programView([]),
   tile: { days: [{ weekday: 'DS', day: '28' }, { weekday: 'DG', day: '29' }], gap: false },
   dates: 'Ds., 28 – dg., 29 de novembre',
   time: '10:00 – 17:00',
@@ -89,7 +75,7 @@ const laterWeek = week({
   isCurrent: false,
   range: '23–29 de novembre',
   title: { start: '23', end: '29 de novembre', startElided: 'no', endElided: 'no' },
-  events: [event({ id: 'fri27', plays: [] }), egara],
+  events: [event({ id: 'fri27', program: programView([]) }), egara],
 })
 
 const weeks = () => [week(), laterWeek]
@@ -222,6 +208,28 @@ describe('EventsTimeline cards', () => {
 
     expect(within(card('egara')).queryByText('away')).toBeNull()
     expect(within(card('egara')).queryByRole('link', { name: /directions/ })).toBeNull()
+  })
+
+  it('shows the program of a special: count chips, day sections and the always-open block', () => {
+    const program = programView([], {
+      multiDay: true,
+      days: [
+        dayView([play({ id: 'sp1' }), tournamentView({ id: 'sp2' })], { day: '2026-11-28', title: 'Dissabte 28 de novembre' }),
+        dayView([activityView({ id: 'sp3' })], { day: '2026-11-29', title: 'Diumenge 29 de novembre' }),
+      ],
+      alwaysOpen: [{ zone: '2tomatoes', items: [demoView()] }],
+    })
+    render(<EventsTimeline weeks={[week({ events: [event({ ...egara, program })] })]} />)
+
+    const chips = card('egara').querySelector('[data-program-counts]')!
+    expect([...chips.querySelectorAll('li')].map((li) => li.textContent)).toEqual([
+      'summary_plays(1)',
+      'summary_tournaments(1)',
+      'summary_activities(1)',
+      'summary_demos(1)',
+    ])
+    const days = within(panel('egara')).getAllByRole('heading', { level: 4 }).map((h) => h.textContent)
+    expect(days).toEqual([expect.stringContaining('Dissabte'), expect.stringContaining('Diumenge'), expect.stringContaining('always_open_event')])
   })
 
   it('shows the special details: sign-ups, description and the Ludoya link', () => {

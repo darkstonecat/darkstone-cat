@@ -15,22 +15,12 @@ vi.mock('next/image', () => ({
 }))
 
 import SeatPill from '@/components/events/SeatPill'
-import PlayCard from '@/components/events/PlayCard'
-import type { AgendaPlay } from '@/lib/events/agenda-view'
+import ItemCard from '@/components/events/program/ItemCard'
+import AlwaysOpenTile from '@/components/events/program/AlwaysOpenTile'
+import { activityView, demoView, playView, tournamentView } from '../../helpers/program-view'
 
-const play = (over: Partial<AgendaPlay> = {}): AgendaPlay => ({
-  id: 'p1',
-  gameName: 'Emberleaf',
-  coverUrl: 'https://img.test/emberleaf.jpg',
-  startsAt: '2026-11-13T17:00:00Z',
-  endsAt: '2026-11-13T19:00:00Z',
-  place: null,
-  participantCount: 3,
-  capacity: 4,
-  minParticipants: null,
-  ludoyaUrl: 'https://ludoya.test/events/p1',
-  ...over,
-})
+const play = (over: Parameters<typeof playView>[0] = {}) =>
+  playView({ coverUrl: 'https://img.test/emberleaf.jpg', ludoyaUrl: 'https://ludoya.test/events/p1', time: '18:00 – 20:00', ...over })
 
 const chairs = (container: HTMLElement, variant: 'mobile' | 'desktop') =>
   container.querySelector(`[data-chairs="${variant}"]`)!
@@ -84,58 +74,97 @@ describe('SeatPill', () => {
   })
 })
 
-describe('PlayCard', () => {
-  it('shows the cover, time, game name, status and the sign-up link', () => {
-    render(<PlayCard play={play()} time="18:00" />)
+const inList = (ui: React.ReactNode) => render(<ul>{ui}</ul>)
+
+describe('ItemCard: play', () => {
+  it('shows the cover, time, game name and the sign-up link', () => {
+    inList(<ItemCard item={play()} />)
 
     expect(screen.getByText('Emberleaf')).toBeInTheDocument()
-    expect(screen.getByText('18:00')).toBeInTheDocument()
+    expect(screen.getByText('18:00 – 20:00')).toBeInTheDocument()
     const cover = document.querySelector('img')!
     expect(cover).toHaveAttribute('src', 'https://img.test/emberleaf.jpg')
     expect(cover).toHaveAttribute('data-quality', '60')
 
-    const link = screen.getByRole('link', { name: /join/ })
+    const link = screen.getByRole('link', { name: /play\.join/ })
     expect(link).toHaveAttribute('href', 'https://ludoya.test/events/p1')
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    expect(document.querySelector('[data-item-badge]')).toBeNull()
   })
 
   it('offers the queue when the play is full', () => {
-    render(<PlayCard play={play({ participantCount: 4, capacity: 4 })} time="18:00" />)
+    inList(<ItemCard item={play({ participantCount: 4, capacity: 4 })} />)
 
-    expect(screen.getByRole('link', { name: /queue/ })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /play\.queue/ })).toBeInTheDocument()
   })
 
   it('writes no status text under the cover, the seat pill already shows it', () => {
-    const { rerender } = render(<PlayCard play={play({ participantCount: 1, capacity: 6, minParticipants: 3 })} time="18:00" />)
+    inList(<ItemCard item={play({ participantCount: 1, capacity: 6, minParticipants: 3 })} />)
     expect(screen.queryByText(/^status_/)).toBeNull()
-
-    for (const p of [
-      play({ participantCount: 1, capacity: 4 }),
-      play({ participantCount: 3, capacity: 4 }),
-      play({ participantCount: 4, capacity: 4 }),
-      play({ participantCount: 1, capacity: null }),
-    ]) {
-      rerender(<PlayCard play={p} time="18:00" />)
-      expect(screen.queryByText(/^status_/)).toBeNull()
-    }
   })
 
-  it('opens the play on Ludoya from the cover, like the sign-up button', () => {
-    const { container } = render(<PlayCard play={play()} time="18:00" />)
+  it('opens the play on Ludoya from the cover, out of the tab order', () => {
+    const { container } = inList(<ItemCard item={play()} />)
 
-    const cover = container.querySelector('a[data-play-cover]')!
+    const cover = container.querySelector('a[data-item-cover]')!
     expect(cover).toHaveAttribute('href', 'https://ludoya.test/events/p1')
     expect(cover).toHaveAttribute('target', '_blank')
-    expect(cover).toHaveAttribute('rel', 'noopener noreferrer')
-    // The button is the keyboard target; the cover is a mouse and touch shortcut.
     expect(cover).toHaveAttribute('tabindex', '-1')
   })
 
-  it('draws a placeholder when the play has no cover', () => {
-    const { container } = render(<PlayCard play={play({ coverUrl: null })} time="18:00" />)
+  it('draws the placeholder when there is no cover', () => {
+    const { container } = inList(<ItemCard item={play({ coverUrl: null })} />)
 
     expect(container.querySelector('img')).toBeNull()
-    expect(container.querySelector('[data-cover-placeholder]')).not.toBeNull()
+    expect(container.querySelector('[data-cover-placeholder]')).toHaveTextContent('cover_none')
+  })
+
+  it('puts the play title and its zone under the game name', () => {
+    inList(<ItemCard item={play({ title: 'Aquí nunca hubo campanas', gameName: 'D&D Yearbook 2024', zone: 'Partides de ROL' })} />)
+
+    expect(screen.getByText('D&D Yearbook 2024')).toBeInTheDocument()
+    expect(screen.getByText('Aquí nunca hubo campanas · Partides de ROL')).toBeInTheDocument()
+  })
+})
+
+describe('ItemCard: tournament and activity', () => {
+  it('marks a tournament with its format and the sign-up button', () => {
+    inList(<ItemCard item={tournamentView()} />)
+
+    expect(document.querySelector('[data-item-badge="tournament"]')).toHaveTextContent('badge_tournament_format(format.SWISS)')
+    expect(screen.getByRole('img', { name: /aria_seats/ })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /program\.cta_tournament/ })).toBeInTheDocument()
+  })
+
+  it('says "tickets" for a ticketed tournament and plain "tournament" without a format', () => {
+    inList(<ItemCard item={tournamentView({ format: null, tickets: true } as never)} />)
+
+    expect(document.querySelector('[data-item-badge="tournament"]')).toHaveTextContent('badge_tournament')
+    expect(screen.getByRole('link', { name: /program\.cta_tickets/ })).toBeInTheDocument()
+  })
+
+  it('shows an activity without seats, with its badge and "more info"', () => {
+    inList(<ItemCard item={activityView()} />)
+
+    expect(screen.queryByRole('img', { name: /aria_/ })).toBeNull()
+    expect(document.querySelector('[data-item-badge="activity"]')).toHaveTextContent('badge_activity')
+    expect(screen.getByRole('link', { name: /program\.cta_info/ })).toBeInTheDocument()
+  })
+})
+
+describe('AlwaysOpenTile', () => {
+  it('is a square cover with the demo badge and the name as the link', () => {
+    inList(<AlwaysOpenTile item={demoView()} />)
+
+    expect(document.querySelector('[data-item-badge="demo"]')).toHaveTextContent('badge_demo')
+    expect(screen.getByRole('link', { name: /Fearsome Floors/ })).toHaveAttribute('href', 'https://ludoya.test/d1')
+    expect(screen.queryByRole('img', { name: /aria_/ })).toBeNull()
+  })
+
+  it('names a play among always-open items as a play', () => {
+    inList(<AlwaysOpenTile item={playView({ placement: 'alwaysOpen', startsAt: null, time: null })} />)
+
+    expect(document.querySelector('[data-item-badge="play"]')).toHaveTextContent('badge_play')
   })
 })

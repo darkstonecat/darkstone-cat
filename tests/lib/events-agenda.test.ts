@@ -7,6 +7,7 @@ const bgg = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/bgg", () => bgg);
 
+import { programItems } from "@/lib/events/agenda-view";
 import { fetchEventsAgenda } from "@/lib/events/agenda";
 
 // Friday 2 October 2026, 14:00 in Madrid (the mock fixtures' dates).
@@ -50,14 +51,27 @@ describe("fetchEventsAgenda", () => {
     const { agenda } = await fetchEventsAgenda(NOW);
     const friday = agenda.weeks[0].events[0];
 
-    expect(friday.plays.map((p) => p.gameName)).toEqual([
+    const plays = programItems(friday.program);
+    expect(plays.map((p) => (p.kind === "play" ? p.gameName : null))).toEqual([
       "Emberleaf",
       "Signorie",
       "Forest Shuffle: Smoky Mountains",
       "Fábricas Fantásticas",
     ]);
-    expect(friday.plays[0]).toMatchObject({ participantCount: 3, capacity: 4, minParticipants: 1 });
-    expect(friday.plays.every((p) => p.coverUrl !== undefined)).toBe(true);
+    expect(plays[0]).toMatchObject({ participantCount: 3, capacity: 4, minParticipants: 1 });
+    expect(plays.every((p) => p.coverUrl !== undefined)).toBe(true);
+  });
+
+  it("builds the Egara Juga program from its whole sub-event tree, drafts left out", async () => {
+    const { agenda } = await fetchEventsAgenda(NOW);
+    const egara = agenda.specials.find((s) => s.title === "Egara Juga 2026")!;
+
+    expect(egara.program.counts).toEqual({ plays: 8, tournaments: 3, activities: 3, demos: 13 });
+    expect(egara.program.days.map((d) => [d.day, d.mode])).toEqual([
+      ["2026-11-28", "slots"],
+      ["2026-11-29", "grid"],
+    ]);
+    expect(JSON.stringify(egara)).not.toMatch(/Clocktower|BOTC|Brass/);
   });
 
   it("sends no organizer names to the page", async () => {

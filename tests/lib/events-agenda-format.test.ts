@@ -1,20 +1,27 @@
 import { describe, expect, it } from "vitest";
 import { formatAgenda } from "@/lib/events/agenda-format";
-import type { Agenda, AgendaEvent, AgendaPlay } from "@/lib/events/agenda-view";
+import type { Agenda, AgendaEvent } from "@/lib/events/agenda-view";
+import { layoutProgram, type PlayItem, type ProgramItem } from "@/lib/events/program";
 
-const play = (over: Partial<AgendaPlay> = {}): AgendaPlay => ({
+const play = (over: Partial<PlayItem> = {}): PlayItem => ({
+  kind: "play",
   id: "p1",
+  title: "Emberleaf",
   gameName: "Emberleaf",
+  zone: null,
   coverUrl: null,
   startsAt: "2026-11-13T15:15:00Z",
   endsAt: null,
-  place: null,
+  placement: "timed",
   participantCount: 1,
   capacity: 4,
   minParticipants: null,
   ludoyaUrl: "https://ludoya.test/p1",
   ...over,
 });
+
+const ONE_DAY = { startsAt: "2026-11-13T15:00:00Z", endsAt: "2026-11-13T19:30:00Z" };
+const programOf = (items: ProgramItem[], range = ONE_DAY) => layoutProgram(items, range);
 
 const event = (over: Partial<AgendaEvent> = {}): AgendaEvent => ({
   id: "e1",
@@ -29,7 +36,7 @@ const event = (over: Partial<AgendaEvent> = {}): AgendaEvent => ({
   participantCount: 0,
   capacity: null,
   countdown: null,
-  plays: [play()],
+  program: programOf([play()]),
   ...over,
 });
 
@@ -40,7 +47,7 @@ const special = event({
   startsAt: "2026-11-28T09:00:00Z",
   endsAt: "2026-11-29T16:00:00Z",
   countdown: { kind: "days", days: 17 },
-  plays: [],
+  program: programOf([], { startsAt: "2026-11-28T09:00:00Z", endsAt: "2026-11-29T16:00:00Z" }),
 });
 
 const agenda = (): Agenda => ({
@@ -61,7 +68,7 @@ describe("formatAgenda", () => {
     expect(friday.dates).toBe("Divendres 13 de novembre");
     expect(friday.time).toBe("16:00 – 20:30");
     expect(friday.when).toBe("Divendres 13 de novembre · 16:00 – 20:30");
-    expect(friday.plays[0].time).toBe("16:15");
+    expect(friday.program.days[0].groups[0].items[0].time).toBe("16:15");
   });
 
   it("puts both days of a two-day special on the tile", () => {
@@ -201,5 +208,38 @@ describe("formatAgenda strip", () => {
   it("drops weeks without events and labels them per locale", () => {
     expect(formatAgenda(agenda(), "es", NOW).strip.map((w) => w.label)).toEqual(["9–15 nov", "23–29 nov"]);
     expect(formatAgenda(agenda(), "en", NOW).strip.map((w) => w.label)).toEqual(["9–15 Nov", "23–29 Nov"]);
+  });
+});
+
+describe("formatAgenda program", () => {
+  const TWO_DAYS = { startsAt: "2026-11-28T09:00:00Z", endsAt: "2026-11-29T14:00:00Z" };
+  const at = (id: string, startsAt: string, endsAt: string | null = null) => play({ id, startsAt, endsAt });
+
+  it("formats item ranges, day titles and slot times in Madrid time", () => {
+    const items = [
+      ...Array.from({ length: 9 }, (_, i) => at(`s${i}`, i < 5 ? "2026-11-28T09:00:00Z" : "2026-11-28T15:00:00Z", "2026-11-28T13:00:00Z")),
+      at("sun", "2026-11-29T09:00:00Z", "2026-11-29T12:00:00Z"),
+      play({ id: "open", startsAt: null, endsAt: null, placement: "alwaysOpen" }),
+    ];
+    const egara = formatAgenda(
+      { weeks: [{ start: "2026-11-23", end: "2026-11-29", isCurrent: false, events: [event({ ...TWO_DAYS, type: "special", program: programOf(items, TWO_DAYS) })] }], specials: [] },
+      "ca"
+    ).weeks[0].events[0];
+    const [saturday, sunday] = egara.program.days;
+
+    expect(egara.program.multiDay).toBe(true);
+    expect(saturday.title).toBe("Dissabte 28 de novembre");
+    expect(saturday.groups.map((g) => g.time)).toEqual(["10:00", "16:00"]);
+    expect(saturday.groups[0].items[0].time).toBe("10:00 – 14:00");
+    expect(sunday.title).toBe("Diumenge 29 de novembre");
+    expect(sunday.groups[0].time).toBeNull();
+    expect(egara.program.alwaysOpen[0].items[0].time).toBeNull();
+  });
+
+  it("titles the day in Spanish and English too", () => {
+    const week = (locale: string) =>
+      formatAgenda({ weeks: [{ start: "2026-11-09", end: "2026-11-15", isCurrent: true, events: [event()] }], specials: [] }, locale).weeks[0].events[0].program.days[0].title;
+    expect(week("es")).toBe("Viernes 13 de noviembre");
+    expect(week("en")).toBe("Friday 13 November");
   });
 });

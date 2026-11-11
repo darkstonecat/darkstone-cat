@@ -7,9 +7,12 @@
 // model never carries organizer names, visibility or the usual venue's place.
 // No React and no server-only imports, so components and tests can use it.
 
-import type { MemberSession, MemberSessionPlay } from "@/lib/member-sessions";
+import type { MemberSession } from "@/lib/member-sessions";
 import type { LudoyaPlace, LudoyaSession } from "@/lib/ludoya/types";
 import { madridDay } from "./madrid-day";
+import { classifyProgram, layoutProgram, seatedItems, type ProgramLayout } from "./program";
+
+export { programItems } from "./program";
 
 /** This week plus the three following ones. */
 export const AGENDA_WEEKS = 4;
@@ -31,19 +34,6 @@ export type Countdown =
   /** A multi-day event that started on an earlier day and is still running. */
   | { kind: "running"; days: 0 };
 
-export interface AgendaPlay {
-  id: string;
-  gameName: string;
-  coverUrl: string | null;
-  startsAt: string;
-  endsAt: string | null;
-  place: AgendaPlace | null;
-  participantCount: number;
-  capacity: number | null;
-  minParticipants: number | null;
-  ludoyaUrl: string;
-}
-
 export interface AgendaEvent {
   id: string;
   title: string;
@@ -58,7 +48,8 @@ export interface AgendaEvent {
   capacity: number | null;
   /** Days left, for special events only. */
   countdown: Countdown | null;
-  plays: AgendaPlay[];
+  /** Plays, tournaments, activities and demos, laid out by day (PUBLIC only, no organizers). */
+  program: ProgramLayout;
 }
 
 export interface AgendaWeek {
@@ -111,21 +102,6 @@ export function countdown(event: { startsAt: string; endsAt: string }, now: Date
 const toPlace = (place: LudoyaPlace | null): AgendaPlace | null =>
   place && !place.isUsual ? { name: place.name, address: place.address } : null;
 
-function toPlay(play: MemberSessionPlay): AgendaPlay {
-  return {
-    id: play.id,
-    gameName: play.gameName,
-    coverUrl: play.coverUrl ?? play.imageUrl,
-    startsAt: play.startsAt,
-    endsAt: play.endsAt,
-    place: toPlace(play.place),
-    participantCount: play.participantCount,
-    capacity: play.capacity,
-    minParticipants: play.minParticipants,
-    ludoyaUrl: play.ludoyaUrl,
-  };
-}
-
 function toEvent(session: MemberSession, now: Date): AgendaEvent {
   return {
     id: session.id,
@@ -140,7 +116,7 @@ function toEvent(session: MemberSession, now: Date): AgendaEvent {
     participantCount: session.participantCount,
     capacity: session.capacity,
     countdown: session.type === "special" ? countdown(session, now) : null,
-    plays: session.plannedPlays.map(toPlay),
+    program: layoutProgram(classifyProgram(session.subEvents, session), session),
   };
 }
 
@@ -193,7 +169,7 @@ export function toAgenda(sessions: MemberSession[], now: Date): Agenda {
   return { weeks, specials };
 }
 
-type SeatsOnly = Pick<AgendaPlay, "participantCount" | "capacity">;
+type SeatsOnly = { participantCount: number; capacity: number | null };
 
 export type EventAvailability =
   | { kind: "none" }
@@ -201,27 +177,28 @@ export type EventAvailability =
   | { kind: "unlimited" }
   | { kind: "all_full" };
 
-/** Summary of a collapsed card: how many plays and what room is left. */
-export function summarizeEvent(event: { plays: SeatsOnly[] }): { playCount: number; availability: EventAvailability } {
-  const { plays } = event;
-  const free = plays.reduce((sum, p) => sum + (p.capacity === null ? 0 : Math.max(p.capacity - p.participantCount, 0)), 0);
+function summarizeSeats(items: SeatsOnly[]): { playCount: number; availability: EventAvailability } {
+  const free = items.reduce((sum, p) => sum + (p.capacity === null ? 0 : Math.max(p.capacity - p.participantCount, 0)), 0);
   let availability: EventAvailability;
-  if (plays.length === 0) availability = { kind: "none" };
+  if (items.length === 0) availability = { kind: "none" };
   else if (free > 0) availability = { kind: "seats", free };
-  else if (plays.some((p) => p.capacity === null)) availability = { kind: "unlimited" };
+  else if (items.some((p) => p.capacity === null)) availability = { kind: "unlimited" };
   else availability = { kind: "all_full" };
-  return { playCount: plays.length, availability };
+  return { playCount: items.length, availability };
+}
+
+/** Summary of a collapsed card: how many plays and tournaments, and what room is left. */
+export function summarizeEvent(event: { program: ProgramLayout }): { playCount: number; availability: EventAvailability } {
+  return summarizeSeats(seatedItems(event.program));
 }
 
 /** Counts shown under a week title. */
-export function weekSummary(events: { type: AgendaEvent["type"]; plays: SeatsOnly[] }[]) {
+export function weekSummary(events: { type: AgendaEvent["type"]; program: ProgramLayout }[]) {
+  const summaries = events.map(summarizeEvent);
   return {
     sessions: events.filter((e) => e.type === "regular").length,
     specials: events.filter((e) => e.type === "special").length,
-    plays: events.reduce((sum, e) => sum + e.plays.length, 0),
-    free: events.reduce((sum, e) => {
-      const { availability } = summarizeEvent(e);
-      return sum + (availability.kind === "seats" ? availability.free : 0);
-    }, 0),
+    plays: summaries.reduce((sum, s) => sum + s.playCount, 0),
+    free: summaries.reduce((sum, s) => sum + (s.availability.kind === "seats" ? s.availability.free : 0), 0),
   };
 }
