@@ -656,8 +656,14 @@
       "legend_special": "Especial",
       "legend_today": "Avui",
       "hint": "Clica un dia per anar-hi.",
+      "hint_touch": "Toca un dia per anar-hi.",
       "error": "No s’han pogut carregar les dates d’aquest mes.",
       "error_link": "Veure-les a Ludoya"
+    },
+    "strip": {
+      "title": "Properes dates",
+      "show_month": "Veure el mes",
+      "hide_month": "Amaga el mes"
     }
   },
   "faq": {

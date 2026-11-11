@@ -102,3 +102,66 @@ describe("formatAgenda", () => {
     expect(view.specials[0]).toEqual(view.weeks[1].events[0]);
   });
 });
+
+describe("formatAgenda strip", () => {
+  const NOW = new Date("2026-11-11T11:00:00Z");
+  const saturday = event({ id: "sat", title: "Dissabtes de jocs!", startsAt: "2026-11-14T09:00:00Z", endsAt: "2026-11-14T12:30:00Z" });
+  const sameDaySpecial = event({
+    id: "carton",
+    title: "El Cartón Peleón",
+    type: "special",
+    startsAt: "2026-11-14T14:30:00Z",
+    endsAt: "2026-11-14T19:30:00Z",
+  });
+  const withStrip = (): Agenda => ({
+    weeks: [
+      { start: "2026-11-09", end: "2026-11-15", isCurrent: true, events: [event(), saturday, sameDaySpecial] },
+      { start: "2026-11-23", end: "2026-11-29", isCurrent: false, events: [special] },
+    ],
+    specials: [sameDaySpecial, special],
+  });
+
+  it("lists each upcoming day with events once, grouped by week", () => {
+    const { strip } = formatAgenda(withStrip(), "ca", NOW);
+
+    expect(strip.map((w) => [w.start, w.current, w.label])).toEqual([
+      ["2026-11-09", true, "9–15 de nov."],
+      ["2026-11-23", false, "23–29 de nov."],
+    ]);
+    expect(strip[0].days.map((d) => [d.date, d.weekday, d.day, d.special, d.eventId])).toEqual([
+      ["2026-11-13", "DV", "13", false, "e1"],
+      // A day with a session and a special opens the special.
+      ["2026-11-14", "DS", "14", true, "carton"],
+    ]);
+    expect(strip[0].days[1]).toMatchObject({ label: "Dissabte 14 de novembre", titles: ["Dissabtes de jocs!", "El Cartón Peleón"] });
+  });
+
+  it("repeats a multi-day special on each of its days", () => {
+    const { strip } = formatAgenda(withStrip(), "ca", NOW);
+    expect(strip[1].days.map((d) => [d.date, d.weekday, d.special, d.eventId])).toEqual([
+      ["2026-11-28", "DS", true, "egara"],
+      ["2026-11-29", "DG", true, "egara"],
+    ]);
+  });
+
+  it("skips the days of a running special that are already past", () => {
+    const running = event({
+      id: "fest",
+      type: "special",
+      title: "Festa",
+      startsAt: "2026-11-10T09:00:00Z",
+      endsAt: "2026-11-12T18:00:00Z",
+    });
+    const { strip } = formatAgenda(
+      { weeks: [{ start: "2026-11-09", end: "2026-11-15", isCurrent: true, events: [running] }], specials: [running] },
+      "ca",
+      NOW
+    );
+    expect(strip[0].days.map((d) => d.date)).toEqual(["2026-11-11", "2026-11-12"]);
+  });
+
+  it("drops weeks without events and labels them per locale", () => {
+    expect(formatAgenda(agenda(), "es", NOW).strip.map((w) => w.label)).toEqual(["9–15 nov", "23–29 nov"]);
+    expect(formatAgenda(agenda(), "en", NOW).strip.map((w) => w.label)).toEqual(["9–15 Nov", "23–29 Nov"]);
+  });
+});

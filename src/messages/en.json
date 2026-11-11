@@ -656,8 +656,14 @@
       "legend_special": "Special",
       "legend_today": "Today",
       "hint": "Click a day to jump to it.",
+      "hint_touch": "Tap a day to jump to it.",
       "error": "This month’s dates could not be loaded.",
       "error_link": "See them on Ludoya"
+    },
+    "strip": {
+      "title": "Upcoming dates",
+      "show_month": "Show the month",
+      "hide_month": "Hide the month"
     }
   },
   "faq": {

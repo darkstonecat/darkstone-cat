@@ -11,6 +11,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import EventsHeader from "@/components/events/EventsHeader";
 import EventsTimeline from "@/components/events/EventsTimeline";
 import EventsCalendar from "@/components/events/EventsCalendar";
+import EventsDayStrip from "@/components/events/EventsDayStrip";
 import EventsStatus from "@/components/events/EventsStatus";
 import HowItWorks from "@/components/events/HowItWorks";
 import { VENUE, VENUE_POSTAL_ADDRESS } from "@/lib/venue";
@@ -67,7 +68,8 @@ export default async function EventsPage({
   const webPageJsonLd = getWebPageJsonLd(locale, "/events", tMeta("events_title"), tMeta("events_description"));
 
   // Build Event schema.org JSON-LD for each event
-  const agenda = formatAgenda(agendaResult.agenda, locale);
+  const agenda = formatAgenda(agendaResult.agenda, locale, now);
+  const loadedIds = agenda.weeks.flatMap((week) => week.events.map((event) => event.id));
   const allEvents = agenda.weeks.flatMap((week) => week.events);
   const eventJsonLd = allEvents.slice(0, 20).map((event) => {
     const startMs = new Date(event.startsAt).getTime();
@@ -121,11 +123,14 @@ export default async function EventsPage({
       <div className="bg-brand-beige px-4 text-stone-custom sm:px-6">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-10 pt-9 pb-[72px] lg:flex-row lg:items-start">
           <aside className="order-last flex shrink-0 flex-col gap-3.5 lg:sticky lg:top-24 lg:order-first lg:w-[330px]">
-            {/* Mobile gets its own day strip and month toggle (T5). */}
-            <EventsCalendar className="hidden lg:flex" initial={calendar} loadedIds={allEvents.map((e) => e.id)} />
+            <EventsCalendar className="hidden lg:flex" initial={calendar} loadedIds={loadedIds} />
             <HowItWorks />
           </aside>
           <div className="min-w-0 flex-1">
+            {/* Mobile: the day strip and month toggle take the sidebar calendar's place. */}
+            {!agendaResult.error && (
+              <EventsDayStrip className="mb-7 lg:hidden" strip={agenda.strip} calendar={calendar} loadedIds={loadedIds} />
+            )}
             {agendaResult.error ? (
               <EventsStatus kind="error" />
             ) : allEvents.length === 0 ? (

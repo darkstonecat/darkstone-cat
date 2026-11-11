@@ -10,13 +10,13 @@ function BannerCountdown({ event }: { event: EventView }) {
   const countdown = event.countdown;
   if (!countdown) return null;
   if (countdown.kind !== "days") {
-    return <strong className="text-xl font-black text-brand-orange-text sm:text-2xl">{t(`countdown_${countdown.kind}`)}</strong>;
+    return <strong className="text-lg font-black text-brand-orange-text sm:text-2xl">{t(`countdown_${countdown.kind}`)}</strong>;
   }
   const count = countdown.days;
   return (
     <span className="flex flex-col items-center leading-none" aria-label={t("countdown_days", { count })}>
       <span aria-hidden="true" className="text-xs font-bold text-stone-600">{t("banner_days_before", { count })}</span>
-      <strong aria-hidden="true" className="text-3xl font-black text-brand-orange-text sm:text-[40px]">{count}</strong>
+      <strong aria-hidden="true" className="text-[30px] font-black text-brand-orange-text sm:text-[40px]">{count}</strong>
       <span aria-hidden="true" className="text-xs font-bold text-stone-600">{t("banner_days_after", { count })}</span>
     </span>
   );
@@ -29,23 +29,24 @@ function SpecialBanner({ event }: { event: EventView }) {
       href={`#${eventAnchor(event.id)}`}
       className="group flex min-h-24 items-stretch overflow-hidden rounded-[18px] bg-stone-white-hover text-stone-custom sm:min-h-28"
     >
-      <span className="relative w-24 shrink-0 bg-brand-orange/80 sm:w-[180px]">
+      <span className="relative w-[84px] shrink-0 bg-brand-orange/80 sm:w-[180px]">
         {event.imageUrl && (
-          <Image src={event.imageUrl} alt="" fill quality={60} sizes="(min-width: 640px) 180px, 96px" className="object-cover" />
+          <Image src={event.imageUrl} alt="" fill quality={60} sizes="(min-width: 640px) 180px, 84px" className="object-cover" />
         )}
       </span>
-      <span className="flex min-w-0 flex-1 flex-col justify-center gap-1 px-4 py-3 sm:px-6 sm:py-4">
+      <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 p-3 sm:gap-1 sm:px-6 sm:py-4">
         <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[0.1em] text-brand-orange-text uppercase sm:text-xs">
           <MdStar aria-hidden="true" />
-          {t("special_label")}
+          <span className="sm:hidden">{t("special_badge")}</span>
+          <span className="hidden sm:inline">{t("special_label")}</span>
         </span>
-        <span className="text-lg leading-tight font-extrabold group-hover:underline sm:text-2xl">{event.title}</span>
-        <span className="text-sm text-stone-600 sm:text-[15px]">
+        <span className="line-clamp-2 text-[17px] leading-tight font-extrabold group-hover:underline sm:text-2xl">{event.title}</span>
+        <span className="truncate text-[13px] text-stone-600 sm:text-[15px]">
           {event.dates}
           {event.place && ` · ${event.place.name}`}
         </span>
       </span>
-      <span className="flex shrink-0 items-center gap-4 border-l border-stone-200 px-3 py-3 sm:px-6">
+      <span className="flex w-[72px] shrink-0 items-center justify-center gap-4 border-l border-stone-200 py-3 sm:w-auto sm:px-6">
         <BannerCountdown event={event} />
         <span className="hidden min-h-11 items-center rounded-xl bg-stone-custom px-4 text-sm font-bold text-white md:inline-flex">
           {t("banner_more")}&nbsp;<span aria-hidden="true">↓</span>

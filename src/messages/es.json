@@ -656,8 +656,14 @@
       "legend_special": "Especial",
       "legend_today": "Hoy",
       "hint": "Haz clic en un día para ir a él.",
+      "hint_touch": "Toca un día para ir a él.",
       "error": "No se han podido cargar las fechas de este mes.",
       "error_link": "Verlas en Ludoya"
+    },
+    "strip": {
+      "title": "Próximas fechas",
+      "show_month": "Ver el mes",
+      "hide_month": "Ocultar el mes"
     }
   },
   "faq": {

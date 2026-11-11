@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import type { EventsCalendarDay, EventsCalendarMonth } from "@/lib/events/calendar-view";
@@ -10,14 +10,19 @@ import { cn } from "@/lib/utils";
 
 const navButton =
   "inline-flex size-11 cursor-pointer items-center justify-center rounded-full border border-stone-white-base bg-brand-white text-stone-custom aria-disabled:cursor-default aria-disabled:opacity-40";
-const cellBase = "flex h-10 w-full items-center justify-center rounded-[10px] text-[13px]";
+const cellBase = "flex w-full items-center justify-center rounded-[10px]";
+/** Sidebar cells are 40 px; the inline (mobile) grid keeps 44 px touch targets. */
+const cellSize = { sidebar: "h-10 text-[13px]", inline: "h-11 text-sm" } as const;
 
-function DayCell({ day, loaded }: { day: EventsCalendarDay; loaded: Set<string> }) {
+type Variant = keyof typeof cellSize;
+
+function DayCell({ day, loaded, variant }: { day: EventsCalendarDay; loaded: Set<string>; variant: Variant }) {
   const t = useTranslations("events.calendar");
+  const base = cn(cellBase, cellSize[variant]);
 
   if (!day.inMonth) {
     return (
-      <span aria-hidden="true" className={cn(cellBase, "text-stone-400")}>
+      <span aria-hidden="true" className={cn(base, "text-stone-400")}>
         {day.day}
       </span>
     );
@@ -26,7 +31,7 @@ function DayCell({ day, loaded }: { day: EventsCalendarDay; loaded: Set<string> 
   const todayRing = day.isToday && "ring-2 ring-stone-custom ring-inset font-extrabold";
   if (day.eventId === null) {
     return (
-      <span className={cn(cellBase, "text-stone-custom", day.isPast && "text-stone-custom/45", todayRing)}>
+      <span className={cn(base, "text-stone-custom", day.isPast && "text-stone-custom/45", todayRing)}>
         {day.day}
         {day.isToday && <span className="sr-only"> ({t("today")})</span>}
       </span>
@@ -46,7 +51,7 @@ function DayCell({ day, loaded }: { day: EventsCalendarDay; loaded: Set<string> 
       {...(inAgenda ? {} : { target: "_blank", rel: "noopener noreferrer" })}
       aria-label={label}
       className={cn(
-        cellBase,
+        base,
         "text-brand-white no-underline hover:brightness-125",
         day.kind === "special" ? "bg-brand-orange font-extrabold" : "bg-stone-custom font-bold",
         day.isPast && "opacity-35",
@@ -62,18 +67,22 @@ function DayCell({ day, loaded }: { day: EventsCalendarDay; loaded: Set<string> 
  * Month calendar of the /events sidebar. The first month arrives with the page;
  * the others come from `/api/events/calendar`, so switching months never moves
  * the timeline. Days with a loaded event jump to its card; the rest open Ludoya.
+ * `inline` is the mobile grid under the day strip (bigger cells, touch hint).
  */
 export default function EventsCalendar({
   initial,
   loadedIds,
   className,
+  variant = "sidebar",
 }: {
   initial: EventsCalendarMonth;
   /** Events present in the timeline. */
   loadedIds: string[];
   className?: string;
+  variant?: Variant;
 }) {
   const t = useTranslations("events.calendar");
+  const titleId = useId();
   const locale = useLocale();
   const [month, setMonth] = useState(initial);
   const [loadingKey, setLoadingKey] = useState<string | null>(null);
@@ -122,12 +131,16 @@ export default function EventsCalendar({
 
   return (
     <section
-      aria-labelledby="events-calendar-title"
-      className={cn("flex-col gap-2.5 rounded-[20px] bg-brand-white p-4 text-stone-custom", className)}
+      aria-labelledby={titleId}
+      className={cn(
+        "flex-col gap-2.5 rounded-[20px] bg-brand-white text-stone-custom",
+        variant === "inline" ? "px-2 py-3" : "p-4",
+        className
+      )}
     >
       <div className="flex items-center justify-between gap-2">
         {renderNav(month.prev, "prev")}
-        <h2 id="events-calendar-title" className="text-base font-bold">
+        <h2 id={titleId} className="text-base font-bold">
           <span className="sr-only">{t("title")}: </span>
           {month.title}
         </h2>
@@ -139,7 +152,8 @@ export default function EventsCalendar({
       <table
         aria-busy={loadingKey !== null}
         className={cn(
-          "w-full table-fixed border-separate border-spacing-[3px] transition-opacity",
+          "w-full table-fixed border-separate transition-opacity",
+          variant === "inline" ? "border-spacing-0.5" : "border-spacing-[3px]",
           loadingKey !== null && "pointer-events-none opacity-50"
         )}
       >
@@ -158,7 +172,7 @@ export default function EventsCalendar({
             <tr key={week[0].date}>
               {week.map((day) => (
                 <td key={day.date} aria-current={day.isToday ? "date" : undefined} className="p-0">
-                  <DayCell day={day} loaded={loaded} />
+                  <DayCell day={day} loaded={loaded} variant={variant} />
                 </td>
               ))}
             </tr>
@@ -193,7 +207,7 @@ export default function EventsCalendar({
           {t("legend_today")}
         </li>
       </ul>
-      <p className="text-xs text-stone-600">{t("hint")}</p>
+      <p className="text-xs text-stone-600">{t(variant === "inline" ? "hint_touch" : "hint")}</p>
     </section>
   );
 }
