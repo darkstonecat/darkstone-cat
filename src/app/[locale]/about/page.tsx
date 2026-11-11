@@ -2,6 +2,7 @@ import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getOgImageUrl, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { fetchBggCollectionCount } from "@/lib/bgg";
+import { fetchActiveMemberCount } from "@/lib/supabase/member-count";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -53,8 +54,9 @@ export default async function AboutPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const [gameCount, tNav] = await Promise.all([
+  const [gameCount, memberCount, tNav] = await Promise.all([
     fetchBggCollectionCount(),
+    fetchActiveMemberCount(),
     getTranslations({ locale, namespace: "nav" }),
   ]);
   const t = await getTranslations({ locale, namespace: "metadata" });
@@ -73,7 +75,7 @@ export default async function AboutPage({
       <AboutHero />
       <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="curve" flip />
       <AboutOrigin />
-      <AboutStats gameCount={gameCount} />
+      <AboutStats gameCount={gameCount} memberCount={memberCount} />
       <AboutMissionValues />
       <AboutValues />
       <AboutBoard />

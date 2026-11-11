@@ -35,7 +35,14 @@ function AnimatedNumber({ value, inView }: { value: number; inView: boolean }) {
   return <>{display}</>;
 }
 
-export default function AboutStats({ gameCount }: { gameCount: number }) {
+export default function AboutStats({
+  gameCount,
+  memberCount,
+}: {
+  gameCount: number;
+  /** Active members from the database; null when it could not be read. */
+  memberCount: number | null;
+}) {
   const t = useTranslations("about_page");
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
@@ -43,7 +50,8 @@ export default function AboutStats({ gameCount }: { gameCount: number }) {
   const stats: StatItem[] = [
     {
       icon: MdGroup,
-      animatedValue: 150,
+      animatedValue: memberCount && memberCount > 0 ? memberCount : undefined,
+      fallback: t("stat_members_value"),
       label: t("stat_members_label"),
     },
     {

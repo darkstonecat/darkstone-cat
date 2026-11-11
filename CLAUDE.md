@@ -92,7 +92,7 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | Route | Page file | Description |
 |---|---|---|
 | `/` | `page.tsx` | Landing: Hero → About → Activities → Schedule → JoinUs → Location → Footer |
-| `/about` | `about/page.tsx` | Origin story, mission, values |
+| `/about` | `about/page.tsx` | Origin story, mission, values. The member stat counts active members (`left_on IS NULL`) with the service role, cached one day by `unstable_cache` (tag `member-count`, `src/lib/supabase/member-count.ts`); on failure it shows `stat_members_value` ("150+") |
 | `/ludoteca` | `ludoteca/page.tsx` | Game library with BGG integration (ISR, revalidate: 86400) |
 | `/contact` | `contact/page.tsx` | Contact form (Workspace SMTP email) |
 | `/events` | `events/page.tsx` | Upcoming events from the Ludoya public API (`revalidate: 86400`) |
