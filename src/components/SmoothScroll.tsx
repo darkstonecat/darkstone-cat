@@ -79,6 +79,15 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     window.addEventListener("touchmove", startLoop, { passive: true });
     window.addEventListener("scroll", startLoop, { passive: true });
 
+    // A programmatic scrollTo has no wheel/touch event to start the loop, so it
+    // would never animate. Kick it here; each animated frame then fires a native
+    // scroll event, which keeps the loop alive until the animation ends.
+    const scrollTo = instance.scrollTo.bind(instance);
+    instance.scrollTo = (...args: Parameters<Lenis["scrollTo"]>) => {
+      startLoop();
+      return scrollTo(...args);
+    };
+
     // Initial kick to handle page load
     startLoop();
 
