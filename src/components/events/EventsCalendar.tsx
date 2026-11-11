@@ -22,7 +22,7 @@ function DayCell({ day, loaded, variant }: { day: EventsCalendarDay; loaded: Set
 
   if (!day.inMonth) {
     return (
-      <span aria-hidden="true" className={cn(base, "text-stone-400")}>
+      <span aria-hidden="true" className={cn(base, "text-stone-500")}>
         {day.day}
       </span>
     );
@@ -31,7 +31,7 @@ function DayCell({ day, loaded, variant }: { day: EventsCalendarDay; loaded: Set
   const todayRing = day.isToday && "ring-2 ring-stone-custom ring-inset font-extrabold";
   if (day.eventId === null) {
     return (
-      <span className={cn(base, "text-stone-custom", day.isPast && "text-stone-custom/45", todayRing)}>
+      <span className={cn(base, "text-stone-custom", day.isPast && "text-stone-500", todayRing)}>
         {day.day}
         {day.isToday && <span className="sr-only"> ({t("today")})</span>}
       </span>

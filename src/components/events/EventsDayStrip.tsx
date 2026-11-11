@@ -28,9 +28,9 @@ function DayTile({ day, current }: { day: StripDay; current: boolean }) {
             : "border border-stone-white-base bg-brand-white text-stone-custom"
       )}
     >
-      <span className="text-[11px] font-bold opacity-85">{day.weekday}</span>
+      <span className="text-[11px] font-bold">{day.weekday}</span>
       <span className="text-[22px] font-extrabold">{day.day}</span>
-      <span aria-hidden="true" className="h-2.5 text-[10px] font-bold opacity-85">
+      <span aria-hidden="true" className="h-2.5 text-[10px] font-bold">
         {day.special ? "★" : ""}
       </span>
     </a>

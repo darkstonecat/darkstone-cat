@@ -34,7 +34,7 @@ function AwayPlace({ place, dark }: { place: AgendaPlace; dark?: boolean }) {
   return (
     <span className="text-[15px]">
       <strong>{place.name}</strong> · <span className={accent}>{t("away")}</span> ·{" "}
-      <a href={directionsUrl(place)} target="_blank" rel="noopener noreferrer" className={cn("underline-offset-2 hover:underline", accent)}>
+      <a href={directionsUrl(place)} target="_blank" rel="noopener noreferrer" className={cn("underline underline-offset-2", accent)}>
         {t("directions")}
         <NewTab />
       </a>
@@ -186,7 +186,7 @@ function SpecialCard({ event, open, onToggle, panelId }: EventCardProps & { pane
             {event.plays.length === 0 && (
               <p className="text-[13px] text-stone-400">
                 {t("special_plays_none")}{" "}
-                <a href={event.ludoyaUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-brand-orange-light hover:underline">
+                <a href={event.ludoyaUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-brand-orange-light underline underline-offset-2">
                   {t("propose_short")}
                   <NewTab />
                 </a>
