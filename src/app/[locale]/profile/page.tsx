@@ -95,7 +95,6 @@ export default async function ProfilePage({
 
           <div className="flex-1 bg-brand-beige px-4 py-6 md:px-12 md:pt-12 md:pb-20">
             <div className="mx-auto flex max-w-[1120px] flex-col gap-5 md:gap-7">
-              <BenefitsCard benefits={benefits} />
               <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
                 {checklistVisible && <ProfileChecklist steps={checklist} />}
                 <BadgesSection
@@ -103,6 +102,7 @@ export default async function ProfilePage({
                   className={checklistVisible ? "md:col-span-2" : "md:col-span-3"}
                 />
               </div>
+              <BenefitsCard benefits={benefits} />
               <SessionsSection />
               <CalendarSection month={month} />
             </div>

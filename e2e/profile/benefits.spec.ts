@@ -3,19 +3,25 @@ import { PAGES } from '../helpers/constants'
 import { expectHydrated } from '../helpers/hydration'
 
 // Member benefits card (odd/tasks/member-benefits.md S6): the seeded Outlet Games benefit with its
-// code, as the first card of the member home (/profile), only inside the member area. Other benefits may appear while the admin flow runs.
+// code, in the member home (/profile) right above "Properes sessions", only inside the member area. Other benefits may appear while the admin flow runs.
 test.describe('Member benefits card (S6)', () => {
   test('an active member sees Outlet Games with the code and the shop link', async ({ memberPage: page }) => {
     await page.goto(PAGES.profile)
     const card = page.getByRole('region', { name: 'Beneficis per ser soci' })
-    // First card of the home content: it comes before the badges in the page.
+    // Order of the home: badges, then this card, right above "Properes sessions".
     const badges = page.getByRole('region', { name: 'Les teves insígnies' })
+    const sessions = page.getByRole('region', { name: 'Properes sessions' })
     await expect(badges).toBeVisible()
-    const cardFirst = await card.evaluate(
-      (node, other) => Boolean(node.compareDocumentPosition(other as Node) & Node.DOCUMENT_POSITION_FOLLOWING),
-      await badges.elementHandle()
-    )
-    expect(cardFirst).toBe(true)
+    await expect(sessions).toBeVisible()
+    const follows = async (a: typeof card, b: typeof card) =>
+      a.evaluate(
+        (node, other) => Boolean(node.compareDocumentPosition(other as Node) & Node.DOCUMENT_POSITION_FOLLOWING),
+        await b.elementHandle()
+      )
+    expect(await follows(badges, card)).toBe(true)
+    expect(await follows(card, sessions)).toBe(true)
+    const nextSection = await card.evaluate((node) => node.nextElementSibling?.getAttribute('aria-labelledby'))
+    expect(nextSection).toBe('sessions-title')
     const outlet = card.getByRole('listitem').filter({ has: page.getByRole('heading', { name: 'Outlet Games' }) })
     await expect(outlet.getByText('DARKSTONE', { exact: true })).toBeVisible()
     await expect(outlet.getByRole('img', { name: 'Outlet Games' })).toBeVisible()
