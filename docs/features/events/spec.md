@@ -22,7 +22,7 @@
 3. **Two columns**:
    - left, sticky: the **month calendar** and the "Com funciona" card;
    - right: the **timeline**, grouped by week.
-4. "Veure més dates a Ludoya ↗" closes the timeline.
+4. "Veure més dates a Ludoya" (with the Ludoya mark) closes the timeline.
 
 ### Mobile
 
@@ -53,7 +53,8 @@ There is no section link bar ("Aquesta setmana / Properes setmanes / Especials")
 | Toggle all | Each later week has "Desplega-ho tot / Plega-ho tot". |
 | Closed card | Title, date and time, play count, free seats, a stack of small covers. |
 | Open card | The event's **program** (see below) plus a "Proposa una partida" card linking to Ludoya ("Sigues el primer!" when there are no plays). |
-| Place | Shown only when it is **not** the usual venue: name, "fora del local habitual", "Com arribar-hi ↗" (Google Maps). The usual venue appears only in the header. |
+| Place | Shown only when it is **not** the usual venue: name, "fora del local habitual", "Com arribar-hi" (Google Maps). The usual venue appears only in the header. |
+| Link icons | Inline SVGs from `icons.tsx`, never the "↗" glyph. The Ludoya mark on "Apunta't a Ludoya" and "Veure més dates a Ludoya"; Material Symbols `app_registration` on the program sign-up buttons ("Apunta't", "A la cua", "Inscriu-t'hi", "Entrada"), `chat_info` on "Més info", and `arrow_outward` on every other outside link (venue, "Com arribar-hi", "Proposa", calendar error). |
 | Countdown | Specials only, on the banner and the card: "Falten N dies", "Demà", "Avui", "En curs". Never on sessions or in the day strip. |
 
 ### Program (sub-events)
@@ -173,6 +174,7 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
 | `src/components/events/SeatPill.tsx` | Seat counter on play and tournament covers |
 | `src/components/events/EventsCalendar.tsx` | Month grid, `sidebar` and `inline` variants |
 | `src/components/events/EventsDayStrip.tsx` | Mobile strip and month toggle |
+| `src/components/events/icons.tsx` | Inline link icons (`ArrowOutwardIcon`, `RegisterIcon`, `InfoIcon`, `LudoyaIcon`): `currentColor`, 1em, `aria-hidden`, `data-icon` for tests |
 | `src/components/events/HowItWorks.tsx`, `EventsStatus.tsx` | "Com funciona" card, error and empty states |
 | `src/app/api/events/calendar/route.ts` | Calendar month route |
 

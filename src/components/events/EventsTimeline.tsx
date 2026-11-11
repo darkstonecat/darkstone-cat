@@ -8,6 +8,7 @@ import { weekSummary } from "@/lib/events/agenda-view";
 import { LUDOYA_AGENDA_URL, eventAnchor, eventIdFromHash } from "@/lib/events/links";
 import { cn } from "@/lib/utils";
 import EventCard, { RAIL } from "./EventCard";
+import { LudoyaIcon } from "./icons";
 
 /** Room for the fixed NavBar when scrolling to a card. */
 const SCROLL_OFFSET = -96;
@@ -158,7 +159,7 @@ export default function EventsTimeline({ weeks }: { weeks: WeekView[] }) {
         rel="noopener noreferrer"
         className="ml-[60px] inline-flex min-h-11 items-center self-start text-sm font-bold text-brand-orange-text hover:underline sm:ml-[84px]"
       >
-        {t("more_on_ludoya")}&nbsp;<span aria-hidden="true">↗</span>
+        {t("more_on_ludoya")}&nbsp;<LudoyaIcon />
         <span className="sr-only"> {t("new_tab")}</span>
       </a>
     </section>

@@ -4,6 +4,7 @@ import { CHAIRS_MAX_DESKTOP, seatCounter } from "@/lib/events/seat-counter";
 import { cn } from "@/lib/utils";
 import SeatPill from "../SeatPill";
 import CoverFrame from "./CoverFrame";
+import { InfoIcon, RegisterIcon } from "../icons";
 import ItemBadge from "./ItemBadge";
 
 type Cta = "join" | "queue" | "tournament" | "tickets" | "info";
@@ -66,7 +67,7 @@ export default function ItemCard({ item, dark = false, hideZone = false }: { ite
         )}
       >
         {label}
-        <span aria-hidden="true">&nbsp;↗</span>
+        {cta === "info" ? <InfoIcon className="ml-1.5 size-4" /> : <RegisterIcon className="ml-1.5 size-4" />}
         <span className="sr-only"> {t("program.item_new_tab", { title })}</span>
       </a>
     </li>

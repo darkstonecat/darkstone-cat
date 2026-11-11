@@ -152,6 +152,32 @@ describe('ItemCard: tournament and activity', () => {
   })
 })
 
+describe('ItemCard: button icon', () => {
+  const icons = (link: HTMLElement) => [...link.querySelectorAll('svg[data-icon]')].map((svg) => svg.getAttribute('data-icon'))
+
+  it.each([
+    ['join', () => play(), /play\.join/],
+    ['queue', () => play({ participantCount: 4, capacity: 4 }), /play\.queue/],
+    ['tournament', () => tournamentView(), /program\.cta_tournament/],
+    ['tickets', () => tournamentView({ tickets: true } as never), /program\.cta_tickets/],
+  ])('shows the sign-up icon on "%s"', (_cta, item, name) => {
+    inList(<ItemCard item={item()} />)
+
+    const link = screen.getByRole('link', { name })
+    expect(icons(link)).toEqual(['app_registration'])
+    expect(link).not.toHaveTextContent('↗')
+  })
+
+  it.each([
+    ['activity', () => activityView()],
+    ['demo', () => demoView()],
+  ])('shows the info icon on the "more info" button of an %s', (_kind, item) => {
+    inList(<ItemCard item={item()} />)
+
+    expect(icons(screen.getByRole('link', { name: /program\.cta_info/ }))).toEqual(['chat_info'])
+  })
+})
+
 describe('ItemCard: always-open items', () => {
   it('shows a demo as a full card with its badge, no seats and "more info"', () => {
     inList(<ItemCard item={demoView()} />)

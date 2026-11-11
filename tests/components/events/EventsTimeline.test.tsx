@@ -23,6 +23,8 @@ import EventsHeader from '@/components/events/EventsHeader'
 import type { EventView, WeekView } from '@/lib/events/agenda-format'
 import { activityView, dayView, demoView, playView as play, programView, tournamentView } from '../../helpers/program-view'
 
+const icons = (el: HTMLElement) => [...el.querySelectorAll('svg[data-icon]')].map((svg) => svg.getAttribute('data-icon'))
+
 const event = (over: Partial<EventView> = {}): EventView => ({
   id: 'fri',
   title: 'Divendres de jocs!',
@@ -196,10 +198,12 @@ describe('EventsTimeline cards', () => {
 
     const special = within(panel('egara'))
     expect(special.getByText('away')).toBeInTheDocument()
-    expect(special.getByRole('link', { name: /directions/ })).toHaveAttribute(
+    const directions = special.getByRole('link', { name: /directions/ })
+    expect(directions).toHaveAttribute(
       'href',
       'https://www.google.com/maps/search/?api=1&query=Recinte%20Firal%2C%20Carrer%20Firal%2C%201'
     )
+    expect(icons(directions)).toEqual(['arrow_outward'])
     expect(within(card('fri')).queryByText('away')).toBeNull()
   })
 
@@ -239,13 +243,19 @@ describe('EventsTimeline cards', () => {
     expect(special.getByText(/signups\(21\)/)).toHaveTextContent('signups(21) · capacity_unlimited')
     expect(special.getByText('Programa complet')).toBeInTheDocument()
     expect(special.getByText('special_plays_none')).toBeInTheDocument()
-    expect(special.getByRole('link', { name: /special_join/ })).toHaveAttribute('href', 'https://ludoya.test/fri')
+    const join = special.getByRole('link', { name: /special_join/ })
+    expect(join).toHaveAttribute('href', 'https://ludoya.test/fri')
+    expect(icons(join)).toEqual(['ludoya'])
+    expect(icons(special.getByRole('link', { name: /propose_short/ }))).toEqual(['arrow_outward'])
   })
 
   it('ends with the link to more dates on Ludoya', () => {
     render(<EventsTimeline weeks={weeks()} />)
 
-    expect(screen.getByRole('link', { name: /more_on_ludoya/ })).toHaveAttribute('target', '_blank')
+    const more = screen.getByRole('link', { name: /more_on_ludoya/ })
+    expect(more).toHaveAttribute('target', '_blank')
+    expect(icons(more)).toEqual(['ludoya'])
+    expect(more).not.toHaveTextContent('↗')
   })
 })
 
@@ -304,6 +314,14 @@ describe('EventsHeader', () => {
     expect(banners[0]).toHaveAttribute('href', '#event-egara')
     expect(within(banners[0]).getByText('Egara Juga 2026')).toBeInTheDocument()
     expect(within(banners[0]).getByLabelText('countdown_days(17)')).toHaveTextContent('17')
+  })
+
+  it('marks the venue link with the outward arrow', () => {
+    render(<EventsHeader specials={[]} />)
+
+    const venue = screen.getByRole('link', { name: /Ca N/ })
+    expect(icons(venue)).toEqual(['arrow_outward'])
+    expect(venue).not.toHaveTextContent('↗')
   })
 
   it('shows a word instead of a number tomorrow, today and while running', () => {

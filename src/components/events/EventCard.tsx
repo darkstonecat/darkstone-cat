@@ -7,6 +7,7 @@ import type { EventView } from "@/lib/events/agenda-format";
 import { programItems, summarizeEvent, type AgendaPlace } from "@/lib/events/agenda-view";
 import { countdownText, directionsUrl, eventAnchor } from "@/lib/events/links";
 import EventProgram from "./program/EventProgram";
+import { ArrowOutwardIcon, LudoyaIcon } from "./icons";
 import ProposeTile from "./program/ProposeTile";
 import { useCountsSummary } from "./program/useCountsSummary";
 
@@ -32,11 +33,12 @@ interface EventCardProps {
  */
 export const RAIL = "pointer-events-none absolute left-[23px] w-0.5 bg-stone-300 sm:left-[31px]";
 
-function NewTab() {
+/** Trailing icon and screen-reader note of a link that opens in a new tab; `ludoya` shows the Ludoya mark. */
+function NewTab({ ludoya = false }: { ludoya?: boolean }) {
   const t = useTranslations("events");
   return (
     <>
-      &nbsp;<span aria-hidden="true">↗</span>
+      &nbsp;{ludoya ? <LudoyaIcon /> : <ArrowOutwardIcon />}
       <span className="sr-only"> {t("new_tab")}</span>
     </>
   );
@@ -203,7 +205,7 @@ function SpecialCard({ event, open, onToggle, panelId }: EventCardProps & { pane
                 className="inline-flex min-h-12 items-center rounded-[14px] bg-brand-orange px-5 text-[15px] font-bold text-white transition-colors hover:bg-brand-orange/90"
               >
                 {t("special_join")}
-                <NewTab />
+                <NewTab ludoya />
               </a>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { MdOutlineLocationOn, MdOutlineSchedule, MdStar } from "react-icons/md";
 import type { EventView } from "@/lib/events/agenda-format";
 import { eventAnchor } from "@/lib/events/links";
 import { SESSION_TIME_VALUES, VENUE } from "@/lib/venue";
+import { ArrowOutwardIcon } from "./icons";
 
 function BannerCountdown({ event }: { event: EventView }) {
   const t = useTranslations("events");
@@ -78,7 +79,7 @@ export default function EventsHeader({ specials }: { specials: EventView[] }) {
             <li className="inline-flex items-center gap-2 rounded-full bg-stone-800 px-3.5 py-2">
               <MdOutlineLocationOn aria-hidden="true" className="text-brand-orange-light" />
               <a href={VENUE.mapsUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                {VENUE.name}&nbsp;<span aria-hidden="true">↗</span>
+                {VENUE.name}&nbsp;<ArrowOutwardIcon />
                 <span className="sr-only"> {t("maps_new_tab")}</span>
               </a>
             </li>

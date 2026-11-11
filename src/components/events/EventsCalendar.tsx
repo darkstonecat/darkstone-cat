@@ -7,6 +7,7 @@ import type { EventsCalendarDay, EventsCalendarMonth } from "@/lib/events/calend
 import type { CalendarNeighbour } from "@/lib/events/month-grid";
 import { LUDOYA_AGENDA_URL, eventAnchor } from "@/lib/events/links";
 import { cn } from "@/lib/utils";
+import { ArrowOutwardIcon } from "./icons";
 
 const navButton =
   "inline-flex size-11 cursor-pointer items-center justify-center rounded-full border border-stone-white-base bg-brand-white text-stone-custom aria-disabled:cursor-default aria-disabled:opacity-40";
@@ -188,7 +189,7 @@ export default function EventsCalendar({
             rel="noopener noreferrer"
             className="font-bold text-brand-orange-text hover:underline"
           >
-            {t("error_link")}&nbsp;<span aria-hidden="true">↗</span>
+            {t("error_link")}&nbsp;<ArrowOutwardIcon />
             <span className="sr-only"> {t("external")}</span>
           </a>
         </p>
