@@ -215,22 +215,31 @@ The events page can run offline with `LUDOYA_MOCK=1`, which reads JSON fixtures 
 
 ## Lighthouse Audit
 
-The project maintains near-perfect Lighthouse scores across all 11 pages (100/100/100/100 on desktop, 91–100 Performance on mobile with 100 Accessibility/Best Practices/SEO).
+`npm run lighthouse` audits 17 pages (Catalan locale) on mobile and desktop, 34 audits in all, from a local production build; `npm run lighthouse:prod` runs the same set against darkstone.cat. The pages are listed in `scripts/lighthouse/config.mjs` and the report lands in `audits/lighthouse/<timestamp>/REPORT.md`. The audits run without a session, so the protected pages (`/profile`, `/profile/edit`, `/profile/card`, `/admin`, `/admin/members`) measure the redirect to `/login`.
 
-Known audit limitations come from Next.js framework constraints (legacy JS polyfills, bfcache, render-blocking CSS, network chains, unused shared chunks) and expected page complexity (ludoteca LCP, heavy animation pages, the `/events` mobile LCP). The former `AUDIT.md` with the details was removed in `f3eea9c`; its content is in the git history.
+Last measured for `/events` (11 November 2026, local production build, live data): desktop performance 99, accessibility 100, best practices 96, SEO 92; mobile performance 84–95 between runs, accessibility 100. Details in `docs/events-page.md`.
+
+Known audit limitations, to ignore in future audits:
+
+- **Next.js framework constraints**: legacy JS polyfills, bfcache, render-blocking CSS, network chains, unused shared chunks.
+- **Page complexity**: the ludoteca LCP, the heavy animation pages, and the `/events` mobile LCP (3–4 s on the header intro paragraph).
+- **Local runs only**: best practices loses points to the Vercel Analytics scripts (404 locally) and SEO flags the canonical, which points to `www.darkstone.cat`.
+
+The former `AUDIT.md` with the details was removed in `f3eea9c`; its content is in the git history.
+
+## Rate Limiting
+
+Public endpoints and server actions share one limiter, `allowRequestShared()` in `src/lib/rate-limit.ts`, backed by the `public.rate_limit_hit` Postgres function, so the quota holds across serverless instances and cold starts. It is used by the contact form (5 per IP per hour plus 50 per day for the whole site), the username checks, password reset, magic link, sign-up and the admin cache refresh and access link actions.
+
+- Buckets hold an HMAC of the IP (keyed from `ENCRYPTION_KEY`), never the raw address.
+- The client IP comes from `src/lib/client-ip.ts`: `x-real-ip`, set by the platform, then the first hop of `x-forwarded-for`.
+- If Supabase errors, times out (3 s) or is not configured, the limiter fails open to an in-memory limit for that instance and logs one warning.
 
 ## Future Improvements
 
-### Persistent Rate Limiting
-
-The contact form API (`src/app/api/contact/route.ts`) uses an in-memory `Map` for rate limiting (5 requests per IP per hour). This has two limitations:
-
-1. **Cold starts**: When Vercel spins up a new serverless instance, the `Map` starts empty and previous request history is lost.
-2. **Multiple instances**: If Vercel scales to 2+ instances, each has its own independent `Map`. Requests distributed across instances bypass the shared limit.
-
-**Recommended solution**: Migrate to [Vercel KV](https://vercel.com/docs/storage/vercel-kv) (built on Upstash Redis). The free Hobby plan includes 30,000 requests/month, more than enough for this use case. The change involves replacing `rateLimitMap.get()`/`.set()` with `kv.get()`/`kv.set()` with automatic TTL expiry.
-
-Related: IP identification currently relies solely on the `x-forwarded-for` header (SEC03). This works correctly behind Vercel's proxy, but if the rate limiter is migrated to a persistent store, the IP identification strategy should also be reviewed.
+- **"Afegeix al calendari" (`.ics`) on `/events`**: deferred (`docs/events-page.md`).
+- **Members-only Ludoya sessions (`ONLY_GROUP`)**: hidden everywhere until a board-approved member state exists (`docs/admin-panel/spec.md`, BR-19).
+- **Speed Insights**: mounted, but it stores nothing until the project is on a paid Vercel plan.
 
 ---
 
