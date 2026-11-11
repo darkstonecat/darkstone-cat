@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { MdClose } from "react-icons/md";
 import type { QrMatrix } from "@/lib/member-card/qr";
-import { useLenis } from "@/components/SmoothScroll";
+import { useModalDialog } from "@/hooks/useModalDialog";
 import QrCodeSvg from "./QrCodeSvg";
 
 type CardQrOverlayProps = {
@@ -20,55 +20,15 @@ type CardQrOverlayProps = {
  */
 export default function CardQrOverlay({ matrix, memberNumber }: CardQrOverlayProps) {
   const t = useTranslations("profile.card");
-  const lenis = useLenis();
-  // Kept in a ref so a new Lenis identity never re-runs the effect (and its cleanup) while open.
-  const lenisRef = useRef(lenis);
-  useEffect(() => {
-    lenisRef.current = lenis;
-  }, [lenis]);
   const titleId = useId();
   const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
   const label = t("qr_alt", { number: memberNumber });
 
   const close = useCallback(() => setOpen(false), []);
 
-  useEffect(() => {
-    if (!open) return;
-    const trigger = triggerRef.current;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    // Only restart Lenis on close if this overlay is the one that stopped it.
-    const current = lenisRef.current;
-    const stoppedLenis = current && !current.isStopped ? current : null;
-    stoppedLenis?.stop();
-    // Everything behind the dialog becomes inert (no focus, no clicks, hidden from assistive tech).
-    const main = document.getElementById("main-content");
-    const wasInert = main?.hasAttribute("inert") ?? false;
-    main?.setAttribute("inert", "");
-    closeRef.current?.focus();
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setOpen(false);
-      } else if (event.key === "Tab") {
-        // The close button is the only focusable element: keep focus on it.
-        event.preventDefault();
-        closeRef.current?.focus();
-      }
-    }
-    document.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
-      stoppedLenis?.start();
-      if (!wasInert) main?.removeAttribute("inert");
-      trigger?.focus();
-    };
-  }, [open]);
+  useModalDialog({ active: open, panelRef, onEscape: close, returnFocus: triggerRef });
 
   return (
     <>
@@ -86,6 +46,7 @@ export default function CardQrOverlay({ matrix, memberNumber }: CardQrOverlayPro
       {open &&
         createPortal(
           <div
+            ref={panelRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
@@ -93,7 +54,7 @@ export default function CardQrOverlay({ matrix, memberNumber }: CardQrOverlayPro
             className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 bg-brand-white p-6 text-stone-custom"
           >
             <button
-              ref={closeRef}
+              data-autofocus
               type="button"
               onClick={close}
               aria-label={t("qr_close")}

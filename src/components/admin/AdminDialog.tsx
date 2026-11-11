@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "motion/react";
 import { MdClose, MdMenuBook } from "react-icons/md";
 import { Link } from "@/i18n/routing";
-import { useLenis } from "@/components/SmoothScroll";
+import { useModalDialog } from "@/hooks/useModalDialog";
 import { cn } from "@/lib/utils";
 import { adminButtonClass } from "./adminButtons";
 
@@ -53,50 +53,9 @@ export type AdminDialogProps = {
   children?: ReactNode;
 };
 
-const FOCUSABLE =
-  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
 export function isReasonValid(reason: AdminDialogReason | undefined) {
   if (!reason) return true;
   return reason.value.trim().length >= (reason.minLength ?? 5);
-}
-
-type PageLock = { count: number; overflow: string; inert: boolean; lenis: { start: () => void } | null };
-let pageLock: PageLock | null = null;
-
-/**
- * Locks the page behind the dialogs (body scroll, Lenis, `#main-content` inert). Shared by every
- * open dialog through a counter, so a dialog that opens while another one is closing keeps the page
- * locked, and the original overflow / inert state is restored only when the last one releases.
- */
-function lockPage(lenis: { isStopped: boolean; stop: () => void; start: () => void } | null) {
-  if (!pageLock) {
-    const main = document.getElementById("main-content");
-    const stopped = lenis && !lenis.isStopped ? lenis : null;
-    // Lenis scrolls the page on wheel events regardless of body overflow: stop it while open, and
-    // restart it on release only if a dialog is the one that stopped it.
-    stopped?.stop();
-    pageLock = {
-      count: 0,
-      overflow: document.body.style.overflow,
-      inert: main?.hasAttribute("inert") ?? false,
-      lenis: stopped,
-    };
-    document.body.style.overflow = "hidden";
-    // Everything behind the dialog becomes inert (no focus, no clicks, hidden from assistive tech).
-    main?.setAttribute("inert", "");
-  }
-  pageLock.count += 1;
-  return function unlockPage() {
-    const lock = pageLock;
-    if (!lock) return;
-    lock.count -= 1;
-    if (lock.count > 0) return;
-    pageLock = null;
-    document.body.style.overflow = lock.overflow;
-    lock.lenis?.start();
-    if (!lock.inert) document.getElementById("main-content")?.removeAttribute("inert");
-  };
 }
 
 /**
@@ -140,65 +99,17 @@ function DialogPanel({
   const reasonHintId = useId();
   const explainId = useId();
 
-  const lenis = useLenis();
-  // Kept in a ref so a new Lenis identity never re-runs the lock effect (and its cleanup) while open.
-  const lenisRef = useRef(lenis);
-  useEffect(() => {
-    lenisRef.current = lenis;
-  }, [lenis]);
-
   // `false` as soon as the parent sets `open` to false, while the exit animation is still running.
   const isPresent = useIsPresent();
 
-  // Latest values for the document listener, which is attached once.
-  const live = useRef({ busy, onClose });
-  useEffect(() => {
-    live.current = { busy, onClose };
+  useModalDialog({
+    active: isPresent,
+    panelRef,
+    onEscape: () => {
+      if (busy) return false;
+      onClose();
+    },
   });
-
-  useEffect(() => {
-    if (!isPresent) return;
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const unlockPage = lockPage(lenisRef.current);
-    const panel = panelRef.current;
-    const first = panel?.querySelector<HTMLElement>("[data-autofocus]") ?? panel;
-    first?.focus();
-
-    function onKeyDown(event: KeyboardEvent) {
-      const root = panelRef.current;
-      if (!root) return;
-      if (event.key === "Escape") {
-        if (!live.current.busy) {
-          event.preventDefault();
-          live.current.onClose();
-        }
-        return;
-      }
-      if (event.key !== "Tab") return;
-      const items = Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE));
-      if (items.length === 0) {
-        event.preventDefault();
-        return;
-      }
-      const firstItem = items[0];
-      const lastItem = items[items.length - 1];
-      const active = document.activeElement;
-      if (event.shiftKey && (active === firstItem || active === root || !root.contains(active))) {
-        event.preventDefault();
-        lastItem.focus();
-      } else if (!event.shiftKey && (active === lastItem || !root.contains(active))) {
-        event.preventDefault();
-        firstItem.focus();
-      }
-    }
-
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      unlockPage();
-      previous?.focus?.();
-    };
-  }, [isPresent]);
 
   // The buttons disable while a request runs: keep focus inside the dialog instead of <body>.
   useEffect(() => {
