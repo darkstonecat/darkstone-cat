@@ -585,7 +585,24 @@
     "no_events": "No events scheduled at the moment",
     "carousel_page": "Page",
     "carousel_prev": "Previous",
-    "carousel_next": "Next"
+    "carousel_next": "Next",
+    "seats": {
+      "status_full": "Full",
+      "status_needed": "{count} more needed to start",
+      "status_last": "1 seat left",
+      "status_free": "{count} seats left",
+      "status_unlimited": "No seat limit",
+      "count_open": "{count} signed up",
+      "aria_seats": "{taken} of {capacity} seats taken",
+      "aria_seats_needed": "{taken} of {capacity} seats taken, {needed} more needed to start",
+      "aria_open": "{taken, plural, one {# person signed up} other {# people signed up}}, no limit",
+      "aria_open_needed": "{taken, plural, one {# person signed up} other {# people signed up}}, no limit, {needed} more needed to start"
+    },
+    "play": {
+      "join": "Sign up",
+      "queue": "Waiting list",
+      "new_tab": "for {game} (opens Ludoya in a new tab)"
+    }
   },
   "faq": {
     "title": "Frequently asked questions",

@@ -585,7 +585,24 @@
     "no_events": "No hi ha esdeveniments programats properament",
     "carousel_page": "Pàgina",
     "carousel_prev": "Anterior",
-    "carousel_next": "Següent"
+    "carousel_next": "Següent",
+    "seats": {
+      "status_full": "Completa",
+      "status_needed": "{count, plural, one {Falta # per començar} other {Falten # per començar}}",
+      "status_last": "Queda 1 plaça",
+      "status_free": "Queden {count} places",
+      "status_unlimited": "Sense límit de places",
+      "count_open": "{count, plural, one {# apuntat} other {# apuntats}}",
+      "aria_seats": "{taken} de {capacity} places ocupades",
+      "aria_seats_needed": "{taken} de {capacity} places ocupades, {needed, plural, one {en falta # per començar} other {en falten # per començar}}",
+      "aria_open": "{taken, plural, one {# persona apuntada} other {# persones apuntades}}, sense límit",
+      "aria_open_needed": "{taken, plural, one {# persona apuntada} other {# persones apuntades}}, sense límit, {needed, plural, one {en falta # per començar} other {en falten # per començar}}"
+    },
+    "play": {
+      "join": "Apunta’t",
+      "queue": "A la cua",
+      "new_tab": "a {game} (s’obre Ludoya en una pestanya nova)"
+    }
   },
   "faq": {
     "title": "Preguntes freqüents",

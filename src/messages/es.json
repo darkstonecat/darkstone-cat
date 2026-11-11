@@ -585,7 +585,24 @@
     "no_events": "No hay eventos programados próximamente",
     "carousel_page": "Página",
     "carousel_prev": "Anterior",
-    "carousel_next": "Siguiente"
+    "carousel_next": "Siguiente",
+    "seats": {
+      "status_full": "Completa",
+      "status_needed": "{count, plural, one {Falta # para empezar} other {Faltan # para empezar}}",
+      "status_last": "Queda 1 plaza",
+      "status_free": "Quedan {count} plazas",
+      "status_unlimited": "Sin límite de plazas",
+      "count_open": "{count, plural, one {# apuntado} other {# apuntados}}",
+      "aria_seats": "{taken} de {capacity} plazas ocupadas",
+      "aria_seats_needed": "{taken} de {capacity} plazas ocupadas, {needed, plural, one {falta # para empezar} other {faltan # para empezar}}",
+      "aria_open": "{taken, plural, one {# persona apuntada} other {# personas apuntadas}}, sin límite",
+      "aria_open_needed": "{taken, plural, one {# persona apuntada} other {# personas apuntadas}}, sin límite, {needed, plural, one {falta # para empezar} other {faltan # para empezar}}"
+    },
+    "play": {
+      "join": "Apúntate",
+      "queue": "En cola",
+      "new_tab": "a {game} (abre Ludoya en una pestaña nueva)"
+    }
   },
   "faq": {
     "title": "Preguntas frecuentes",
