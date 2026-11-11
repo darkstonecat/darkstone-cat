@@ -9,6 +9,7 @@
 
 import type { MemberSession, MemberSessionPlay } from "@/lib/member-sessions";
 import type { LudoyaPlace, LudoyaSession } from "@/lib/ludoya/types";
+import { madridDay } from "./madrid-day";
 
 /** This week plus the three following ones. */
 export const AGENDA_WEEKS = 4;
@@ -16,8 +17,6 @@ export const AGENDA_WEEKS = 4;
 export const MAX_BANNERS = 3;
 /** Special events are listed when they start within this many months. */
 const SPECIAL_MONTHS_AHEAD = 12;
-
-const TIME_ZONE = "Europe/Madrid";
 
 /** A place worth naming: only set when it is not the association's usual venue. */
 export interface AgendaPlace {
@@ -75,16 +74,6 @@ export interface Agenda {
   weeks: AgendaWeek[];
   /** Upcoming special events for the banners, soonest first. */
   specials: AgendaEvent[];
-}
-
-/** `YYYY-MM-DD` of an instant on the Madrid calendar. */
-function madridDay(instant: Date | string): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date(instant));
 }
 
 const dayToUtc = (day: string) => {
