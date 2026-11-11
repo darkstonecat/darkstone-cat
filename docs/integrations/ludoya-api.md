@@ -31,8 +31,9 @@ The `/events` agenda data lives outside the adapter: `src/lib/member-sessions.ts
 
 ```
 GET /events?includeSubEvents=true      (one request)
-  → futureEvents.elements[]  sessions (MEETUP, parentId null) and their plays
-                              (PLANNED_PLAY with parentId = session id and a game)
+  → futureEvents.elements[]  sessions (MEETUP, parentId null) and every sub-event,
+                              children and grandchildren (parentId = their parent's id):
+                              plays, tournaments, meetup zones and always-open demos
 GET /locations                          (cached 1 h, optional)
   → the location with isDefault = true is the usual venue
 ```
@@ -81,7 +82,11 @@ The image host (`ludoya-images.s3.eu-west-par.io.cloud.ovh.net`) must stay in `n
 | ★ `id`, ★ `type` | `MEETUP` (sessions), `PLANNED_PLAY`, `TOURNAMENT`, `PLAY_BOOTH`, `ROTATIVE_PLAYTEST` |
 | ★ `title`, `description` | |
 | ★ `startsAt`, ★ `endsAt`, `timeZone` | UTC instants; Friday 16:00 local is `14:00Z` in summer, `15:00Z` in winter |
-| `parentId` | Set on sub-events. Plays hang off their session |
+| ★ `parentId` | Set on sub-events. The tree is at most two levels deep below a session (checked live, Nov 2026): a meetup zone holds plays, tournaments or demo meetups |
+| ★ `alwaysOpen` | Optional boolean. `true` on always-open demos, which usually have `startsAt`/`endsAt` = `null` (the site keeps them as "sempre obert") |
+| ★ `attendanceMode` | Optional: `RSVP`, `NONE`, `EXTERNAL`, `LUDOYA_TICKETS` (the site says "Entrada" for tickets) |
+| ★ `tournament.format` | On tournaments: `SWISS`, `MIXER`, `SINGLE_ELIM`, `DOUBLE_ELIM`, `TABLE_KNOCKOUT` (unknown → plain "Torneig") |
+| `slug` | URL slug of the event page (the site links by id, which also works) |
 | `imageUrl` | Full-size image (the old API sent reduced ones) |
 | `participantCount` | Seats taken |
 | `capacity`, `minParticipants` | Nullable / optional. Null capacity = unlimited |
@@ -89,13 +94,13 @@ The image host (`ludoya-images.s3.eu-west-par.io.cloud.ovh.net`) must stay in `n
 | `visibility` | `PUBLIC`, `ONLY_GROUP`, `ONLY_FRIENDS`, `PRIVATE`. The key returns all of them, so the site filters |
 | `draft`, `canceled` | Drafts appear in the list; skip both |
 | `master`, `teacher` | Optional `{ id, username, name, avatarUrl }`: game master / teacher, used as organizer |
-| `game` | On plays: `{ id, slug, name, imageUrl, yearPublished? }` |
+| `game` | On plays and tournaments: `{ id, slug, name, imageUrl, yearPublished? }`. Demo meetups have none: the game name is the title |
 
 **Not exposed by the public API** (verified 2026-09-30): the BGG id of a game, a game type (no RPG flag), a waiting-list count (`queuedParticipantCount`), `childEventCounts`. Standalone plays (`PLANNED_PLAY` with no `parentId`, e.g. an RPG table) appear at top level; the site ignores them because they have no session to show under.
 
 ### `GET /events/{eventId}/children`
 
-`{ "children": [Event] }`, the same shape as list items. Not used by the site today (sub-events arrive with `includeSubEvents`); the check script exercises it.
+`{ "children": [Event] }`, the same shape as list items, direct children only. Not used by the site (the whole tree arrives with `includeSubEvents`); the check script exercises it. A draft parent hides its children on the site even when they are not drafts themselves.
 
 ### `GET /locations`
 

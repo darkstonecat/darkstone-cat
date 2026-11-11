@@ -197,6 +197,33 @@ async function main() {
     }
   }
 
+  // 3b. Sub-event tree (src/lib/ludoya/normalize.ts parseSubEvent) ------------
+  section("3b. Sub-event tree (zones, tournaments, always-open demos)");
+  const subEvents = elements.filter((e) => e.parentId);
+  if (subEvents.length === 0) {
+    console.log("  – No sub-events upcoming; skipping tree checks");
+  } else {
+    const known = new Set(["MEETUP", "PLANNED_PLAY", "TOURNAMENT", "PLAY_BOOTH", "ROTATIVE_PLAYTEST"]);
+    const unknownTypes = [...new Set(subEvents.map((e) => e.type).filter((t) => !known.has(t)))];
+    if (unknownTypes.length > 0) fail(`Unknown sub-event type(s): ${unknownTypes.join(", ")} (they show as meetups)`);
+    else ok(`${subEvents.length} sub-events, types ${[...new Set(subEvents.map((e) => e.type))].join(", ")}`);
+    const ids = new Set(elements.map((e) => e.id));
+    const depth = (e) => (e.parentId && ids.has(e.parentId) ? 1 + depth(elements.find((p) => p.id === e.parentId)) : 0);
+    ok(`Deepest sub-event is ${Math.max(...subEvents.map(depth))} level(s) below its session`);
+    for (const [i, e] of subEvents.slice(0, 20).entries()) {
+      const ctx = `subEvents[${i}]`;
+      expectField(e, "alwaysOpen", "boolean", ctx, { optional: true });
+      expectField(e, "attendanceMode", "string", ctx, { optional: true });
+      if (e.startsAt !== null) expectField(e, "startsAt", "string", ctx);
+      if (e.endsAt !== null) expectField(e, "endsAt", "string", ctx, { optional: true });
+    }
+    const formats = new Set(["SWISS", "MIXER", "SINGLE_ELIM", "DOUBLE_ELIM", "TABLE_KNOCKOUT"]);
+    const tournaments = subEvents.filter((e) => e.type === "TOURNAMENT");
+    const oddFormats = tournaments.map((e) => e.tournament?.format).filter((f) => f && !formats.has(f));
+    if (oddFormats.length > 0) fail(`Unknown tournament format(s): ${[...new Set(oddFormats)].join(", ")} (shown as plain "Torneig")`);
+    else if (tournaments.length > 0) ok(`${tournaments.length} tournaments with known formats`);
+  }
+
   // 4. User search ------------------------------------------------------------
   section("4. User search");
   const users = await getJson("/search/users?query=a&intent=PLAY&pagination=1,0");

@@ -52,9 +52,26 @@ There is no section link bar ("Aquesta setmana / Properes setmanes / Especials")
 | Default state | This week's events open; later sessions closed; specials always open. |
 | Toggle all | Each later week has "Desplega-ho tot / Plega-ho tot". |
 | Closed card | Title, date and time, play count, free seats, a stack of small covers. |
-| Open session | Grid of play cards (2 columns on mobile) plus a "Proposa una partida" card linking to Ludoya ("Sigues el primer!" when there are no plays). |
+| Open card | The event's **program** (see below) plus a "Proposa una partida" card linking to Ludoya ("Sigues el primer!" when there are no plays). |
 | Place | Shown only when it is **not** the usual venue: name, "fora del local habitual", "Com arribar-hi ↗" (Google Maps). The usual venue appears only in the header. |
 | Countdown | Specials only, on the banner and the card: "Falten N dies", "Demà", "Avui", "En curs". Never on sessions or in the day strip. |
+
+### Program (sub-events)
+
+Every published descendant of an event is shown inside its card, the same way for sessions and specials. Ludoya returns the whole tree, at most two levels deep, in the one `/events` request. Code: `src/lib/events/program/`; spec: `odd/tasks/events-sub-events.md`.
+
+| Rule | Value |
+|---|---|
+| Hidden | A draft, cancelled or non-`PUBLIC` node is hidden together with everything below it. |
+| Zone | A meetup with children ("Partides de ROL", "Demostracions de 2tomatoes") is not a card; its title names its children. |
+| Play | Today's play card. The game name leads, and the play's own title and its zone go below it. |
+| Tournament | The play card with an orange badge "Torneig · <format>" (Sistema suís, Eliminació directa, Doble eliminació, Eliminatòria per taules, Taules rotatives). The button is "Entrada" when Ludoya sells tickets, otherwise "Inscriu-t'hi". |
+| Activity | A meetup leaf with hours (a talk, an open tournament): the event image, the badge "Activitat", no seat pill, "Més info". |
+| Always open | `alwaysOpen`, no start date, or a meetup that covers the whole event. These go to a collapsible block, open by default: "Tot l'esdeveniment" (multi-day) or "Tot el dia". The block has the pill "Sempre obert · sense hora" and groups its items by zone, with "Altres activitats" last. Its tiles are square, badged "Demo" or "Activitat". |
+| Slots | More than **8** timed items in a day are grouped by start time ("10:00", "16:00"). At 8 or fewer, the grid is sorted by start. |
+| Days | A multi-day event shows every day as a collapsible section, all open, each with a summary ("4 partides · 3 tornejos · 2 activitats"). There are no tabs or filters. |
+| Special summary | Count chips under the special's details: "8 partides · 3 tornejos · 3 activitats · 13 demos". |
+| Cover | A node with a game: BGG (name + year), else the game's Ludoya image, else the node image. A node without a game: its image, else BGG by exact title. Nothing found: the dice placeholder "Sense portada". |
 
 ### Seat counter (play cards)
 
@@ -101,11 +118,12 @@ Ludoya  GET /events?includeSubEvents=true&pastLimit=200  +  GET /locations
 fetchMemberAreaSessions()          src/lib/member-sessions.ts
    │
    ├─► selectAgendaSessions()      agenda-view.ts   PUBLIC, range, running specials
-   │   withCovers(…, ∞)            member-sessions.ts   BGG covers within 2.5 s, else Ludoya's
-   │   toAgenda()                  agenda-view.ts   weeks, specials, countdown, place rule
+   │   withCovers(…, ∞)            member-sessions.ts   BGG covers within 2.5 s for plays and every sub-event
+   │   toAgenda()                  agenda-view.ts   weeks, specials, countdown, place rule,
+   │                                                 program = layoutProgram(classifyProgram(subEvents))
    │   formatAgenda(…, locale, now) agenda-format.ts   every date text + strip days (server)
    │        ▼
-   │   EventsHeader · EventsTimeline · EventCard · PlayCard · SeatPill · EventsDayStrip
+   │   EventsHeader · EventsTimeline · EventCard · program/* (EventProgram, ItemCard…) · SeatPill · EventsDayStrip
    │
    └─► toEventsCalendar()          calendar-view.ts + month-grid.ts
             ▼
@@ -119,7 +137,7 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
 
 ## 4. Privacy
 
-- Only the fields of the view model leave the server: no organizer names, no `visibility` field, no `ONLY_GROUP` play. Unit tests check the serialised JSON; the E2E checks the HTML.
+- Only the fields of the view model leave the server: no organizer names, no `visibility` field, no `ONLY_GROUP` or draft node at any depth of the sub-event tree. Unit tests check the serialised JSON; the E2E checks the HTML.
 - The calendar route is public by design: it returns the same titles, ids and Ludoya links the page already shows.
 
 ## 5. `GET /api/events/calendar`
@@ -136,6 +154,9 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
 | File | Role |
 |---|---|
 | `src/lib/events/agenda-view.ts` | Pure: selection, weeks, countdown, place rule, view model, summaries |
+| `src/lib/events/program/` | Pure: `classifyProgram` (tree → plays, tournaments, activities, demos), `layoutProgram` (days, slots above 8, always-open groups), `programItems`, `seatedItems` |
+| `src/lib/events/madrid-day.ts` | `madridDay()`, shared by the view model and the program layout |
+| `src/lib/sub-event-covers.ts` | Pure: cover requests for the tree and their answers |
 | `src/lib/events/agenda-format.ts` | Pure: date texts, date tiles and strip days, formatted on the server |
 | `src/lib/events/agenda.ts` | Server: `fetchEventsAgenda(now)` |
 | `src/lib/events/seat-counter.ts` | Pure: seat pill mode, chairs, status, label |
@@ -147,13 +168,14 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
 | `src/components/events/EventsHeader.tsx` | Header chips and special banners |
 | `src/components/events/EventsTimeline.tsx` | Week groups, open state, toggle all, `#event-` handling and scroll |
 | `src/components/events/EventCard.tsx` | Session and special cards, the date tile and its segment of the timeline line (`RAIL`) |
-| `src/components/events/PlayCard.tsx`, `SeatPill.tsx` | Play cover and seat counter |
+| `src/components/events/program/` | `EventProgram` (days or one day, then the always-open block), `DayItems` (grid or slots), `CollapsibleSection`, `AlwaysOpenSection`, `ItemCard` (play, tournament, activity), `AlwaysOpenTile`, `CoverFrame`, `ItemBadge`, `ProposeTile`, `useCountsSummary` |
+| `src/components/events/SeatPill.tsx` | Seat counter on play and tournament covers |
 | `src/components/events/EventsCalendar.tsx` | Month grid, `sidebar` and `inline` variants |
 | `src/components/events/EventsDayStrip.tsx` | Mobile strip and month toggle |
 | `src/components/events/HowItWorks.tsx`, `EventsStatus.tsx` | "Com funciona" card, error and empty states |
 | `src/app/api/events/calendar/route.ts` | Calendar month route |
 
-Messages: `events.*` (header, banners, timeline, cards), `events.seats`, `events.play`, `events.calendar`, `events.strip`.
+Messages: `events.*` (header, banners, timeline, cards), `events.program` (badges, formats, sections, CTAs), `events.seats`, `events.play`, `events.calendar`, `events.strip`.
 
 ## 7. Testing
 
@@ -219,3 +241,4 @@ No database migration and no production configuration step. The page reads the s
 |---|---|
 | `21cdb93` | Fix: one continuous timeline line (it broke under every tile and at each week header) |
 | `3172f92` | Multi-day date tiles show the first and last day ("DS 28 / DG 29", "⋮" when days lie between) |
+| `94c4a2c` … | Sub-events: every published child and grandchild inside its card (zones, tournaments, activities, always-open demos), time slots above 8 items, one collapsible section per day. Branch `feat/events-sub-events`, spec `odd/tasks/events-sub-events.md` |
