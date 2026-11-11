@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { MdChevronLeft, MdChevronRight, MdOutlineErrorOutline, MdStar } from "react-icons/md";
-import type { CalendarNeighbour, CalendarPayload } from "@/lib/member-home/month-grid";
+import type { CalendarNeighbour, CalendarPayload } from "@/lib/events/month-grid";
 import { cn } from "@/lib/utils";
 import CalendarSkeleton from "./CalendarSkeleton";
 import MonthCalendar from "./MonthCalendar";

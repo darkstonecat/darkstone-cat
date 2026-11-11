@@ -15,7 +15,7 @@ import BadgesSection from "@/components/profile/BadgesSection";
 import SessionsSection from "@/components/profile/SessionsSection";
 import CalendarSection from "@/components/profile/CalendarSection";
 import BenefitsCard from "@/components/profile/BenefitsCard";
-import { parseMonthParam } from "@/lib/member-home/month-grid";
+import { parseMonthParam } from "@/lib/events/month-grid";
 
 export const revalidate = false;
 

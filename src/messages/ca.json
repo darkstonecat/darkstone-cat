@@ -640,6 +640,24 @@
       "join": "Apunta’t",
       "queue": "A la cua",
       "new_tab": "a {game} (s’obre Ludoya en una pestanya nova)"
+    },
+    "calendar": {
+      "title": "Calendari",
+      "month_nav": "Navegació per mesos",
+      "prev": "Mes anterior: {month}",
+      "next": "Mes següent: {month}",
+      "prev_limit": "No hi ha mesos anteriors",
+      "next_limit": "No hi ha més mesos",
+      "grid_label": "Calendari de {month}",
+      "day_link": "{date}: {titles}",
+      "today": "avui",
+      "external": "(s’obre Ludoya en una pestanya nova)",
+      "legend_session": "Sessió",
+      "legend_special": "Especial",
+      "legend_today": "Avui",
+      "hint": "Clica un dia per anar-hi.",
+      "error": "No s’han pogut carregar les dates d’aquest mes.",
+      "error_link": "Veure-les a Ludoya"
     }
   },
   "faq": {

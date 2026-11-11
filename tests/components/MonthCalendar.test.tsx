@@ -9,7 +9,7 @@ vi.mock('next-intl', () => ({
 }))
 
 import MonthCalendar from '@/components/profile/MonthCalendar'
-import { buildCalendarView, type CalendarEvent, type YearMonth } from '@/lib/member-home/month-grid'
+import { buildCalendarView, type CalendarEvent, type YearMonth } from '@/lib/events/month-grid'
 
 const view = (month: YearMonth, events: CalendarEvent[], today: string) => buildCalendarView(month, events, today, 'ca')
 

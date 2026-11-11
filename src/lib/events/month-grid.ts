@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Member home — month calendar helpers
+// Month calendar helpers (the /events calendar and, until it goes, the member home)
 // ---------------------------------------------------------------------------
 // Pure functions (no React, no server-only imports): month parameter parsing,
 // the navigation range, the Monday-first week grid and its labels. Days are
@@ -10,9 +10,11 @@ const TIME_ZONE = "Europe/Madrid";
 const INTL_LOCALES: Record<string, string> = { ca: "ca-ES", es: "es-ES", en: "en-GB" };
 const intlLocale = (locale: string) => INTL_LOCALES[locale] ?? locale;
 
-/** How many months before and after the current one the calendar lets you browse. */
+/** How many months before and after the current one the member calendar lets you browse. */
 export const MONTHS_BACK = 3;
 export const MONTHS_FORWARD = 6;
+/** The public /events calendar starts at the current month. */
+export const EVENTS_MONTHS_BACK = 0;
 
 export interface YearMonth {
   year: number;
@@ -71,14 +73,14 @@ export function shiftMonth({ year, month }: YearMonth, delta: number): YearMonth
 
 const monthIndex = ({ year, month }: YearMonth) => year * 12 + month - 1;
 
-/** First and last month the member can browse, relative to `now`. */
-export function monthRange(now: Date): { first: YearMonth; last: YearMonth } {
+/** First and last month that can be browsed, relative to `now`. */
+export function monthRange(now: Date, monthsBack: number = MONTHS_BACK): { first: YearMonth; last: YearMonth } {
   const current = currentYearMonth(now);
-  return { first: shiftMonth(current, -MONTHS_BACK), last: shiftMonth(current, MONTHS_FORWARD) };
+  return { first: shiftMonth(current, -monthsBack), last: shiftMonth(current, MONTHS_FORWARD) };
 }
 
-export function isInRange(target: YearMonth, now: Date): boolean {
-  const { first, last } = monthRange(now);
+export function isInRange(target: YearMonth, now: Date, monthsBack: number = MONTHS_BACK): boolean {
+  const { first, last } = monthRange(now, monthsBack);
   return monthIndex(target) >= monthIndex(first) && monthIndex(target) <= monthIndex(last);
 }
 

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import { buildCalendarPayload } from "@/lib/member-home/calendar-payload";
-import { isInRange } from "@/lib/member-home/month-grid";
+import { isInRange } from "@/lib/events/month-grid";
 
 const noStore = { "Cache-Control": "no-store" } as const;
 

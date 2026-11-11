@@ -12,7 +12,7 @@ import {
   shiftMonth,
   weekdayLabels,
   type CalendarEvent,
-} from '@/lib/member-home/month-grid'
+} from '@/lib/events/month-grid'
 
 const event = (id: string, startsAt: string, special = false): CalendarEvent => ({
   id,

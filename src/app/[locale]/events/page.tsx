@@ -3,11 +3,14 @@ import { getTranslations } from "next-intl/server";
 import { getAlternates, getOgImageUrl, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
 import { fetchEventsAgenda } from "@/lib/events/agenda";
 import { formatAgenda } from "@/lib/events/agenda-format";
+import { fetchEventsCalendar } from "@/lib/events/calendar";
+import { currentYearMonth } from "@/lib/events/month-grid";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import EventsHeader from "@/components/events/EventsHeader";
 import EventsTimeline from "@/components/events/EventsTimeline";
+import EventsCalendar from "@/components/events/EventsCalendar";
 import EventsStatus from "@/components/events/EventsStatus";
 import HowItWorks from "@/components/events/HowItWorks";
 import { VENUE, VENUE_POSTAL_ADDRESS } from "@/lib/venue";
@@ -50,8 +53,10 @@ export default async function EventsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const [agendaResult, tNav, tMeta] = await Promise.all([
-    fetchEventsAgenda(),
+  const now = new Date();
+  const [agendaResult, calendar, tNav, tMeta] = await Promise.all([
+    fetchEventsAgenda(now),
+    fetchEventsCalendar(currentYearMonth(now), locale, now),
     getTranslations({ locale, namespace: "nav" }),
     getTranslations({ locale, namespace: "metadata" }),
   ]);
@@ -116,6 +121,8 @@ export default async function EventsPage({
       <div className="bg-brand-beige px-4 text-stone-custom sm:px-6">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-10 pt-9 pb-[72px] lg:flex-row lg:items-start">
           <aside className="order-last flex shrink-0 flex-col gap-3.5 lg:sticky lg:top-24 lg:order-first lg:w-[330px]">
+            {/* Mobile gets its own day strip and month toggle (T5). */}
+            <EventsCalendar className="hidden lg:flex" initial={calendar} loadedIds={allEvents.map((e) => e.id)} />
             <HowItWorks />
           </aside>
           <div className="min-w-0 flex-1">

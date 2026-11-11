@@ -12,7 +12,7 @@ import {
   type CalendarNeighbour,
   type CalendarPayload,
   type YearMonth,
-} from "./month-grid";
+} from "@/lib/events/month-grid";
 
 function neighbour(target: YearMonth, now: Date, locale: string): CalendarNeighbour | null {
   return isInRange(target, now) ? { key: formatMonthKey(target), title: formatMonthTitle(target, locale) } : null;

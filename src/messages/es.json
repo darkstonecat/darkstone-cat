@@ -640,6 +640,24 @@
       "join": "Apúntate",
       "queue": "En cola",
       "new_tab": "a {game} (abre Ludoya en una pestaña nueva)"
+    },
+    "calendar": {
+      "title": "Calendario",
+      "month_nav": "Navegación por meses",
+      "prev": "Mes anterior: {month}",
+      "next": "Mes siguiente: {month}",
+      "prev_limit": "No hay meses anteriores",
+      "next_limit": "No hay más meses",
+      "grid_label": "Calendario de {month}",
+      "day_link": "{date}: {titles}",
+      "today": "hoy",
+      "external": "(se abre Ludoya en una pestaña nueva)",
+      "legend_session": "Sesión",
+      "legend_special": "Especial",
+      "legend_today": "Hoy",
+      "hint": "Haz clic en un día para ir a él.",
+      "error": "No se han podido cargar las fechas de este mes.",
+      "error_link": "Verlas en Ludoya"
     }
   },
   "faq": {

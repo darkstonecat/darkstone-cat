@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { MdOutlinePlace, MdStar } from "react-icons/md";
-import type { CalendarDayView, CalendarView } from "@/lib/member-home/month-grid";
+import type { CalendarDayView, CalendarView } from "@/lib/events/month-grid";
 import { cn } from "@/lib/utils";
 
 type MonthCalendarProps = {

@@ -6,7 +6,7 @@ const member = vi.hoisted(() => ({ fetchMonthEvents: vi.fn() }))
 vi.mock('@/lib/member-sessions', () => member)
 
 import { GET } from '@/app/api/profile/calendar/route'
-import type { CalendarPayload } from '@/lib/member-home/month-grid'
+import type { CalendarPayload } from '@/lib/events/month-grid'
 import type { LudoyaSession } from '@/lib/ludoya/types'
 
 function setupAuth(opts: { user?: { id: string } | null; member?: { id: string; left_on?: string | null } | null }) {

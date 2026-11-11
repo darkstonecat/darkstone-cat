@@ -9,7 +9,7 @@ vi.mock('next-intl', () => ({
 }))
 
 import MemberCalendar from '@/components/profile/MemberCalendar'
-import { buildCalendarView, type CalendarPayload } from '@/lib/member-home/month-grid'
+import { buildCalendarView, type CalendarPayload } from '@/lib/events/month-grid'
 import ca from '@/messages/ca.json'
 import es from '@/messages/es.json'
 import en from '@/messages/en.json'

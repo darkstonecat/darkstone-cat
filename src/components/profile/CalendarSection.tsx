@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ludoyaConfig } from "@/lib/ludoya/config";
 import { buildCalendarPayload } from "@/lib/member-home/calendar-payload";
-import { currentYearMonth, formatMonthKey, type YearMonth } from "@/lib/member-home/month-grid";
+import { currentYearMonth, formatMonthKey, type YearMonth } from "@/lib/events/month-grid";
 import CalendarSkeleton from "./CalendarSkeleton";
 import MemberCalendar from "./MemberCalendar";
 
