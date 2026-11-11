@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from "@/lib/seo";
 import { requireRole } from "@/lib/admin/guard";
 import { createClient } from "@/lib/supabase/server";
 import type { AdminMemberListRow } from "@/lib/admin/members-list";
@@ -109,7 +109,7 @@ export default async function AdminRolesPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd([breadcrumbJsonLd, webPageJsonLd]) }}
       />
       <RolesContent
         superadmins={superadmins ?? []}

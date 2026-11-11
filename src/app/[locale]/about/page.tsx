@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates, getOgImageUrl, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
+import { getAlternates, getOgImageUrl, getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from "@/lib/seo";
 import { fetchBggCollectionCount } from "@/lib/bgg";
 import { fetchActiveMemberCount } from "@/lib/supabase/member-count";
 import NavBar from "@/components/NavBar";
@@ -69,7 +69,7 @@ export default async function AboutPage({
     <main id="main-content" className="relative min-h-screen font-sans selection:bg-stone-300">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd([breadcrumbJsonLd, webPageJsonLd]) }}
       />
       <NavBar />
       <AboutHero />

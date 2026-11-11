@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from "@/lib/seo";
 import { requireRole } from "@/lib/admin/guard";
 import { createClient } from "@/lib/supabase/server";
 import type { AdminActivityRow } from "@/lib/admin/audit-format";
@@ -76,7 +76,7 @@ export default async function AdminPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd([breadcrumbJsonLd, webPageJsonLd]) }}
       />
       <AdminOverview stats={stats} activity={activity} />
     </>

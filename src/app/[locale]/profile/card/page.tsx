@@ -2,7 +2,7 @@ import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { MdChevronLeft, MdOutlineBadge, MdOutlineFileDownload, MdOutlineQrCode2 } from "react-icons/md";
 import { Link } from "@/i18n/routing";
-import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from "@/lib/seo";
 import { getCurrentMember } from "@/lib/supabase/auth";
 import { buildCardVerifyUrl } from "@/lib/member-card/verify-url";
 import { buildQrMatrix } from "@/lib/member-card/qr";
@@ -75,7 +75,7 @@ export default async function ProfileCardPage({
     <main id="main-content" className="relative flex min-h-dvh flex-col bg-stone-custom font-sans selection:bg-stone-300 md:bg-transparent">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd([breadcrumbJsonLd, webPageJsonLd]) }}
       />
       <NavBar />
 

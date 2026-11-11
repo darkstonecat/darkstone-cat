@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from "@/lib/seo";
 import { getProfileData } from "@/lib/supabase/auth";
 import { getBadgeCatalogue, getMemberBadges } from "@/lib/supabase/badges";
 import { getMemberBenefits } from "@/lib/supabase/benefits";
@@ -73,7 +73,7 @@ export default async function ProfilePage({
     <main id="main-content" className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd([breadcrumbJsonLd, webPageJsonLd]) }}
       />
       <NavBar />
 

@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from "@/lib/seo";
 import { getProfileData } from "@/lib/supabase/auth";
 import { decrypt } from "@/lib/encryption";
 import NavBar from "@/components/NavBar";
@@ -92,7 +92,7 @@ export default async function ProfileEditPage({
     <main id="main-content" className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd([breadcrumbJsonLd, webPageJsonLd]) }}
       />
       <NavBar />
       <AuthHero titleKey="edit_title" subtitleKey="edit_subtitle" namespace="profile" />

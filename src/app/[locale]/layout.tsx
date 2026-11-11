@@ -15,6 +15,7 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 import VercelMonitoring from "@/components/VercelMonitoring";
 import DocumentProvider from "@/components/documents/DocumentProvider";
 import SkipLink from "@/components/SkipLink";
+import { serializeJsonLd } from "@/lib/seo";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -213,7 +214,7 @@ export default async function LocaleLayout({
       <body>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
         <noscript>
           <div style={{ padding: "1rem", backgroundColor: "#B54F00", color: "#fff", textAlign: "center", fontSize: "0.875rem" }}>

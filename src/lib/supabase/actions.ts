@@ -26,6 +26,17 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL_LENGTH = 254;
 const PREPARE_IP_LIMIT = 10;
 const PREPARE_WINDOW_MS = 10 * 60 * 1000;
+// Completing and discarding a sign-up are anonymous calls that hit the GoTrue admin API.
+// Generous on purpose: a refusal loses the optional data, and an event can put many
+// people signing up behind one Wi-Fi address.
+const FOLLOWUP_IP_LIMIT = 60;
+const FOLLOWUP_WINDOW_MS = 10 * 60 * 1000;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function allowSignupFollowup(): Promise<boolean> {
+  const ip = getClientIp(await headers());
+  return allowRequestShared("signup-followup-ip", ip, FOLLOWUP_IP_LIMIT, FOLLOWUP_WINDOW_MS);
+}
 
 /**
  * The browser shows the same screen whether or not the details were saved (so it
@@ -63,6 +74,7 @@ export async function updateMemberAfterSignup(
     if (!data || typeof data.userId !== "string" || !data.userId) {
       return { error: "Missing user ID" };
     }
+    if (!UUID_RE.test(data.userId)) return refuse("invalid_user_id");
 
     const phone = data.phone?.trim();
     const dni = data.dni?.trim();
@@ -77,6 +89,8 @@ export async function updateMemberAfterSignup(
     const bggClean = bgg ? normalizeUsername(bgg) : null;
     if (ludoya && !ludoyaClean) return { error: "Invalid Ludoya username" };
     if (bgg && !bggClean) return { error: "Invalid BGG username" };
+
+    if (!(await allowSignupFollowup())) return refuse("rate_limited");
 
     const supabase = createAdminClient();
 
@@ -119,7 +133,8 @@ export async function updateMemberAfterSignup(
  */
 export async function discardUnconfirmedSignup(userId: string): Promise<{ discarded: boolean }> {
   try {
-    if (typeof userId !== "string" || !userId) return { discarded: false };
+    if (typeof userId !== "string" || !UUID_RE.test(userId)) return { discarded: false };
+    if (!(await allowSignupFollowup())) return { discarded: false };
     const supabase = createAdminClient();
     if (!(await isFreshUnconfirmedUser(supabase, userId, DISCARD_WINDOW_MS))) {
       return { discarded: false };

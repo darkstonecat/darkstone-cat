@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/routing";
-import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from "@/lib/seo";
 import { requireRole } from "@/lib/admin/guard";
 import { isSuperadmin } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
@@ -85,7 +85,7 @@ export default async function AdminMembersPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd([breadcrumbJsonLd, webPageJsonLd]) }}
       />
       <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-4 pt-10 sm:px-6 md:pt-16">
         <div className="flex flex-col gap-4 rounded-2xl bg-brand-white p-5 md:p-6">

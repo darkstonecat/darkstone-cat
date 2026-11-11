@@ -21,6 +21,14 @@ vi.mock('@/lib/supabase/admin', () => ({
   })),
 }))
 
+const mockAllowRequestShared = vi.fn()
+vi.mock('@/lib/rate-limit', () => ({
+  allowRequestShared: (...args: unknown[]) => mockAllowRequestShared(...args),
+}))
+vi.mock('next/headers', () => ({
+  headers: vi.fn(async () => new Headers({ 'x-real-ip': '203.0.113.7' })),
+}))
+
 vi.mock('@/lib/encryption', () => ({
   encrypt: vi.fn((text: string) => `encrypted:${text}`),
 }))
@@ -28,9 +36,11 @@ vi.mock('@/lib/encryption', () => ({
 import { discardUnconfirmedSignup, updateMemberAfterSignup } from '@/lib/supabase/actions'
 import { encrypt } from '@/lib/encryption'
 
+const USER_ID = '4f1c2b3a-5d6e-4f70-8a9b-0c1d2e3f4a5b'
+
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString()
 
-const freshUser = { id: 'user-1', created_at: minutesAgo(1), email_confirmed_at: null }
+const freshUser = { id: USER_ID, created_at: minutesAgo(1), email_confirmed_at: null }
 const blankRow = {
   dni_nie_encrypted: null,
   phone_encrypted: null,
@@ -42,12 +52,13 @@ const blankRow = {
 describe('updateMemberAfterSignup', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockAllowRequestShared.mockResolvedValue(true)
     mockEq.mockResolvedValue({ error: null })
     mockGetUserById.mockResolvedValue({ data: { user: freshUser }, error: null })
     mockMaybeSingle.mockResolvedValue({ data: blankRow, error: null })
   })
 
-  const baseData = { userId: 'user-1', newsletter_accepted: false }
+  const baseData = { userId: USER_ID, newsletter_accepted: false }
   const rejected = { error: 'Could not save member data' }
 
   it('returns error when userId is missing', async () => {
@@ -59,7 +70,7 @@ describe('updateMemberAfterSignup', () => {
   it('encrypts phone when provided', async () => {
     await updateMemberAfterSignup({ ...baseData, phone: '612345678' })
     // Bound to the row being completed (AAD member:<id>, T7b)
-    expect(encrypt).toHaveBeenCalledWith('612345678', 'user-1')
+    expect(encrypt).toHaveBeenCalledWith('612345678', USER_ID)
     expect(mockUpdatePayload.mock.calls[0][0].phone_encrypted).toBe('encrypted:612345678')
   })
 
@@ -93,7 +104,7 @@ describe('updateMemberAfterSignup', () => {
 
   it('targets the correct user ID', async () => {
     await updateMemberAfterSignup(baseData)
-    expect(mockEq).toHaveBeenCalledWith('id', 'user-1')
+    expect(mockEq).toHaveBeenCalledWith('id', USER_ID)
   })
 
   it('returns a generic error on database failure', async () => {
@@ -175,21 +186,35 @@ describe('updateMemberAfterSignup', () => {
       expect(mockUpdatePayload).not.toHaveBeenCalled()
     })
   })
+
+  it('refuses an id that is not a UUID without calling GoTrue', async () => {
+    expect(await updateMemberAfterSignup({ ...baseData, userId: 'user-1' })).toEqual(rejected)
+    expect(mockGetUserById).not.toHaveBeenCalled()
+  })
+
+  it('is throttled per client IP before calling GoTrue', async () => {
+    mockAllowRequestShared.mockResolvedValue(false)
+    expect(await updateMemberAfterSignup({ ...baseData, phone: '612345678' })).toEqual(rejected)
+    expect(mockAllowRequestShared).toHaveBeenCalledWith('signup-followup-ip', '203.0.113.7', 60, 600_000)
+    expect(mockGetUserById).not.toHaveBeenCalled()
+    expect(mockUpdatePayload).not.toHaveBeenCalled()
+  })
 })
 
 describe('discardUnconfirmedSignup', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockAllowRequestShared.mockResolvedValue(true)
     mockGetUserById.mockResolvedValue({ data: { user: freshUser }, error: null })
     mockDeleteUser.mockResolvedValue({ error: null })
     mockMemberDelete.mockResolvedValue({ error: null })
   })
 
   it('deletes a fresh unconfirmed user (member row cascades)', async () => {
-    expect(await discardUnconfirmedSignup('user-1')).toEqual({ discarded: true })
+    expect(await discardUnconfirmedSignup(USER_ID)).toEqual({ discarded: true })
     // The members row goes through the FK cascade, not an explicit delete.
     expect(mockMemberDelete).not.toHaveBeenCalled()
-    expect(mockDeleteUser).toHaveBeenCalledWith('user-1')
+    expect(mockDeleteUser).toHaveBeenCalledWith(USER_ID)
   })
 
   it('accepts a sign-up up to 30 minutes old', async () => {
@@ -197,7 +222,7 @@ describe('discardUnconfirmedSignup', () => {
       data: { user: { ...freshUser, created_at: minutesAgo(25) } },
       error: null,
     })
-    expect((await discardUnconfirmedSignup('user-1')).discarded).toBe(true)
+    expect((await discardUnconfirmedSignup(USER_ID)).discarded).toBe(true)
   })
 
   it.each([
@@ -206,14 +231,26 @@ describe('discardUnconfirmedSignup', () => {
     ['old user', { data: { user: { ...freshUser, created_at: minutesAgo(45) } }, error: null }],
   ])('refuses %s', async (_name, response) => {
     mockGetUserById.mockResolvedValue(response)
-    expect(await discardUnconfirmedSignup('user-1')).toEqual({ discarded: false })
+    expect(await discardUnconfirmedSignup(USER_ID)).toEqual({ discarded: false })
     expect(mockDeleteUser).not.toHaveBeenCalled()
     expect(mockMemberDelete).not.toHaveBeenCalled()
   })
 
   it('never throws', async () => {
     mockDeleteUser.mockRejectedValue(new Error('boom'))
-    expect(await discardUnconfirmedSignup('user-1')).toEqual({ discarded: false })
+    expect(await discardUnconfirmedSignup(USER_ID)).toEqual({ discarded: false })
     expect(await discardUnconfirmedSignup('')).toEqual({ discarded: false })
+  })
+
+  it('refuses an id that is not a UUID without calling GoTrue', async () => {
+    expect(await discardUnconfirmedSignup('user-1')).toEqual({ discarded: false })
+    expect(mockGetUserById).not.toHaveBeenCalled()
+  })
+
+  it('is throttled per client IP before calling GoTrue', async () => {
+    mockAllowRequestShared.mockResolvedValue(false)
+    expect(await discardUnconfirmedSignup(USER_ID)).toEqual({ discarded: false })
+    expect(mockGetUserById).not.toHaveBeenCalled()
+    expect(mockDeleteUser).not.toHaveBeenCalled()
   })
 })

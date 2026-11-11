@@ -2,7 +2,7 @@ import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { MdArrowBack } from "react-icons/md";
 import { Link } from "@/i18n/routing";
-import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
+import { getAlternates, getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from "@/lib/seo";
 import { requireRole } from "@/lib/admin/guard";
 import { fetchUpcomingEvents } from "@/lib/ludoya";
 import EventImagesContent from "@/components/events/EventImagesContent";
@@ -62,7 +62,7 @@ export default async function EventImagesPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd]),
+          __html: serializeJsonLd([breadcrumbJsonLd, webPageJsonLd]),
         }}
       />
       <div className="mx-auto flex max-w-[1120px] flex-col gap-2 px-4 pt-10 sm:px-6 md:pt-16">

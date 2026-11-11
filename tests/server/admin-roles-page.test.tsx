@@ -12,6 +12,7 @@ vi.mock('@/lib/seo', () => ({
   getAlternates: vi.fn(() => ({ canonical: 'x' })),
   getBreadcrumbJsonLd: vi.fn(() => ({})),
   getWebPageJsonLd: vi.fn(() => ({})),
+  serializeJsonLd: (data: unknown) => JSON.stringify(data),
 }))
 vi.mock('@/components/admin/roles/RolesContent', () => ({ default: () => null }))
 

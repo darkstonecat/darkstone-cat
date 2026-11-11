@@ -1,6 +1,11 @@
-import { describe, it, expect, afterAll } from 'vitest'
+import { describe, it, expect, afterAll, vi } from 'vitest'
 import { supabaseAdmin, cleanupUsers } from '../helpers/supabase'
 import { discardUnconfirmedSignup, updateMemberAfterSignup } from '@/lib/supabase/actions'
+
+// Server actions read the client IP for their throttle; there is no request here.
+// A random documentation-range IP keeps reruns out of each other's bucket.
+const testIp = `198.51.100.${Math.floor(Math.random() * 254) + 1}`
+vi.mock('next/headers', () => ({ headers: async () => new Headers({ 'x-real-ip': testIp }) }))
 
 const userIds: string[] = []
 afterAll(() => cleanupUsers(userIds))

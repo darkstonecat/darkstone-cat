@@ -85,3 +85,12 @@ export function getWebPageJsonLd(
     ...options.extra,
   };
 }
+
+/**
+ * JSON for an inline `<script type="application/ld+json">`. `JSON.stringify`
+ * leaves `<` as is, so an upstream text holding `</script>` (a Ludoya event
+ * description, a BGG game name) would close the tag; `<` keeps it inert.
+ */
+export function serializeJsonLd(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}

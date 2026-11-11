@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getAlternates, getOgImageUrl, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
+import { getAlternates, getOgImageUrl, getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from "@/lib/seo";
 import { fetchEventsAgenda } from "@/lib/events/agenda";
 import { formatAgenda } from "@/lib/events/agenda-format";
 import { fetchEventsCalendar } from "@/lib/events/calendar";
@@ -116,7 +116,7 @@ export default async function EventsPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([breadcrumbJsonLd, webPageJsonLd, ...eventJsonLd]),
+          __html: serializeJsonLd([breadcrumbJsonLd, webPageJsonLd, ...eventJsonLd]),
         }}
       />
       <NavBar />
