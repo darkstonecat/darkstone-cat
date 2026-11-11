@@ -43,7 +43,7 @@
 | `/about` | Origin story, mission, and values |
 | `/ludoteca` | Game library with filters, search, and BGG data |
 | `/contact` | Contact form |
-| `/events` | The public agenda from Ludoya: special banners, month calendar, collapsible session cards with seat counters (spec: `docs/features/events/spec.md`) |
+| `/events` | The public agenda from Ludoya: special banners, month calendar, collapsible event cards with every published sub-event (plays, tournaments, activities, always-open demos) and seat counters (spec: `docs/features/events/spec.md`) |
 | `/faq` | Frequently asked questions |
 | `/legal` | Terms & conditions |
 | `/privacy` | Privacy policy |
@@ -219,7 +219,7 @@ The events page can run offline with `LUDOYA_MOCK=1`, which reads JSON fixtures 
 
 `npm run lighthouse` audits 17 pages (Catalan locale) on mobile and desktop, 34 audits in all, from a local production build; `npm run lighthouse:prod` runs the same set against darkstone.cat. The pages are listed in `scripts/lighthouse/config.mjs` and the report lands in `audits/lighthouse/<timestamp>/REPORT.md`. The audits run without a session, so the protected pages (`/profile`, `/profile/edit`, `/profile/card`, `/admin`, `/admin/members`) measure the redirect to `/login`.
 
-Last measured for `/events` (11 November 2026, local production build, live data): desktop performance 99, accessibility 100, best practices 96, SEO 92; mobile performance 84–95 between runs, accessibility 100. Details in `docs/features/events/spec.md`.
+Last measured for `/events` (11 November 2026, local production build, live data): desktop performance 99, accessibility 100, best practices 96, SEO 92; mobile performance 84–95 between runs, accessibility 100 (96 after the sub-events, from the day strip link names, a known follow-up). Details in `docs/features/events/spec.md`.
 
 Known audit limitations, to ignore in future audits:
 

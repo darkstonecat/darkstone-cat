@@ -67,7 +67,7 @@ Every published descendant of an event is shown inside its card, the same way fo
 | Play | Today's play card. The game name leads, and the play's own title and its zone go below it. |
 | Tournament | The play card with an orange badge "Torneig · <format>" (Sistema suís, Eliminació directa, Doble eliminació, Eliminatòria per taules, Taules rotatives). The button is "Entrada" when Ludoya sells tickets, otherwise "Inscriu-t'hi". |
 | Activity | A meetup leaf with hours (a talk, an open tournament): the event image, the badge "Activitat", no seat pill, "Més info". |
-| Always open | `alwaysOpen`, no start date, or a meetup that covers the whole event. These go to a collapsible block, open by default: "Tot l'esdeveniment" (multi-day) or "Tot el dia". The block has the pill "Sempre obert · sense hora" and groups its items by zone, with "Altres activitats" last. Its tiles are square, badged "Demo" or "Activitat". |
+| Always open | `alwaysOpen`, no start date, or a meetup that covers the whole event. These go to a collapsible block, open by default: "Tot l'esdeveniment" (multi-day) or "Tot el dia". The block has the pill "Sempre obert · sense hora" and groups its items by zone, with "Altres activitats" last. Its items use the same full card as the timed ones (badge "Demo" or "Activitat", white "Més info" button), without repeating the zone. In an event that goes by start time, each group sits beside a clock in the time column, so every card of the event has the same size (four per row at the widest card). |
 | Slots | More than **8** timed items in a day are grouped by start time ("10:00", "16:00"). When one day of a multi-day event is over 8, every day of that event uses start-time rows, so the program reads the same way. At 8 or fewer in every day, each day is a grid sorted by start. |
 | Card order | Inside a start-time row and inside each always-open group, cards go by variant: tournaments, plays with a cover, plays without a cover, activities, demos; equal variants keep their start or tree order. The grid stays in start order. |
 | Days | A multi-day event shows every day as a collapsible section, all open, each with a summary ("4 partides · 3 tornejos · 2 activitats"). There are no tabs or filters. |
@@ -186,6 +186,7 @@ Messages: `events.*` (header, banners, timeline, cards), `events.program` (badge
   - next week: Friday 9 (closed) and the special "Juguem a El Cartón Peleón!" on Sunday 11, away from the usual venue (open, "Falten 10 dies");
   - "Egara Juga 2026", 28–29 November (special);
   - drafts on 10 October and 8 November are never shown; Friday 25 December is outside the four weeks, so its calendar day opens Ludoya.
+  - Egara's program: count chips, one open section per day, start-time rows on both days, the zone subtitle, the tournament badge and the "Entrada" button, the always-open block with "Altres activitats" last, drafts absent, folding;
   - the timeline line is checked geometrically (`expectContinuousRail`: segments touch within 1 px, and the line starts and ends inside the first and last tile), on desktop and mobile.
 - Run: `npm run test:unit`, `npx playwright test e2e/pages/events.spec.ts`.
 
@@ -197,6 +198,8 @@ Messages: `events.*` (header, banners, timeline, cards), `events.program` (badge
 | E2E | full suite green (261 + the fixed benefits test); events spec 29/29 with `--repeat-each=3` |
 | Lighthouse `/events`, desktop | performance 99, accessibility 100, best practices 96, SEO 92, CLS 0 |
 | Lighthouse `/events`, mobile | performance 84–95 across 4 runs (LCP 3.0–4.3 s), accessibility 100, best practices 96, SEO 92, CLS 0 |
+
+After the sub-events (`feat/events-sub-events`, same day): unit 2094 tests, events E2E 15/15, Lighthouse `/events` desktop 99 / 100 / 96 / 92, mobile 91 / 96 / 96 / 92 (CLS 0). The mobile accessibility point is the day strip (see section 10).
 
 Notes on the remaining points, all from a local production build with live data: the mobile LCP element is the header intro paragraph (time to first byte about 0.3 s plus about 1.1 s of render delay from render-blocking CSS); best practices loses points to the Vercel Analytics scripts, which answer 404 locally; SEO flags the canonical because it points to `www.darkstone.cat` while the audit runs on localhost.
 
@@ -216,6 +219,8 @@ Notes on the remaining points, all from a local production build with live data:
 - **"Afegeix al calendari" (`.ics`)**: deferred by the user.
 - **Members-only sessions (`ONLY_GROUP`)** stay hidden everywhere until a board-approved member state exists (`docs/features/admin-panel/spec.md`, BR-19).
 - **Mobile LCP**: bound by the framework's render-blocking CSS, not by this page's code.
+- **Day strip accessible names**: on mobile, Lighthouse flags `label-content-name-mismatch` on the `EventsDayStrip` links (their `aria-label` does not contain the visible day text). Follow-up.
+- **JSON-LD `subEvent`**: the sub-events are not in the Event schema yet.
 
 ## 11. Delivery
 
@@ -242,4 +247,20 @@ No database migration and no production configuration step. The page reads the s
 |---|---|
 | `21cdb93` | Fix: one continuous timeline line (it broke under every tile and at each week header) |
 | `3172f92` | Multi-day date tiles show the first and last day ("DS 28 / DG 29", "⋮" when days lie between) |
-| `94c4a2c` … | Sub-events: every published child and grandchild inside its card (zones, tournaments, activities, always-open demos), time slots above 8 items, one collapsible section per day. Branch `feat/events-sub-events`, spec `odd/tasks/events-sub-events.md` |
+
+### Sub-events (`feat/events-sub-events`, spec `odd/tasks/events-sub-events.md`)
+
+| Commit | Change |
+|---|---|
+| `94c4a2c` | Ludoya adapter reads the whole sub-event tree; drafts, cancelled and non-public nodes hide their subtree |
+| `759b17f` | Program domain: classify the tree (plays, tournaments, activities, demos) and lay it out (days, start-time rows, always-open groups) |
+| `706aa62` | Covers for every sub-event (BGG, Ludoya game, node image, placeholder) |
+| `64c963f` | View model and UI: every sub-event in the event cards |
+| `a175fdf` | E2E, `ludoya:check` sub-event checks, docs |
+| `98e057e` | Fix: non-public sub-events are never sent to BGG |
+| `2c9a427` | One mode per event: when one day goes by start time, every day does |
+| `c0eb154` | Card order inside a row and an always-open group: tournaments, plays with a cover, plays without, activities, demos (the grid stays by time) |
+| `9ba4845` | Always-open items on the full card |
+| `6e0d1a6` | Same card size everywhere (time / clock column, 140 px grid minimum), white "Més info" button |
+
+No database migration and no production configuration step.
