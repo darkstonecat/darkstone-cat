@@ -33,6 +33,30 @@ async function openEvents(page: Page) {
   await expectHydrated(toggle(page, 'Divendres de jocs!'))
 }
 
+/**
+ * The timeline line: every rail segment touches the next one, the line starts at
+ * the centre of the first date tile and ends at the centre of the last one.
+ */
+async function expectContinuousRail(page: Page) {
+  const { rails, tiles } = await page.evaluate(() => {
+    const box = (el: Element) => el.getBoundingClientRect()
+    const rails = [...document.querySelectorAll('[data-timeline-rail]')].map(box).sort((a, b) => a.top - b.top)
+    const tiles = [...document.querySelectorAll('[data-timeline-tile]')].map(box).sort((a, b) => a.top - b.top)
+    return {
+      rails: rails.map((r) => ({ top: r.top, bottom: r.bottom, x: r.left + r.width / 2 })),
+      tiles: tiles.map((t) => ({ centerY: t.top + t.height / 2, centerX: t.left + t.width / 2 })),
+    }
+  })
+  expect(tiles.length).toBeGreaterThan(1)
+  expect(rails.length).toBeGreaterThan(1)
+  expect(Math.abs(rails[0].top - tiles[0].centerY)).toBeLessThanOrEqual(1)
+  expect(Math.abs(rails.at(-1)!.bottom - tiles.at(-1)!.centerY)).toBeLessThanOrEqual(1)
+  for (let i = 1; i < rails.length; i++) {
+    expect(Math.abs(rails[i].top - rails[i - 1].bottom), `gap above rail segment ${i}`).toBeLessThanOrEqual(1)
+  }
+  for (const rail of rails) expect(Math.abs(rail.x - tiles[0].centerX)).toBeLessThanOrEqual(1)
+}
+
 test.describe('Events page (/events)', () => {
   test('shows the header, the hours and venue, and one banner per special with its countdown', async ({ page }) => {
     await openEvents(page)
@@ -131,6 +155,14 @@ test.describe('Events page (/events)', () => {
     expect(events.map((e) => e.name)).toContain('Egara Juga 2026')
   })
 
+  test('draws one continuous timeline line from the first day to the last, open or closed', async ({ page }) => {
+    await openEvents(page)
+    await expectContinuousRail(page)
+    await toggle(page, 'Divendres de jocs!', 0).click()
+    await expect(toggle(page, 'Divendres de jocs!', 0)).toHaveAttribute('aria-expanded', 'false')
+    await expectContinuousRail(page)
+  })
+
   test('the calendar route answers public months only', async ({ request }) => {
     const ok = await request.get('/api/events/calendar?month=2026-11&locale=es')
     expect(ok.status()).toBe(200)
@@ -167,5 +199,9 @@ test.describe('Events page on mobile', () => {
 
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
     expect(overflow).toBeLessThanOrEqual(0)
+  })
+  test('draws one continuous timeline line', async ({ page }) => {
+    await openEvents(page)
+    await expectContinuousRail(page)
   })
 })

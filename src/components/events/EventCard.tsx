@@ -16,7 +16,18 @@ interface EventCardProps {
   isCurrentWeek: boolean;
   open: boolean;
   onToggle: () => void;
+  /** First event of the timeline: the line starts at the centre of its date tile. */
+  isFirst?: boolean;
+  /** Last event of the timeline: the line ends at the centre of its date tile. */
+  isLast?: boolean;
 }
+
+/**
+ * One segment of the timeline line, centred on the date tile column (48 px, 64 px from sm).
+ * Every row and week header draws its own segment edge to edge, so they join into one line;
+ * the tile sits on top of it.
+ */
+export const RAIL = "pointer-events-none absolute left-[23px] w-0.5 bg-stone-300 sm:left-[31px]";
 
 function NewTab() {
   const t = useTranslations("events");
@@ -234,17 +245,28 @@ function SpecialCard({ event, open, onToggle, panelId }: EventCardProps & { pane
  * image, description and the Ludoya sign-up.
  */
 export default function EventCard(props: EventCardProps) {
-  const { event, isCurrentWeek } = props;
+  const { event, isCurrentWeek, isFirst = false, isLast = false } = props;
   const anchor = eventAnchor(event.id);
   const panelId = `${anchor}-panel`;
   const special = event.type === "special";
   return (
-    <div id={anchor} className="flex scroll-mt-24 gap-3 sm:gap-5">
-      <div className="flex w-12 shrink-0 flex-col items-center sm:w-16">
+    <div id={anchor} className="relative flex scroll-mt-24 gap-3 sm:gap-5">
+      {!(isFirst && isLast) && (
         <span
           aria-hidden="true"
+          data-timeline-rail
           className={cn(
-            "flex size-12 flex-col items-center justify-center rounded-2xl leading-none sm:size-16",
+            RAIL,
+            isFirst ? "top-6 bottom-0 sm:top-8" : isLast ? "top-0 h-6 sm:h-8" : "top-0 bottom-0"
+          )}
+        />
+      )}
+      <div className="w-12 shrink-0 sm:w-16">
+        <span
+          aria-hidden="true"
+          data-timeline-tile
+          className={cn(
+            "relative flex size-12 flex-col items-center justify-center rounded-2xl leading-none sm:size-16",
             special
               ? "bg-brand-orange text-white"
               : isCurrentWeek
@@ -255,7 +277,6 @@ export default function EventCard(props: EventCardProps) {
           <span className="text-[10px] font-bold sm:text-[11px]">{event.tile.weekday}</span>
           <span className="text-xl font-extrabold sm:text-2xl">{event.tile.day}</span>
         </span>
-        <span aria-hidden="true" className="mt-2 w-0.5 flex-1 bg-stone-300" />
       </div>
       {special ? <SpecialCard {...props} panelId={panelId} /> : <SessionCard {...props} panelId={panelId} />}
     </div>

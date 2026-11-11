@@ -6,7 +6,8 @@ import { useLenis } from "@/components/SmoothScroll";
 import type { EventView, WeekView } from "@/lib/events/agenda-format";
 import { weekSummary } from "@/lib/events/agenda-view";
 import { LUDOYA_AGENDA_URL, eventAnchor, eventIdFromHash } from "@/lib/events/links";
-import EventCard from "./EventCard";
+import { cn } from "@/lib/utils";
+import EventCard, { RAIL } from "./EventCard";
 
 /** Room for the fixed NavBar when scrolling to a card. */
 const SCROLL_OFFSET = -96;
@@ -14,7 +15,18 @@ const SCROLL_OFFSET = -96;
 /** This week's events and every special start open; later sessions start closed. */
 export const isOpenByDefault = (event: EventView, week: WeekView) => event.type === "special" || week.isCurrent;
 
-function WeekHeader({ week, allOpen, onToggleAll }: { week: WeekView; allOpen: boolean; onToggleAll: () => void }) {
+function WeekHeader({
+  week,
+  allOpen,
+  onToggleAll,
+  rail,
+}: {
+  week: WeekView;
+  allOpen: boolean;
+  onToggleAll: () => void;
+  /** Events above and below: the timeline line runs through the header. */
+  rail: boolean;
+}) {
   const t = useTranslations("events");
   const counts = weekSummary(week.events);
   const summary = week.isCurrent
@@ -25,7 +37,9 @@ function WeekHeader({ week, allOpen, onToggleAll }: { week: WeekView; allOpen: b
         ...(counts.specials > 0 ? [t("summary_specials", { count: counts.specials })] : []),
       ];
   return (
-    <div className="mb-4 ml-[60px] flex flex-wrap items-baseline justify-between gap-2 sm:ml-[84px]">
+    // Padding, not margin: the line has to cover the space under the header too.
+    <div className="relative flex flex-wrap items-baseline justify-between gap-2 pb-4 pl-[60px] sm:pl-[84px]">
+      {rail && <span aria-hidden="true" data-timeline-rail className={cn(RAIL, "top-0 bottom-0")} />}
       <span className="flex flex-col gap-0.5">
         <h2 className={week.isCurrent ? "text-2xl font-extrabold sm:text-3xl" : "text-xl font-extrabold"}>
           {week.isCurrent ? t("this_week") : t("week_title", week.title)}
@@ -57,7 +71,10 @@ export default function EventsTimeline({ weeks }: { weeks: WeekView[] }) {
   const [overrides, setOverrides] = useState<Record<string, boolean>>({});
   const [scrollTarget, setScrollTarget] = useState<{ id: string; seq: number } | null>(null);
 
-  const eventIds = useMemo(() => new Set(weeks.flatMap((w) => w.events.map((e) => e.id))), [weeks]);
+  const orderedIds = useMemo(() => weeks.flatMap((w) => w.events.map((e) => e.id)), [weeks]);
+  const eventIds = useMemo(() => new Set(orderedIds), [orderedIds]);
+  const firstId = orderedIds[0];
+  const lastId = orderedIds.at(-1);
   const isOpen = (event: EventView, week: WeekView) => overrides[event.id] ?? isOpenByDefault(event, week);
   const setOpen = (ids: string[], open: boolean) =>
     setOverrides((current) => ({ ...current, ...Object.fromEntries(ids.map((id) => [id, open])) }));
@@ -109,16 +126,25 @@ export default function EventsTimeline({ weeks }: { weeks: WeekView[] }) {
 
   return (
     <section aria-label={t("timeline_label")} className="flex min-w-0 flex-col">
-      {weeks.map((week) => {
+      {weeks.map((week, index) => {
         const allOpen = week.events.every((e) => isOpen(e, week));
+        const eventsBefore = weeks.slice(0, index).some((w) => w.events.length > 0);
+        const eventsFrom = weeks.slice(index).some((w) => w.events.length > 0);
         return (
           <div key={week.start} className="flex flex-col">
-            <WeekHeader week={week} allOpen={allOpen} onToggleAll={() => setOpen(week.events.map((e) => e.id), !allOpen)} />
+            <WeekHeader
+              week={week}
+              allOpen={allOpen}
+              onToggleAll={() => setOpen(week.events.map((e) => e.id), !allOpen)}
+              rail={eventsBefore && eventsFrom}
+            />
             {week.events.map((event) => (
               <EventCard
                 key={event.id}
                 event={event}
                 isCurrentWeek={week.isCurrent}
+                isFirst={event.id === firstId}
+                isLast={event.id === lastId}
                 open={isOpen(event, week)}
                 onToggle={() => setOpen([event.id], !isOpen(event, week))}
               />
