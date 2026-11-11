@@ -365,6 +365,7 @@ Migrations: new `CHECK` constraints are added `NOT VALID` (length-only) so legac
 | `CONTACT_ALLOW_LOCALHOST` | Optional. `1` makes `/api/contact` accept the `http://localhost:3000` origin even when `NODE_ENV=production` (local production build only; never set it in Vercel) |
 | `RETENTION_APPLY` | Optional GitHub repository **variable** (not a secret, not a Vercel env). `true` makes the scheduled `retention.yml` runs apply (`?apply=1`); anything else or unset keeps them dry runs |
 | `LUDOYA_MOCK` | Optional. `1` serves Ludoya fixtures from `/public/mock/ludoya/v1/` |
+| `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` | Optional. `1` advertises the member area: the NavBar login button (and its loading placeholder) and the `/login` sign-up card linking to `/register`. Unset or anything else hides them: visitors see no login button, the card links to the Google Form (`MEMBERSHIP_FORM_URL` in `src/lib/member-area.ts`), and `/login`, `/register` stay reachable by direct URL; a signed-in member still gets the user pill. Inlined at build time: set it in Vercel and redeploy. The Playwright server sets it to `1` |
 
 ## Translation Key Namespaces
 

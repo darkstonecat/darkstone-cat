@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { Link } from "@/i18n/routing";
 import TextReveal from "@/components/TextReveal";
+import { MEMBERSHIP_FORM_URL } from "@/lib/member-area";
 
 export default function AboutCTA() {
   const t = useTranslations("about_page");
@@ -36,7 +37,7 @@ export default function AboutCTA() {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <a
-              href="https://docs.google.com/forms/d/1OBM0vAOs0vvBioSeop4T0aYh__ysuNEOy36kprTJo7Q/viewform"
+              href={MEMBERSHIP_FORM_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105 active:scale-[0.97]"

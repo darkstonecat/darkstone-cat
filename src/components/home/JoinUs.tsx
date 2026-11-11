@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import TextReveal from "@/components/TextReveal";
 
 import SocialLinks from "@/components/home/SocialLinks";
+import { MEMBERSHIP_FORM_URL } from "@/lib/member-area";
 
 export default function JoinUs() {
   const t = useTranslations("join_us");
@@ -44,7 +45,7 @@ export default function JoinUs() {
             className="mt-10"
           >
             <a
-              href="https://docs.google.com/forms/d/1OBM0vAOs0vvBioSeop4T0aYh__ysuNEOy36kprTJo7Q/viewform"
+              href={MEMBERSHIP_FORM_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="animate-cta-nudge group inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105 active:scale-[0.97]"

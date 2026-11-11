@@ -67,6 +67,8 @@ export default defineConfig({
       SMTP_PASSWORD: process.env.SMTP_PASSWORD!,
       // Ludoya events come from fixtures: no API key in CI, and no live calls locally.
       LUDOYA_MOCK: '1',
+      // E2E covers the public member area (navbar login, /login → /register).
+      NEXT_PUBLIC_MEMBER_AREA_PUBLIC: '1',
     },
   },
 })

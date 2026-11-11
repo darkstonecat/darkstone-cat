@@ -9,6 +9,7 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { isBoardRole } from "@/lib/auth/roles";
 import { signOutCurrentSession } from "@/lib/supabase/session-actions";
+import { isMemberAreaPublic } from "@/lib/member-area";
 
 function hexToRgba(hex: string, alpha: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -82,6 +83,8 @@ export default function NavBar() {
   const lenis = useLenis();
   const isHomePage = pathname === "/";
   const { user, role, loading: authLoading } = useAuthUser();
+  // Hidden until the member area is public; a signed-in member still gets the pill.
+  const showLogin = isMemberAreaPublic();
 
   const [scrolled, setScrolled] = useState(false);
   const [homeActiveSection, setHomeActiveSection] = useState("");
@@ -273,6 +276,40 @@ export default function NavBar() {
 
   const hamburgerColor = mobileOpen ? "#FAFAF9" : theme.text;
 
+  // Auth slot for a visitor: nothing while the member area is hidden, a
+  // placeholder while the session loads (no user yet), then the login link.
+  const desktopLoginStyle = {
+    backgroundColor: theme.text,
+    color: theme.bg,
+    transition: "background-color 0.4s, color 0.4s",
+  };
+  const desktopVisitorEntry = !showLogin ? null : authLoading ? (
+    <span className="rounded-xl px-4 py-2 text-sm font-medium" style={desktopLoginStyle}>
+      {t("login")}
+    </span>
+  ) : (
+    <Link
+      href="/login"
+      className="rounded-xl px-4 py-2 text-sm font-medium transition-colors"
+      style={desktopLoginStyle}
+    >
+      {t("login")}
+    </Link>
+  );
+  const mobileVisitorEntry = !showLogin ? null : authLoading ? (
+    <span className="rounded-xl bg-brand-white px-6 py-2.5 text-sm font-semibold text-stone-custom">
+      {t("login")}
+    </span>
+  ) : (
+    <Link
+      href="/login"
+      onClick={closeMobileMenu}
+      className="rounded-xl bg-brand-white px-6 py-2.5 text-sm font-semibold text-stone-custom transition-colors hover:bg-brand-white/90"
+    >
+      {t("login")}
+    </Link>
+  );
+
   return (
     <>
       <nav
@@ -343,18 +380,7 @@ export default function NavBar() {
 
             {/* Auth button (desktop) */}
             <div className="ml-3 relative" ref={dropdownRef}>
-              {authLoading ? (
-                <span
-                  className="rounded-xl px-4 py-2 text-sm font-medium"
-                  style={{
-                    backgroundColor: theme.text,
-                    color: theme.bg,
-                    transition: "background-color 0.4s, color 0.4s",
-                  }}
-                >
-                  {t("login")}
-                </span>
-              ) : user ? (
+              {user ? (
                 <>
                   <button
                     onClick={() => setDropdownOpen((o) => !o)}
@@ -396,19 +422,7 @@ export default function NavBar() {
                     </div>
                   )}
                 </>
-              ) : (
-                <Link
-                  href="/login"
-                  className="rounded-xl px-4 py-2 text-sm font-medium transition-colors"
-                  style={{
-                    backgroundColor: theme.text,
-                    color: theme.bg,
-                    transition: "background-color 0.4s, color 0.4s",
-                  }}
-                >
-                  {t("login")}
-                </Link>
-              )}
+              ) : desktopVisitorEntry}
             </div>
           </div>
 
@@ -519,11 +533,7 @@ export default function NavBar() {
                   : "nav-link-enter 0.4s ease-out 0.5s both",
               }}
             >
-              {authLoading ? (
-                <span className="rounded-xl bg-brand-white px-6 py-2.5 text-sm font-semibold text-stone-custom">
-                  {t("login")}
-                </span>
-              ) : user ? (
+              {user ? (
                 <>
                   <Link
                     href="/profile"
@@ -548,15 +558,7 @@ export default function NavBar() {
                     {t("logout")}
                   </button>
                 </>
-              ) : (
-                <Link
-                  href="/login"
-                  onClick={closeMobileMenu}
-                  className="rounded-xl bg-brand-white px-6 py-2.5 text-sm font-semibold text-stone-custom transition-colors hover:bg-brand-white/90"
-                >
-                  {t("login")}
-                </Link>
-              )}
+              ) : mobileVisitorEntry}
             </div>
           </nav>
         </div>

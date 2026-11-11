@@ -193,6 +193,7 @@ CI runs all tests automatically via GitHub Actions on push/PR to `main`.
 | `BGG_API_KEY` | BoardGameGeek XML API key |
 | `LUDOYA_API_KEY` | Ludoya public API key (server-side only), see `docs/ludoya-api-reference.md` |
 | `CRON_SECRET` | Bearer secret for `/api/cron/refresh` (same value in Vercel Production and the GitHub repository secret) |
+| `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` | Optional. `1` shows the navbar login button and links `/login` to `/register`; unset hides them (sign-up links go to the Google Form, the pages stay reachable by direct URL). Build-time: redeploy after changing it |
 
 ### Development without API keys
 

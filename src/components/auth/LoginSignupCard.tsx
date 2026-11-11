@@ -2,6 +2,10 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { MdCheck, MdArrowForward } from "react-icons/md";
 import { Link } from "@/i18n/routing";
+import { isMemberAreaPublic, MEMBERSHIP_FORM_URL } from "@/lib/member-area";
+
+const ctaClass =
+  "mt-1.5 inline-flex min-h-11 items-center gap-2 self-start rounded-full bg-brand-orange px-7 text-sm font-semibold text-brand-white transition-colors hover:bg-brand-orange/90";
 
 export default function LoginSignupCard() {
   const t = useTranslations("auth");
@@ -39,13 +43,23 @@ export default function LoginSignupCard() {
             </li>
           ))}
         </ul>
-        <Link
-          href="/register"
-          className="mt-1.5 inline-flex min-h-11 items-center gap-2 self-start rounded-full bg-brand-orange px-7 text-sm font-semibold text-brand-white transition-colors hover:bg-brand-orange/90"
-        >
-          {t("login_cta_button")}
-          <MdArrowForward size={16} aria-hidden="true" />
-        </Link>
+        {isMemberAreaPublic() ? (
+          <Link href="/register" className={ctaClass}>
+            {t("login_cta_button")}
+            <MdArrowForward size={16} aria-hidden="true" />
+          </Link>
+        ) : (
+          // Web sign-up is reachable only by direct URL until the member area is public
+          <a
+            href={MEMBERSHIP_FORM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={ctaClass}
+          >
+            {t("login_cta_button")}
+            <MdArrowForward size={16} aria-hidden="true" />
+          </a>
+        )}
       </div>
     </aside>
   );
