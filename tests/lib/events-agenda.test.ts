@@ -69,7 +69,7 @@ describe("fetchEventsAgenda", () => {
     expect(egara.program.counts).toEqual({ plays: 8, tournaments: 3, activities: 3, demos: 13 });
     expect(egara.program.days.map((d) => [d.day, d.mode])).toEqual([
       ["2026-11-28", "slots"],
-      ["2026-11-29", "grid"],
+      ["2026-11-29", "slots"],
     ]);
     expect(JSON.stringify(egara)).not.toMatch(/Clocktower|BOTC|Brass/);
   });

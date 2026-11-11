@@ -181,11 +181,12 @@ test.describe('Events page (/events)', () => {
     // Count chips of the whole tree (drafts left out).
     await expect(egara.locator('[data-program-counts] li')).toHaveText(['8 partides', '3 tornejos', '3 activitats', '13 demos'])
 
-    // Every day is visible and open; Saturday (9 items) goes by start time.
+    // Every day is visible and open; Saturday (9 items) puts the whole event,
+    // Sunday included, in start-time rows.
     const saturday = section(/Dissabte 28 de novembre/)
     await expect(saturday).toHaveAttribute('aria-expanded', 'true')
     await expect(section(/Diumenge 29 de novembre/)).toHaveAttribute('aria-expanded', 'true')
-    await expect(egara.locator('[data-program-slot] time')).toHaveText(['10:00', '16:00', '18:00'])
+    await expect(egara.locator('[data-program-slot] time')).toHaveText(['10:00', '16:00', '18:00', '10:00'])
 
     // A play inside a meetup zone, and a tournament with its format.
     await expect(egara.getByText('Aquí nunca hubo campanas · Partides de ROL')).toBeVisible()

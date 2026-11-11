@@ -68,7 +68,7 @@ Every published descendant of an event is shown inside its card, the same way fo
 | Tournament | The play card with an orange badge "Torneig · <format>" (Sistema suís, Eliminació directa, Doble eliminació, Eliminatòria per taules, Taules rotatives). The button is "Entrada" when Ludoya sells tickets, otherwise "Inscriu-t'hi". |
 | Activity | A meetup leaf with hours (a talk, an open tournament): the event image, the badge "Activitat", no seat pill, "Més info". |
 | Always open | `alwaysOpen`, no start date, or a meetup that covers the whole event. These go to a collapsible block, open by default: "Tot l'esdeveniment" (multi-day) or "Tot el dia". The block has the pill "Sempre obert · sense hora" and groups its items by zone, with "Altres activitats" last. Its tiles are square, badged "Demo" or "Activitat". |
-| Slots | More than **8** timed items in a day are grouped by start time ("10:00", "16:00"). At 8 or fewer, the grid is sorted by start. |
+| Slots | More than **8** timed items in a day are grouped by start time ("10:00", "16:00"). When one day of a multi-day event is over 8, every day of that event uses start-time rows, so the program reads the same way. At 8 or fewer in every day, each day is a grid sorted by start. |
 | Days | A multi-day event shows every day as a collapsible section, all open, each with a summary ("4 partides · 3 tornejos · 2 activitats"). There are no tabs or filters. |
 | Special summary | Count chips under the special's details: "8 partides · 3 tornejos · 3 activitats · 13 demos". |
 | Cover | A node with a game: BGG (name + year), else the game's Ludoya image, else the node image. A node without a game: its image, else BGG by exact title. Nothing found: the dice placeholder "Sense portada". |

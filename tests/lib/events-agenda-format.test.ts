@@ -232,8 +232,18 @@ describe("formatAgenda program", () => {
     expect(saturday.groups.map((g) => g.time)).toEqual(["10:00", "16:00"]);
     expect(saturday.groups[0].items[0].time).toBe("10:00 – 14:00");
     expect(sunday.title).toBe("Diumenge 29 de novembre");
-    expect(sunday.groups[0].time).toBeNull();
+    // Saturday is over the threshold, so Sunday gets start-time rows too.
+    expect(sunday.groups.map((g) => g.time)).toEqual(["10:00"]);
     expect(egara.program.alwaysOpen[0].items[0].time).toBeNull();
+  });
+
+  it("leaves the group time empty when the event stays in a grid", () => {
+    const ONE_DAY = { startsAt: "2026-11-28T09:00:00Z", endsAt: "2026-11-28T14:00:00Z" };
+    const view = formatAgenda(
+      { weeks: [{ start: "2026-11-23", end: "2026-11-29", isCurrent: false, events: [event({ ...ONE_DAY, program: programOf([at("one", "2026-11-28T09:00:00Z")], ONE_DAY) })] }], specials: [] },
+      "ca"
+    ).weeks[0].events[0];
+    expect(view.program.days.map((d) => d.groups.map((g) => g.time))).toEqual([[null]]);
   });
 
   it("titles the day in Spanish and English too", () => {

@@ -92,7 +92,7 @@ describe("classifyProgram", () => {
 });
 
 describe("layoutProgram", () => {
-  it("splits a multi-day event into its days, each in slots or a grid", () => {
+  it("splits a multi-day event into its days, all in slots when one day is above the threshold", () => {
     const layout = layoutProgram(classifyProgram(egara.subEvents, EVENT), EVENT);
     expect(layout.multiDay).toBe(true);
     expect(layout.days.map((d) => d.day)).toEqual(["2026-11-28", "2026-11-29"]);
@@ -101,10 +101,22 @@ describe("layoutProgram", () => {
     expect(saturday.mode).toBe("slots");
     expect(saturday.groups.map((g) => g.startsAt)).toEqual(["2026-11-28T09:00:00Z", "2026-11-28T15:00:00Z", "2026-11-28T17:00:00Z"]);
     expect(saturday.counts).toEqual({ plays: 4, tournaments: 3, activities: 2, demos: 0 });
-    expect(sunday.mode).toBe("grid");
-    expect(sunday.groups).toHaveLength(1);
-    expect(sunday.groups[0].startsAt).toBeNull();
+    // Sunday has fewer items but follows Saturday, so the whole event reads the same way.
+    expect(sunday.mode).toBe("slots");
+    expect(sunday.groups.map((g) => [g.startsAt, g.items.length])).toEqual([["2026-11-29T09:00:00Z", 4]]);
     expect(sunday.counts.plays).toBe(4);
+  });
+
+  it("keeps every day of a multi-day event in a grid when none is above the threshold", () => {
+    const WEEKEND = { startsAt: "2026-12-05T09:00:00Z", endsAt: "2026-12-06T18:00:00Z" };
+    const items = classifyProgram(
+      [
+        ...Array.from({ length: PROGRAM_SLOT_THRESHOLD }, (_, i) => node({ id: `sat${i}`, startsAt: "2026-12-05T10:00:00Z", endsAt: "2026-12-05T12:00:00Z" })),
+        node({ id: "sun", startsAt: "2026-12-06T10:00:00Z", endsAt: "2026-12-06T12:00:00Z" }),
+      ],
+      WEEKEND
+    );
+    expect(layoutProgram(items, WEEKEND).days.map((d) => d.mode)).toEqual(["grid", "grid"]);
   });
 
   it("groups the always-open block by zone, zone-less last", () => {

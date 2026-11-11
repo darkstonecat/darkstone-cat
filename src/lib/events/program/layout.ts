@@ -4,14 +4,15 @@
 // Rules (odd/tasks/events-sub-events.md, S3, S7, S8):
 // - Timed items go to the Madrid day they start on; a multi-day event shows one
 //   section per day that has items.
-// - Inside a day, more than PROGRAM_SLOT_THRESHOLD items are grouped by start
-//   time; otherwise they form one grid sorted by start.
+// - When any day has more than PROGRAM_SLOT_THRESHOLD timed items, every day
+//   of the event is grouped by start time, so the whole program reads the same
+//   way; otherwise each day is one grid sorted by start.
 // - Always-open items are grouped by zone in tree order, zone-less ones last.
 
 import { madridDay } from "../madrid-day";
 import type { AlwaysOpenGroup, ProgramCounts, ProgramDay, ProgramEvent, ProgramItem, ProgramLayout, SeatedItem } from "./types";
 
-/** More timed items than this in one day are grouped by start time. */
+/** More timed items than this in one day put the whole event in slots. */
 export const PROGRAM_SLOT_THRESHOLD = 8;
 
 const MINUTE = 60_000;
@@ -38,8 +39,7 @@ function groupByStart<T extends ProgramItem>(items: T[]): ProgramDay<T>["groups"
   return [...groups.entries()].map(([minute, group]) => ({ startsAt: new Date(minute).toISOString().replace(".000Z", "Z"), items: group }));
 }
 
-function layoutDay<T extends ProgramItem>(day: string, items: T[]): ProgramDay<T> {
-  const mode = items.length > PROGRAM_SLOT_THRESHOLD ? "slots" : "grid";
+function layoutDay<T extends ProgramItem>(day: string, items: T[], mode: ProgramDay["mode"]): ProgramDay<T> {
   return {
     day,
     mode,
@@ -63,9 +63,10 @@ export function layoutProgram<T extends ProgramItem>(items: readonly T[], event:
     const day = madridDay(item.startsAt!);
     byDay.set(day, [...(byDay.get(day) ?? []), item]);
   }
+  const mode = [...byDay.values()].some((dayItems) => dayItems.length > PROGRAM_SLOT_THRESHOLD) ? "slots" : "grid";
   return {
     multiDay: madridDay(event.startsAt) !== madridDay(event.endsAt),
-    days: [...byDay.entries()].map(([day, dayItems]) => layoutDay(day, dayItems)),
+    days: [...byDay.entries()].map(([day, dayItems]) => layoutDay(day, dayItems, mode)),
     alwaysOpen: alwaysOpenGroups(items.filter((item) => item.placement === "alwaysOpen")),
     counts: countItems(items),
   };
