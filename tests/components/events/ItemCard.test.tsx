@@ -162,6 +162,15 @@ describe('ItemCard: always-open items', () => {
     expect(screen.queryByRole('img', { name: /aria_/ })).toBeNull()
   })
 
+  it('fills the "more info" button like the sign-up one', () => {
+    inList(<ItemCard item={demoView()} dark />)
+    inList(<ItemCard item={play({ id: 'p2', participantCount: 0, capacity: 4 })} dark />)
+
+    const info = screen.getByRole('link', { name: /program\.cta_info/ })
+    const join = screen.getByRole('link', { name: /play\.join/ })
+    expect(info.className).toBe(join.className)
+  })
+
   it('leaves the zone out when the group already names it', () => {
     inList(<ItemCard item={demoView()} hideZone />)
 

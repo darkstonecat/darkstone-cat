@@ -169,7 +169,7 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
 | `src/components/events/EventsHeader.tsx` | Header chips and special banners |
 | `src/components/events/EventsTimeline.tsx` | Week groups, open state, toggle all, `#event-` handling and scroll |
 | `src/components/events/EventCard.tsx` | Session and special cards, the date tile and its segment of the timeline line (`RAIL`) |
-| `src/components/events/program/` | `EventProgram` (days or one day, then the always-open block), `DayItems` (grid or slots), `CollapsibleSection`, `AlwaysOpenSection`, `ItemCard` (play, tournament, activity, demo; the same full card in the days and the always-open block), `grid.ts` (`PROGRAM_GRID`), `CoverFrame`, `ItemBadge`, `ProposeTile`, `useCountsSummary` |
+| `src/components/events/program/` | `EventProgram` (days or one day, then the always-open block), `DayItems` (grid or slots), `CollapsibleSection`, `AlwaysOpenSection`, `ItemCard` (play, tournament, activity, demo; the same full card in the days and the always-open block), `grid.ts` (`PROGRAM_GRID`, 140px minimum: four cards per row at the widest card), `ProgramRow` (left column with the time, or the always-open clock in an event that goes by start time, so every grid has the same width), `CoverFrame`, `ItemBadge`, `ProposeTile`, `useCountsSummary` |
 | `src/components/events/SeatPill.tsx` | Seat counter on play and tournament covers |
 | `src/components/events/EventsCalendar.tsx` | Month grid, `sidebar` and `inline` variants |
 | `src/components/events/EventsDayStrip.tsx` | Mobile strip and month toggle |

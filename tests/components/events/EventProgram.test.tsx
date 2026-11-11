@@ -104,8 +104,25 @@ describe('EventProgram always-open cards', () => {
     expect(zone.querySelectorAll('[data-item-kind="demo"]')).toHaveLength(2)
     expect(within(zone).getAllByRole('link', { name: /program\.cta_info/ })).toHaveLength(2)
     expect(within(zone).getAllByText('Demostracions de 2tomatoes')).toHaveLength(1)
-    const sundayGrid = document.getElementById(toggleOf(/Diumenge/).getAttribute('aria-controls')!)!.querySelector('ul')!
-    expect(zone.querySelector('ul')!.className).toBe(sundayGrid.className)
+  })
+
+  it('keeps the time column beside them when the event goes by start time, so every card has the same size', () => {
+    const { container } = render(<EventProgram program={weekend} />)
+
+    const slotGrid = container.querySelector('[data-program-slot] ul')!
+    for (const group of container.querySelectorAll('[data-always-open-group]')) {
+      expect(group.querySelector('[data-program-aside]')).not.toBeNull()
+      expect(group.querySelector('ul')!.className).toBe(slotGrid.className)
+    }
+  })
+
+  it('has no side column when the event stays in a grid', () => {
+    const program = programView([playView()], { alwaysOpen: [{ zone: null, items: [demoView({ zone: null })] }] })
+    const { container } = render(<EventProgram program={program} />)
+
+    const group = container.querySelector('[data-always-open-group]')!
+    expect(group.querySelector('[data-program-aside]')).toBeNull()
+    expect(group.querySelector('ul')!.className).toBe(container.querySelector('ul')!.className)
   })
 })
 

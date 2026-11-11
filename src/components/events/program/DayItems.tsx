@@ -3,6 +3,7 @@ import type { DayView } from "@/lib/events/agenda-format";
 import { cn } from "@/lib/utils";
 import { PROGRAM_GRID as GRID } from "./grid";
 import ItemCard from "./ItemCard";
+import ProgramRow from "./ProgramRow";
 
 /**
  * The timed items of one day: a single grid, or one row per start time in slots
@@ -20,15 +21,20 @@ export default function DayItems({ day, dark = false, trailing }: { day: DayView
   return (
     <div className="flex flex-col gap-5">
       {day.groups.map((group, index) => (
-        <div key={group.startsAt} data-program-slot className="flex flex-col gap-2.5 sm:flex-row sm:gap-4">
-          <p className={cn("shrink-0 text-xl font-extrabold sm:w-16 sm:pt-1", dark ? "text-brand-orange-light" : "text-brand-orange-text")}>
-            <time dateTime={group.startsAt ?? undefined}>{group.time}</time>
-          </p>
-          <ul className={cn(GRID, "min-w-0 flex-1")}>
+        <ProgramRow
+          key={group.startsAt}
+          data-program-slot
+          aside={
+            <p className={cn("text-xl font-extrabold", dark ? "text-brand-orange-light" : "text-brand-orange-text")}>
+              <time dateTime={group.startsAt ?? undefined}>{group.time}</time>
+            </p>
+          }
+        >
+          <ul className={GRID}>
             {group.items.map((item) => <ItemCard key={item.id} item={item} dark={dark} />)}
             {index === day.groups.length - 1 && trailing}
           </ul>
-        </div>
+        </ProgramRow>
       ))}
     </div>
   );

@@ -32,7 +32,7 @@ export default function ItemCard({ item, dark = false, hideZone = false }: { ite
   const ownTitle = title !== item.title ? item.title : null;
   const subtitle = [ownTitle, hideZone ? null : item.zone].filter(Boolean).join(" · ") || null;
   const label = { join: t("play.join"), queue: t("play.queue"), tournament: t("program.cta_tournament"), tickets: t("program.cta_tickets"), info: t("program.cta_info") }[cta];
-  const outlined = full || cta === "info";
+  const outlined = full;
 
   return (
     <li className="flex flex-col gap-2" data-item-kind={item.kind}>
