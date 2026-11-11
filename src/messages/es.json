@@ -2,7 +2,6 @@
   "nav": {
     "home": "Inicio",
     "about": "Quiénes somos",
-    "conduct": "Código de conducta",
     "contact": "Contacto",
     "ludoteca": "Ludoteca",
     "menu_button": "Botón de menú",
@@ -99,6 +98,7 @@
     "legal": "Aviso legal",
     "privacy": "Privacidad",
     "cookies": "Cookies",
+    "conduct": "Código de conducta",
     "data_protection": "Protección de datos",
     "events": "Eventos",
     "supportedBy": "Con el apoyo de"
@@ -350,8 +350,6 @@
     "about_description": "Conoce la Asociación Darkstone Catalunya: nuestro origen, misión, valores y la junta directiva. Asociación de juegos de mesa y rol fundada en Terrassa en 2024.",
     "contact_title": "Contacto — Juegos de mesa en Terrassa",
     "contact_description": "Contacta con la Asociación Darkstone Catalunya. Escríbenos para cualquier duda, sugerencia o información sobre nuestras sesiones de juegos de mesa y rol en Terrassa.",
-    "conduct_title": "Código de conducta",
-    "conduct_description": "Código de conducta de la Asociación Darkstone Catalunya. Espacio seguro, comunicación respetuosa, inclusión y colaboración para disfrutar de los juegos de mesa.",
     "legal_title": "Aviso legal",
     "legal_description": "Aviso legal de la Asociación Darkstone Catalunya. Identificación del titular, propiedad intelectual, condiciones de uso y legislación aplicable al sitio web.",
     "privacy_title": "Política de privacidad",
@@ -401,9 +399,7 @@
     "admin_badges_title": "Insignias — Administración",
     "admin_badges_description": "Catálogo de insignias de Darkstone Catalunya: crear, editar, archivar y otorgar.",
     "admin_badge_title": "Insignia — Administración",
-    "admin_badge_description": "Textos, icono y socios de una insignia de Darkstone Catalunya.",
-    "data_protection_title": "Política de protección de datos",
-    "data_protection_description": "Política de protección de datos personales de la Asociación Darkstone Catalunya. Información sobre el responsable del tratamiento, derechos RGPD, legitimidad y comunicación de datos."
+    "admin_badge_description": "Textos, icono y socios de una insignia de Darkstone Catalunya."
   },
   "not_found": {
     "title": "Página no encontrada",
@@ -453,7 +449,7 @@
     "updates_title": "Actualizaciones",
     "updates_text": "Esta política de privacidad puede ser actualizada periódicamente. Última actualización: febrero de 2026.",
     "association_policy_title": "Política de protección de datos de la asociación",
-    "association_policy_text": "Además de esta política de privacidad del sitio web, la Asociación DarkStone Catalunya dispone de una política de protección de datos que regula el tratamiento de los datos personales de los socios, sus derechos y las obligaciones del responsable del tratamiento. Puede consultarla en la página de Protección de Datos de este sitio web."
+    "association_policy_text": "Además de esta política de privacidad del sitio web, la Asociación DarkStone Catalunya dispone de una política de protección de datos que regula el tratamiento de los datos personales de los socios, sus derechos y las obligaciones del responsable del tratamiento. Puede consultar la <dataProtectionLink>política de protección de datos</dataProtectionLink>."
   },
   "collaborators": {
     "title": "Nos Acompañan",
@@ -563,6 +559,14 @@
     "legal_info_title": "8. Información legal",
     "legal_info_p1": "Los requisitos de esta Política complementan, y no reemplazan, cualquier otro requisito existente bajo la ley de protección de datos aplicable, que será la que prevalezca en cualquier caso.",
     "legal_info_p2": "Esta Política está sujeta a revisiones periódicas y la Asociación DarkStone Catalunya la puede modificar en cualquier momento. Cuando esto ocurra, le avisaremos de cualquier cambio y le pediremos que vuelva a leer la versión más reciente de nuestra Política y que confirme su aceptación."
+  },
+  "documents": {
+    "close": "Cerrar el documento",
+    "section_title": "Documentos de la asociación",
+    "conduct_summary": "Espacio seguro, respeto y colaboración en las mesas.",
+    "data_protection_summary": "Cómo tratamos tus datos personales y qué derechos tienes.",
+    "profile_intro": "Los documentos que aceptas al hacerte socio.",
+    "about_intro": "Al hacerte socio aceptas estos documentos."
   },
   "events": {
     "title": "Eventos",
@@ -675,8 +679,8 @@
     "register_ludoya_not_found": "No lo hemos encontrado en Ludoya. Revisa que esté bien escrito; puedes guardarlo igualmente.",
     "register_bgg_not_found": "No lo hemos encontrado en BGG. Revisa que esté bien escrito; puedes guardarlo igualmente.",
     "register_section_consents": "Antes de crear la cuenta",
-    "register_conduct_checkbox": "He leído y acepto las <link>pautas de conducta</link>",
-    "register_privacy_checkbox": "Acepto la <link>política de protección de datos</link>",
+    "register_conduct_checkbox": "He leído y acepto las <conductLink>pautas de conducta</conductLink>",
+    "register_privacy_checkbox": "Acepto la <dataProtectionLink>política de protección de datos</dataProtectionLink>",
     "register_newsletter_consent": "Acepto recibir comunicaciones de Darkstone por correo electrónico",
     "register_newsletter_checkbox": "Quiero recibir información sobre eventos y novedades",
     "register_submit": "Crear mi cuenta",

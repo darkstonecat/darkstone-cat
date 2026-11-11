@@ -13,6 +13,7 @@ import CookieConsentProvider from "@/components/CookieConsentProvider";
 import CookieBanner from "@/components/CookieBanner";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import VercelMonitoring from "@/components/VercelMonitoring";
+import DocumentProvider from "@/components/documents/DocumentProvider";
 import SkipLink from "@/components/SkipLink";
 
 export function generateStaticParams() {
@@ -223,7 +224,7 @@ export default async function LocaleLayout({
           <SmoothScroll>
             <CookieConsentProvider>
               <SkipLink />
-              {children}
+              <DocumentProvider>{children}</DocumentProvider>
               <Suspense>
                 <CookieBanner />
                 <GoogleAnalytics />

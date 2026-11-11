@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef, startTransition } from "react";
 import { useSearchParams } from "next/navigation";
+import { DOCUMENT_PARAM } from "@/lib/documents";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -121,6 +122,9 @@ function serializeStateToUrl(
   if (viewMode !== "grid") params.set("view", viewMode);
   if (page > 1) params.set("page", String(page));
   if (perPage !== DEFAULT_PAGE_SIZE) params.set("pp", String(perPage));
+  // An open association document (`?doc=`) is not ours: keep it, or the dialog would close.
+  const doc = new URLSearchParams(window.location.search).get(DOCUMENT_PARAM);
+  if (doc) params.set(DOCUMENT_PARAM, doc);
   const qs = params.toString();
   const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
   window.history.replaceState(null, "", url);

@@ -5,8 +5,8 @@ const locales = ["ca", "es", "en"] as const;
 
 /**
  * Only indexable pages belong here. Pages served with `robots: noindex`
- * (/legal, /privacy, /cookies, /data-protection and the
- * auth/profile/admin pages) are intentionally excluded:
+ * (/legal, /privacy, /cookies and the auth/profile/admin pages) are
+ * intentionally excluded:
  * listing a noindex URL in the sitemap is a contradictory signal that Search
  * Console reports as "Excluded by 'noindex' tag".
  *
@@ -20,7 +20,6 @@ const pages = [
   { path: "/contact", changeFrequency: "yearly" as const, priority: 0.7 },
   { path: "/events", changeFrequency: "weekly" as const, priority: 0.8 },
   { path: "/faq", changeFrequency: "yearly" as const, priority: 0.6 },
-  { path: "/conduct", changeFrequency: "yearly" as const, priority: 0.5 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

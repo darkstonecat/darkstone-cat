@@ -30,7 +30,6 @@ test.describe('Navigation', () => {
       TEXT.nav_about,
       TEXT.nav_events,
       TEXT.nav_ludoteca,
-      TEXT.nav_conduct,
       TEXT.nav_contact,
     ]) {
       await expect(page.getByRole('link', { name: link, exact: true }).first()).toBeVisible()
@@ -65,11 +64,10 @@ test.describe('Navigation', () => {
     await expect(page).toHaveURL(/\/events/)
   })
 
-  test('navigates to conduct page', async ({ page }) => {
+  test('navbar does not link to the code of conduct (it opens from the footer, About and sign-up)', async ({ page }) => {
     await page.goto(PAGES.home)
     await openMobileMenuIfNeeded(page)
-    await page.getByRole('link', { name: TEXT.nav_conduct, exact: true }).first().click()
-    await expect(page).toHaveURL(/\/conduct/)
+    await expect(page.getByRole('navigation', { name: /Main navigation|Mobile navigation/ }).getByRole('link', { name: TEXT.doc_conduct })).toHaveCount(0)
   })
 
   test('footer is visible on subpages', async ({ page }) => {

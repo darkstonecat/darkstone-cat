@@ -12,6 +12,7 @@ import GamingAccounts from "@/components/profile/GamingAccounts";
 import MemberDataCard from "@/components/profile/MemberDataCard";
 import NewsletterSwitch from "@/components/profile/NewsletterSwitch";
 import AccountActions from "@/components/profile/AccountActions";
+import DocumentList from "@/components/documents/DocumentList";
 
 export const revalidate = false;
 
@@ -50,6 +51,7 @@ export default async function ProfileDetailsPage({
   const tNav = await getTranslations({ locale, namespace: "nav" });
   const tMeta = await getTranslations({ locale, namespace: "metadata" });
   const t = await getTranslations({ locale, namespace: "profile.details" });
+  const tDocs = await getTranslations({ locale, namespace: "documents" });
   const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
     { name: tNav("profile"), path: "/profile" },
     { name: tNav("profile_details"), path: "/profile/details" },
@@ -121,6 +123,14 @@ export default async function ProfileDetailsPage({
                   <AccountActions email={profile.email} memberNumber={member.member_number} />
                 </section>
               </div>
+
+              <section aria-labelledby="documents-title" className={`${cardClass} lg:col-span-3`}>
+                <h2 id="documents-title" className={titleClass}>
+                  {tDocs("section_title")}
+                </h2>
+                <p className="mt-1 mb-5 text-sm text-stone-custom/65">{tDocs("profile_intro")}</p>
+                <DocumentList />
+              </section>
             </div>
           </div>
         </>

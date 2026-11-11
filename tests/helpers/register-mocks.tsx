@@ -9,7 +9,10 @@ export function mockTranslator() {
       {key}
       {values?.name ? `:${values.name}` : ''}
       {values?.email ? `:${values.email}` : ''}
-      {values?.link ? values.link('link') : null}
+      {/* every rich tag (link, conductLink, dataProtectionLink...) renders with its name as text */}
+      {Object.entries(values ?? {}).map(([tag, render]) =>
+        typeof render === 'function' ? <span key={tag}>{render(tag)}</span> : null
+      )}
     </>
   )
   return t

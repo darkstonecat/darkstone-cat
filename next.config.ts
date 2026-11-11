@@ -108,9 +108,6 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // Legacy route renamed in ecd08af (/pautes-de-conducta → /conduct)
-      { source: "/pautes-de-conducta", destination: "/conduct", permanent: true },
-      { source: "/:locale(es|en)/pautes-de-conducta", destination: "/:locale/conduct", permanent: true },
       // Event images tool moved under the admin panel (provisional path, decision D-G).
       // `/ca/events/images` is listed first so it takes one hop instead of two.
       { source: "/events/images", destination: "/admin/tools/event-images", permanent: true },

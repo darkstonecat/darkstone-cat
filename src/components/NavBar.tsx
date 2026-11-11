@@ -26,7 +26,6 @@ const NAV_LINKS = [
   { href: "/about", key: "about" },
   { href: "/events", key: "events" },
   { href: "/ludoteca", key: "ludoteca" },
-  { href: "/conduct", key: "conduct" },
   { href: "/contact", key: "contact" },
 ] as const;
 
@@ -46,7 +45,6 @@ const SECTION_THEMES: Record<string, { text: string; bg: string }> = {
 const SUBPAGE_THEMES: Record<string, { text: string; bg: string }> = {
   "/about": { text: "#FAFAF9", bg: "#1C1917" },
   "/ludoteca": { text: "#FAFAF9", bg: "#1C1917" },
-  "/conduct": { text: "#FAFAF9", bg: "#1C1917" },
   "/contact": { text: "#FAFAF9", bg: "#1C1917" },
   "/legal": { text: "#FAFAF9", bg: "#1C1917" },
   "/privacy": { text: "#FAFAF9", bg: "#1C1917" },
@@ -63,7 +61,6 @@ const SUBPAGE_THEMES: Record<string, { text: string; bg: string }> = {
   "/profile/card": { text: "#FAFAF9", bg: "#1C1917" },
   "/admin": { text: "#FAFAF9", bg: "#1C1917" },
   "/admin/members": { text: "#FAFAF9", bg: "#1C1917" },
-  "/data-protection": { text: "#FAFAF9", bg: "#1C1917" },
 };
 
 /** Dynamic routes have no exact key in `SUBPAGE_THEMES`; they match by prefix (dark hero pages). */

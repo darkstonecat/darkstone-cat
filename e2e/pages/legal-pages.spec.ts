@@ -4,8 +4,6 @@ const LEGAL_PAGES = [
   { path: '/legal', titlePattern: /legal|avís/i },
   { path: '/privacy', titlePattern: /privad|privacy/i },
   { path: '/cookies', titlePattern: /cookie/i },
-  { path: '/conduct', titlePattern: /conducta|conduct/i },
-  { path: '/data-protection', titlePattern: /protecció|protection/i },
 ] as const
 
 for (const legalPage of LEGAL_PAGES) {

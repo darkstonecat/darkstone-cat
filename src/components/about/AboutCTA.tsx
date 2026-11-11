@@ -5,9 +5,16 @@ import { motion } from "motion/react";
 import { Link } from "@/i18n/routing";
 import TextReveal from "@/components/TextReveal";
 import { MEMBERSHIP_FORM_URL } from "@/lib/member-area";
+import DocumentLink from "@/components/documents/DocumentLink";
+
+const docLinkClass =
+  "inline-flex min-h-11 items-center font-semibold text-brand-orange-text underline underline-offset-4 transition-colors hover:text-brand-orange";
 
 export default function AboutCTA() {
   const t = useTranslations("about_page");
+  const tDocs = useTranslations("documents");
+  const tConduct = useTranslations("conduct");
+  const tDataProtection = useTranslations("data_protection");
 
   return (
     <section className="bg-brand-beige py-24 text-stone-custom">
@@ -55,6 +62,21 @@ export default function AboutCTA() {
               {t("cta_secondary_button")}
             </Link>
           </motion.div>
+
+          <section aria-labelledby="about-documents" className="mt-12 text-sm text-stone-custom/70">
+            <p id="about-documents">{tDocs("about_intro")}</p>
+            <p className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+              <DocumentLink doc="conduct" className={docLinkClass}>
+                {tConduct("title")}
+              </DocumentLink>
+              <span aria-hidden="true" className="text-stone-custom/40">
+                &middot;
+              </span>
+              <DocumentLink doc="data-protection" className={docLinkClass}>
+                {tDataProtection("title")}
+              </DocumentLink>
+            </p>
+          </section>
         </div>
       </div>
     </section>

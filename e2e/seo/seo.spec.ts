@@ -7,7 +7,6 @@ const SEO_PAGES = [
   { path: '/contact', expectTitle: /contacte|contact/i },
   { path: '/events', expectTitle: /esdeveniments|events/i },
   { path: '/faq', expectTitle: /faq|preguntes/i },
-  { path: '/conduct', expectTitle: /conducta|conduct/i },
 ] as const
 
 for (const seoPage of SEO_PAGES) {

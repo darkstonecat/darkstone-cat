@@ -45,7 +45,6 @@
 | `/contact` | Contact form |
 | `/events` | Upcoming events from Ludoya |
 | `/faq` | Frequently asked questions |
-| `/conduct` | Code of conduct |
 | `/legal` | Terms & conditions |
 | `/privacy` | Privacy policy |
 | `/cookies` | Cookie policy |
@@ -58,7 +57,8 @@
 | `/profile/edit` | Profile edit form (protected) |
 | `/profile/card` | Member card with a real QR, image download (protected) |
 | `/verify/[token]` | Public member card check from the QR (valid + member number only, `noindex`) |
-| `/data-protection` | Data protection policy (RGPD) |
+
+The code of conduct and the data protection policy have no page of their own: they open in a dialog over the current page (footer, end of `/about`, sign-up, profile). `?doc=conduct` or `?doc=data-protection` on any URL opens one, e.g. `https://www.darkstone.cat/?doc=conduct`; the old `/conduct` and `/data-protection` URLs answer 404.
 
 ### Admin panel (board and superadmin only, `noindex`)
 
@@ -99,7 +99,7 @@ src/
 │   ├── ludoteca/           # Game library (grid, cards, filters, modal, pagination)
 │   ├── contact/            # Contact form and info
 │   ├── events/             # Events carousel and event images tool
-│   ├── conduct/            # Code of conduct content
+│   ├── documents/          # Conduct + data protection dialog (?doc=)
 │   ├── legal/              # Legal, privacy, and cookies pages
 │   ├── auth/, profile/, admin/  # Member area: sign-up/login, La meva zona, card, admin
 │   ├── NavBar.tsx          # Navigation with language switcher

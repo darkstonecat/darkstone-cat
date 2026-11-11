@@ -72,7 +72,7 @@ describe('RegisterFlow (sign-up form)', () => {
       expect(checkbox(name).checked).toBe(false)
     }
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'))
-    expect(hrefs).toEqual(expect.arrayContaining(['/conduct', '/data-protection', '/login']))
+    expect(hrefs).toEqual(expect.arrayContaining(['?doc=conduct', '?doc=data-protection', '/login']))
   })
 
   it('blocks submit until the required consents are accepted', async () => {

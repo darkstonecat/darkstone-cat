@@ -16,6 +16,8 @@ import {
   MdOutlineGridView,
 } from "react-icons/md";
 import { Link } from "@/i18n/routing";
+import DocumentLink from "@/components/documents/DocumentLink";
+import type { DocumentKey } from "@/lib/documents";
 import { createClient } from "@/lib/supabase/client";
 import { discardUnconfirmedSignup, prepareSignup, updateMemberAfterSignup } from "@/lib/supabase/actions";
 import { checkBggUsername, checkLudoyaUsername } from "@/lib/profile/username-checks";
@@ -361,7 +363,7 @@ export default function RegisterForm({ onSuccess }: Props) {
   function consentBox(
     name: "conduct" | "privacy",
     labelKey: "register_conduct_checkbox" | "register_privacy_checkbox",
-    href: string
+    doc: DocumentKey
   ) {
     return (
       <div>
@@ -379,10 +381,10 @@ export default function RegisterForm({ onSuccess }: Props) {
           />
           <span className="text-[15px] leading-snug text-stone-custom">
             {t.rich(labelKey, {
-              link: (chunks: ReactNode) => (
-                <Link href={href} target="_blank" className={linkClass}>
+              [doc === "conduct" ? "conductLink" : "dataProtectionLink"]: (chunks: ReactNode) => (
+                <DocumentLink doc={doc} className={linkClass}>
                   {chunks}
-                </Link>
+                </DocumentLink>
               ),
             })}{" "}
             <Star />
@@ -579,8 +581,8 @@ export default function RegisterForm({ onSuccess }: Props) {
         className="rounded-2xl border border-stone-custom/15 bg-brand-white"
         bodyClassName="gap-3.5"
       >
-        {consentBox("conduct", "register_conduct_checkbox", "/conduct")}
-        {consentBox("privacy", "register_privacy_checkbox", "/data-protection")}
+        {consentBox("conduct", "register_conduct_checkbox", "conduct")}
+        {consentBox("privacy", "register_privacy_checkbox", "data-protection")}
         <div className="h-px bg-stone-custom/10" />
         <label className="flex min-h-11 items-start gap-3 md:min-h-0">
           <input

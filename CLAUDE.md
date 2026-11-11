@@ -59,7 +59,7 @@ Scope text assertions to a region (e.g. the "Dades personals" `section`): the na
 
 ### Lighthouse Audits
 
-Automated Lighthouse audits for all 19 pages (Catalan locale) on mobile + desktop (38 audits total). Scripts in `scripts/lighthouse/`:
+Automated Lighthouse audits for all 17 pages (Catalan locale) on mobile + desktop (34 audits total). Scripts in `scripts/lighthouse/`:
 
 | File | Purpose |
 |---|---|
@@ -97,7 +97,6 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/contact` | `contact/page.tsx` | Contact form (Workspace SMTP email) |
 | `/events` | `events/page.tsx` | Upcoming events from the Ludoya public API (`revalidate: 86400`) |
 | `/faq` | `faq/page.tsx` | FAQ with accordion UI, FAQPage schema (`revalidate = false`) |
-| `/conduct` | `conduct/page.tsx` | Code of conduct (`revalidate = false`) |
 | `/legal` | `legal/page.tsx` | Terms & conditions (`revalidate = false`) |
 | `/privacy` | `privacy/page.tsx` | Privacy policy (`revalidate = false`) |
 | `/cookies` | `cookies/page.tsx` | Cookie policy (`revalidate = false`) |
@@ -106,7 +105,7 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/forgot-password` | `forgot-password/page.tsx` | Password recovery (`revalidate = false`, `noindex`) |
 | `/reset-password` | `reset-password/page.tsx` | Set new password — protected route (`revalidate = false`, `noindex`) |
 | `/profile` | `profile/page.tsx` | "La meva zona", the member home: greeting hero with tabs and mini card, "Completa el perfil" checklist (hidden at 4/4), badges (grid / mobile carousel), "Properes sessions" (this week's Ludoya sessions and plays streamed in a Suspense boundary with skeleton / empty / error states, expandable rows), month calendar (`?month=YYYY-MM`, invalid or out-of-range falls back to the current month) — protected route (`revalidate = false`, `noindex`) |
-| `/profile/details` | `profile/details/page.tsx` | Profile and account: shared `MemberHeader` + tabs, cards "On jugues" (link Ludoya/BGG), "Dades de soci" (masked DNI/phone), "Comunicacions" (email switch), "Compte" (change password, download data, **"Dona't de baixa"**: M-1, `LeaveAssociationDialog`, server action `leaveAssociation`) — protected route (`revalidate = false`, `noindex`) |
+| `/profile/details` | `profile/details/page.tsx` | Profile and account: shared `MemberHeader` + tabs, cards "On jugues" (link Ludoya/BGG), "Dades de soci" (masked DNI/phone), "Comunicacions" (email switch), "Compte" (change password, download data, **"Dona't de baixa"**: M-1, `LeaveAssociationDialog`, server action `leaveAssociation`), "Documents de l'associació" (`DocumentList`: conduct and data protection open in `DocumentDialog`) — protected route (`revalidate = false`, `noindex`) |
 | `/profile/edit` | `profile/edit/page.tsx` | Profile edit form — protected route (`revalidate = false`, `noindex`) |
 | `/profile/card` | `profile/card/page.tsx` | Member card (tilted landscape card on desktop, portrait card + full-screen QR overlay on mobile, keeps the real NavBar), download — protected route (`revalidate = false`, `noindex`) |
 | `/admin` | `admin/page.tsx` | V-1 summary: `admin_stats()` figures, last 10 audit entries, shortcuts — board route (`force-dynamic`, `noindex`). The layout `admin/layout.tsx` guards every admin page with `requireRole("board")` and renders NavBar, `AdminHeader`, `AdminTabs`, Footer |
@@ -119,8 +118,9 @@ Next.js App Router with `next-intl` v4 for internationalization:
 | `/admin/tools` | `admin/tools/page.tsx` | V-6: cache refresh status per job (`admin_ops_status()`) and manual refresh (A-14), link to the event image tool — board route (`force-dynamic`) |
 | `/admin/tools/event-images` | `admin/tools/event-images/page.tsx` | Internal tool: preview/download shareable event images — board route (`revalidate = false`). `/events/images`, `/ca/events/images`, `/es|en/events/images` redirect here with a 308 (`next.config.ts`) |
 | `/admin/roles` | `admin/roles/page.tsx` | V-5: active superadmins and board with `role_since`, rules (two superadmins minimum) — superadmin route (`force-dynamic`; board and members get the 404) |
-| `/data-protection` | `data-protection/page.tsx` | Data protection policy, RGPD compliance (`revalidate = false`) |
 | `/verify/[token]` | `verify/[token]/page.tsx` | Public card check from the member card QR: "Carnet vàlid · Núm. de soci …" or "Carnet no vàlid", nothing else (`force-dynamic`, `noindex`, not in sitemap, `Referrer-Policy: no-referrer` + `X-Robots-Tag` via `next.config.ts`). Lookup only through the `verify_card_token(p_token)` SECURITY DEFINER function (`src/lib/supabase/verify-card.ts`, anonymous cookie-less client) |
+
+**Association documents** (code of conduct, data protection policy) have no page: they open in `DocumentDialog` over the current page (large dialog on desktop, bottom sheet on mobile, text scrolling inside), from `DocumentLink` (a real `<a href="?doc=conduct">`). Entry points: the Footer legal row, the end of `/about`, the sign-up consent boxes, and the "Documents de l'associació" card of `/profile/details`. The open document lives in the URL: a click pushes `?doc=<key>` as a history entry on the same page (other params and the hash are kept), so the browser Back button or the mobile back gesture closes the dialog instead of leaving the page (no lost sign-up form); closing goes back when the page pushed it, otherwise it drops the param with `replaceState`. `?doc=conduct` or `?doc=data-protection` on any URL opens one after hydration (the link to give to outside forms or e-mails, e.g. `https://www.darkstone.cat/?doc=conduct`). **Code that rewrites the whole query string must keep `DOCUMENT_PARAM`** (like `LudotecaClient`'s `serializeStateToUrl`), or it closes an open document. The old `/conduct`, `/data-protection` and `/pautes-de-conducta` URLs answer 404 on purpose (no redirect). Code: `src/lib/documents.ts` (keys, `?doc=` helpers), `src/components/documents/` (`DocumentProvider` mounted in the locale layout, `DocumentDialog`, `DocumentBody`, `DocumentLink`, `DocumentList`). Rich-text tags `<conductLink>` / `<dataProtectionLink>` open them from translated text (`LegalPageContent`, `RegisterForm`).
 
 Every admin page is `noindex` and not in the sitemap. A signed-in member without a board role gets the 404 page (not a "restricted" card); without a session the guard redirects to `/login?redirect=<path>`.
 
@@ -145,7 +145,7 @@ Auth callback routes: `src/app/auth/confirm/route.ts` (email confirmation), `src
 ### Provider Stack (layout.tsx)
 
 ```
-html[lang] → body → JSON-LD script → NextIntlClientProvider → SmoothScroll → CookieConsentProvider → {children} + CookieBanner + GoogleAnalytics + Vercel Analytics + SpeedInsights
+html[lang] → body → JSON-LD script → NextIntlClientProvider → SmoothScroll → CookieConsentProvider → DocumentProvider({children}) + CookieBanner + GoogleAnalytics + Vercel Analytics + SpeedInsights
 ```
 
 ### Theme System
@@ -199,7 +199,7 @@ All interactive components use `"use client"`. Components are organized by page:
 - `src/components/contact/` — Contact form (ContactHero, ContactForm, ContactInfo)
 - `src/components/events/` — Events page (EventsHero, EventsContent) and event images tool content (`EventImagesContent`, rendered by `/admin/tools/event-images`)
 - `src/components/faq/` — FAQ page (FaqContent)
-- `src/components/conduct/` — Code of conduct (ConductContent)
+- `src/components/documents/` — Association document dialog (DocumentProvider, DocumentDialog, DocumentBody with the conduct and data protection sections, DocumentLink, DocumentList)
 - `src/components/auth/` — Auth pages (AuthHero, LoginForm + LoginSignupCard with magic link, RegisterFlow / RegisterForm / RegisterDone for the multi-step sign-up and "Revisa el teu correu", ForgotPasswordForm, ResetPasswordForm)
 - `src/components/profile/` — Profile pages (MemberHeader, MemberTabs shared by the member area: MemberHeader is the one dark header of Inici / Perfil / Carnet, with eyebrow, title, member line, equal-width tabs, optional children below the tabs and an optional top-aligned aside; GamingAccounts, MemberDataCard, NewsletterSwitch, AccountActions for `/profile/details`; CardFace, QrCodeSvg, CardQrOverlay, CardDownloadButton for `/profile/card`; HomeHero, ProfileChecklist, BadgesSection, SessionsSection (server, Suspense + fetch), SessionsList (client accordion), CalendarSection (server: streams the first month behind a Suspense skeleton, `?month=YYYY-MM` sets it), MemberCalendar (client: month navigation through `/api/profile/calendar`, skeleton, error card) and MonthCalendar (client: desktop sheet / mobile grid + day panel, receives a `CalendarView` with every date already formatted on the server) for the home `/profile`, with pure helpers in `src/lib/member-home/` (`badge-items.ts`: tenure badge first, then the catalogue from `getBadgeCatalogue()` with names and texts resolved on the server in the page locale (Catalan fallback), `show_locked` off hides an unearned badge, stored badges missing from the catalogue are not shown; `sessions-view.ts`: `toPublicSessions` keeps PUBLIC sessions and plays only (web sign-up is open and every account is a `member`; ONLY_GROUP stays hidden until a board-approved member state exists), seat status, counts, Madrid dates; `month-grid.ts`: Monday-first grid, month range 3 back / 6 forward, `?month` parsing); ProfileEditForm, LeaveAssociationDialog (M-1; `AccountActions` disables "Dona't de baixa" for role holders, BR-12))
 - `src/app/[locale]/verify/[token]/` — Public card verification page (no components of its own)
@@ -209,7 +209,7 @@ All interactive components use `"use client"`. Components are organized by page:
   - `badges/` (V-7: `BadgeCatalogue`, `CreateBadgeDialog`, `BadgeStateDialog` (archive/restore/delete), `BadgeDetail`, `BadgeEditForm` (language tabs, icon picker, switch, preview), `BadgeHolders`, `BulkAwardDialog`, `BadgeCircle`, `shared.ts` (error keys, languages));
   - `activity/` (V-4: `ActivityFilters`, `ActivityList`, `AuditParts`); `procedures/` (`ProceduresContent` + `procedures.ts`); `tools/ToolsContent` (V-6); `roles/RolesContent` (V-5).
   - Server-side helpers in `src/lib/admin/`: `guard.ts` (`requireRole`, `getAdminAccess`), server actions `member-actions.ts` (A-4/A-5/A-8/A-9), `membership-actions.ts` (A-6/A-7), `access-actions.ts` (A-15), `superadmin-actions.ts` (S-1/S-2/S-3), `ops-actions.ts` (A-14), `action-context.ts` + `action-errors.ts` (shared guard, DB prefix → code), pure modules `members-list.ts`, `member-file.ts`, `activity.ts`, `audit-format.ts` (the one audit renderer), `stats.ts`, `ops-status.ts`, `leave-dates.ts`, `exports.ts`, `export-client.ts`. Job-run recording in `src/lib/ops/job-runs.ts`. Mail in `src/lib/mail/` (Workspace SMTP transport shared with the contact form, `templates/membership.ts`, Catalan only, D-C).
-- `src/components/legal/` — Legal pages (LegalPageContent, LegalContent, PrivacyContent, CookiesContent, DataProtectionContent)
+- `src/components/legal/` — Legal pages (LegalPageContent, LegalContent, PrivacyContent, CookiesContent)
 - Root-level: NavBar, Footer, SmoothScroll, CookieBanner, CookieConsentProvider, GoogleAnalytics, ScrollProgress, ScrollToTop, TextReveal, LanguageSwitcher, ThemeLink, ErrorContent, SkipLink, CollaboratorModal
 
 ### Ludoteca (Game Library)
@@ -271,6 +271,8 @@ Ludoya **public v1 API** (`https://api.ludoya.com/public/v1`, header `X-Api-Key`
 
 ### Cookie Consent
 
+`CookieBanner` handles keys (Escape rejects, Tab trap) only while focus is inside it, and its delayed autofocus skips when focus is in another `aria-modal` dialog, so Escape in a document or admin dialog closes that dialog instead of rejecting cookies.
+
 `src/hooks/useCookieConsent.ts` — Uses `useSyncExternalStore` for localStorage subscription (prevents hydration mismatch). Key: `darkstone_cookie_consent`. Status: `'accepted' | 'rejected' | null`. Google Analytics only loads when accepted.
 
 ### SEO
@@ -279,7 +281,7 @@ Ludoya **public v1 API** (`https://api.ludoya.com/public/v1`, header `X-Api-Key`
 - `src/app/robots.ts` — robots.txt
 - `src/lib/seo.ts` — `getLocalizedUrl()` / `getAlternates()` build canonical + hreflang URLs. The root is always `https://www.darkstone.cat/` (with trailing slash)
 - `src/app/[locale]/[...rest]/page.tsx` — Catch-all that calls `notFound()` so unknown paths render the custom `not-found.tsx` instead of the Next.js default 404
-- `next.config.ts` `redirects()` — Permanent (308) redirects: legacy `/pautes-de-conducta` → `/conduct`, and `/ca/*` → `/*` (next-intl's middleware only does a temporary 307). **When renaming a route, add a permanent redirect from the old path here.**
+- `next.config.ts` `redirects()` — Permanent (308) redirects: `/events/images` → `/admin/tools/event-images`, and `/ca/*` → `/*` (next-intl's middleware only does a temporary 307). **When renaming a route, add a permanent redirect from the old path here.**
 - `src/app/[locale]/opengraph-image.tsx` — Dynamic OG image (1200×630)
 - Layout: JSON-LD Organization schema, OpenGraph + Twitter metadata
 - Metadata base: `https://www.darkstone.cat`
@@ -370,7 +372,7 @@ Migrations: new `CHECK` constraints are added `NOT VALID` (length-only) so legac
 
 ## Translation Key Namespaces
 
-`nav`, `hero`, `about`, `about_page`, `activities`, `schedule`, `join_us`, `location`, `footer`, `ludoteca`, `contact_page`, `events`, `event_images`, `faq`, `cookies`, `cookie_policy`, `conduct`, `legal`, `legal_notice`, `privacy`, `privacy_policy`, `data_protection`, `error_page`, `not_found`, `metadata`, `auth`, `verify`, `profile`, `admin`, `collaborators`
+`nav`, `hero`, `about`, `about_page`, `activities`, `schedule`, `join_us`, `location`, `footer`, `ludoteca`, `contact_page`, `events`, `event_images`, `faq`, `cookies`, `cookie_policy`, `conduct`, `legal`, `legal_notice`, `privacy`, `privacy_policy`, `data_protection`, `documents`, `error_page`, `not_found`, `metadata`, `auth`, `verify`, `profile`, `admin`, `collaborators`
 
 `admin` has sub-namespaces `members`, `member_file`, `activity`, `badges`, `overview`, `procedures`, `roles`, `tools`; `metadata` has `admin_{,members_,procedures_,roles_,activity_,tools_,badges_,badge_}{title,description}`; `nav` has `admin`, `admin_members`, `admin_procedures`, `admin_roles`, `admin_activity`, `admin_tools`, `admin_badges`.
 
@@ -416,7 +418,7 @@ Migrations: new `CHECK` constraints are added `NOT VALID` (length-only) so legac
 19. **Role holders cannot leave or delete their account** (BR-12): remove the role first, and with two superadmins promote the replacement before demoting anyone (BR-10).
 20. **Retired `admin` role** — gone since M7: `src/lib/auth/roles.ts` treats it as unknown (no access). Old audit entries keep `actor_role = 'admin'` and still render as "Junta".
 21. **The audit log is append-only** — tests cannot delete their entries (filter by their own ids; `db:reset` clears them).
-22. **`AdminDialog` locks the page through a shared counter** — it renders in a portal to `body`, sets `#main-content` inert, stops Lenis and hides body overflow while open; the lock is released only when the last open dialog closes (a dialog opening while another closes keeps the page locked), restoring the original overflow / inert / Lenis state. Build admin dialogs on it, not on ad-hoc modals.
+22. **Dialogs lock the page through a shared counter** — `useModalDialog` (`src/hooks/useModalDialog.ts`), used by `AdminDialog`, `DocumentDialog` and `CardQrOverlay`: it sets `#main-content` inert, stops Lenis and hides body overflow while open, moves focus to `[data-autofocus]`, traps Tab, handles Escape and returns focus on close; the lock is released only when the last open dialog closes (a dialog opening while another closes keeps the page locked), restoring the original overflow / inert / Lenis state. The dialogs render in a portal to `body`. Build new dialogs on this hook (admin ones on `AdminDialog`), not on ad-hoc modals.
 23. **E2E: use `expectHydrated`, not `networkidle`** — `e2e/helpers/hydration.ts` `expectHydrated(locator)` waits until React has attached its props to the control the test is about to use (`networkidle` is flaky on a cold dev server).
 
 <!-- BEGIN:nextjs-agent-rules -->

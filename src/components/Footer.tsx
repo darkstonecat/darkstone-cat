@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
+import DocumentLink from "@/components/documents/DocumentLink";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { FaFacebook, FaInstagram, FaTelegram } from "react-icons/fa";
@@ -17,7 +18,6 @@ const NAV_LINKS = [
   { href: "/about", key: "about" },
   { href: "/events", key: "events" },
   { href: "/ludoteca", key: "ludoteca" },
-  { href: "/conduct", key: "conduct" },
   { href: "/contact", key: "contact" },
 ] as const;
 
@@ -44,13 +44,17 @@ const SOCIALS = [
   },
 ] as const;
 
+/** Pages (`href`) and association documents (`doc`, opened in a dialog over the current page). */
 const LEGAL_LINKS = [
   { href: "/faq", key: "faq" },
   { href: "/legal", key: "legal" },
   { href: "/privacy", key: "privacy" },
-  { href: "/data-protection", key: "data_protection" },
+  { doc: "data-protection", key: "data_protection" },
   { href: "/cookies", key: "cookies" },
+  { doc: "conduct", key: "conduct" },
 ] as const;
+
+const legalLinkClass = "text-xs text-stone-300 transition-colors hover:text-stone-white-hover";
 
 
 const columnAnimation = (delay: number) => ({
@@ -207,12 +211,15 @@ export default function Footer() {
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 md:justify-start">
             {LEGAL_LINKS.map((item, i) => (
               <span key={item.key} className="flex items-center gap-4">
-                <Link
-                  href={item.href}
-                  className="text-xs text-stone-300 transition-colors hover:text-stone-white-hover"
-                >
-                  {t(item.key)}
-                </Link>
+                {"doc" in item ? (
+                  <DocumentLink doc={item.doc} className={legalLinkClass}>
+                    {t(item.key)}
+                  </DocumentLink>
+                ) : (
+                  <Link href={item.href} className={legalLinkClass}>
+                    {t(item.key)}
+                  </Link>
+                )}
                 {i < LEGAL_LINKS.length - 1 && (
                   <span className="text-stone-700">&middot;</span>
                 )}

@@ -2,6 +2,24 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
+import type { ReactNode } from "react";
+import DocumentLink from "@/components/documents/DocumentLink";
+
+const linkClass = "font-semibold underline transition-opacity hover:opacity-80";
+
+/** Rich-text tags any legal paragraph can use to open an association document in its dialog. */
+const DOCUMENT_TAGS = {
+  conductLink: (chunks: ReactNode) => (
+    <DocumentLink doc="conduct" className={linkClass}>
+      {chunks}
+    </DocumentLink>
+  ),
+  dataProtectionLink: (chunks: ReactNode) => (
+    <DocumentLink doc="data-protection" className={linkClass}>
+      {chunks}
+    </DocumentLink>
+  ),
+};
 
 interface LegalSection {
   titleKey: string;
@@ -68,7 +86,7 @@ export default function LegalPageContent({ namespace, titleKey, introKey, sectio
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.4, delay: j * 0.05 }}
                   >
-                    {t(pKey)}
+                    {t.rich(pKey, DOCUMENT_TAGS)}
                   </motion.p>
                 ))}
               </div>
