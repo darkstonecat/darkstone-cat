@@ -282,6 +282,14 @@ export const collaborators: Collaborator[] = [
     url: "https://darkstone.es",
     brandColor: "#CCC5C4",
   },
+  {
+    id: "la-marca-degara",
+    name: "La Marca d'Egara",
+    slug: "la-marca-degara",
+    category: "clubs",
+    logo: "/images/logos/collaborators/clubs/logo_la_marca_degara.webp",
+    url: "https://www.instagram.com/lamarcadeegara",
+  },
 
   // ── Content Creators ───────────────────────────────────────────
   {
