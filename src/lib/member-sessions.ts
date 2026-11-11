@@ -1,31 +1,26 @@
 // ---------------------------------------------------------------------------
-// Member area — sessions data for "La meva zona"
+// Ludoya sessions with BGG covers — the data behind the /events agenda
 // ---------------------------------------------------------------------------
-// Composes the Ludoya adapter with BGG covers. Seat counts change while people
-// sign up, so this data is cached for 60 seconds (the public /events page keeps
-// its 24 hours). If Ludoya is down, the fetch data cache keeps serving the last
-// good response; only a cold cache surfaces the error state.
+// Seat counts change while people sign up, so the sessions request is cached
+// for 60 seconds (the admin event images keep `fetchUpcomingEvents` and its 24
+// hours). If Ludoya is down, the fetch data cache keeps serving the last good
+// response; only a cold cache surfaces the error state.
 
 import "server-only";
 import { fetchBggCollection, type BggGame } from "./bgg";
 import { resolvePlayCovers } from "./game-matching";
 import { ludoyaConfig, MEMBER_AREA_LIMITS } from "./ludoya/config";
-import { MAX_PLAYS_SHOWN } from "./member-home/sessions-view";
-import { describeError, isTimeoutError } from "./ludoya/client";
-import {
-  fetchSessions,
-  sessionsInMonth,
-  sessionsInNextDays,
-} from "./ludoya/sessions";
-import type { LudoyaFetchError, LudoyaSession, LudoyaSessionPlay } from "./ludoya/types";
+import { describeError } from "./ludoya/client";
+import { fetchSessions } from "./ludoya/sessions";
+import type { LudoyaSession, LudoyaSessionPlay } from "./ludoya/types";
 
 /**
- * The week and every calendar month share ONE events request: the same URL
+ * The agenda and every calendar month share ONE events request: the same URL
  * (`includeSubEvents` + `pastLimit` 200, the default of `fetchSessions`), so
  * one page load costs one events fetch (plus locations) under the 60 s data
- * cache instead of one per variant. The past events also keep a multi-day
- * event that already started (and is still running) from being lost;
- * `sessionsInNextDays` drops whatever already ended.
+ * cache instead of one per view. The past events also keep a multi-day event
+ * that already started (and is still running) from being lost; the agenda
+ * drops whatever already ended. `/api/cron/refresh` warms this request.
  */
 export const fetchMemberAreaSessions = () =>
   fetchSessions({
@@ -42,18 +37,6 @@ export interface MemberSessionPlay extends LudoyaSessionPlay {
 export interface MemberSession extends Omit<LudoyaSession, "plannedPlays"> {
   plannedPlays: MemberSessionPlay[];
 }
-
-export interface MemberSessionsResult {
-  sessions: MemberSession[];
-  error?: LudoyaFetchError;
-}
-
-export interface MonthEventsResult {
-  events: LudoyaSession[];
-  error?: LudoyaFetchError;
-}
-
-const errorKind = (error: unknown): LudoyaFetchError => (isTimeoutError(error) ? "timeout" : "api_error");
 
 async function loadCollection(): Promise<BggGame[]> {
   try {
@@ -95,10 +78,7 @@ async function resolveCoversWithin(shown: LudoyaSessionPlay[], budgetMs: number)
  * Adds a cover to every play; only the first `playsPerSession` plays of each
  * session are looked up on BGG, the rest keep Ludoya's image.
  */
-export async function withCovers(
-  sessions: LudoyaSession[],
-  playsPerSession: number = MAX_PLAYS_SHOWN
-): Promise<MemberSession[]> {
+export async function withCovers(sessions: LudoyaSession[], playsPerSession: number): Promise<MemberSession[]> {
   const shown = sessions.flatMap((s) => s.plannedPlays.slice(0, playsPerSession));
   const covers = shown.length > 0 ? await resolveCoversWithin(shown, COVER_BUDGET_MS) : new Map<string, string | null>();
 
@@ -109,33 +89,4 @@ export async function withCovers(
       coverUrl: covers.get(play.id) ?? play.imageUrl,
     })),
   }));
-}
-
-/**
- * Sessions of the next seven Madrid calendar days (today included, in-progress
- * ones too) with their plays, seat counts, place and covers.
- */
-export async function fetchMemberWeekSessions(now: Date = new Date()): Promise<MemberSessionsResult> {
-  try {
-    const sessions = await fetchMemberAreaSessions();
-    return { sessions: await withCovers(sessionsInNextDays(sessions, now)) };
-  } catch (error) {
-    console.error(`[Ludoya] Failed to fetch member sessions: ${describeError(error)}`);
-    return { sessions: [], error: errorKind(error) };
-  }
-}
-
-/**
- * Sessions starting in a Madrid calendar month (`month` is 1–12) for the home
- * calendar, from the same request as the week. Earlier days and past months come
- * from Ludoya's recent past events; the calendar pills need no covers.
- */
-export async function fetchMonthEvents(year: number, month: number): Promise<MonthEventsResult> {
-  try {
-    const sessions = await fetchMemberAreaSessions();
-    return { events: sessionsInMonth(sessions, year, month) };
-  } catch (error) {
-    console.error(`[Ludoya] Failed to fetch month events: ${describeError(error)}`);
-    return { events: [], error: errorKind(error) };
-  }
 }

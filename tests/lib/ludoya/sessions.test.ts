@@ -1,11 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  fetchSessions,
-  madridDay,
-  sessionsInMonth,
-  sessionsInNextDays,
-} from "@/lib/ludoya/sessions";
-import { parseSessionsResponse } from "@/lib/ludoya/normalize";
+import { fetchSessions, madridDay } from "@/lib/ludoya/sessions";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -24,47 +18,6 @@ describe("madridDay", () => {
     expect(madridDay("2026-10-02T22:30:00Z")).toBe("2026-10-03");
     expect(madridDay("2026-12-31T23:30:00Z")).toBe("2027-01-01");
     expect(madridDay("2026-10-02T14:00:00Z")).toBe("2026-10-02");
-  });
-});
-
-describe("time windows", () => {
-  const sessions = parseSessionsResponse(fixture("events.json"));
-
-  it("sessionsInNextDays keeps the next 7 Madrid days, in-progress sessions included", () => {
-    vi.setSystemTime(new Date("2026-10-02T15:00:00Z")); // Friday, inside the 14:00–18:30Z session
-    const week = sessionsInNextDays(sessions, new Date());
-    expect(week.map((s) => madridDay(s.startsAt))).toEqual(["2026-10-02", "2026-10-03"]);
-  });
-
-  it("drops sessions that already ended today", () => {
-    const week = sessionsInNextDays(sessions, new Date("2026-10-02T19:00:00Z"));
-    expect(week.map((s) => madridDay(s.startsAt))).toEqual(["2026-10-03"]);
-  });
-
-  it("keeps a multi-day event that started earlier and is still running", () => {
-    const multiDay = parseSessionsResponse({
-      futureEvents: {
-        elements: [
-          {
-            id: "fair", type: "MEETUP", title: "Fair", visibility: "PUBLIC",
-            startsAt: "2026-10-01T08:00:00Z", endsAt: "2026-10-04T18:00:00Z", timeZone: "Europe/Madrid",
-          },
-        ],
-      },
-    });
-    expect(sessionsInNextDays(multiDay, new Date("2026-10-02T10:00:00Z")).map((s) => s.id)).toEqual(["fair"]);
-    expect(sessionsInNextDays(multiDay, new Date("2026-10-05T10:00:00Z"))).toEqual([]);
-  });
-
-  it("includes the seventh day and excludes the eighth", () => {
-    const seventh = sessionsInNextDays(sessions, new Date("2026-09-26T08:00:00Z")); // window to Oct 2
-    expect(seventh.map((s) => madridDay(s.startsAt))).toEqual(["2026-10-02"]);
-  });
-
-  it("sessionsInMonth filters by Madrid month", () => {
-    expect(sessionsInMonth(sessions, 2026, 10).length).toBeGreaterThan(2);
-    expect(sessionsInMonth(sessions, 2026, 11).map((s) => s.title)).toContain("Egara Juga 2026");
-    expect(sessionsInMonth(sessions, 2026, 9)).toEqual([]);
   });
 });
 

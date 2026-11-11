@@ -8,7 +8,6 @@
 
 import type { LudoyaFetchError, LudoyaSession } from "@/lib/ludoya/types";
 import {
-  EVENTS_MONTHS_BACK,
   buildMonthGrid,
   formatDayLong,
   formatMonthKey,
@@ -54,7 +53,7 @@ export interface EventsCalendarMonth {
 }
 
 /** The current month up to six months ahead. */
-export const isEventsMonth = (target: YearMonth, now: Date) => isInRange(target, now, EVENTS_MONTHS_BACK);
+export const isEventsMonth = (target: YearMonth, now: Date) => isInRange(target, now);
 
 /** `YYYY-MM` → month, or null when malformed. */
 export function parseMonthKey(value: string | null): YearMonth | null {
@@ -80,7 +79,6 @@ export function toEventsCalendar(
       title: s.title,
       startsAt: s.startsAt,
       special: s.type === "special",
-      placeName: null,
       ludoyaUrl: s.ludoyaUrl,
     }));
 

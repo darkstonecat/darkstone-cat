@@ -1,14 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import {
-  buildCalendarView,
   buildMonthGrid,
   currentYearMonth,
-  defaultSelectedDay,
   formatMonthTitle,
   isInRange,
   madridDayKey,
   monthRange,
-  parseMonthParam,
   shiftMonth,
   weekdayLabels,
   type CalendarEvent,
@@ -19,7 +16,6 @@ const event = (id: string, startsAt: string, special = false): CalendarEvent => 
   title: id,
   startsAt,
   special,
-  placeName: null,
   ludoyaUrl: `https://ludoya.test/${id}`,
 })
 
@@ -36,17 +32,12 @@ describe('month navigation', () => {
     expect(currentYearMonth(new Date('2026-09-30T22:30:00Z'))).toEqual({ year: 2026, month: 10 })
   })
 
-  it('browses 3 months back and 6 forward', () => {
-    expect(monthRange(NOW)).toEqual({ first: { year: 2026, month: 6 }, last: { year: 2027, month: 3 } })
-    expect(isInRange({ year: 2026, month: 5 }, NOW)).toBe(false)
+  it('browses from the current month to 6 ahead', () => {
+    expect(monthRange(NOW)).toEqual({ first: { year: 2026, month: 9 }, last: { year: 2027, month: 3 } })
+    expect(isInRange({ year: 2026, month: 8 }, NOW)).toBe(false)
+    expect(isInRange({ year: 2026, month: 9 }, NOW)).toBe(true)
+    expect(isInRange({ year: 2027, month: 3 }, NOW)).toBe(true)
     expect(isInRange({ year: 2027, month: 4 }, NOW)).toBe(false)
-  })
-
-  it('parses the month param and falls back to the current month', () => {
-    expect(parseMonthParam('2026-10', NOW)).toEqual({ year: 2026, month: 10 })
-    for (const bad of [undefined, '', '2026-13', '2026-00', '26-10', '2026-1', '2026-10-01', '2020-01', '2030-01', ['2026-10']]) {
-      expect(parseMonthParam(bad as string, NOW)).toEqual({ year: 2026, month: 9 })
-    }
   })
 })
 
@@ -109,21 +100,6 @@ describe('buildMonthGrid', () => {
   })
 })
 
-describe('defaultSelectedDay', () => {
-  const weeks = buildMonthGrid(
-    { year: 2026, month: 10 },
-    [event('a', '2026-10-02T14:00:00Z'), event('b', '2026-10-16T14:00:00Z')],
-    '2026-10-10'
-  )
-  it('picks the first event from today on', () => {
-    expect(defaultSelectedDay(weeks, '2026-10-10')).toBe('2026-10-16')
-  })
-  it('falls back to the first event of the month, or null', () => {
-    expect(defaultSelectedDay(weeks, '2026-11-01')).toBe('2026-10-02')
-    expect(defaultSelectedDay(buildMonthGrid({ year: 2026, month: 10 }, [], ''), '')).toBeNull()
-  })
-})
-
 describe('labels', () => {
   it('formats the month title and Monday-first weekdays per locale', () => {
     expect(formatMonthTitle({ year: 2026, month: 10 }, 'ca')).toBe('Octubre 2026')
@@ -131,16 +107,5 @@ describe('labels', () => {
     expect(weekdayLabels('ca').map((w) => w.short)).toEqual(['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg'])
     expect(weekdayLabels('en')[0].long).toBe('Monday')
     expect(weekdayLabels('es')[6].long).toBe('Domingo')
-  })
-})
-
-describe('buildCalendarView', () => {
-  it('serialises formatted labels and times so client components never format dates', () => {
-    const view = buildCalendarView({ year: 2026, month: 10 }, [event('fri', '2026-10-02T14:00:00Z')], '2026-10-10', 'ca')
-    expect(view.title).toBe('Octubre 2026')
-    expect(view.defaultSelected).toBe('2026-10-02')
-    const day = view.weeks.flat().find((d) => d.date === '2026-10-02')!
-    expect(day.label).toMatch(/^Divendres 2 d.octubre$/)
-    expect(day.events[0].time).toBe('16:00')
   })
 })

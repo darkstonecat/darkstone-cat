@@ -20,12 +20,12 @@ Code lives in `src/lib/ludoya/`; only `normalize.ts` knows raw shapes.
 | `client.ts` | `ludoyaGet()`: `X-Api-Key`, 10 s timeout, 3 attempts with backoff, `Retry-After` honoured up to 5 s, typed `LudoyaApiError`, mock mode. `import "server-only"`. |
 | `shape.ts` | Guards; `LudoyaShapeError` names the exact field path that changed. |
 | `normalize.ts` | Raw JSON → `LudoyaSession`, `LudoyaSessionPlay`, `LudoyaLocation`, `LudoyaUser`; `withUsualVenue()`. |
-| `sessions.ts` | `fetchSessions()`, Madrid-calendar-day windows (`sessionsInNextDays`, `sessionsInMonth`). |
+| `sessions.ts` | `fetchSessions()` and `madridDay()`. |
 | `username.ts` | `lookupLudoyaUsername()`. |
 | `types.ts` | Public types. Independent from Ludoya's shapes. |
 | `index.ts` | `fetchUpcomingEvents()` for `/events` and event images (long cache, `PUBLIC` events only, stripped to `LudoyaEvent`). |
 
-Member-area data lives outside the adapter, in `src/lib/member-sessions.ts` (`fetchMemberWeekSessions`, `fetchMonthEvents`, cache 60 s, BGG covers through `src/lib/game-matching.ts`). Username checks are server actions in `src/lib/profile/username-checks.ts`.
+The `/events` agenda data lives outside the adapter: `src/lib/member-sessions.ts` (`fetchMemberAreaSessions`, cache 60 s, and `withCovers`, BGG covers through `src/lib/game-matching.ts`) feeds `src/lib/events/agenda.ts` and `src/lib/events/calendar.ts`. Username checks are server actions in `src/lib/profile/username-checks.ts`.
 
 ### Fetch flow
 

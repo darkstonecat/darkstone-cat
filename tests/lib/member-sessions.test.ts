@@ -8,7 +8,7 @@ const bgg = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/bgg", () => bgg);
 
-import { COVER_BUDGET_MS, fetchMemberWeekSessions, fetchMonthEvents } from "@/lib/member-sessions";
+import { COVER_BUDGET_MS, fetchMemberAreaSessions, withCovers } from "@/lib/member-sessions";
 
 const collectionGame = (over: Partial<BggGame>): BggGame => ({
   id: "1",
@@ -46,13 +46,18 @@ afterEach(() => {
   Object.values(bgg).forEach((m) => m.mockReset());
 });
 
-describe("fetchMemberWeekSessions", () => {
-  it("returns the next seven days with plays, seats, place and Ludoya covers as fallback", async () => {
-    const result = await fetchMemberWeekSessions();
+/** Friday 2 and Saturday 3 October of the mock fixtures (4 and 2 plays). */
+async function weekend() {
+  const sessions = await fetchMemberAreaSessions();
+  return sessions.filter((s) => s.startsAt >= "2026-10-02" && s.startsAt < "2026-10-04");
+}
 
-    expect(result.error).toBeUndefined();
-    expect(result.sessions.map((s) => s.title)).toEqual(["Divendres de jocs!", "Dissabtes de jocs!"]);
-    const friday = result.sessions[0];
+describe("withCovers", () => {
+  it("keeps every play with its seats and place, Ludoya cover as fallback", async () => {
+    const sessions = await withCovers(await weekend(), Infinity);
+
+    expect(sessions.map((s) => s.title)).toEqual(["Divendres de jocs!", "Dissabtes de jocs!"]);
+    const friday = sessions[0];
     expect(friday.plannedPlays).toHaveLength(4);
     expect(friday.place).toMatchObject({ name: "Centre Cívic Ca N’Aurell", isUsual: true });
     const play = friday.plannedPlays[0];
@@ -65,9 +70,9 @@ describe("fetchMemberWeekSessions", () => {
       games: [collectionGame({ id: "1", name: "Signorie", year: 2015, image: "https://bgg.example/signorie.jpg" })],
     });
 
-    const { sessions } = await fetchMemberWeekSessions();
-    const signorie = sessions[0].plannedPlays.find((p) => p.gameName === "Signorie")!;
-    const emberleaf = sessions[0].plannedPlays.find((p) => p.gameName === "Emberleaf")!;
+    const [friday] = await withCovers(await weekend(), Infinity);
+    const signorie = friday.plannedPlays.find((p) => p.gameName === "Signorie")!;
+    const emberleaf = friday.plannedPlays.find((p) => p.gameName === "Emberleaf")!;
 
     expect(signorie.coverUrl).toBe("https://bgg.example/signorie.jpg");
     expect(emberleaf.coverUrl).toBe(emberleaf.imageUrl);
@@ -78,8 +83,8 @@ describe("fetchMemberWeekSessions", () => {
       games: [collectionGame({ name: "Signorie", year: 2001, image: "https://bgg.example/other.jpg" })],
     });
 
-    const { sessions } = await fetchMemberWeekSessions();
-    const signorie = sessions[0].plannedPlays.find((p) => p.gameName === "Signorie")!;
+    const [friday] = await withCovers(await weekend(), Infinity);
+    const signorie = friday.plannedPlays.find((p) => p.gameName === "Signorie")!;
     expect(signorie.coverUrl).toBe(signorie.imageUrl);
   });
 
@@ -88,37 +93,40 @@ describe("fetchMemberWeekSessions", () => {
     bgg.fetchBggCollection.mockRejectedValue(new Error("BGG down"));
     bgg.searchBggGames.mockRejectedValue(new Error("BGG down"));
 
-    const { sessions, error } = await fetchMemberWeekSessions();
-
-    expect(error).toBeUndefined();
-    expect(sessions[0].plannedPlays.every((p) => p.coverUrl === p.imageUrl)).toBe(true);
+    const [friday] = await withCovers(await weekend(), Infinity);
+    expect(friday.plannedPlays.every((p) => p.coverUrl === p.imageUrl)).toBe(true);
   });
 
   it("does not wait for a slow BGG: after the cover budget the Ludoya covers are used", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     bgg.fetchBggCollection.mockReturnValue(new Promise(() => {})); // never settles
+    const input = await weekend();
 
     let settled = false;
-    const pending = fetchMemberWeekSessions().finally(() => (settled = true));
-    // The fixture read takes real I/O time before the cover timer starts, so keep advancing.
+    const pending = withCovers(input, Infinity).finally(() => (settled = true));
     await vi.waitFor(async () => {
       await vi.advanceTimersByTimeAsync(COVER_BUDGET_MS + 100);
       expect(settled).toBe(true);
     });
-    const { sessions, error } = await pending;
+    const sessions = await pending;
 
-    expect(error).toBeUndefined();
     expect(sessions).toHaveLength(2);
     expect(sessions.flatMap((s) => s.plannedPlays).every((p) => p.coverUrl === p.imageUrl)).toBe(true);
   });
 
-  it("only resolves BGG covers for the plays the home shows (max 5 per session)", async () => {
-    await fetchMemberWeekSessions();
-    // Friday has 4 plays and Saturday 2, all under the cap → one search each.
+  it("looks up BGG only for the first plays of each session", async () => {
+    const input = await weekend();
+    await withCovers(input, 1);
+    expect(bgg.searchBggGames).toHaveBeenCalledTimes(2);
+
+    bgg.searchBggGames.mockClear();
+    await withCovers(input, Infinity);
     expect(bgg.searchBggGames).toHaveBeenCalledTimes(6);
   });
+});
 
-  it("asks for a few past events so a running multi-day event is not lost", async () => {
+describe("fetchMemberAreaSessions", () => {
+  it("asks for past events too, so a running multi-day event is not lost", async () => {
     vi.stubEnv("LUDOYA_MOCK", "");
     vi.stubEnv("LUDOYA_API_KEY", "ldy_test");
     const fetchMock = vi.fn<typeof fetch>(async (input) =>
@@ -130,10 +138,7 @@ describe("fetchMemberWeekSessions", () => {
                 futureEvents: { elements: [] },
                 pastEvents: {
                   elements: [
-                    // Started yesterday, still running: must stay in the week.
                     { id: "run", type: "MEETUP", visibility: "PUBLIC", title: "Running", startsAt: "2026-10-01T09:00:00Z", endsAt: "2026-10-03T16:00:00Z" },
-                    // Ended already: must go.
-                    { id: "old", type: "MEETUP", visibility: "PUBLIC", title: "Old", startsAt: "2026-09-25T09:00:00Z", endsAt: "2026-09-25T12:00:00Z" },
                   ],
                 },
               }
@@ -143,57 +148,10 @@ describe("fetchMemberWeekSessions", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
 
-    const { sessions } = await fetchMemberWeekSessions();
+    const sessions = await fetchMemberAreaSessions();
 
     const eventsUrl = fetchMock.mock.calls.map(([u]) => String(u)).find((u) => u.includes("/events"))!;
     expect(eventsUrl).toContain("pastLimit=200");
     expect(sessions.map((s) => s.id)).toEqual(["run"]);
-  });
-
-  it("reports api_error and timeout instead of throwing", async () => {
-    vi.stubEnv("LUDOYA_MOCK", "");
-    vi.stubEnv("LUDOYA_API_KEY", "ldy_test");
-    vi.spyOn(console, "error").mockImplementation(() => {});
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ code: "unauthorized" }), { status: 401 })));
-    expect(await fetchMemberWeekSessions()).toEqual({ sessions: [], error: "api_error" });
-
-    vi.stubGlobal("fetch", vi.fn(async () => { throw Object.assign(new Error("t"), { name: "TimeoutError" }); }));
-    const pending = fetchMemberWeekSessions();
-    await vi.runAllTimersAsync();
-    expect(await pending).toEqual({ sessions: [], error: "timeout" });
-  });
-});
-
-describe("fetchMonthEvents", () => {
-  it("returns the sessions of the requested Madrid month without covers work", async () => {
-    const { events, error } = await fetchMonthEvents(2026, 11);
-    expect(error).toBeUndefined();
-    expect(events.map((e) => e.title)).toContain("Egara Juga 2026");
-    expect(bgg.searchBggGames).not.toHaveBeenCalled();
-  });
-
-  it("uses the same events request as the week, for every month", async () => {
-    vi.stubEnv("LUDOYA_MOCK", "");
-    vi.stubEnv("LUDOYA_API_KEY", "ldy_test");
-    const fetchMock = vi.fn<typeof fetch>(async (input) =>
-      new Response(
-        JSON.stringify(
-          String(input).includes("/locations")
-            ? { locations: [] }
-            : { futureEvents: { elements: [] }, pastEvents: { elements: [] } }
-        ),
-        { status: 200 }
-      )
-    );
-    vi.stubGlobal("fetch", fetchMock);
-
-    await fetchMemberWeekSessions();
-    await fetchMonthEvents(2026, 10); // current month
-    await fetchMonthEvents(2026, 11); // future month
-    await fetchMonthEvents(2026, 8); // past month
-
-    const urls = new Set(fetchMock.mock.calls.map(([u]) => String(u)).filter((u) => u.includes("/events")));
-    expect(urls.size).toBe(1);
-    expect([...urls][0]).toContain("pastLimit=200");
   });
 });

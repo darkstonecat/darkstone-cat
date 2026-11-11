@@ -76,26 +76,3 @@ export function madridDay(instant: Date | string): string {
     day: "2-digit",
   }).format(new Date(instant));
 }
-
-function addDays(day: string, days: number): string {
-  const [y, m, d] = day.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
-}
-
-/**
- * Sessions still to come (or in progress, even if they started on an earlier
- * day) that begin within the next `days` Madrid calendar days, today included.
- */
-export function sessionsInNextDays(sessions: LudoyaSession[], now: Date, days = 7): LudoyaSession[] {
-  const last = addDays(madridDay(now), days - 1);
-  return sessions.filter((s) => {
-    // Multi-day events that started earlier stay while they are still running.
-    return new Date(s.endsAt) > now && madridDay(s.startsAt) <= last;
-  });
-}
-
-/** Sessions that start in the given Madrid calendar month (`month` is 1–12). */
-export function sessionsInMonth(sessions: LudoyaSession[], year: number, month: number): LudoyaSession[] {
-  const prefix = `${year}-${String(month).padStart(2, "0")}-`;
-  return sessions.filter((s) => madridDay(s.startsAt).startsWith(prefix));
-}

@@ -1,8 +1,8 @@
 // ---------------------------------------------------------------------------
-// Month calendar helpers (the /events calendar and, until it goes, the member home)
+// Month calendar helpers of the /events calendar
 // ---------------------------------------------------------------------------
-// Pure functions (no React, no server-only imports): month parameter parsing,
-// the navigation range, the Monday-first week grid and its labels. Days are
+// Pure functions (no React, no server-only imports): the navigation range, the
+// Monday-first week grid and its labels. Days are
 // plain `YYYY-MM-DD` strings on the Madrid calendar and all date arithmetic is
 // done in UTC on those strings, so DST changes cannot shift a day.
 
@@ -10,11 +10,8 @@ const TIME_ZONE = "Europe/Madrid";
 const INTL_LOCALES: Record<string, string> = { ca: "ca-ES", es: "es-ES", en: "en-GB" };
 const intlLocale = (locale: string) => INTL_LOCALES[locale] ?? locale;
 
-/** How many months before and after the current one the member calendar lets you browse. */
-export const MONTHS_BACK = 3;
+/** The calendar browses from the current month up to this many months ahead. */
 export const MONTHS_FORWARD = 6;
-/** The public /events calendar starts at the current month. */
-export const EVENTS_MONTHS_BACK = 0;
 
 export interface YearMonth {
   year: number;
@@ -28,14 +25,7 @@ export interface CalendarEvent {
   title: string;
   startsAt: string;
   special: boolean;
-  placeName: string | null;
   ludoyaUrl: string;
-}
-
-/** An event with its locale-dependent text already formatted (on the server). */
-export interface CalendarEventView extends CalendarEvent {
-  /** "16:00" on the Madrid clock. */
-  time: string;
 }
 
 export interface CalendarDay {
@@ -74,27 +64,14 @@ export function shiftMonth({ year, month }: YearMonth, delta: number): YearMonth
 const monthIndex = ({ year, month }: YearMonth) => year * 12 + month - 1;
 
 /** First and last month that can be browsed, relative to `now`. */
-export function monthRange(now: Date, monthsBack: number = MONTHS_BACK): { first: YearMonth; last: YearMonth } {
+export function monthRange(now: Date): { first: YearMonth; last: YearMonth } {
   const current = currentYearMonth(now);
-  return { first: shiftMonth(current, -monthsBack), last: shiftMonth(current, MONTHS_FORWARD) };
+  return { first: current, last: shiftMonth(current, MONTHS_FORWARD) };
 }
 
-export function isInRange(target: YearMonth, now: Date, monthsBack: number = MONTHS_BACK): boolean {
-  const { first, last } = monthRange(now, monthsBack);
+export function isInRange(target: YearMonth, now: Date): boolean {
+  const { first, last } = monthRange(now);
   return monthIndex(target) >= monthIndex(first) && monthIndex(target) <= monthIndex(last);
-}
-
-/**
- * Month from the `?month=YYYY-MM` search param. Anything missing, malformed or
- * outside the browsable range falls back to the current month.
- */
-export function parseMonthParam(value: string | string[] | undefined, now: Date): YearMonth {
-  const current = currentYearMonth(now);
-  if (typeof value !== "string") return current;
-  const match = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(value);
-  if (!match) return current;
-  const parsed = { year: Number(match[1]), month: Number(match[2]) };
-  return isInRange(parsed, now) ? parsed : current;
 }
 
 const utcDate = (day: string) => {
@@ -143,12 +120,6 @@ export function buildMonthGrid(
   );
 }
 
-/** The day the mobile panel opens on: the first event from today on, else the first of the month. */
-export function defaultSelectedDay(weeks: CalendarDay[][], today: string): string | null {
-  const withEvents = weeks.flat().filter((d) => d.events.length > 0);
-  return (withEvents.find((d) => d.date >= today) ?? withEvents[0])?.date ?? null;
-}
-
 const capitalize = (text: string) => text.charAt(0).toLocaleUpperCase() + text.slice(1);
 
 /** "Octubre 2026" */
@@ -179,74 +150,8 @@ export function formatDayLong(day: string, locale: string): string {
   );
 }
 
-/** "16:00" on the Madrid clock. */
-export function formatEventTime(instant: string, locale: string): string {
-  return new Intl.DateTimeFormat(intlLocale(locale), {
-    timeZone: TIME_ZONE,
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  }).format(new Date(instant));
-}
-
-export interface CalendarDayView extends Omit<CalendarDay, "events"> {
-  /** "Divendres 2 d'octubre" */
-  label: string;
-  events: CalendarEventView[];
-}
-
-/**
- * Everything the client calendar needs as plain strings. Dates are formatted
- * on the server only: Node and browser ICU can differ (apostrophes,
- * abbreviations), which would trigger a hydration mismatch if a client
- * component formatted them.
- */
-export interface CalendarView {
-  title: string;
-  weekdays: { short: string; long: string }[];
-  weeks: CalendarDayView[][];
-  /** Day the mobile panel opens on. */
-  defaultSelected: string | null;
-}
-
-export function buildCalendarView(
-  month: YearMonth,
-  events: CalendarEvent[],
-  today: string,
-  locale: string
-): CalendarView {
-  const weeks = buildMonthGrid(month, events, today);
-  return {
-    title: formatMonthTitle(month, locale),
-    weekdays: weekdayLabels(locale),
-    defaultSelected: defaultSelectedDay(weeks, today),
-    weeks: weeks.map((week) =>
-      week.map((day) => ({
-        ...day,
-        label: formatDayLong(day.date, locale),
-        events: day.events.map((event) => ({ ...event, time: formatEventTime(event.startsAt, locale) })),
-      }))
-    ),
-  };
-}
-
 /** A month reachable from the current one (its key and formatted title), or null at the range limit. */
 export interface CalendarNeighbour {
   key: string;
   title: string;
-}
-
-/**
- * One month of the member calendar as plain data: header, neighbours for the
- * navigation and either the grid or the reason Ludoya could not be read. The
- * server builds it (for the first render and for `/api/profile/calendar`) so the
- * client never formats dates.
- */
-export interface CalendarPayload {
-  monthKey: string;
-  title: string;
-  prev: CalendarNeighbour | null;
-  next: CalendarNeighbour | null;
-  view: CalendarView | null;
-  error?: "api_error" | "timeout";
 }

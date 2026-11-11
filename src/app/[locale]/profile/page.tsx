@@ -12,10 +12,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import HomeHero from "@/components/profile/HomeHero";
 import ProfileChecklist from "@/components/profile/ProfileChecklist";
 import BadgesSection from "@/components/profile/BadgesSection";
-import SessionsSection from "@/components/profile/SessionsSection";
-import CalendarSection from "@/components/profile/CalendarSection";
 import BenefitsCard from "@/components/profile/BenefitsCard";
-import { parseMonthParam } from "@/lib/events/month-grid";
 
 export const revalidate = false;
 
@@ -42,14 +39,10 @@ export async function generateMetadata({
 
 export default async function ProfilePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ month?: string | string[] }>;
 }) {
   const { locale } = await params;
-  // `?month=YYYY-MM` picks the calendar month; invalid or out-of-range values fall back to the current one.
-  const month = parseMonthParam((await searchParams).month, new Date());
 
   // Auth protection is handled by middleware (PROTECTED_ROUTES).
   // Do NOT redirect to /login here — it creates a loop when the middleware
@@ -103,8 +96,6 @@ export default async function ProfilePage({
                 />
               </div>
               <BenefitsCard benefits={benefits} />
-              <SessionsSection />
-              <CalendarSection month={month} />
             </div>
           </div>
         </>

@@ -53,46 +53,17 @@ test.describe('Member home (/profile)', () => {
     await expect(page.getByText('Descarregar les meves dades')).toHaveCount(0)
   })
 
+  test('has no sessions or calendar sections (they live on /events)', async ({ memberPage: page }) => {
+    await page.goto(PAGES.profile)
+    await expect(page.getByRole('heading', { name: 'Les teves insígnies' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Properes sessions' })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: /Calendari/ })).toHaveCount(0)
+  })
+
   test('tabs navigate to the profile details page', async ({ memberPage: page }) => {
     await page.goto(PAGES.profile)
     await page.getByRole('navigation', { name: 'Zona de socis' }).getByRole('link', { name: 'Perfil' }).click()
     await expect(page).toHaveURL(/\/profile\/details$/)
-  })
-})
-
-// The E2E server runs with LUDOYA_MOCK=1 (public/mock/ludoya/v1 fixtures). Their
-// dates are fixed, so the week window shows sessions only around the fixture
-// dates and the empty state afterwards: the tests accept both and check the rest.
-test.describe('Member home sessions', () => {
-  test('renders the sessions card in the page shell', async ({ memberPage: page }) => {
-    await page.goto(PAGES.profile)
-    const card = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Properes sessions' }) })
-    await expect(card).toBeVisible()
-    await expect(card.getByText('Aquesta setmana')).toBeVisible()
-    await expect(card.getByRole('link', { name: /Tots els esdeveniments/ })).toHaveAttribute('href', '/events')
-    // Once streamed in, the skeleton is gone.
-    await expect(card.getByRole('status').filter({ hasText: 'Carregant' })).toHaveCount(0)
-  })
-
-  test('lists sessions with an accessible accordion, or the empty state', async ({ memberPage: page }) => {
-    await page.goto(PAGES.profile)
-    const card = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Properes sessions' }) })
-    const toggles = card.getByRole('button', { name: /Veure partides/ })
-    await expect(toggles.first().or(card.getByText('Encara no hi ha partides programades'))).toBeVisible()
-    if ((await toggles.count()) === 0) return
-
-    const toggle = toggles.first()
-    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
-    await toggle.click()
-    await expect(card.getByRole('button', { name: /Amaga/ }).first()).toHaveAttribute('aria-expanded', 'true')
-    const panelId = await card.getByRole('button', { name: /Amaga/ }).first().getAttribute('aria-controls')
-    const panel = page.locator(`[id="${panelId}"]`)
-    await expect(panel).toBeVisible()
-    await expect(panel.getByText('Proposa una partida')).toBeVisible()
-    for (const link of await panel.getByRole('link').all()) {
-      await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-      await expect(link).toHaveAttribute('target', '_blank')
-    }
   })
 })
 
@@ -110,92 +81,6 @@ test.describe('Member home on mobile', () => {
     await next.click()
     await expect(region.getByRole('button', { name: /Insígnia 2:/ })).toHaveAttribute('aria-current', 'true')
     await expect(prev).toBeEnabled()
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
-    expect(overflow).toBeLessThanOrEqual(0)
-  })
-})
-
-// Month calendar. Fixture events sit in October and November 2026, so the tests
-// open `?month=2026-10` and accept a fallback to the current month once the
-// browsable range (3 months back, 6 forward) no longer reaches it.
-test.describe('Member home calendar', () => {
-
-  test('shows the current month with accessible navigation', async ({ memberPage: page }) => {
-    await page.goto(PAGES.profile)
-    const nav = page.getByRole('navigation', { name: 'Navegació del calendari' })
-    await expect(nav).toBeVisible()
-    await expect(nav.getByRole('button', { name: /^Mes anterior: / })).toBeVisible()
-    await expect(nav.getByRole('button', { name: /^Mes següent: / })).toBeVisible()
-    await expect(page.getByRole('table', { name: /^Calendari de / })).toHaveCount(1)
-  })
-
-  test('navigates to another month through the URL and back', async ({ memberPage: page }) => {
-    await page.goto(`${PAGES.profile}?month=2026-10`)
-    const heading = page.getByRole('heading', { name: /Calendari/ })
-    test.skip(
-      !(await heading.textContent())?.includes('Octubre 2026'),
-      'October 2026 is out of the browsable range: the page fell back to the current month',
-    )
-    const table = page.getByRole('table', { name: 'Calendari de Octubre 2026' })
-    await expect(table).toBeVisible()
-    await expect(table.getByRole('columnheader')).toHaveText(['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg'])
-    const pills = table.getByRole('link', { name: /Obre a Ludoya/ })
-    expect(await pills.count()).toBeGreaterThan(0)
-    await expect(pills.first()).toHaveAttribute('target', '_blank')
-    await expect(pills.first()).toHaveAttribute('rel', 'noopener noreferrer')
-
-    // Months load from the calendar route, not through a page navigation.
-    const monthResponse = page.waitForResponse((r) => r.url().includes('/api/profile/calendar?month=2026-11'))
-    await page.getByRole('button', { name: /^Mes següent: Novembre 2026/ }).click()
-    expect((await monthResponse).status()).toBe(200)
-    // The current month is the bare /profile, so ?month is dropped when November 2026 is today's month.
-    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit' })
-      .format(new Date())
-      .slice(0, 7)
-    if (today === '2026-11') await expect(page).toHaveURL(/\/profile$/)
-    else await expect(page).toHaveURL(/month=2026-11/)
-    await expect(page.getByRole('table', { name: 'Calendari de Novembre 2026' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: /Calendari/ })).toContainText('Novembre 2026')
-  })
-
-  test('keeps the arrows focusable at the end of the range', async ({ memberPage: page }) => {
-    await page.goto(PAGES.profile)
-    const prev = page.getByRole('navigation', { name: 'Navegació del calendari' }).getByRole('button').first()
-    // 3 months back at most: go there, then the arrow becomes aria-disabled but keeps focus.
-    for (let i = 0; i < 3; i++) {
-      const loaded = page.waitForResponse((r) => r.url().includes('/api/profile/calendar'))
-      await prev.click()
-      await loaded
-      await expect(prev).toHaveAttribute('aria-label', i < 2 ? /^Mes anterior: / : /^Mes anterior no disponible$/)
-    }
-    await expect(prev).toHaveAttribute('aria-disabled', 'true')
-    await expect(prev).toBeFocused()
-  })
-
-  test('an invalid month falls back to the current one', async ({ memberPage: page }) => {
-    await page.goto(`${PAGES.profile}?month=abc`)
-    await expect(page.getByRole('table', { name: /^Calendari de / })).toBeVisible()
-    await page.goto(`${PAGES.profile}?month=1999-01`)
-    await expect(page.getByRole('table', { name: /^Calendari de / })).toBeVisible()
-  })
-})
-
-test.describe('Member home calendar on mobile', () => {
-  test.use({ viewport: { width: 375, height: 812 } })
-
-  test('day buttons are 44 px and select a day into the detail panel', async ({ memberPage: page }) => {
-    await page.goto(`${PAGES.profile}?month=2026-10`)
-    const heading = page.getByRole('heading', { name: /Calendari/ })
-    if (!(await heading.textContent())?.includes('Octubre 2026')) return
-    const days = page.getByRole('button', { name: /esdeveniment/ })
-    await expect(days.first()).toBeVisible()
-    const box = await days.first().boundingBox()
-    expect(box!.height).toBeGreaterThanOrEqual(44)
-    expect(box!.width).toBeGreaterThanOrEqual(44)
-    await days.first().click()
-    await expect(days.first()).toHaveAttribute('aria-pressed', 'true')
-    const panel = page.getByRole('status', { name: 'Esdeveniments del dia seleccionat' })
-    await expect(panel.getByRole('link', { name: /Obre a Ludoya/ })).toHaveAttribute('target', '_blank')
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
     expect(overflow).toBeLessThanOrEqual(0)
   })
