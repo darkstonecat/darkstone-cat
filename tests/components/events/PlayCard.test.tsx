@@ -93,7 +93,6 @@ describe('PlayCard', () => {
     const cover = document.querySelector('img')!
     expect(cover).toHaveAttribute('src', 'https://img.test/emberleaf.jpg')
     expect(cover).toHaveAttribute('data-quality', '60')
-    expect(screen.getByText('status_last')).toBeInTheDocument()
 
     const link = screen.getByRole('link', { name: /join/ })
     expect(link).toHaveAttribute('href', 'https://ludoya.test/events/p1')
@@ -104,22 +103,33 @@ describe('PlayCard', () => {
   it('offers the queue when the play is full', () => {
     render(<PlayCard play={play({ participantCount: 4, capacity: 4 })} time="18:00" />)
 
-    expect(screen.getByText('status_full')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /queue/ })).toBeInTheDocument()
   })
 
-  it('says how many people are still needed before the free seats', () => {
-    render(<PlayCard play={play({ participantCount: 1, capacity: 6, minParticipants: 3 })} time="18:00" />)
+  it('writes no status text under the cover, the seat pill already shows it', () => {
+    const { rerender } = render(<PlayCard play={play({ participantCount: 1, capacity: 6, minParticipants: 3 })} time="18:00" />)
+    expect(screen.queryByText(/^status_/)).toBeNull()
 
-    expect(screen.getByText('status_needed(2)')).toBeInTheDocument()
+    for (const p of [
+      play({ participantCount: 1, capacity: 4 }),
+      play({ participantCount: 3, capacity: 4 }),
+      play({ participantCount: 4, capacity: 4 }),
+      play({ participantCount: 1, capacity: null }),
+    ]) {
+      rerender(<PlayCard play={p} time="18:00" />)
+      expect(screen.queryByText(/^status_/)).toBeNull()
+    }
   })
 
-  it('lists free seats and the no-limit case', () => {
-    const { rerender } = render(<PlayCard play={play({ participantCount: 1, capacity: 4 })} time="18:00" />)
-    expect(screen.getByText('status_free(3)')).toBeInTheDocument()
+  it('opens the play on Ludoya from the cover, like the sign-up button', () => {
+    const { container } = render(<PlayCard play={play()} time="18:00" />)
 
-    rerender(<PlayCard play={play({ participantCount: 1, capacity: null })} time="18:00" />)
-    expect(screen.getByText('status_unlimited')).toBeInTheDocument()
+    const cover = container.querySelector('a[data-play-cover]')!
+    expect(cover).toHaveAttribute('href', 'https://ludoya.test/events/p1')
+    expect(cover).toHaveAttribute('target', '_blank')
+    expect(cover).toHaveAttribute('rel', 'noopener noreferrer')
+    // The button is the keyboard target; the cover is a mouse and touch shortcut.
+    expect(cover).toHaveAttribute('tabindex', '-1')
   })
 
   it('draws a placeholder when the play has no cover', () => {

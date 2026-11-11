@@ -8,23 +8,26 @@ import SeatPill from "./SeatPill";
 
 /**
  * One play of a session: 3:4 cover with the seat pill on top and the time and
- * game on a dark strip, then the status line and the Ludoya sign-up link.
+ * game on a dark strip, then the Ludoya sign-up link. The pill already shows the
+ * seats, so there is no status text. The cover opens the same Ludoya link; it is
+ * out of the tab order because the button right below is the keyboard target.
  * `time` comes formatted from the server (Node and browser ICU can differ).
  * `dark` switches the text and button colours for a dark background.
  */
 export default function PlayCard({ play, time, dark = false }: { play: AgendaPlay; time: string; dark?: boolean }) {
-  const tSeats = useTranslations("events.seats");
   const tPlay = useTranslations("events.play");
-  const { status, full } = seatCounter(play, CHAIRS_MAX_DESKTOP);
-
-  const statusText =
-    status.kind === "needed" || status.kind === "free"
-      ? tSeats(`status_${status.kind}`, { count: status.count })
-      : tSeats(`status_${status.kind}`);
+  const { full } = seatCounter(play, CHAIRS_MAX_DESKTOP);
 
   return (
     <li className="flex flex-col gap-2">
-      <div className="relative aspect-[3/4] overflow-hidden rounded-[14px] bg-stone-custom">
+      <a
+        href={play.ludoyaUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        tabIndex={-1}
+        data-play-cover
+        className="group relative block aspect-[3/4] overflow-hidden rounded-[14px] bg-stone-custom"
+      >
         {play.coverUrl ? (
           <Image
             src={play.coverUrl}
@@ -32,7 +35,7 @@ export default function PlayCard({ play, time, dark = false }: { play: AgendaPla
             fill
             quality={60}
             sizes="(min-width: 768px) 200px, 45vw"
-            className="object-cover"
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
           />
         ) : (
           <span data-cover-placeholder aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-stone-white-base/50">
@@ -44,15 +47,7 @@ export default function PlayCard({ play, time, dark = false }: { play: AgendaPla
           <span className="text-[11px] font-bold text-brand-orange-light">{time}</span>
           <span className="text-sm leading-tight font-extrabold">{play.gameName}</span>
         </div>
-      </div>
-      <span
-        className={cn(
-          "text-xs font-bold",
-          dark
-            ? full ? "text-stone-white-base" : "text-brand-orange-light"
-            : full ? "text-stone-600" : "text-brand-orange-text"
-        )}
-      >{statusText}</span>
+      </a>
       <a
         href={play.ludoyaUrl}
         target="_blank"

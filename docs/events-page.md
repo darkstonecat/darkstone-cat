@@ -65,7 +65,7 @@ A light pill at the top of the 3:4 cover, always on one line, with `X/N` on the 
 | > 20 | Continuous bar. |
 | No capacity | People icon and "N apuntats". |
 
-Status line under the cover, by priority: "Completa", "Falta 1 / Falten N per començar", "Queda 1 plaça", "Queden N places", "Sense límit de places". The pill is `role="img"` with a label such as "3 de 4 places ocupades, en falta 1 per començar". Edge cases: a capacity ≤ 0 counts as no limit, needed seats never exceed free seats, an over-booked play is full.
+There is no status text under the cover (the pill already shows the seats); a full play only changes the button to "A la cua". The pill is `role="img"` with a label such as "3 de 4 places ocupades, en falta 1 per començar". Edge cases: a capacity ≤ 0 counts as no limit, needed seats never exceed free seats, an over-booked play is full.
 
 ### Calendar
 

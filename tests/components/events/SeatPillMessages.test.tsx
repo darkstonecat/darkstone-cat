@@ -47,19 +47,18 @@ describe('seat texts with the real messages', () => {
   })
 
   it.each([
-    ['ca', 'Falta 1 per començar', 'Apunta’t'],
-    ['es', 'Falta 1 para empezar', 'Apúntate'],
-    ['en', '1 more needed to start', 'Sign up'],
-  ] as const)('writes the status line and button in %s', (locale, status, join) => {
+    ['ca', 'Apunta’t'],
+    ['es', 'Apúntate'],
+    ['en', 'Sign up'],
+  ] as const)('writes the button in %s', (locale, join) => {
     renderIn(locale, <PlayCard play={play()} time="18:00" />)
 
-    expect(screen.getByText(status)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: new RegExp(join) })).toBeInTheDocument()
   })
 
-  it('uses the plural forms of every status in Catalan', () => {
+  it('switches to the queue when full and labels an unlimited play in Catalan', () => {
     const { rerender } = renderIn('ca', <PlayCard play={play({ participantCount: 1, minParticipants: 3 })} time="18:00" />)
-    expect(screen.getByText('Falten 2 per començar')).toBeInTheDocument()
+    expect(screen.queryByText('Falten 2 per començar')).toBeNull()
 
     const again = (p: AgendaPlay) =>
       rerender(
@@ -68,12 +67,12 @@ describe('seat texts with the real messages', () => {
         </NextIntlClientProvider>
       )
     again(play({ participantCount: 1, minParticipants: null }))
-    expect(screen.getByText('Queden 3 places')).toBeInTheDocument()
+    expect(screen.queryByText('Queden 3 places')).toBeNull()
     again(play({ participantCount: 4, minParticipants: null }))
-    expect(screen.getByText('Completa')).toBeInTheDocument()
+    expect(screen.queryByText('Completa')).toBeNull()
     expect(screen.getByRole('link', { name: /A la cua/ })).toBeInTheDocument()
     again(play({ participantCount: 1, capacity: null, minParticipants: null }))
-    expect(screen.getByText('Sense límit de places')).toBeInTheDocument()
+    expect(screen.queryByText('Sense límit de places')).toBeNull()
     expect(screen.getByRole('img', { name: '1 persona apuntada, sense límit' })).toHaveTextContent('1 apuntat')
   })
 })
