@@ -220,15 +220,6 @@ export const collaborators: Collaborator[] = [
     brandColor: "#000000",
   },
   {
-    id: "trollcave",
-    name: "Trollcave",
-    slug: "trollcave",
-    category: "shops",
-    logo: "/images/logos/collaborators/botigues/logo_trollcave.webp",
-    url: "https://www.troll-cave.com/",
-    brandColor: "#000000",
-  },
-  {
     id: "nikochan",
     name: "Nikochan",
     slug: "nikochan",

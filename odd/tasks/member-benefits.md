@@ -1,0 +1,33 @@
+# Member benefits managed by the board
+
+Objective: a board-managed list of member benefits (first one: Outlet Games, code `DARKSTONE`), shown only to signed-in active members in their profile, and Trollcave removed from the site.
+Branch: `feat/member-benefits` (from `develop`). Delivery: `ask-on-risk`, `feature-branch-chain` (same as the badge catalogue): one work-unit commit per task on this branch, merged into `develop` when done. Test runner: Vitest (`npm run test:unit`, `npm run test:integration` with local Supabase), Playwright for UI.
+
+## Specs
+
+- **S1 Remove Trollcave.** User: "\"Troll Cave\" se debe eliminar." Remove it from the collaborators (home and `/about`), its descriptions in ca/es/en and its logo. The Ludoya mock location "Troll Cave Terrassa" stays (it mirrors real Ludoya data).
+- **S2 Discount point on `/about`.** User: "Se puede reaprovechar para decir que tenemos un descuento con la tienda OUTLET GAMES, sin determinar el porcentage, solo mencionandolo" and "Outlet games no es una tienda fisica, por lo que no es enseñando el carnet, es con un código descuento que deberiamos poner en el perfil y solo lo damos allí." `why_join_point_3` mentions a discount at Outlet Games with a members-only code found in the member area; no percentage, no code, no "show the card".
+- **S3 Benefits table.** User: "Editable desde una vista de admin en la DB, posible tabla beneficios por ser socio, por ahora solo este con el código DARKSTONE." Table `public.member_benefits`: `id` (uuid), `name` and `description` (`{ca, es?, en?}`, `ca` required, others fall back to `ca`), `discount_code` (optional), `url` (shop link, `https://`), `collaborator_id` (logo, see S5), `sort_order`, `archived_at`/`archived_by`, `created_by`, `created_at`, `updated_at`. Seeded with Outlet Games, code `DARKSTONE`, `https://outletgames.es`. Only ACTIVE members read non-archived rows; API roles cannot write it.
+- **S4 Board functions.** SECURITY DEFINER `admin_*` functions with the session client, one audit entry per change (`benefit.create`, `benefit.update`, `benefit.archive`, `benefit.restore`, details hold the Catalan name): list, create, update, archive, restore. Assumption: no hard delete (archive is enough for one or two rows).
+- **S5 Image.** User chose "Pick a collaborator logo": the board picks one of the collaborators of `src/data/collaborators.ts`; the benefit shows its logo. An unknown id shows no image.
+- **S6 Profile card.** User: "En el perfil podria haber una tarjeta nueva de Benificios por ser socios con estas entradas, ahora con la de outlet games, código descuento, link a la tienda, imagen de esta." A card "Beneficis per ser soci" in `/profile/details` lists each benefit: logo, name, description, discount code (copyable), link to the shop. Rendered on the server; the code never appears in `src/messages`, public pages or the client bundle. No benefits → no card.
+- **S7 Admin view.** A tab "Beneficis" (`/admin/benefits`, board) with the list (active and archived), create, edit (language tabs ca/es/en, code, URL, logo picker, order) and archive/restore in `AdminDialog`. Activity log renders `benefit.*`. All copy in ca/es/en; `noindex`, not in the sitemap.
+
+## Tasks
+
+| ID | Specs | Route | Status | Commit |
+|---|---|---|---|---|
+| T1 | S1 | inline | pending | |
+| T2 | S3, S4 | inline (Risk: item 2, RLS and grants) | pending | |
+| T3 | S2, S5, S6 | inline | pending | |
+| T4 | S4, S5, S7 | inline | pending | |
+| T5 | all | inline (docs CLAUDE.md, README, E2E) | pending | |
+
+## Log
+
+- L1 (2026-11-11, user): "En la vista home en la sección collaboratos o desde la vista about se debe eleiminar una de las tiendas. \"Troll Cave\" se debe eliminar. Analiza como funciona y como limpiarlo limpiamente"
+- L2 (2026-11-11, user): "Se puede reaprovechar para decir que tenemos un descuento con la tienda OUTLET GAMES, sin determinar el porcentage, solo mencionandolo"
+- L3 (2026-11-11, user): "Outlet games no es una tienda fisica, por lo que no es enseñando el carnet, es con un código descuento que deberiamos poner en el perfil y solo lo damos allí."
+- L4 (2026-11-11, user, code source): "Editable desde una vista de admin en la DB, posible tabla beneficios por ser socio, por ahora solo este con el código DARKSTONE. En el perfil podria haber una tarjeta nueva de Benificios por ser socios con estas entradas, ahora con la de outlet games, código descuento, link a la tienda, imagen de esta."
+- L5 (2026-11-11, user, image): "Pick a collaborator logo (Recommended)".
+- L6: production runs without `NEXT_PUBLIC_MEMBER_AREA_PUBLIC`, so most members cannot reach the profile yet; the migration needs the user's go-ahead before production.
