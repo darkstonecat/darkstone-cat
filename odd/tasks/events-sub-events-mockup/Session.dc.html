@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>Sessions setmanals</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1C1917}
+a{color:#A04500}a:hover{color:#1C1917}
+</style>
+</helmet>
+<div style="width: 980px; box-sizing: border-box; padding: 40px 30px 60px; background: #EEE8DC; display: flex; flex-direction: column; gap: 22px">
+  <div style="display: flex; flex-direction: column; gap: 4px">
+    <span style="font-size: 12px; font-weight: 800; color: #A04500; text-transform: uppercase">Exemple il·lustratiu · jocs inventats</span>
+    <span style="font-size: 14px; color: #57534E">Mateixes variants a les sessions. Llindar actual: {{threshold}} elements (Tweaks).</span>
+  </div>
+  <sc-for list="{{sessions}}" as="ev" hint-placeholder-count="2">
+    <div style="display: flex; gap: 20px; align-items: flex-start">
+      <div style="width: 64px; height: 64px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 16px; background: #1C1917; color: #FAFAF9">
+        <span style="font-size: 11px; font-weight: 700">{{ev.wd}}</span><span style="font-size: 24px; font-weight: 800; line-height: 1">{{ev.d}}</span>
+      </div>
+      <article style="flex: 1; min-width: 0; border-radius: 22px; overflow: hidden; background: #FFFFFF">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 20px 22px">
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <h3 style="margin: 0; font-size: 22px; font-weight: 800">{{ev.title}}</h3>
+            <span style="font-size: 15px; color: #57534E">{{ev.when}}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px">
+            <span style="display: flex; flex-direction: column; font-size: 14px"><strong>{{ev.summary}}</strong><span style="font-weight: 700; color: #A04500">{{ev.free}}</span></span>
+            <button type="button" style="min-height: 44px; width: 150px; border-radius: 12px; border: 1px solid #D6D3D1; background: #FFFFFF; color: #1C1917; font-size: 14px; font-weight: 700; font-family: inherit">Amaga ⌃</button>
+          </div>
+        </div>
+        <div style="border-top: 1px solid #E7E5E4; padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 16px">
+          <span style="font-size: 12px; font-weight: 700; color: #57534E">{{ev.mode}}</span>
+          <sc-for list="{{ev.groups}}" as="g" hint-placeholder-count="1">
+            <div style="display: flex; gap: 16px; align-items: flex-start">
+              <sc-if value="{{g.time}}" hint-placeholder-val="{{false}}">
+                <span style="width: 58px; flex-shrink: 0; padding-top: 4px; font-size: 20px; font-weight: 800; color: #A04500">{{g.time}}</span>
+              </sc-if>
+              <ul style="flex: 1; min-width: 0; margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+                <sc-for list="{{g.items}}" as="it" hint-placeholder-count="4">
+                  <li style="display: flex; flex-direction: column; gap: 8px">
+                    <div style="position: relative; aspect-ratio: 3 / 4; border-radius: 14px; overflow: hidden; background: {{it.bg}}">
+                      <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 800; color: rgba(255,255,255,.22)">{{it.initials}}</span>
+                      <div style="position: absolute; top: 8px; left: 8px; right: 8px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start">
+                        <sc-if value="{{it.count}}" hint-placeholder-val="{{true}}">
+                          <div style="align-self: stretch; display: flex; align-items: center; gap: 6px; border-radius: 12px; background: rgba(250,250,249,.96); padding: 5px 8px; color: #1C1917; box-shadow: 0 1px 3px rgba(28,25,23,.25)">
+                            <span style="flex: 1; display: flex; gap: 2px"><sc-for list="{{it.segs}}" as="s" hint-placeholder-count="5"><span style="flex: 1; height: 10px; border-radius: 2px; background: {{s.bg}}"></span></sc-for></span>
+                            <strong style="font-size: 14px">{{it.count}}</strong>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{it.badge}}" hint-placeholder-val="{{false}}">
+                          <span style="border-radius: 999px; background: {{it.badgeBg}}; color: #FFFFFF; padding: 4px 9px; font-size: 11px; font-weight: 800">{{it.badge}}</span>
+                        </sc-if>
+                      </div>
+                      <div style="position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 3px; padding: 10px; background: rgba(28,25,23,.82); color: #FAFAF9">
+                        <span style="font-size: 11px; font-weight: 700; color: #E07A2E">{{it.time}}</span>
+                        <span style="font-size: 14px; font-weight: 800; line-height: 1.15">{{it.title}}</span>
+                      </div>
+                    </div>
+                    <a href="#" style="{{it.btnStyle}}">{{it.cta}} ↗</a>
+                  </li>
+                </sc-for>
+              </ul>
+            </div>
+          </sc-for>
+        </div>
+      </article>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"threshold":{"editor":"int","default":8,"min":2,"max":20},"$preview":{"width":980,"height":1900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var threshold = this.props.threshold ?? 8;
+    var palette = ['#5B3A29','#2F4858','#4A5D23','#6D2E46','#3D3B6B','#7A4B12','#1F5F5B','#5E3F6E','#7B2D26','#35524A'];
+    var k = 0;
+    var initials = function (t) { return t.split(/[\s:]+/).filter(function (w) { return w.length > 2; }).slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase(); };
+    var mk = function (kind, title, start, end, cap, part, format) {
+      var isT = kind === 't', isA = kind === 'a';
+      var segs = []; for (var i = 0; i < Math.min(cap || 0, 12); i++) segs.push({ bg: i < part ? '#1C1917' : '#BDB7B0' });
+      return { start: start, title: title, time: start + ' – ' + end, bg: palette[(k++) % palette.length], initials: initials(title),
+        count: isA ? '' : part + '/' + cap, segs: segs,
+        badge: isT ? 'Torneig · ' + format : (isA ? 'Activitat' : ''), badgeBg: isT ? '#B54F00' : '#57534E',
+        cta: isA ? 'Més info' : (isT ? 'Inscriu-t’hi' : 'Apunta’t'),
+        btnStyle: 'display:flex;min-height:44px;align-items:center;justify-content:center;border-radius:12px;font-size:13px;font-weight:700;text-decoration:none;' + (isA ? 'border:1px solid #A8A29E;color:#1C1917;' : 'background:#1C1917;color:#FFFFFF;') };
+    };
+    var build = function (items) {
+      if (items.length <= threshold) return { mode: items.length + ' elements · fins al llindar: quadrícula ordenada per hora', groups: [{ time: '', items: items }] };
+      var by = {}; var order = [];
+      items.forEach(function (it) { if (!by[it.start]) { by[it.start] = []; order.push(it.start); } by[it.start].push(it); });
+      return { mode: items.length + ' elements · per sobre del llindar: franges per hora d’inici', groups: order.map(function (t) { return { time: t, items: by[t] }; }) };
+    };
+    var a = [
+      mk('p', 'Joc de cartes A', '16:00', '18:00', 4, 2),
+      mk('p', 'Joc d’estratègia B', '16:15', '19:30', 4, 3),
+      mk('t', 'Torneig de joc C', '17:00', '20:30', 8, 5, 'Eliminació directa'),
+      mk('p', 'Joc familiar D', '18:00', '19:00', 6, 1)
+    ];
+    var b = [
+      mk('p', 'Joc A', '16:00', '18:00', 4, 4), mk('p', 'Joc B', '16:00', '19:00', 5, 2), mk('p', 'Joc C', '16:00', '17:30', 4, 1),
+      mk('t', 'Torneig de joc D', '17:00', '20:30', 16, 9, 'Sistema suís'),
+      mk('p', 'Joc E', '17:30', '19:30', 3, 0), mk('p', 'Joc F', '17:30', '20:00', 6, 3),
+      mk('a', 'Taller per aprendre a jugar', '18:00', '19:00'),
+      mk('p', 'Joc G', '19:00', '20:30', 4, 2), mk('p', 'Joc H', '19:00', '20:30', 4, 0), mk('p', 'Joc I', '19:00', '20:00', 2, 1)
+    ];
+    var sa = build(a), sb = build(b);
+    return {
+      threshold: threshold,
+      sessions: [
+        { wd: 'DV', d: '4', title: 'Sessió de jocs', when: 'Divendres 4 de desembre · 16:00 – 20:30', summary: '4 elements', free: '7 places lliures', mode: sa.mode, groups: sa.groups },
+        { wd: 'DS', d: '12', title: 'Sessió de jocs', when: 'Dissabte 12 de desembre · 16:00 – 20:30', summary: '10 elements', free: '21 places lliures', mode: sb.mode, groups: sb.groups }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

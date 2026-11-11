@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>Variants i regles</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1C1917}
+a{color:#A04500}a:hover{color:#1C1917}
+td,th{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid #D6D3D1;font-size:13px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#57534E}
+</style>
+</helmet>
+<div style="width: 1100px; height: 1500px; box-sizing: border-box; padding: 40px; background: #EEE8DC; display: flex; flex-direction: column; gap: 28px">
+  <h2 style="margin: 0; font-size: 28px; font-weight: 800">Variants de targeta <span style="font-size: 16px; font-weight: 600; color: #57534E">· per a totes les sessions i especials</span></h2>
+
+  <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; padding: 22px; border-radius: 22px; background: #1C1917; color: #FAFAF9">
+    <sc-for list="{{cards}}" as="c" hint-placeholder-count="5">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 11px; font-weight: 800; color: #E07A2E; text-transform: uppercase">{{c.label}}</span>
+        <div style="position: relative; aspect-ratio: 3 / 4; border-radius: 14px; overflow: hidden; background: {{c.bg}}">
+          <sc-if value="{{c.placeholder}}" hint-placeholder-val="{{false}}">
+            <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: rgba(214,211,209,.55)">
+              <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="3"></rect><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"></circle><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"></circle><circle cx="12" cy="12" r="1.2" fill="currentColor"></circle></svg>
+              <span style="font-size: 11px; font-weight: 700">Sense portada</span>
+            </div>
+          </sc-if>
+          <div style="position: absolute; top: 8px; left: 8px; right: 8px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start">
+            <sc-if value="{{c.pill}}" hint-placeholder-val="{{true}}">
+              <div style="align-self: stretch; display: flex; align-items: center; justify-content: space-between; gap: 6px; border-radius: 12px; background: rgba(250,250,249,.96); padding: 5px 8px; color: #1C1917">
+                <span style="flex: 1; height: 10px; border-radius: 999px; background: #BDB7B0"></span>
+                <strong style="font-size: 14px">{{c.pill}}</strong>
+              </div>
+            </sc-if>
+            <sc-if value="{{c.badge}}" hint-placeholder-val="{{false}}">
+              <span style="border-radius: 999px; background: {{c.badgeBg}}; color: {{c.badgeFg}}; padding: 4px 9px; font-size: 11px; font-weight: 800">{{c.badge}}</span>
+            </sc-if>
+          </div>
+          <div style="position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 3px; padding: 10px; background: rgba(28,25,23,.82)">
+            <span style="font-size: 11px; font-weight: 700; color: #E07A2E">{{c.time}}</span>
+            <span style="font-size: 14px; font-weight: 800">{{c.title}}</span>
+            <span style="font-size: 11px; color: #D6D3D1">{{c.sub}}</span>
+          </div>
+        </div>
+        <span style="display: flex; min-height: 44px; align-items: center; justify-content: center; border-radius: 12px; font-size: 13px; font-weight: 700; border: 1px solid #57534E">{{c.cta}} ↗</span>
+        <span style="font-size: 12px; color: #D6D3D1; line-height: 1.4">{{c.note}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; gap: 28px">
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 10px">
+      <h3 style="margin: 0; font-size: 18px; font-weight: 800">Format de torneig → etiqueta</h3>
+      <table style="border-collapse: collapse; width: 100%">
+        <tr><th>Ludoya</th><th>ca</th><th>es</th><th>en</th></tr>
+        <tr><td>SWISS</td><td>Sistema suís</td><td>Sistema suizo</td><td>Swiss</td></tr>
+        <tr><td>SINGLE_ELIM</td><td>Eliminació directa</td><td>Eliminación directa</td><td>Single elimination</td></tr>
+        <tr><td>DOUBLE_ELIM</td><td>Doble eliminació</td><td>Doble eliminación</td><td>Double elimination</td></tr>
+        <tr><td>TABLE_KNOCKOUT</td><td>Eliminatòria per taules</td><td>Eliminatoria por mesas</td><td>Table knockout</td></tr>
+        <tr><td>MIXER</td><td>Taules rotatives</td><td>Mesas rotativas</td><td>Mixer</td></tr>
+        <tr><td>(sense format)</td><td colspan="3">Només «Torneig»</td></tr>
+      </table>
+    </div>
+    <div style="flex: 1.3; display: flex; flex-direction: column; gap: 10px">
+      <h3 style="margin: 0; font-size: 18px; font-weight: 800">De Ludoya a la targeta</h3>
+      <table style="border-collapse: collapse; width: 100%">
+        <tr><th>Element</th><th>On va</th></tr>
+        <tr><td>PLANNED_PLAY (fill o nét)</td><td>Partida al dia i franja de <code>startsAt</code>; la zona pare (p. ex. «Partides de ROL») surt com a subtítol</td></tr>
+        <tr><td>TOURNAMENT (fill o nét)</td><td>Targeta de torneig amb insígnia «Torneig · format»; <code>LUDOYA_TICKETS</code> → botó «Entrada»</td></tr>
+        <tr><td>MEETUP amb fills</td><td>No és targeta: és una zona. Dona nom als seus fills (subtítol o grup de demos)</td></tr>
+        <tr><td>MEETUP sense fills i amb hora</td><td>Activitat (xerrada, Crokinole): imatge de l'esdeveniment, sense places</td></tr>
+        <tr><td>MEETUP sense fills, sempre obert, sense zona pare</td><td>Activitat al bloc «sempre obert», grup «Altres activitats» (p. ex. A Risk Cat)</td></tr>
+        <tr><td><code>alwaysOpen</code>, o dates que cobreixen tot l'esdeveniment</td><td>Bloc «Tot el cap de setmana · sempre obert», agrupat pel pare</td></tr>
+        <tr><td><code>draft</code>, <code>canceled</code>, no PUBLIC</td><td>Amagat, i tots els seus descendents també</td></tr>
+        <tr><td>Portada</td><td>BGG (nom + any) → <code>game.imageUrl</code> → <code>imageUrl</code> de l'esdeveniment → marcador «Sense portada»</td></tr>
+        <tr><td>Qualsevol esdeveniment (sessió o especial)</td><td>Les mateixes variants de targeta i les mateixes regles</td></tr>
+        <tr><td>Fins a 8 elements amb hora</td><td>La quadrícula d'avui, ordenada per hora</td></tr>
+        <tr><td>Més de 8 elements amb hora</td><td>Franges per hora d'inici</td></tr>
+        <tr><td>Esdeveniment de més d'un dia</td><td>Un desplegable per dia, tots oberts, amb el resum (partides · tornejos · activitats); es pot plegar</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1100,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      cards: [
+        { label: 'Partida', bg: '#2F4858', placeholder: false, pill: '2/5', badge: '', time: '16:00 – 20:00', title: 'Mundodisco', sub: 'Rol · Partides de ROL', cta: 'Apunta’t', note: 'La d’ara. Afegeix una línia amb la zona pare quan és una néta.' },
+        { label: 'Torneig', bg: '#7A4B12', placeholder: false, pill: '3/16', badge: 'Torneig · Sistema suís', badgeBg: '#B54F00', badgeFg: '#FFFFFF', time: '16:00 – 20:00', title: 'Torneig de Root', sub: 'Root', cta: 'Inscriu-t’hi', note: 'Insígnia taronja amb el format. «Entrada» si les places van amb entrada de Ludoya.' },
+        { label: 'Activitat', bg: '#6D2E46', placeholder: false, pill: '', badge: 'Activitat', badgeBg: '#44403C', badgeFg: '#FFFFFF', time: '18:00 – 20:00', title: 'Pòdcast en directe', sub: 'Xerrada', cta: 'Més info', note: 'MEETUP sense fills: imatge de l’esdeveniment, sense píndola de places.' },
+        { label: 'Sense portada', bg: '#1C1917', placeholder: true, pill: '0/5', badge: '', time: '10:00 – 15:00', title: 'Arun', sub: 'Rol · joc no vinculat', cta: 'Apunta’t', note: 'Sense BGG, joc ni imatge: el mateix marcador d’avui (dau).' },
+        { label: 'Demo (sempre obert)', bg: '#1F5F5B', placeholder: false, pill: '', badge: 'Sempre obert', badgeBg: '#FAFAF9', badgeFg: '#1C1917', time: 'Tot el cap de setmana', title: 'Alta Tensión', sub: 'Demostracions de 2tomatoes', cta: 'Veure a Ludoya', note: 'Al bloc final en tessel·la quadrada petita; aquí, en format gran per comparar.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
