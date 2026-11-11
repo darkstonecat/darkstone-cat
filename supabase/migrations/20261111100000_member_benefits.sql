@@ -85,7 +85,7 @@ CREATE INDEX member_benefits_sort_idx ON public.member_benefits (sort_order, cre
 INSERT INTO public.member_benefits (name, description, discount_code, url, collaborator_id, sort_order)
 VALUES (
   '{"ca": "Outlet Games", "es": "Outlet Games", "en": "Outlet Games"}',
-  '{"ca": "Descompte a la botiga online de jocs de taula amb el codi de soci.", "es": "Descuento en la tienda online de juegos de mesa con el código de socio.", "en": "Discount at the online board game shop with the member code."}',
+  '{"ca": "3% de descompte a la botiga online de jocs de taula amb el codi de soci.", "es": "3% de descuento en la tienda online de juegos de mesa con el código de socio.", "en": "3% off at the online board game shop with the member code."}',
   'DARKSTONE',
   'https://outletgames.es',
   'outlet-games',
