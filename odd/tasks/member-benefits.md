@@ -21,7 +21,8 @@ Branch: `feat/member-benefits` (from `develop`). Delivery: `ask-on-risk`, `featu
 | T2 | S3, S4 | inline (Risk: item 2, RLS and grants) | done (12 integration tests; RLS mutation check fails without `has_role`; integration suite 562) | 90d5b77 |
 | T3 | S2, S5, S6 | inline | done (RED then GREEN on `toBenefitViews`; card tests; unit 1962) | 3996864 |
 | T4 | S4, S5, S7 | inline | done (parsers, actions, page, list/dialog tests; unit 2004) | be9ed45 |
-| T5 | all | inline (docs CLAUDE.md, README, E2E) | done (E2E admin flow + profile card + code absent from public pages) | see Log |
+| T5 | all | inline (docs CLAUDE.md, README, E2E) | done (E2E admin flow + profile card + code absent from public pages) | 8985062 |
+| T6 | S2, S6 | inline (3% text, card moved to `/profile` above the sessions, full-width rows) | done (profile E2E 20, card tests) | 813b662, 335dcf8, 31c89ba, d875063 |
 
 ## Log
 
@@ -38,3 +39,4 @@ Branch: `feat/member-benefits` (from `develop`). Delivery: `ask-on-risk`, `featu
 - L11 (2026-11-11, user): "Verificado, todo ok. En profile, la card de beneficis debe estar justo encima de la de properes sessions". Card moved below the checklist and badges, above the sessions.
 - L12 (2026-11-11, user): "Si" (merge). feat/member-benefits fast-forwarded into develop at 31c89ba; not pushed. Production migration still pending.
 - L13 (2026-11-11, user): "Haz la migración a producción de la base de datos, pero no añadas los datos archivados que tenemos en local para pruebas, solo lo relativo a aoutletgames actual". Dry run listed only 20261111100000_member_benefits.sql; `supabase db push --linked` applied it. Read-only check on production: 1 row (Outlet Games, DARKSTONE, https://outletgames.es, outlet-games, 3% text), RLS on with the active-member policy, anon cannot select or call admin_list_benefits, service role cannot insert, migration recorded, audit CHECK keeps old actions plus benefit.*. Local test benefits were never pushed (db push only runs migration files).
+- L14 (2026-11-11, user): "En profile, la tarjeta de beneficios, cada subtarjeta de cada beneficio podria ocupar todo el ancho" (d875063), then "haz commit y push": develop pushed to origin at d875063. Feature closed: code on origin/develop, production database migrated; production deploy of the code pending (member area still hidden by NEXT_PUBLIC_MEMBER_AREA_PUBLIC).

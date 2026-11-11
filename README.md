@@ -52,7 +52,7 @@
 | `/register` | Registration form (direct URL only until the member area is public) |
 | `/forgot-password` | Password recovery |
 | `/reset-password` | Set new password (protected) |
-| `/profile` | "La meva zona": member home with checklist, badges and this week's sessions from Ludoya (protected) |
+| `/profile` | "La meva zona": member home with checklist, badges, member benefits and this week's sessions from Ludoya (protected) |
 | `/profile/details` | Profile details: hero, tabs and account (protected) |
 | `/profile/edit` | Profile edit form (protected) |
 | `/profile/card` | Member card with a real QR, image download (protected) |
