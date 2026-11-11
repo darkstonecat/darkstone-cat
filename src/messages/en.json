@@ -905,6 +905,15 @@
       }
     },
     "details": {
+      "benefits_title": "Member benefits",
+      "benefits_intro": "Perks for Darkstone members. Codes are for members only: please don't share them outside the association.",
+      "benefits_code_label": "Discount code",
+      "benefits_copy": "Copy",
+      "benefits_copy_label": "Copy the {name} code",
+      "benefits_copied": "Copied",
+      "benefits_copy_failed": "Couldn't copy. Select the code and copy it by hand.",
+      "benefits_visit": "Go to {name}",
+      "benefits_new_tab": "(opens in a new tab)",
       "gaming_title": "Where you play",
       "linked": "Linked",
       "not_linked": "Not linked",

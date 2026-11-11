@@ -905,6 +905,15 @@
       }
     },
     "details": {
+      "benefits_title": "Beneficios por ser socio",
+      "benefits_intro": "Ventajas para los socios de Darkstone. Los códigos son solo para socios: no los compartas fuera de la asociación.",
+      "benefits_code_label": "Código de descuento",
+      "benefits_copy": "Copiar",
+      "benefits_copy_label": "Copiar el código de {name}",
+      "benefits_copied": "Copiado",
+      "benefits_copy_failed": "No se ha podido copiar. Selecciona el código y cópialo a mano.",
+      "benefits_visit": "Ir a {name}",
+      "benefits_new_tab": "(se abre en una pestaña nueva)",
       "gaming_title": "Dónde juegas",
       "linked": "Vinculado",
       "not_linked": "Sin vincular",
