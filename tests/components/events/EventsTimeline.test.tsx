@@ -1,0 +1,297 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, within, fireEvent, act } from '@testing-library/react'
+
+// Messages come back as `key` or `key(values)`, so tests read the rule, not the copy.
+vi.mock('next-intl', () => ({
+  useTranslations: vi.fn(() => (key: string, values?: Record<string, unknown>) =>
+    values ? `${key}(${Object.values(values).join(',')})` : key
+  ),
+}))
+vi.mock('next/image', () => ({
+  default: (props: Record<string, unknown>) => {
+    const { quality, sizes, fill, ...rest } = props
+    return <img alt="" {...rest} />
+  },
+}))
+vi.mock('@/components/SmoothScroll', () => ({ useLenis: () => null }))
+vi.mock('@/i18n/routing', () => ({
+  Link: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => <a href={href} {...rest}>{children}</a>,
+}))
+
+import EventsTimeline from '@/components/events/EventsTimeline'
+import EventsHeader from '@/components/events/EventsHeader'
+import type { EventView, PlayView, WeekView } from '@/lib/events/agenda-format'
+
+const play = (over: Partial<PlayView> = {}): PlayView => ({
+  id: 'p1',
+  gameName: 'Emberleaf',
+  coverUrl: 'https://img.test/emberleaf.jpg',
+  startsAt: '2026-11-13T15:00:00Z',
+  endsAt: null,
+  place: null,
+  participantCount: 3,
+  capacity: 4,
+  minParticipants: null,
+  ludoyaUrl: 'https://ludoya.test/p1',
+  time: '16:00',
+  ...over,
+})
+
+const event = (over: Partial<EventView> = {}): EventView => ({
+  id: 'fri',
+  title: 'Divendres de jocs!',
+  description: '',
+  startsAt: '2026-11-13T15:00:00Z',
+  endsAt: '2026-11-13T19:30:00Z',
+  type: 'regular',
+  imageUrl: null,
+  ludoyaUrl: 'https://ludoya.test/fri',
+  place: null,
+  participantCount: 3,
+  capacity: null,
+  countdown: null,
+  plays: [play(), play({ id: 'p2', gameName: 'Signorie', participantCount: 2 })],
+  tile: { weekday: 'DV', day: '13' },
+  dates: 'Divendres 13 de novembre',
+  time: '16:00 – 20:30',
+  when: 'Divendres 13 de novembre · 16:00 – 20:30',
+  ...over,
+})
+
+const egara = event({
+  id: 'egara',
+  title: 'Egara Juga 2026',
+  type: 'special',
+  description: 'Programa complet',
+  participantCount: 21,
+  capacity: null,
+  countdown: { kind: 'days', days: 17 },
+  place: { name: 'Recinte Firal', address: 'Carrer Firal, 1' },
+  plays: [],
+  tile: { weekday: 'DS–DG', day: '28' },
+  dates: 'Ds., 28 – dg., 29 de novembre',
+  time: '10:00 – 17:00',
+})
+
+const week = (over: Partial<WeekView> = {}): WeekView => ({
+  start: '2026-11-09',
+  end: '2026-11-15',
+  isCurrent: true,
+  range: '9–15 de novembre',
+  title: { start: '9', end: '15 de novembre', startElided: 'no', endElided: 'no' },
+  events: [event()],
+  ...over,
+})
+
+const laterWeek = week({
+  start: '2026-11-23',
+  end: '2026-11-29',
+  isCurrent: false,
+  range: '23–29 de novembre',
+  title: { start: '23', end: '29 de novembre', startElided: 'no', endElided: 'no' },
+  events: [event({ id: 'fri27', plays: [] }), egara],
+})
+
+const weeks = () => [week(), laterWeek]
+
+const card = (id: string) => document.getElementById(`event-${id}`)!
+const toggle = (id: string) => card(id).querySelector<HTMLButtonElement>('button[aria-expanded]')!
+const panel = (id: string) => document.getElementById(`event-${id}-panel`)!
+
+beforeEach(() => {
+  Element.prototype.scrollIntoView = vi.fn()
+  window.history.replaceState(null, '', '/events')
+})
+afterEach(() => vi.restoreAllMocks())
+
+describe('EventsTimeline defaults', () => {
+  it("opens this week's sessions and every special, closes later sessions", () => {
+    render(<EventsTimeline weeks={weeks()} />)
+
+    expect(toggle('fri')).toHaveAttribute('aria-expanded', 'true')
+    expect(panel('fri')).toBeVisible()
+    expect(toggle('fri27')).toHaveAttribute('aria-expanded', 'false')
+    expect(panel('fri27')).not.toBeVisible()
+    expect(toggle('egara')).toHaveAttribute('aria-expanded', 'true')
+    expect(toggle('fri')).toHaveAttribute('aria-controls', 'event-fri-panel')
+  })
+
+  it('names the weeks and sums them up', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+
+    expect(screen.getByRole('heading', { level: 2, name: 'this_week' })).toBeInTheDocument()
+    expect(screen.getByText('9–15 de novembre · summary_plays(2) · summary_free(3)')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'week_title(23,29 de novembre,no,no)' })).toBeInTheDocument()
+    expect(screen.getByText('summary_sessions(1) · summary_specials(1)')).toBeInTheDocument()
+  })
+})
+
+describe('EventsTimeline cards', () => {
+  it('toggles a card', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+
+    fireEvent.click(toggle('fri'))
+    expect(toggle('fri')).toHaveAttribute('aria-expanded', 'false')
+    expect(panel('fri')).not.toBeVisible()
+    fireEvent.click(toggle('fri'))
+    expect(panel('fri')).toBeVisible()
+  })
+
+  it('expands and collapses a whole later week', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'expand_all' }))
+    expect(toggle('fri27')).toHaveAttribute('aria-expanded', 'true')
+    fireEvent.click(screen.getByRole('button', { name: 'collapse_all' }))
+    expect(toggle('fri27')).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle('egara')).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('has no toggle-all for this week', () => {
+    render(<EventsTimeline weeks={[week()]} />)
+
+    expect(screen.queryByRole('button', { name: /expand_all|collapse_all/ })).toBeNull()
+  })
+
+  it('shows the plays grid with seats and the propose card when open', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+
+    const grid = within(panel('fri'))
+    expect(grid.getByText('Emberleaf')).toBeInTheDocument()
+    expect(grid.getAllByText('16:00')).toHaveLength(2)
+    expect(grid.getByRole('link', { name: /propose_title/ })).toHaveAttribute('href', 'https://ludoya.test/fri')
+    expect(grid.getByText('propose_hint')).toBeInTheDocument()
+  })
+
+  it('sums up a closed session: plays, free seats and a stack of covers', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+    fireEvent.click(toggle('fri'))
+
+    const header = within(card('fri'))
+    expect(header.getByText('summary_plays(2)')).toBeInTheDocument()
+    expect(header.getByText('summary_free(3)')).toBeInTheDocument()
+    const stack = card('fri').querySelectorAll('[aria-hidden="true"] img')
+    expect(stack).toHaveLength(2)
+  })
+
+  it('invites to propose the first play of a session without plays', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+
+    const header = within(card('fri27'))
+    expect(header.getByText('plays_none')).toBeInTheDocument()
+    expect(header.getByText('propose_short')).toBeInTheDocument()
+    expect(within(panel('fri27')).getByText('propose_hint_first')).toBeInTheDocument()
+  })
+
+  it('gives the countdown to specials only', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+
+    expect(within(card('egara')).getByText(/countdown_days\(17\)/)).toBeInTheDocument()
+    expect(within(card('fri')).queryByText(/countdown/)).toBeNull()
+  })
+
+  it('names a place only when it is not the usual venue, with directions', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+
+    const special = within(panel('egara'))
+    expect(special.getByText('away')).toBeInTheDocument()
+    expect(special.getByRole('link', { name: /directions/ })).toHaveAttribute(
+      'href',
+      'https://www.google.com/maps/search/?api=1&query=Recinte%20Firal%2C%20Carrer%20Firal%2C%201'
+    )
+    expect(within(card('fri')).queryByText('away')).toBeNull()
+  })
+
+  it('names no place for a special at the usual venue', () => {
+    render(<EventsTimeline weeks={[week({ events: [{ ...egara, place: null }] })]} />)
+
+    expect(within(card('egara')).queryByText('away')).toBeNull()
+    expect(within(card('egara')).queryByRole('link', { name: /directions/ })).toBeNull()
+  })
+
+  it('shows the special details: sign-ups, description and the Ludoya link', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+
+    const special = within(panel('egara'))
+    expect(special.getByText(/signups\(21\)/)).toHaveTextContent('signups(21) · capacity_unlimited')
+    expect(special.getByText('Programa complet')).toBeInTheDocument()
+    expect(special.getByText('special_plays_none')).toBeInTheDocument()
+    expect(special.getByRole('link', { name: /special_join/ })).toHaveAttribute('href', 'https://ludoya.test/fri')
+  })
+
+  it('ends with the link to more dates on Ludoya', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+
+    expect(screen.getByRole('link', { name: /more_on_ludoya/ })).toHaveAttribute('target', '_blank')
+  })
+})
+
+describe('EventsTimeline anchors', () => {
+  it('opens a closed card and updates the hash when a #event link is clicked', () => {
+    render(
+      <>
+        <a href="#event-fri27">jump</a>
+        <EventsTimeline weeks={weeks()} />
+      </>
+    )
+
+    fireEvent.click(screen.getByRole('link', { name: 'jump' }))
+
+    expect(toggle('fri27')).toHaveAttribute('aria-expanded', 'true')
+    expect(window.location.hash).toBe('#event-fri27')
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled()
+  })
+
+  it('ignores links to unknown events', () => {
+    render(
+      <>
+        <a href="#event-nope">jump</a>
+        <EventsTimeline weeks={weeks()} />
+      </>
+    )
+
+    fireEvent.click(screen.getByRole('link', { name: 'jump' }))
+
+    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled()
+  })
+
+  it('opens the card named by the hash on load', async () => {
+    vi.useFakeTimers()
+    window.history.replaceState(null, '', '/events#event-fri27')
+    render(<EventsTimeline weeks={weeks()} />)
+
+    await act(async () => {
+      vi.advanceTimersByTime(50)
+    })
+    vi.useRealTimers()
+
+    expect(toggle('fri27')).toHaveAttribute('aria-expanded', 'true')
+  })
+})
+
+describe('EventsHeader', () => {
+  it('has the title, hours, venue and one banner per special', () => {
+    render(<EventsHeader specials={[egara]} />)
+
+    expect(screen.getByRole('heading', { level: 1, name: 'title' })).toBeInTheDocument()
+    expect(screen.getByText(/hours_chip/)).toBeInTheDocument()
+    expect(screen.getByText('free_chip')).toBeInTheDocument()
+    const banners = within(screen.getByRole('list', { name: 'banners_label' })).getAllByRole('link')
+    expect(banners).toHaveLength(1)
+    expect(banners[0]).toHaveAttribute('href', '#event-egara')
+    expect(within(banners[0]).getByText('Egara Juga 2026')).toBeInTheDocument()
+    expect(within(banners[0]).getByLabelText('countdown_days(17)')).toHaveTextContent('17')
+  })
+
+  it('shows a word instead of a number tomorrow, today and while running', () => {
+    render(<EventsHeader specials={[{ ...egara, countdown: { kind: 'running', days: 0 } }]} />)
+
+    expect(screen.getByText('countdown_running')).toBeInTheDocument()
+  })
+
+  it('has no banner list without specials', () => {
+    render(<EventsHeader specials={[]} />)
+
+    expect(screen.queryByRole('list', { name: 'banners_label' })).toBeNull()
+  })
+})

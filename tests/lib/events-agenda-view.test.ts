@@ -3,6 +3,8 @@ import {
   AGENDA_WEEKS,
   MAX_BANNERS,
   countdown,
+  summarizeEvent,
+  weekSummary,
   madridWeekStart,
   toAgenda,
 } from "@/lib/events/agenda-view";
@@ -220,6 +222,12 @@ describe("toAgenda", () => {
     expect(agenda.specials.map((s) => s.id)).toEqual(["sp1", "sp0", "sp2"]);
   });
 
+  it("keeps the event's own sign-ups and capacity", () => {
+    const [event] = toAgenda([session({ participantCount: 21, capacity: null })], NOW).weeks[0].events;
+
+    expect(event).toMatchObject({ participantCount: 21, capacity: null });
+  });
+
   it("orders events inside a week by start", () => {
     const sessions = [
       session({ id: "sat", startsAt: "2026-11-14T09:00:00Z", endsAt: "2026-11-14T12:00:00Z" }),
@@ -227,5 +235,37 @@ describe("toAgenda", () => {
     ];
 
     expect(toAgenda(sessions, NOW).weeks[0].events.map((e) => e.id)).toEqual(["fri", "sat"]);
+  });
+});
+
+describe("summarizeEvent", () => {
+  const p = (taken: number, capacity: number | null) => ({ participantCount: taken, capacity });
+
+  it("says there are no plays yet", () => {
+    expect(summarizeEvent({ plays: [] })).toEqual({ playCount: 0, availability: { kind: "none" } });
+  });
+
+  it("adds up the free seats of every play", () => {
+    expect(summarizeEvent({ plays: [p(3, 4), p(2, 4), p(5, 5)] })).toEqual({ playCount: 3, availability: { kind: "seats", free: 3 } });
+  });
+
+  it("says unlimited when the only room left is a play without limit", () => {
+    expect(summarizeEvent({ plays: [p(5, 5), p(9, null)] }).availability).toEqual({ kind: "unlimited" });
+  });
+
+  it("says all full when every play is full", () => {
+    expect(summarizeEvent({ plays: [p(5, 5), p(6, 4)] }).availability).toEqual({ kind: "all_full" });
+  });
+});
+
+describe("weekSummary", () => {
+  it("counts sessions, plays, specials and free seats of a week", () => {
+    const events = [
+      { type: "regular" as const, plays: [{ participantCount: 3, capacity: 4 }, { participantCount: 1, capacity: 4 }] },
+      { type: "regular" as const, plays: [] },
+      { type: "special" as const, plays: [{ participantCount: 2, capacity: null }] },
+    ];
+
+    expect(weekSummary(events)).toEqual({ sessions: 2, specials: 1, plays: 3, free: 4 });
   });
 });

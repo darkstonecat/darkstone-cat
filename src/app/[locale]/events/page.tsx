@@ -1,15 +1,19 @@
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getOgImageUrl, getBreadcrumbJsonLd, getWebPageJsonLd } from "@/lib/seo";
-import { fetchUpcomingEvents } from "@/lib/ludoya";
+import { fetchEventsAgenda } from "@/lib/events/agenda";
+import { formatAgenda } from "@/lib/events/agenda-format";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
-import EventsHero from "@/components/events/EventsHero";
-import EventsContent from "@/components/events/EventsContent";
+import EventsHeader from "@/components/events/EventsHeader";
+import EventsTimeline from "@/components/events/EventsTimeline";
+import EventsStatus from "@/components/events/EventsStatus";
+import HowItWorks from "@/components/events/HowItWorks";
 import { VENUE, VENUE_POSTAL_ADDRESS } from "@/lib/venue";
 
-export const revalidate = 86400;
+// Seat counts come from the 60 s Ludoya data cache (`fetchMemberAreaSessions`).
+export const revalidate = 60;
 
 export async function generateMetadata({
   params,
@@ -46,8 +50,8 @@ export default async function EventsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const [eventsResult, tNav, tMeta] = await Promise.all([
-    fetchUpcomingEvents(),
+  const [agendaResult, tNav, tMeta] = await Promise.all([
+    fetchEventsAgenda(),
     getTranslations({ locale, namespace: "nav" }),
     getTranslations({ locale, namespace: "metadata" }),
   ]);
@@ -58,7 +62,8 @@ export default async function EventsPage({
   const webPageJsonLd = getWebPageJsonLd(locale, "/events", tMeta("events_title"), tMeta("events_description"));
 
   // Build Event schema.org JSON-LD for each event
-  const allEvents = [...eventsResult.regularEvents, ...eventsResult.specialEvents];
+  const agenda = formatAgenda(agendaResult.agenda, locale);
+  const allEvents = agenda.weeks.flatMap((week) => week.events);
   const eventJsonLd = allEvents.slice(0, 20).map((event) => {
     const startMs = new Date(event.startsAt).getTime();
     const offerValidFrom = new Date(startMs - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -92,11 +97,9 @@ export default async function EventsPage({
         validFrom: offerValidFrom,
         url: event.ludoyaUrl,
       },
-      location: {
-        "@type": "Place",
-        name: VENUE.name,
-        address: VENUE_POSTAL_ADDRESS,
-      },
+      location: event.place
+        ? { "@type": "Place", name: event.place.name, address: event.place.address ?? event.place.name }
+        : { "@type": "Place", name: VENUE.name, address: VENUE_POSTAL_ADDRESS },
     };
   });
 
@@ -109,13 +112,23 @@ export default async function EventsPage({
         }}
       />
       <NavBar />
-      <EventsHero />
-      <EventsContent
-        regularEvents={eventsResult.regularEvents}
-        specialEvents={eventsResult.specialEvents}
-        error={eventsResult.error}
-        locale={locale}
-      />
+      <EventsHeader specials={agenda.specials} />
+      <div className="bg-brand-beige px-4 text-stone-custom sm:px-6">
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-10 pt-9 pb-[72px] lg:flex-row lg:items-start">
+          <aside className="order-last flex shrink-0 flex-col gap-3.5 lg:sticky lg:top-24 lg:order-first lg:w-[330px]">
+            <HowItWorks />
+          </aside>
+          <div className="min-w-0 flex-1">
+            {agendaResult.error ? (
+              <EventsStatus kind="error" />
+            ) : allEvents.length === 0 ? (
+              <EventsStatus kind="empty" />
+            ) : (
+              <EventsTimeline weeks={agenda.weeks} />
+            )}
+          </div>
+        </div>
+      </div>
       <Footer />
       <ScrollToTop />
     </main>

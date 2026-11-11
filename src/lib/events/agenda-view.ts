@@ -55,6 +55,8 @@ export interface AgendaEvent {
   imageUrl: string | null;
   ludoyaUrl: string;
   place: AgendaPlace | null;
+  participantCount: number;
+  capacity: number | null;
   /** Days left, for special events only. */
   countdown: Countdown | null;
   plays: AgendaPlay[];
@@ -146,6 +148,8 @@ function toEvent(session: MemberSession, now: Date): AgendaEvent {
     imageUrl: session.imageUrl,
     ludoyaUrl: session.ludoyaUrl,
     place: toPlace(session.place),
+    participantCount: session.participantCount,
+    capacity: session.capacity,
     countdown: session.type === "special" ? countdown(session, now) : null,
     plays: session.plannedPlays.map(toPlay),
   };
@@ -198,4 +202,37 @@ export function toAgenda(sessions: MemberSession[], now: Date): Agenda {
     .slice(0, MAX_BANNERS);
 
   return { weeks, specials };
+}
+
+type SeatsOnly = Pick<AgendaPlay, "participantCount" | "capacity">;
+
+export type EventAvailability =
+  | { kind: "none" }
+  | { kind: "seats"; free: number }
+  | { kind: "unlimited" }
+  | { kind: "all_full" };
+
+/** Summary of a collapsed card: how many plays and what room is left. */
+export function summarizeEvent(event: { plays: SeatsOnly[] }): { playCount: number; availability: EventAvailability } {
+  const { plays } = event;
+  const free = plays.reduce((sum, p) => sum + (p.capacity === null ? 0 : Math.max(p.capacity - p.participantCount, 0)), 0);
+  let availability: EventAvailability;
+  if (plays.length === 0) availability = { kind: "none" };
+  else if (free > 0) availability = { kind: "seats", free };
+  else if (plays.some((p) => p.capacity === null)) availability = { kind: "unlimited" };
+  else availability = { kind: "all_full" };
+  return { playCount: plays.length, availability };
+}
+
+/** Counts shown under a week title. */
+export function weekSummary(events: { type: AgendaEvent["type"]; plays: SeatsOnly[] }[]) {
+  return {
+    sessions: events.filter((e) => e.type === "regular").length,
+    specials: events.filter((e) => e.type === "special").length,
+    plays: events.reduce((sum, e) => sum + e.plays.length, 0),
+    free: events.reduce((sum, e) => {
+      const { availability } = summarizeEvent(e);
+      return sum + (availability.kind === "seats" ? availability.free : 0);
+    }, 0),
+  };
 }
