@@ -49,8 +49,8 @@
 | `/legal` | Terms & conditions |
 | `/privacy` | Privacy policy |
 | `/cookies` | Cookie policy |
-| `/login` | Login form |
-| `/register` | Registration form |
+| `/login` | Login form (not linked from the navbar until the member area is public, see `docs/member-area-launch.md`) |
+| `/register` | Registration form (direct URL only until the member area is public) |
 | `/forgot-password` | Password recovery |
 | `/reset-password` | Set new password (protected) |
 | `/profile` | "La meva zona": member home with checklist, badges and this week's sessions from Ludoya (protected) |
@@ -193,7 +193,7 @@ CI runs all tests automatically via GitHub Actions on push/PR to `main`.
 | `BGG_API_KEY` | BoardGameGeek XML API key |
 | `LUDOYA_API_KEY` | Ludoya public API key (server-side only), see `docs/ludoya-api-reference.md` |
 | `CRON_SECRET` | Bearer secret for `/api/cron/refresh` (same value in Vercel Production and the GitHub repository secret) |
-| `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` | Optional. `1` shows the navbar login button and links `/login` to `/register`; unset hides them (sign-up links go to the Google Form, the pages stay reachable by direct URL). Build-time: redeploy after changing it |
+| `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` | Optional. `1` shows the navbar login button and links `/login` to `/register`; unset hides them (sign-up links go to the Google Form, the pages stay reachable by direct URL). Build-time: redeploy after changing it. Launch steps: `docs/member-area-launch.md` |
 
 ### Development without API keys
 
