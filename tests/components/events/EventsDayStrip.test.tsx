@@ -43,7 +43,9 @@ describe('EventsDayStrip', () => {
     renderStrip()
     const list = screen.getByRole('list', { name: 'events.strip.title' })
 
-    const fri = within(list).getByRole('link', { name: 'events.calendar.day_link(Divendres 13 de novembre,Divendres de jocs!)' })
+    // The name starts with the visible "DV 13" (WCAG 2.5.3, label in name), then the full date and titles.
+    const fri = within(list).getByRole('link', { name: 'DV 13 events.calendar.day_link(Divendres 13 de novembre,Divendres de jocs!)' })
+    expect(fri.hasAttribute('aria-label')).toBe(false)
     expect(fri.getAttribute('href')).toBe('#event-fri')
     expect(fri.textContent).toContain('DV')
     expect(fri.textContent).toContain('13')

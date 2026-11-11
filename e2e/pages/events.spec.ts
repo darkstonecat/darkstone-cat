@@ -244,7 +244,8 @@ test.describe('Events page on mobile', () => {
     await month.click()
     await expect(month).toHaveAttribute('aria-expanded', 'false')
 
-    await strip.getByRole('list', { name: 'Properes dates' }).getByRole('link', { name: /^Divendres 9 d.octubre/ }).click()
+    // The strip link name starts with its visible text (label in name), then the full date.
+    await strip.getByRole('list', { name: 'Properes dates' }).getByRole('link', { name: /^DV 9 Divendres 9 d.octubre/ }).click()
     await expect(toggle(page, 'Divendres de jocs!', 1)).toHaveAttribute('aria-expanded', 'true')
     await expect(card(page, 'Divendres de jocs!', 1)).toBeInViewport()
 

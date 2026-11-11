@@ -199,7 +199,7 @@ Messages: `events.*` (header, banners, timeline, cards), `events.program` (badge
 | Lighthouse `/events`, desktop | performance 99, accessibility 100, best practices 96, SEO 92, CLS 0 |
 | Lighthouse `/events`, mobile | performance 84–95 across 4 runs (LCP 3.0–4.3 s), accessibility 100, best practices 96, SEO 92, CLS 0 |
 
-After the sub-events (`feat/events-sub-events`, same day): unit 2094 tests, events E2E 15/15, Lighthouse `/events` desktop 99 / 100 / 96 / 92, mobile 91 / 96 / 96 / 92 (CLS 0). The mobile accessibility point is the day strip (see section 10).
+After the sub-events (`feat/events-sub-events`, same day): unit 2094 tests, events E2E 15/15, Lighthouse `/events` desktop 99 / 100 / 96 / 92, mobile 91 / 96 / 96 / 92 (CLS 0). The mobile accessibility point was the day strip: its links had an `aria-label` without the visible "DV 13" (WCAG 2.5.3, label in name). They now take their name from the content, visible text first and the full date and titles in an `sr-only` span; accessibility is back to 100 on mobile.
 
 Notes on the remaining points, all from a local production build with live data: the mobile LCP element is the header intro paragraph (time to first byte about 0.3 s plus about 1.1 s of render delay from render-blocking CSS); best practices loses points to the Vercel Analytics scripts, which answer 404 locally; SEO flags the canonical because it points to `www.darkstone.cat` while the audit runs on localhost.
 
@@ -219,7 +219,6 @@ Notes on the remaining points, all from a local production build with live data:
 - **"Afegeix al calendari" (`.ics`)**: deferred by the user.
 - **Members-only sessions (`ONLY_GROUP`)** stay hidden everywhere until a board-approved member state exists (`docs/features/admin-panel/spec.md`, BR-19).
 - **Mobile LCP**: bound by the framework's render-blocking CSS, not by this page's code.
-- **Day strip accessible names**: on mobile, Lighthouse flags `label-content-name-mismatch` on the `EventsDayStrip` links (their `aria-label` does not contain the visible day text). Follow-up.
 - **JSON-LD `subEvent`**: the sub-events are not in the Event schema yet.
 
 ## 11. Delivery

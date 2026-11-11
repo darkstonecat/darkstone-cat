@@ -16,9 +16,11 @@ type Position = { dots: number; index: number; atEnd: boolean };
 function DayTile({ day, current }: { day: StripDay; current: boolean }) {
   const t = useTranslations("events.calendar");
   return (
+    // The name comes from the content: the visible "DV 13" first (WCAG 2.5.3,
+    // label in name, so voice control can say what it sees), then the full
+    // date and the titles for screen readers. The spaces keep the words apart.
     <a
       href={`#${eventAnchor(day.eventId)}`}
-      aria-label={t("day_link", { date: day.label, titles: day.titles.join(", ") })}
       className={cn(
         "flex h-[72px] w-[58px] flex-col items-center justify-center gap-0.5 rounded-[14px] leading-none shadow-[0_1px_2px_rgba(28,25,23,0.12)]",
         day.special
@@ -28,8 +30,9 @@ function DayTile({ day, current }: { day: StripDay; current: boolean }) {
             : "border border-stone-white-base bg-brand-white text-stone-custom"
       )}
     >
-      <span className="text-[11px] font-bold">{day.weekday}</span>
-      <span className="text-[22px] font-extrabold">{day.day}</span>
+      <span className="text-[11px] font-bold">{day.weekday}</span>{" "}
+      <span className="text-[22px] font-extrabold">{day.day}</span>{" "}
+      <span className="sr-only">{t("day_link", { date: day.label, titles: day.titles.join(", ") })}</span>
       <span aria-hidden="true" className="h-2.5 text-[10px] font-bold">
         {day.special ? "★" : ""}
       </span>
