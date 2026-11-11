@@ -31,9 +31,13 @@ function request(node: LudoyaSubEvent): CoverRequest | null {
   return { id: node.id, gameName: node.title, yearPublished: 0, imageUrl: null, slug: null };
 }
 
-/** One request per node that may get a BGG cover, depth first. */
+/**
+ * One request per node that may get a BGG cover, depth first. A non-public
+ * node never shows, so neither it nor its subtree is sent to BGG.
+ */
 export function collectCoverRequests(nodes: readonly LudoyaSubEvent[]): CoverRequest[] {
   return nodes.flatMap((node) => {
+    if (node.visibility !== "PUBLIC") return [];
     const own = request(node);
     return [...(own ? [own] : []), ...collectCoverRequests(node.children)];
   });

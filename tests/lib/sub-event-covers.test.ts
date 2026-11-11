@@ -41,6 +41,18 @@ describe("collectCoverRequests", () => {
     ]);
   });
 
+  it("never asks for a non-public node or anything under it", () => {
+    const tree = [
+      node({
+        id: "group",
+        visibility: "ONLY_GROUP",
+        children: [node({ id: "group-play", kind: "play", game: GAME }), node({ id: "group-demo" })],
+      }),
+      node({ id: "public-demo", title: "Fjords" }),
+    ];
+    expect(collectCoverRequests(tree).map((r) => r.id)).toEqual(["public-demo"]);
+  });
+
   it("falls back to the node image when the game has none", () => {
     const [req] = collectCoverRequests([node({ id: "p", game: { ...GAME, imageUrl: null }, imageUrl: "https://ludoya.example/node.jpg" })]);
     expect(req.imageUrl).toBe("https://ludoya.example/node.jpg");
