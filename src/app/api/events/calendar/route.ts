@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
 import { fetchEventsCalendar } from "@/lib/events/calendar";
 import { isEventsMonth, parseMonthKey } from "@/lib/events/calendar-view";
+import { agendaNow } from "@/lib/events/clock";
 
 const noStore = { "Cache-Control": "no-store" } as const;
 /** The month is public data and its Ludoya request is cached 60 s anyway. */
@@ -14,7 +15,7 @@ const cacheable = { "Cache-Control": "public, max-age=60, s-maxage=60, stale-whi
  */
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
-  const now = new Date();
+  const now = agendaNow();
   const month = parseMonthKey(params.get("month"));
   if (!month || !isEventsMonth(month, now)) {
     return NextResponse.json({ error: "invalid_month" }, { status: 400, headers: noStore });

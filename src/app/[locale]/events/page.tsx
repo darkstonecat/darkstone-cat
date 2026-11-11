@@ -5,6 +5,7 @@ import { fetchEventsAgenda } from "@/lib/events/agenda";
 import { formatAgenda } from "@/lib/events/agenda-format";
 import { fetchEventsCalendar } from "@/lib/events/calendar";
 import { currentYearMonth } from "@/lib/events/month-grid";
+import { agendaNow } from "@/lib/events/clock";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -54,7 +55,7 @@ export default async function EventsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const now = new Date();
+  const now = agendaNow();
   const [agendaResult, calendar, tNav, tMeta] = await Promise.all([
     fetchEventsAgenda(now),
     fetchEventsCalendar(currentYearMonth(now), locale, now),

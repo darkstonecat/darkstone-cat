@@ -10,7 +10,7 @@
 
 - **Animated Landing Page** — Scroll-driven theme transitions, parallax galleries, and spring-based entrance animations
 - **Ludoteca (Game Library)** — Browse the association's collection with filters, search, and BGG integration via the [BoardGameGeek API](https://boardgamegeek.com/)
-- **Member Area ("La meva zona")** — Email/password or magic-link login, sign-up, member home with this week's public sessions and a month calendar from [Ludoya](https://ludoya.com), profile details and a member card with a real QR that resolves to a public verification page
+- **Member Area ("La meva zona")** — Email/password or magic-link login, sign-up, member home with checklist, badges and member benefits, profile details and a member card with a real QR that resolves to a public verification page
 - **Multilingual** — Fully localized in **Catalan** (default), **Spanish**, and **English**
 - **Contact Form** — Server-side email delivery via Google Workspace SMTP (nodemailer)
 - **Cookie Consent & Analytics** — GDPR-compliant banner with Google Analytics integration
@@ -43,7 +43,7 @@
 | `/about` | Origin story, mission, and values |
 | `/ludoteca` | Game library with filters, search, and BGG data |
 | `/contact` | Contact form |
-| `/events` | Upcoming events from Ludoya |
+| `/events` | The public agenda from Ludoya: special banners, month calendar, collapsible session cards with seat counters |
 | `/faq` | Frequently asked questions |
 | `/legal` | Terms & conditions |
 | `/privacy` | Privacy policy |
@@ -52,7 +52,7 @@
 | `/register` | Registration form (direct URL only until the member area is public) |
 | `/forgot-password` | Password recovery |
 | `/reset-password` | Set new password (protected) |
-| `/profile` | "La meva zona": member home with checklist, badges, member benefits and this week's sessions from Ludoya (protected) |
+| `/profile` | "La meva zona": member home with checklist, badges and member benefits (protected) |
 | `/profile/details` | Profile details: hero, tabs and account (protected) |
 | `/profile/edit` | Profile edit form (protected) |
 | `/profile/card` | Member card with a real QR, image download (protected) |
@@ -87,7 +87,7 @@ src/
 ├── app/
 │   ├── [locale]/           # Localized pages (home, about, ludoteca, contact, etc.)
 │   ├── api/contact/        # Contact form API endpoint
-│   ├── api/events/         # Shareable event image generation
+│   ├── api/events/         # Events calendar month + shareable event image generation
 │   ├── api/members/        # Member card image (with QR)
 │   ├── api/profile/        # Member home calendar months
 │   ├── api/cron/           # Scheduled cache refresh (Bearer CRON_SECRET)
@@ -99,7 +99,7 @@ src/
 │   ├── about/              # About page sections
 │   ├── ludoteca/           # Game library (grid, cards, filters, modal, pagination)
 │   ├── contact/            # Contact form and info
-│   ├── events/             # Events carousel and event images tool
+│   ├── events/             # Events agenda (timeline, calendar, day strip) and event images tool
 │   ├── documents/          # Conduct + data protection dialog (?doc=)
 │   ├── legal/              # Legal, privacy, and cookies pages
 │   ├── auth/, profile/, admin/  # Member area: sign-up/login, La meva zona, card, admin
@@ -200,7 +200,7 @@ CI runs all tests automatically via GitHub Actions on push/PR to `main`.
 
 The ludoteca works in **mock mode** when `BGG_API_KEY` is not set — it reads local XML fixtures from `/public/mock/` so you can develop the UI without hitting the BoardGameGeek API.
 
-The events page can run offline with `LUDOYA_MOCK=1`, which reads JSON fixtures from `/public/mock/ludoya/v1/` (no API key needed).
+The events page can run offline with `LUDOYA_MOCK=1`, which reads JSON fixtures from `/public/mock/ludoya/v1/` (no API key needed). Their dates are fixed, so set `LUDOYA_MOCK_NOW` (an ISO instant, e.g. `2026-10-01T10:00:00Z`) to see them as upcoming.
 
 ## Architecture Highlights
 
