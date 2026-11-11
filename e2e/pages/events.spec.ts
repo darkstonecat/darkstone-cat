@@ -199,7 +199,9 @@ test.describe('Events page (/events)', () => {
     await expect(egara.getByText('Sempre obert · sense hora')).toBeVisible()
     const others = egara.locator('[data-always-open-group]').last()
     await expect(others).toContainText('Altres activitats')
-    await expect(others.getByRole('link', { name: /A Risk Cat/ })).toBeVisible()
+    // Always-open items use the same full card as the timed ones: cover plus "Més info" button.
+    await expect(others.getByRole('link', { name: /^Més info.*A Risk Cat/ })).toBeVisible()
+    await expect(others.locator('[data-item-cover]')).toHaveCount(1)
 
     // Drafts never reach the page.
     await expect(egara).not.toContainText(/Clocktower|BOTC|Brass|Plakks|Paraulògic/)

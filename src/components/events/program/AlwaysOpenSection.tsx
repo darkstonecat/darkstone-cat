@@ -2,12 +2,14 @@ import { useTranslations } from "next-intl";
 import { MdOutlineSchedule } from "react-icons/md";
 import type { ProgramView } from "@/lib/events/agenda-format";
 import { cn } from "@/lib/utils";
-import AlwaysOpenTile from "./AlwaysOpenTile";
 import CollapsibleSection from "./CollapsibleSection";
+import { PROGRAM_GRID } from "./grid";
+import ItemCard from "./ItemCard";
 
 /**
  * Items without hours (always-open demos, stands, undated plays), grouped by
- * zone with "other activities" last. Collapsible, open by default.
+ * zone with "other activities" last, on the same full cards as the timed items
+ * so they weigh the same. Collapsible, open by default.
  */
 export default function AlwaysOpenSection({ program, dark = false }: { program: ProgramView; dark?: boolean }) {
   const t = useTranslations("events.program");
@@ -34,9 +36,9 @@ export default function AlwaysOpenSection({ program, dark = false }: { program: 
               {group.zone ?? t("other_activities")}
               <span className={cn("text-xs font-normal", dark ? "text-stone-400" : "text-stone-600")}>{t("summary_items", { count: group.items.length })}</span>
             </p>
-            <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-[repeat(auto-fill,minmax(120px,1fr))]">
+            <ul className={PROGRAM_GRID}>
               {group.items.map((item) => (
-                <AlwaysOpenTile key={item.id} item={item} dark={dark} />
+                <ItemCard key={item.id} item={item} dark={dark} hideZone />
               ))}
             </ul>
           </div>

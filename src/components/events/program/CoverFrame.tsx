@@ -2,18 +2,16 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { MdOutlineCasino } from "react-icons/md";
-import { cn } from "@/lib/utils";
 
 interface CoverFrameProps {
   href: string;
   coverUrl: string | null;
-  /** Shown on the dark strip at the bottom; omitted on small tiles. */
+  /** Shown on the dark strip at the bottom. */
   title?: string;
   time?: string | null;
   subtitle?: string | null;
   /** Pills and badges laid over the top of the cover. */
   top?: ReactNode;
-  shape?: "portrait" | "square";
   sizes: string;
 }
 
@@ -23,7 +21,7 @@ interface CoverFrameProps {
  * It links to Ludoya but stays out of the tab order: the button or caption
  * next to it is the keyboard target.
  */
-export default function CoverFrame({ href, coverUrl, title, time, subtitle, top, shape = "portrait", sizes }: CoverFrameProps) {
+export default function CoverFrame({ href, coverUrl, title, time, subtitle, top, sizes }: CoverFrameProps) {
   const t = useTranslations("events.program");
   return (
     <a
@@ -32,10 +30,7 @@ export default function CoverFrame({ href, coverUrl, title, time, subtitle, top,
       rel="noopener noreferrer"
       tabIndex={-1}
       data-item-cover
-      className={cn(
-        "group relative block overflow-hidden bg-stone-custom",
-        shape === "portrait" ? "aspect-[3/4] rounded-[14px]" : "aspect-square rounded-xl"
-      )}
+      className="group relative block aspect-[3/4] overflow-hidden rounded-[14px] bg-stone-custom"
     >
       {coverUrl ? (
         <Image
@@ -52,8 +47,8 @@ export default function CoverFrame({ href, coverUrl, title, time, subtitle, top,
           aria-hidden="true"
           className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-stone-white-base/50"
         >
-          <MdOutlineCasino size={shape === "portrait" ? 40 : 28} />
-          {shape === "portrait" && <span className="text-[11px] font-bold">{t("cover_none")}</span>}
+          <MdOutlineCasino size={40} />
+          <span className="text-[11px] font-bold">{t("cover_none")}</span>
         </span>
       )}
       {top && <div className="absolute top-2 right-2 left-2 flex flex-col items-start gap-1.5">{top}</div>}

@@ -17,19 +17,20 @@ function ctaOf(item: ItemView): { cta: Cta; full: boolean } {
 }
 
 /**
- * One timed item of an event's program: a play, a tournament or an activity.
+ * One item of an event's program: a play, a tournament, an activity or a demo.
  * 3:4 cover with the seat pill (plays and tournaments) and the kind badge on
  * top, the time, title and zone on the dark strip, then the Ludoya button.
- * `dark` switches the button colours for the special-event card.
+ * `dark` switches the button colours for the special-event card; `hideZone`
+ * drops the zone from the subtitle where a group heading already names it.
  */
-export default function ItemCard({ item, dark = false }: { item: ItemView; dark?: boolean }) {
+export default function ItemCard({ item, dark = false, hideZone = false }: { item: ItemView; dark?: boolean; hideZone?: boolean }) {
   const t = useTranslations("events");
   const { cta, full } = ctaOf(item);
   const seated = item.kind === "play" || item.kind === "tournament";
   const title = item.kind === "play" ? (item.gameName ?? item.title) : item.title;
   // The game name leads (as before); a play's own title and its zone go below it.
   const ownTitle = title !== item.title ? item.title : null;
-  const subtitle = [ownTitle, item.zone].filter(Boolean).join(" · ") || null;
+  const subtitle = [ownTitle, hideZone ? null : item.zone].filter(Boolean).join(" · ") || null;
   const label = { join: t("play.join"), queue: t("play.queue"), tournament: t("program.cta_tournament"), tickets: t("program.cta_tickets"), info: t("program.cta_info") }[cta];
   const outlined = full || cta === "info";
 

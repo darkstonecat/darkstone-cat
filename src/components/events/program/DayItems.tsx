@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 import type { DayView } from "@/lib/events/agenda-format";
 import { cn } from "@/lib/utils";
+import { PROGRAM_GRID as GRID } from "./grid";
 import ItemCard from "./ItemCard";
-
-const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))]";
 
 /**
  * The timed items of one day: a single grid, or one row per start time in slots

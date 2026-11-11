@@ -5,11 +5,11 @@ import { cn } from "@/lib/utils";
 
 /**
  * Kind badge on a cover: "Torneig · Sistema suís" (orange), "Activitat",
- * "Demo", or "Partida" (only where plays mix with other kinds, `showPlay`).
+ * "Demo"; plays carry none.
  */
-export default function ItemBadge({ item, showPlay = false }: { item: ProgramItem; showPlay?: boolean }) {
+export default function ItemBadge({ item }: { item: ProgramItem }) {
   const t = useTranslations("events.program");
-  if (item.kind === "play" && !showPlay) return null;
+  if (item.kind === "play") return null;
 
   const label =
     item.kind === "tournament"

@@ -16,7 +16,6 @@ vi.mock('next/image', () => ({
 
 import SeatPill from '@/components/events/SeatPill'
 import ItemCard from '@/components/events/program/ItemCard'
-import AlwaysOpenTile from '@/components/events/program/AlwaysOpenTile'
 import { activityView, demoView, playView, tournamentView } from '../../helpers/program-view'
 
 const play = (over: Parameters<typeof playView>[0] = {}) =>
@@ -153,18 +152,19 @@ describe('ItemCard: tournament and activity', () => {
   })
 })
 
-describe('AlwaysOpenTile', () => {
-  it('is a square cover with the demo badge and the name as the link', () => {
-    inList(<AlwaysOpenTile item={demoView()} />)
+describe('ItemCard: always-open items', () => {
+  it('shows a demo as a full card with its badge, no seats and "more info"', () => {
+    inList(<ItemCard item={demoView()} />)
 
     expect(document.querySelector('[data-item-badge="demo"]')).toHaveTextContent('badge_demo')
-    expect(screen.getByRole('link', { name: /Fearsome Floors/ })).toHaveAttribute('href', 'https://ludoya.test/d1')
+    expect(screen.getByRole('link', { name: /program\.cta_info/ })).toHaveAttribute('href', 'https://ludoya.test/d1')
+    expect(screen.getByText('Fearsome Floors')).toBeInTheDocument()
     expect(screen.queryByRole('img', { name: /aria_/ })).toBeNull()
   })
 
-  it('names a play among always-open items as a play', () => {
-    inList(<AlwaysOpenTile item={playView({ placement: 'alwaysOpen', startsAt: null, time: null })} />)
+  it('leaves the zone out when the group already names it', () => {
+    inList(<ItemCard item={demoView()} hideZone />)
 
-    expect(document.querySelector('[data-item-badge="play"]')).toHaveTextContent('badge_play')
+    expect(screen.queryByText('Demostracions de 2tomatoes')).toBeNull()
   })
 })

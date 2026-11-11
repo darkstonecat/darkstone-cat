@@ -3,6 +3,7 @@ import type { ProgramView } from "@/lib/events/agenda-format";
 import AlwaysOpenSection from "./AlwaysOpenSection";
 import CollapsibleSection from "./CollapsibleSection";
 import DayItems from "./DayItems";
+import { PROGRAM_GRID } from "./grid";
 import { useCountsSummary } from "./useCountsSummary";
 
 /**
@@ -17,7 +18,7 @@ export default function EventProgram({ program, dark = false, trailing }: { prog
 
   return (
     <div className="flex flex-col gap-4">
-      {program.days.length === 0 && trailing && <ul className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))]">{trailing}</ul>}
+      {program.days.length === 0 && trailing && <ul className={PROGRAM_GRID}>{trailing}</ul>}
       {program.multiDay
         ? program.days.map((day, index) => (
             <CollapsibleSection key={day.day} title={day.title} summary={summary(day.counts).join(" · ")} dark={dark}>

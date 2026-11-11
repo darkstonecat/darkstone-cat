@@ -96,6 +96,19 @@ describe('EventProgram on a multi-day event', () => {
   })
 })
 
+describe('EventProgram always-open cards', () => {
+  it('draws them as full cards, like the timed ones, without repeating the zone', () => {
+    const { container } = render(<EventProgram program={weekend} />)
+
+    const [zone] = [...container.querySelectorAll<HTMLElement>('[data-always-open-group]')]
+    expect(zone.querySelectorAll('[data-item-kind="demo"]')).toHaveLength(2)
+    expect(within(zone).getAllByRole('link', { name: /program\.cta_info/ })).toHaveLength(2)
+    expect(within(zone).getAllByText('Demostracions de 2tomatoes')).toHaveLength(1)
+    const sundayGrid = document.getElementById(toggleOf(/Diumenge/).getAttribute('aria-controls')!)!.querySelector('ul')!
+    expect(zone.querySelector('ul')!.className).toBe(sundayGrid.className)
+  })
+})
+
 describe('EventProgram on a one-day event', () => {
   it('shows the grid directly, without day sections, and the propose tile after it', () => {
     const program = programView([playView({ id: 'a' }), playView({ id: 'b' })])
