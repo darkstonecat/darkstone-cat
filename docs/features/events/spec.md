@@ -212,3 +212,10 @@ Branch `feat/events-redesign` (from `develop`, not pushed at the time of writing
 | `9ee666e` | E2E spec, `agendaNow()`, CLAUDE.md and README |
 
 No database migration and no production configuration step. The page reads the same `LUDOYA_API_KEY` as before.
+
+### Later changes (on `develop`)
+
+| Commit | Change |
+|---|---|
+| `21cdb93` | Fix: one continuous timeline line (it broke under every tile and at each week header) |
+| `3172f92` | Multi-day date tiles show the first and last day ("DS 28 / DG 29", "⋮" when days lie between) |
