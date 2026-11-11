@@ -20,7 +20,7 @@ export default function BenefitsCard({ benefits }: { benefits: BenefitView[] }) 
       </h2>
       <p className="mt-1 mb-5 text-sm text-stone-custom/65">{t("benefits_intro")}</p>
 
-      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <ul className="flex flex-col gap-4">
         {benefits.map((benefit) => (
           <li
             key={benefit.id}
