@@ -10,8 +10,9 @@ import SeatPill from "./SeatPill";
  * One play of a session: 3:4 cover with the seat pill on top and the time and
  * game on a dark strip, then the status line and the Ludoya sign-up link.
  * `time` comes formatted from the server (Node and browser ICU can differ).
+ * `dark` switches the text and button colours for a dark background.
  */
-export default function PlayCard({ play, time }: { play: AgendaPlay; time: string }) {
+export default function PlayCard({ play, time, dark = false }: { play: AgendaPlay; time: string; dark?: boolean }) {
   const tSeats = useTranslations("events.seats");
   const tPlay = useTranslations("events.play");
   const { status, full } = seatCounter(play, CHAIRS_MAX_DESKTOP);
@@ -44,16 +45,27 @@ export default function PlayCard({ play, time }: { play: AgendaPlay; time: strin
           <span className="text-sm leading-tight font-extrabold">{play.gameName}</span>
         </div>
       </div>
-      <span className={cn("text-xs font-bold", full ? "text-stone-600" : "text-brand-orange-text")}>{statusText}</span>
+      <span
+        className={cn(
+          "text-xs font-bold",
+          dark
+            ? full ? "text-stone-white-base" : "text-brand-orange-light"
+            : full ? "text-stone-600" : "text-brand-orange-text"
+        )}
+      >{statusText}</span>
       <a
         href={play.ludoyaUrl}
         target="_blank"
         rel="noopener noreferrer"
         className={cn(
           "flex min-h-11 items-center justify-center rounded-xl text-[13px] font-bold transition-colors",
-          full
-            ? "border border-stone-400 text-stone-custom hover:bg-stone-custom/5"
-            : "bg-stone-custom text-white hover:bg-stone-800"
+          dark
+            ? full
+              ? "border border-stone-500 text-stone-white-hover hover:bg-white/5"
+              : "bg-stone-white-hover text-stone-custom hover:bg-white"
+            : full
+              ? "border border-stone-400 text-stone-custom hover:bg-stone-custom/5"
+              : "bg-stone-custom text-white hover:bg-stone-800"
         )}
       >
         {full ? tPlay("queue") : tPlay("join")}

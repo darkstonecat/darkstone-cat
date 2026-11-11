@@ -64,23 +64,28 @@ function ToggleButton({ open, special, panelId, onToggle }: { open: boolean; spe
   );
 }
 
-function PlaysGrid({ event }: { event: EventView }) {
+function PlaysGrid({ event, dark = false }: { event: EventView; dark?: boolean }) {
   const t = useTranslations("events");
   return (
     <ul className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))]">
       {event.plays.map((play) => (
-        <PlayCard key={play.id} play={play} time={play.time} />
+        <PlayCard key={play.id} play={play} time={play.time} dark={dark} />
       ))}
       <li className="flex flex-col gap-2">
         <a
           href={event.ludoyaUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex aspect-[3/4] flex-col items-center justify-center gap-2 rounded-[14px] border-2 border-dashed border-[#E9B98F] p-3 text-center text-brand-orange-text transition-colors hover:bg-white/60"
+          className={cn(
+            "flex aspect-[3/4] flex-col items-center justify-center gap-2 rounded-[14px] border-2 border-dashed p-3 text-center transition-colors",
+            dark
+              ? "border-stone-600 text-brand-orange-light hover:bg-white/5"
+              : "border-[#E9B98F] text-brand-orange-text hover:bg-white/60"
+          )}
         >
           <span aria-hidden="true" className="text-[32px] font-light">+</span>
-          <strong className="text-sm text-stone-custom">{t("propose_title")}</strong>
-          <span className="text-xs text-stone-600">{event.plays.length === 0 ? t("propose_hint_first") : t("propose_hint")}</span>
+          <strong className={cn("text-sm", dark ? "text-stone-white-hover" : "text-stone-custom")}>{t("propose_title")}</strong>
+          <span className={cn("text-xs", dark ? "text-stone-white-base" : "text-stone-600")}>{event.plays.length === 0 ? t("propose_hint_first") : t("propose_hint")}</span>
           <span className="sr-only">{t("new_tab")}</span>
         </a>
       </li>
@@ -206,8 +211,9 @@ function SpecialCard({ event, open, onToggle, panelId }: EventCardProps & { pane
           </div>
         </div>
         {event.plays.length > 0 && (
-          <div className="m-3 rounded-[18px] bg-brand-beige p-4 text-stone-custom sm:m-[22px] sm:mt-0">
-            <PlaysGrid event={event} />
+          // Same insets as the session panel, so the play cards get the same size.
+          <div className="px-5 py-5 pb-[22px] sm:px-[22px] sm:pt-[22px]">
+            <PlaysGrid event={event} dark />
           </div>
         )}
       </div>
