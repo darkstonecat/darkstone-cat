@@ -57,24 +57,62 @@ describe("formatAgenda", () => {
   it("formats a one-day session in Madrid time (Catalan)", () => {
     const [friday] = formatAgenda(agenda(), "ca").weeks[0].events;
 
-    expect(friday.tile).toEqual({ weekday: "DV", day: "13" });
+    expect(friday.tile).toEqual({ days: [{ weekday: "DV", day: "13" }], gap: false });
     expect(friday.dates).toBe("Divendres 13 de novembre");
     expect(friday.time).toBe("16:00 – 20:30");
     expect(friday.when).toBe("Divendres 13 de novembre · 16:00 – 20:30");
     expect(friday.plays[0].time).toBe("16:15");
   });
 
-  it("formats a multi-day special with both weekdays on the tile", () => {
+  it("puts both days of a two-day special on the tile", () => {
     const egara = formatAgenda(agenda(), "ca").weeks[1].events[0];
 
-    expect(egara.tile).toEqual({ weekday: "DS–DG", day: "28" });
+    expect(egara.tile).toEqual({
+      days: [
+        { weekday: "DS", day: "28" },
+        { weekday: "DG", day: "29" },
+      ],
+      gap: false,
+    });
     expect(egara.dates).toBe("Ds., 28 – dg., 29 de novembre");
     expect(egara.time).toBe("10:00 – 17:00");
   });
 
   it("formats the same special in Spanish and English", () => {
-    expect(formatAgenda(agenda(), "es").specials[0].tile).toEqual({ weekday: "SÁB–DOM", day: "28" });
+    expect(formatAgenda(agenda(), "es").specials[0].tile.days).toEqual([
+      { weekday: "SÁB", day: "28" },
+      { weekday: "DOM", day: "29" },
+    ]);
     expect(formatAgenda(agenda(), "en").specials[0].dates).toBe("Sat 28 November – Sun 29 November");
+  });
+
+  it("shows only the first and last day of a longer event, with a gap between", () => {
+    const camp = event({ id: "camp", type: "special", startsAt: "2026-11-27T09:00:00Z", endsAt: "2026-11-30T16:00:00Z" });
+    const tile = formatAgenda({ weeks: [{ start: "2026-11-23", end: "2026-11-29", isCurrent: false, events: [camp] }], specials: [] }, "ca")
+      .weeks[0].events[0].tile;
+
+    expect(tile).toEqual({
+      days: [
+        { weekday: "DV", day: "27" },
+        { weekday: "DL", day: "30" },
+      ],
+      gap: true,
+    });
+  });
+
+  it("reads tile days on the Madrid calendar, across a month change", () => {
+    // 31 Oct 23:30 Madrid (22:30 UTC) to 1 Nov 01:00 Madrid: two Madrid days.
+    const night = event({ id: "night", startsAt: "2026-10-31T22:30:00Z", endsAt: "2026-11-01T00:00:00Z" });
+    const tile = formatAgenda({ weeks: [{ start: "2026-10-26", end: "2026-11-01", isCurrent: false, events: [night] }], specials: [] }, "ca")
+      .weeks[0].events[0].tile;
+
+    expect(tile).toEqual({
+      days: [
+        { weekday: "DS", day: "31" },
+        { weekday: "DG", day: "1" },
+      ],
+      gap: false,
+    });
   });
 
   it("labels each week with its range and the parts of its title", () => {

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Fragment } from "react";
 import { useTranslations } from "next-intl";
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import { cn } from "@/lib/utils";
@@ -16,9 +17,9 @@ interface EventCardProps {
   isCurrentWeek: boolean;
   open: boolean;
   onToggle: () => void;
-  /** First event of the timeline: the line starts at the centre of its date tile. */
+  /** First event of the timeline: the line starts behind its date tile (at the centre of a one-day tile). */
   isFirst?: boolean;
-  /** Last event of the timeline: the line ends at the centre of its date tile. */
+  /** Last event of the timeline: the line ends behind its date tile (at the centre of a one-day tile). */
   isLast?: boolean;
 }
 
@@ -266,7 +267,8 @@ export default function EventCard(props: EventCardProps) {
           aria-hidden="true"
           data-timeline-tile
           className={cn(
-            "relative flex size-12 flex-col items-center justify-center rounded-2xl leading-none sm:size-16",
+            // One day fills a square; a multi-day tile stacks its first and last day and grows taller.
+            "relative flex min-h-12 w-12 flex-col items-center justify-center gap-1.5 rounded-2xl py-2 leading-none sm:min-h-16 sm:w-16",
             special
               ? "bg-brand-orange text-white"
               : isCurrentWeek
@@ -274,8 +276,20 @@ export default function EventCard(props: EventCardProps) {
                 : "border border-stone-300 bg-white text-stone-custom"
           )}
         >
-          <span className="text-[10px] font-bold sm:text-[11px]">{event.tile.weekday}</span>
-          <span className="text-xl font-extrabold sm:text-2xl">{event.tile.day}</span>
+          {event.tile.days.map((day, index) => (
+            <Fragment key={index}>
+              {index > 0 &&
+                (event.tile.gap ? (
+                  <span className="text-sm leading-none font-extrabold opacity-70">⋮</span>
+                ) : (
+                  <span className="h-px w-5 bg-current opacity-40" />
+                ))}
+              <span className="flex flex-col items-center gap-0.5">
+                <span className="text-[10px] font-bold sm:text-[11px]">{day.weekday}</span>
+                <span className="text-xl font-extrabold sm:text-2xl">{day.day}</span>
+              </span>
+            </Fragment>
+          ))}
         </span>
       </div>
       {special ? <SpecialCard {...props} panelId={panelId} /> : <SessionCard {...props} panelId={panelId} />}

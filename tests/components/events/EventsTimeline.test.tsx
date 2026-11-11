@@ -51,7 +51,7 @@ const event = (over: Partial<EventView> = {}): EventView => ({
   capacity: null,
   countdown: null,
   plays: [play(), play({ id: 'p2', gameName: 'Signorie', participantCount: 2 })],
-  tile: { weekday: 'DV', day: '13' },
+  tile: { days: [{ weekday: 'DV', day: '13' }], gap: false },
   dates: 'Divendres 13 de novembre',
   time: '16:00 – 20:30',
   when: 'Divendres 13 de novembre · 16:00 – 20:30',
@@ -68,7 +68,7 @@ const egara = event({
   countdown: { kind: 'days', days: 17 },
   place: { name: 'Recinte Firal', address: 'Carrer Firal, 1' },
   plays: [],
-  tile: { weekday: 'DS–DG', day: '28' },
+  tile: { days: [{ weekday: 'DS', day: '28' }, { weekday: 'DG', day: '29' }], gap: false },
   dates: 'Ds., 28 – dg., 29 de novembre',
   time: '10:00 – 17:00',
 })
@@ -127,6 +127,21 @@ describe('EventsTimeline defaults', () => {
 })
 
 describe('EventsTimeline cards', () => {
+  it('shows one day on a one-day tile and both days on a two-day tile', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+    const tile = (id: string) => card(id).querySelector('[data-timeline-tile]')!
+
+    expect(tile('fri').textContent).toBe('DV13')
+    expect(tile('egara').textContent).toBe('DS28DG29')
+  })
+
+  it('marks the days left out between the first and last day of a longer event', () => {
+    const camp = event({ id: 'camp', type: 'special', tile: { days: [{ weekday: 'DV', day: '27' }, { weekday: 'DL', day: '30' }], gap: true } })
+    render(<EventsTimeline weeks={[week({ events: [camp] })]} />)
+
+    expect(card('camp').querySelector('[data-timeline-tile]')!.textContent).toBe('DV27⋮DL30')
+  })
+
   it('toggles a card', () => {
     render(<EventsTimeline weeks={weeks()} />)
 

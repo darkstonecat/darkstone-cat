@@ -47,6 +47,8 @@ There is no section link bar ("Aquesta setmana / Properes setmanes / Especials")
 | Rule | Value |
 |---|---|
 | Format | Every event, session or special, is a collapsible card (`aria-expanded`, `aria-controls`). |
+| Date tile | Left of the card: weekday and day ("DV 13"). A multi-day event stacks its first and last day ("DS 28", "DG 29") with a thin line between them, or "⋮" when days lie between ("DV 27 ⋮ DL 30"), on the Madrid calendar. The full range is in the card. |
+| Timeline line | One continuous line joins the tiles, through the week headers, from the first tile to the last. |
 | Default state | This week's events open; later sessions closed; specials always open. |
 | Toggle all | Each later week has "Desplega-ho tot / Plega-ho tot". |
 | Closed card | Title, date and time, play count, free seats, a stack of small covers. |
@@ -134,7 +136,7 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
 | File | Role |
 |---|---|
 | `src/lib/events/agenda-view.ts` | Pure: selection, weeks, countdown, place rule, view model, summaries |
-| `src/lib/events/agenda-format.ts` | Pure: date texts and strip days, formatted on the server |
+| `src/lib/events/agenda-format.ts` | Pure: date texts, date tiles and strip days, formatted on the server |
 | `src/lib/events/agenda.ts` | Server: `fetchEventsAgenda(now)` |
 | `src/lib/events/seat-counter.ts` | Pure: seat pill mode, chairs, status, label |
 | `src/lib/events/month-grid.ts` | Pure: Monday-first month grid, range, labels |
@@ -144,7 +146,7 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
 | `src/lib/events/clock.ts` | `agendaNow()` |
 | `src/components/events/EventsHeader.tsx` | Header chips and special banners |
 | `src/components/events/EventsTimeline.tsx` | Week groups, open state, toggle all, `#event-` handling and scroll |
-| `src/components/events/EventCard.tsx` | Session and special cards |
+| `src/components/events/EventCard.tsx` | Session and special cards, the date tile and its segment of the timeline line (`RAIL`) |
 | `src/components/events/PlayCard.tsx`, `SeatPill.tsx` | Play cover and seat counter |
 | `src/components/events/EventsCalendar.tsx` | Month grid, `sidebar` and `inline` variants |
 | `src/components/events/EventsDayStrip.tsx` | Mobile strip and month toggle |
@@ -161,6 +163,7 @@ Messages: `events.*` (header, banners, timeline, cards), `events.seats`, `events
   - next week: Friday 9 (closed) and the special "Juguem a El Cartón Peleón!" on Sunday 11, away from the usual venue (open, "Falten 10 dies");
   - "Egara Juga 2026", 28–29 November (special);
   - drafts on 10 October and 8 November are never shown; Friday 25 December is outside the four weeks, so its calendar day opens Ludoya.
+  - the timeline line is checked geometrically (`expectContinuousRail`: segments touch within 1 px, and the line starts and ends inside the first and last tile), on desktop and mobile.
 - Run: `npm run test:unit`, `npx playwright test e2e/pages/events.spec.ts`.
 
 ## 8. Quality at delivery (11 November 2026)

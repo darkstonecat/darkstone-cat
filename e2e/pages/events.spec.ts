@@ -34,8 +34,8 @@ async function openEvents(page: Page) {
 }
 
 /**
- * The timeline line: every rail segment touches the next one, the line starts at
- * the centre of the first date tile and ends at the centre of the last one.
+ * The timeline line: every rail segment touches the next one, and the line starts
+ * behind the first date tile and ends behind the last one (a two-day tile is taller).
  */
 async function expectContinuousRail(page: Page) {
   const { rails, tiles } = await page.evaluate(() => {
@@ -44,13 +44,16 @@ async function expectContinuousRail(page: Page) {
     const tiles = [...document.querySelectorAll('[data-timeline-tile]')].map(box).sort((a, b) => a.top - b.top)
     return {
       rails: rails.map((r) => ({ top: r.top, bottom: r.bottom, x: r.left + r.width / 2 })),
-      tiles: tiles.map((t) => ({ centerY: t.top + t.height / 2, centerX: t.left + t.width / 2 })),
+      tiles: tiles.map((t) => ({ top: t.top, bottom: t.bottom, centerX: t.left + t.width / 2 })),
     }
   })
   expect(tiles.length).toBeGreaterThan(1)
   expect(rails.length).toBeGreaterThan(1)
-  expect(Math.abs(rails[0].top - tiles[0].centerY)).toBeLessThanOrEqual(1)
-  expect(Math.abs(rails.at(-1)!.bottom - tiles.at(-1)!.centerY)).toBeLessThanOrEqual(1)
+  const [first, last] = [tiles[0], tiles.at(-1)!]
+  expect(rails[0].top).toBeGreaterThan(first.top)
+  expect(rails[0].top).toBeLessThan(first.bottom)
+  expect(rails.at(-1)!.bottom).toBeGreaterThan(last.top)
+  expect(rails.at(-1)!.bottom).toBeLessThan(last.bottom)
   for (let i = 1; i < rails.length; i++) {
     expect(Math.abs(rails[i].top - rails[i - 1].bottom), `gap above rail segment ${i}`).toBeLessThanOrEqual(1)
   }
@@ -161,6 +164,12 @@ test.describe('Events page (/events)', () => {
     await toggle(page, 'Divendres de jocs!', 0).click()
     await expect(toggle(page, 'Divendres de jocs!', 0)).toHaveAttribute('aria-expanded', 'false')
     await expectContinuousRail(page)
+  })
+
+  test('a two-day special shows both days on its date tile', async ({ page }) => {
+    await openEvents(page)
+    const tile = page.locator('[id^="event-"]').filter({ has: card(page, 'Egara Juga 2026') }).locator('[data-timeline-tile]')
+    await expect(tile).toHaveText(/DS\s*28\s*DG\s*29/)
   })
 
   test('the calendar route answers public months only', async ({ request }) => {

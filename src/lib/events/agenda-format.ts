@@ -15,9 +15,17 @@ export interface PlayView extends AgendaPlay {
   time: string;
 }
 
+/**
+ * Date tile of the timeline: one day ("DV" / "13"), or the first and last day of a
+ * multi-day event ("DS" / "28", "DG" / "29"). `gap` is true when days lie between them.
+ */
+export interface EventTile {
+  days: { weekday: string; day: string }[];
+  gap: boolean;
+}
+
 export interface EventView extends Omit<AgendaEvent, "plays"> {
-  /** Date tile: "DV" / "13", or "DS–DG" / "28" for a multi-day event. */
-  tile: { weekday: string; day: string };
+  tile: EventTile;
   /** "Divendres 13 de novembre", or a range for a multi-day event. */
   dates: string;
   /** "16:00 – 20:30" */
@@ -111,6 +119,14 @@ export function formatAgenda(agenda: Agenda, locale: string, now: Date = new Dat
 
   const tileWeekday = (instant: Date) => weekday.format(instant).replace(/\./g, "").toLocaleUpperCase();
 
+  function formatTile(start: Date, end: Date): EventTile {
+    const tileDay = (instant: Date) => ({ weekday: tileWeekday(instant), day: dayNumber.format(instant) });
+    const first = isoDay(start);
+    const last = isoDay(end);
+    if (first === last) return { days: [tileDay(start)], gap: false };
+    return { days: [tileDay(start), tileDay(end)], gap: nextDay(first) !== last };
+  }
+
   function formatEvent(event: AgendaEvent): EventView {
     const start = new Date(event.startsAt);
     const end = new Date(event.endsAt);
@@ -121,10 +137,7 @@ export function formatAgenda(agenda: Agenda, locale: string, now: Date = new Dat
     const time = `${clock.format(start)} – ${clock.format(end)}`;
     return {
       ...event,
-      tile: {
-        weekday: multiDay ? `${tileWeekday(start)}–${tileWeekday(end)}` : tileWeekday(start),
-        day: dayNumber.format(start),
-      },
+      tile: formatTile(start, end),
       dates,
       time,
       when: `${dates} · ${time}`,
