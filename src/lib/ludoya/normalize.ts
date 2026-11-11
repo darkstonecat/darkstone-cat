@@ -18,10 +18,15 @@ import {
   requireString,
 } from "./shape";
 import type {
+  LudoyaAttendance,
+  LudoyaGameRef,
   LudoyaLocation,
   LudoyaPlace,
   LudoyaSession,
   LudoyaSessionPlay,
+  LudoyaSubEvent,
+  LudoyaSubEventKind,
+  LudoyaTournamentFormat,
   LudoyaUser,
 } from "./types";
 
@@ -153,6 +158,89 @@ const byStart = (a: { startsAt: string }, b: { startsAt: string }) =>
   new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime();
 
 // ---------------------------------------------------------------------------
+// Sub-event tree
+// ---------------------------------------------------------------------------
+
+const SUB_EVENT_KINDS: Record<string, LudoyaSubEventKind> = { PLANNED_PLAY: "play", TOURNAMENT: "tournament" };
+
+const ATTENDANCE: Record<string, LudoyaAttendance> = {
+  RSVP: "rsvp",
+  NONE: "none",
+  EXTERNAL: "external",
+  LUDOYA_TICKETS: "tickets",
+};
+
+const TOURNAMENT_FORMATS = new Set<string>(["SWISS", "MIXER", "SINGLE_ELIM", "DOUBLE_ELIM", "TABLE_KNOCKOUT"]);
+
+/** A date that may be null or absent (always-open demos); a wrong type still throws. */
+function readOptionalDate(item: unknown, key: string, ctx: string): string | null {
+  const value = getPath(item, key);
+  return value === null || value === undefined ? null : requireIsoDate(item, key, ctx);
+}
+
+function parseGame(item: unknown, ctx: string): LudoyaGameRef | null {
+  const game = getPath(item, "game");
+  if (!isObject(game)) return null;
+  const at = `${ctx}.game`;
+  const name = optionalString(game, "name", at);
+  if (!name) return null;
+  return {
+    name,
+    yearPublished: optionalNumber(game, "yearPublished", at) ?? 0,
+    imageUrl: optionalString(game, "imageUrl", at),
+    slug: optionalString(game, "slug", at),
+  };
+}
+
+/** One node of the tree, without its children; null when it (and so its subtree) must not show. */
+function parseSubEvent(item: unknown, ctx: string): LudoyaSubEvent | null {
+  if (optionalBoolean(item, "canceled", ctx) || optionalBoolean(item, "draft", ctx)) return null;
+  const visibility = readVisibility(item, ctx);
+  if (!visibility) return null;
+
+  const id = requireString(item, "id", ctx);
+  const format = optionalString(item, "tournament.format", ctx);
+  return {
+    id,
+    kind: SUB_EVENT_KINDS[requireString(item, "type", ctx)] ?? "meetup",
+    title: requireString(item, "title", ctx),
+    startsAt: readOptionalDate(item, "startsAt", ctx),
+    endsAt: readOptionalDate(item, "endsAt", ctx),
+    alwaysOpen: optionalBoolean(item, "alwaysOpen", ctx) ?? false,
+    game: parseGame(item, ctx),
+    imageUrl: optionalString(item, "imageUrl", ctx),
+    place: parsePlace(item, ctx),
+    participantCount: optionalNumber(item, "participantCount", ctx) ?? 0,
+    capacity: optionalNumber(item, "capacity", ctx),
+    minParticipants: optionalNumber(item, "minParticipants", ctx),
+    organizerName: parseOrganizerName(item, ctx),
+    attendance: ATTENDANCE[optionalString(item, "attendanceMode", ctx) ?? ""] ?? "rsvp",
+    tournamentFormat: format && TOURNAMENT_FORMATS.has(format) ? (format as LudoyaTournamentFormat) : null,
+    visibility,
+    ludoyaUrl: ludoyaUrls.eventPage(id),
+    children: [],
+  };
+}
+
+// Dated nodes by start, undated (always-open) ones after them in API order.
+const subEventOrder = (a: LudoyaSubEvent, b: LudoyaSubEvent) => {
+  if (a.startsAt === null || b.startsAt === null) return a.startsAt === null ? (b.startsAt === null ? 0 : 1) : -1;
+  return Date.parse(a.startsAt) - Date.parse(b.startsAt);
+};
+
+/**
+ * Children of `parentId`, each with its own subtree. A node whose parent was
+ * skipped is never reached, so a draft or private node hides its descendants.
+ */
+function subTree(parentId: string, byParent: Map<string, LudoyaSubEvent[]>, seen = new Set<string>()): LudoyaSubEvent[] {
+  if (seen.has(parentId)) return [];
+  seen.add(parentId);
+  return (byParent.get(parentId) ?? [])
+    .map((node) => ({ ...node, children: subTree(node.id, byParent, seen) }))
+    .sort(subEventOrder);
+}
+
+// ---------------------------------------------------------------------------
 // Parsers
 // ---------------------------------------------------------------------------
 
@@ -179,6 +267,7 @@ export function parseSessionsResponse(
   ];
   const sessions: LudoyaSession[] = [];
   const playsByParent = new Map<string, LudoyaSessionPlay[]>();
+  const subEventsByParent = new Map<string, LudoyaSubEvent[]>();
 
   elements.forEach(({ item, ctx }) => {
     if (!isObject(item)) throw new LudoyaShapeError(ctx, "object", item);
@@ -188,6 +277,8 @@ export function parseSessionsResponse(
     const parentId = optionalString(item, "parentId", ctx);
 
     if (parentId) {
+      const node = parseSubEvent(item, ctx);
+      if (node) subEventsByParent.set(parentId, [...(subEventsByParent.get(parentId) ?? []), node]);
       const play = type === "PLANNED_PLAY" ? parsePlay(item, ctx) : null;
       if (!play) return;
       playsByParent.set(parentId, [...(playsByParent.get(parentId) ?? []), play]);
@@ -230,12 +321,14 @@ export function parseSessionsResponse(
       queuedParticipantCount: optionalNumber(item, "queuedParticipantCount", ctx),
       organizerName: parseOrganizerName(item, ctx),
       plannedPlays: [],
+      subEvents: [],
     });
   });
 
   for (const session of sessions) {
     session.plannedPlays = (playsByParent.get(session.id) ?? []).sort(byStart);
     session.plannedPlayCount = session.plannedPlays.length;
+    session.subEvents = subTree(session.id, subEventsByParent);
   }
   return sessions;
 }
@@ -283,9 +376,12 @@ export function withUsualVenue(
   if (!usualId) return sessions;
   const mark = (place: LudoyaPlace | null): LudoyaPlace | null =>
     place ? { ...place, isUsual: place.id === usualId } : null;
+  const markTree = (nodes: LudoyaSubEvent[]): LudoyaSubEvent[] =>
+    nodes.map((node) => ({ ...node, place: mark(node.place), children: markTree(node.children) }));
   return sessions.map((session) => ({
     ...session,
     place: mark(session.place),
     plannedPlays: session.plannedPlays.map((play) => ({ ...play, place: mark(play.place) })),
+    subEvents: markTree(session.subEvents),
   }));
 }

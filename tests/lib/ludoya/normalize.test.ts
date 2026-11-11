@@ -307,3 +307,99 @@ describe("parseSessionsResponse play organizer", () => {
     expect(result.plannedPlays.map((p) => p.organizerName)).toEqual(["Host A", "Host B", null]);
   });
 });
+
+describe("parseSessionsResponse sub-events", () => {
+  const EGARA_ID = "053e43407bdb44afa1ebc54539c7843c";
+  const egara = parseSessionsResponse(fixture("events.json")).find((s) => s.id === EGARA_ID)!;
+  type Node = (typeof egara.subEvents)[number];
+  const flatten = (nodes: Node[]): Node[] => nodes.flatMap((n) => [n, ...flatten(n.children)]);
+  const find = (title: string) => flatten(egara.subEvents).find((n) => n.title === title)!;
+
+  it("keeps the published children of the event and drops drafts with their subtree", () => {
+    expect(egara.subEvents.map((n) => n.title).sort()).toEqual(
+      [
+        "A Risk Cat",
+        "Arkham Horror: El Juego de Cartas (Edición Revisada)",
+        "Demostracions SD Games",
+        "Demostracions Tranjis games",
+        "Demostracions de 2tomatoes",
+        "Partides de ROL",
+        "Pòdcast en directe: Cunyadisme lúdic.",
+        "Torneig Crokinole",
+        "Torneig de Root",
+        "Tornejos Awaken Realms",
+      ].sort()
+    );
+    const titles = flatten(egara.subEvents).map((n) => n.title);
+    expect(titles.some((t) => /BOTC|Clocktower|Brass|Plakks|Paraulògic|Jocs del Futur/.test(t))).toBe(false);
+    expect(flatten(egara.subEvents)).toHaveLength(32);
+  });
+
+  it("nests the plays of a meetup zone under it, sorted by start", () => {
+    const zone = find("Partides de ROL");
+    expect(zone.kind).toBe("meetup");
+    expect(zone.children.map((c) => c.kind)).toEqual(Array(7).fill("play"));
+    const starts = zone.children.map((c) => Date.parse(c.startsAt!));
+    expect(starts).toEqual([...starts].sort((a, b) => a - b));
+    expect(find("Mundodisco: Aventuras en Ankh-Morpork")).toMatchObject({
+      game: { name: "Mundodisco: Ankh-Morpork" },
+      capacity: 5,
+      participantCount: 2,
+      alwaysOpen: false,
+      children: [],
+    });
+  });
+
+  it("reads tournaments with their format and ticketed attendance", () => {
+    const [first] = find("Tornejos Awaken Realms").children;
+    expect(first).toMatchObject({ kind: "tournament", tournamentFormat: "TABLE_KNOCKOUT", attendance: "tickets", capacity: 16 });
+    expect(find("Torneig de Root")).toMatchObject({ kind: "tournament", tournamentFormat: "SWISS", attendance: "rsvp" });
+  });
+
+  it("keeps always-open demos without dates or game", () => {
+    expect(find("Fearsome Floors")).toMatchObject({ kind: "meetup", alwaysOpen: true, startsAt: null, endsAt: null, game: null });
+    expect(find("Fearsome Floors").imageUrl).toMatch(/^https:\/\//);
+    expect(find("A Risk Cat")).toMatchObject({ alwaysOpen: true, attendance: "none", children: [] });
+  });
+
+  it("leaves plannedPlays as the direct plays only", () => {
+    expect(egara.plannedPlays.map((p) => p.gameName)).toEqual(["Arkham Horror: The Card Game (Revised Core Set)"]);
+  });
+
+  it("drops a published child of a draft and maps unknown values safely", () => {
+    const base = { visibility: "PUBLIC", startsAt: "2026-11-01T10:00:00Z", endsAt: "2026-11-01T12:00:00Z" };
+    const [session] = parseSessionsResponse({
+      futureEvents: {
+        elements: [
+          { ...base, id: "s", type: "MEETUP", title: "S" },
+          { ...base, id: "d", parentId: "s", type: "MEETUP", title: "Draft zone", draft: true },
+          { ...base, id: "x", parentId: "d", type: "PLANNED_PLAY", title: "Orphan", game: { name: "G" } },
+          { ...base, id: "p", parentId: "s", type: "MEETUP", title: "Private", visibility: "PRIVATE" },
+          { ...base, id: "y", parentId: "p", type: "PLANNED_PLAY", title: "Under private", game: { name: "G" } },
+          { ...base, id: "t", parentId: "s", type: "TOURNAMENT", title: "T", tournament: { format: "SOMETHING_NEW" }, attendanceMode: "SOMETHING" },
+          { ...base, id: "u", parentId: "s", type: "PLAY_BOOTH", title: "Booth", startsAt: null, endsAt: null },
+        ],
+      },
+    });
+    expect(session.subEvents.map((n) => n.id)).toEqual(["t", "u"]);
+    expect(session.subEvents[0]).toMatchObject({ tournamentFormat: null, attendance: "rsvp" });
+    expect(session.subEvents[1]).toMatchObject({ kind: "meetup", startsAt: null });
+  });
+
+  it("still throws when a sub-event date has the wrong type", () => {
+    const base = { visibility: "PUBLIC", startsAt: "2026-11-01T10:00:00Z", endsAt: "2026-11-01T12:00:00Z" };
+    expect(() =>
+      parseSessionsResponse({
+        futureEvents: { elements: [{ ...base, id: "s", type: "MEETUP", title: "S" }, { ...base, id: "c", parentId: "s", type: "MEETUP", title: "C", startsAt: 5 }] },
+      })
+    ).toThrow(/startsAt/);
+  });
+
+  it("flags the usual venue on nested places too", () => {
+    const [session] = withUsualVenue(
+      [{ ...egara, subEvents: [{ ...egara.subEvents[0], place: { id: "home", name: "Local", address: null, isUsual: false } }] }],
+      [{ id: "home", name: "Local", address: null, isDefault: true }]
+    );
+    expect(session.subEvents[0].place?.isUsual).toBe(true);
+  });
+});

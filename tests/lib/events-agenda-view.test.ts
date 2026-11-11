@@ -52,6 +52,7 @@ const session = (over: Partial<MemberSession> = {}): MemberSession => ({
   queuedParticipantCount: null,
   organizerName: "Session Host",
   plannedPlays: [play()],
+  subEvents: [],
   ...over,
 });
 
