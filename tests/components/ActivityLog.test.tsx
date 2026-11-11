@@ -153,11 +153,12 @@ describe('ActivityFilters', () => {
     ])
   })
 
-  it('offers all actions plus the 16 groups', () => {
+  it('offers "all actions" plus the 17 filters', () => {
     render(<ActivityFilters query={query()} actors={[]} />)
     const options = within(screen.getByLabelText('filter_action')).getAllByRole('option')
-    expect(options).toHaveLength(17)
+    expect(options).toHaveLength(18)
     expect(options[0]).toHaveValue('')
+    expect(options.map((o) => o.getAttribute('value'))).toContain('benefit.*')
     expect(options.map((o) => o.getAttribute('value'))).toContain('badge.*')
     expect(options.map((o) => o.getAttribute('value'))).toContain('role.*')
   })

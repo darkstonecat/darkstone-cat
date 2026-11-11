@@ -1,7 +1,8 @@
 /**
  * Stable error codes of the admin server actions (`src/lib/admin/member-actions.ts`,
  * `src/lib/admin/membership-actions.ts`, `src/lib/admin/access-actions.ts`,
- * `src/lib/admin/superadmin-actions.ts`, `src/lib/admin/badge-actions.ts`) and the mapping from the database errors behind them.
+ * `src/lib/admin/superadmin-actions.ts`, `src/lib/admin/badge-actions.ts`,
+ * `src/lib/admin/benefit-actions.ts`) and the mapping from the database errors behind them.
  * Pure, so client and server can import it.
  *
  * The admin functions raise `<prefix>:<code>: <text>` (migrations 20261005100200, 20261005100400,
@@ -32,6 +33,9 @@ export type AdminActionError =
   | "badge_exists"
   | "badge_in_use"
   | "badge_text_sensitive"
+  // Member benefits (20261111100000_member_benefits.sql).
+  | "benefit_archived"
+  | "benefit_text_sensitive"
   // Leave and rejoin (A-6, A-7, M-1).
   | "self_target"
   | "role_held"
@@ -79,6 +83,7 @@ const PREFIXED_CODES: Record<string, AdminActionError> = {
   "admin:badge_archived": "badge_archived",
   "admin:badge_exists": "badge_exists",
   "admin:badge_in_use": "badge_in_use",
+  "admin:benefit_archived": "benefit_archived",
   // The BR-15 detector refusing the audit details: the only free text an A-4..A-9 action puts
   // there is a name (member.update before/after), e.g. a name shaped like a phone.
   "audit:sensitive_details": "invalid_name",
@@ -161,4 +166,14 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 /** A member id as the actions accept it: a UUID string (any case). */
 export function isMemberId(value: unknown): value is string {
   return typeof value === "string" && UUID_RE.test(value);
+}
+
+/**
+ * `adminDbErrorCode` for the member benefit actions. The BR-15 detector refusing the audit details
+ * means the benefit name (stored in every benefit entry) looks like a DNI or phone.
+ */
+export function benefitDbErrorCode(error: DbError): AdminActionError {
+  const message = typeof error?.message === "string" ? error.message : "";
+  if (PREFIX_RE.exec(message)?.[1] === "audit:sensitive_details") return "benefit_text_sensitive";
+  return adminDbErrorCode(error);
 }

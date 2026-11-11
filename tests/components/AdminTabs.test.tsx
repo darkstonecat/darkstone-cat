@@ -20,7 +20,7 @@ describe('AdminTabs', () => {
     nav.pathname = '/admin'
   })
 
-  it('shows six tabs to a board member, in the mockup order (Insígnies after Activitat), without Rols', () => {
+  it('shows seven tabs to a board member, in order (Insígnies, then Beneficis, after Activitat), without Rols', () => {
     render(<AdminTabs isSuperadmin={false} />)
     const links = within(screen.getByRole('navigation', { name: 'tabs_label' })).getAllByRole('link')
     expect(links.map((l) => l.getAttribute('href'))).toEqual([
@@ -28,18 +28,20 @@ describe('AdminTabs', () => {
       '/admin/members',
       '/admin/activity',
       '/admin/badges',
+      '/admin/benefits',
       '/admin/procedures',
       '/admin/tools',
     ])
     expect(links[3]).toHaveTextContent('tab_badges')
+    expect(links[4]).toHaveTextContent('tab_benefits')
   })
 
-  it('adds Rols for a superadmin (seven tabs)', () => {
+  it('adds Rols for a superadmin (eight tabs)', () => {
     render(<AdminTabs isSuperadmin />)
     const links = screen.getAllByRole('link')
-    expect(links).toHaveLength(7)
-    expect(links[6]).toHaveAttribute('href', '/admin/roles')
-    expect(links[6]).toHaveTextContent('tab_roles')
+    expect(links).toHaveLength(8)
+    expect(links[7]).toHaveAttribute('href', '/admin/roles')
+    expect(links[7]).toHaveTextContent('tab_roles')
   })
 
   it('keeps Insígnies active on a badge page (nested path)', () => {

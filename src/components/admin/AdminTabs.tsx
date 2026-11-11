@@ -4,16 +4,20 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
-export type AdminTabKey = "overview" | "members" | "activity" | "badges" | "procedures" | "tools" | "roles";
+export type AdminTabKey = "overview" | "members" | "activity" | "badges" | "benefits" | "procedures" | "tools" | "roles";
 
 type AdminTab = { key: AdminTabKey; href: string; superadminOnly?: boolean };
 
-/** Order as in the mockups (README §4, badge catalogue S7.1): Resum, Socis, Activitat, Insígnies, Procediments, Eines, Rols. */
+/**
+ * Order as in the mockups (README §4, badge catalogue S7.1, member benefits S7): Resum, Socis,
+ * Activitat, Insígnies, Beneficis, Procediments, Eines, Rols.
+ */
 export const ADMIN_TABS: readonly AdminTab[] = [
   { key: "overview", href: "/admin" },
   { key: "members", href: "/admin/members" },
   { key: "activity", href: "/admin/activity" },
   { key: "badges", href: "/admin/badges" },
+  { key: "benefits", href: "/admin/benefits" },
   { key: "procedures", href: "/admin/procedures" },
   { key: "tools", href: "/admin/tools" },
   { key: "roles", href: "/admin/roles", superadminOnly: true },
@@ -32,8 +36,9 @@ export function activeAdminTab(pathname: string): AdminTabKey | null {
 }
 
 /**
- * Pill tabs of the admin panel. Board members see six, superadmins seven (Rols).
- * Desktop: one equal-width row (seven tabs from `lg`); narrower: three columns (README §5).
+ * Pill tabs of the admin panel. Board members see seven, superadmins eight (Rols).
+ * Desktop: one equal-width row (from `md` for seven, `lg` for eight); narrower: three columns
+ * (README §5), four for superadmins so eight tabs make two full rows.
  */
 export default function AdminTabs({ isSuperadmin }: { isSuperadmin: boolean }) {
   const t = useTranslations("admin");
@@ -46,7 +51,9 @@ export default function AdminTabs({ isSuperadmin }: { isSuperadmin: boolean }) {
       <ul
         className={cn(
           "grid w-full grid-cols-3 gap-2",
-          isSuperadmin ? "lg:w-[910px] lg:grid-cols-7" : "md:w-[780px] md:max-w-full md:grid-cols-6",
+          isSuperadmin
+            ? "grid-cols-4 lg:w-[1040px] lg:max-w-full lg:grid-cols-8"
+            : "md:w-[910px] md:max-w-full md:grid-cols-7",
         )}
       >
         {tabs.map((tab) => {

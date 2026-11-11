@@ -15,7 +15,8 @@ import { formatAdminDate } from "./members-list";
 
 /**
  * The 18 action keys of spec §5.1 plus the 5 badge catalogue actions
- * (20261103100000_badge_catalogue.sql): the `audit_log` CHECK.
+ * (20261103100000_badge_catalogue.sql) and the 4 member benefit actions
+ * (20261111100000_member_benefits.sql): the `audit_log` CHECK.
  */
 export const AUDIT_ACTIONS = [
   "member.update",
@@ -41,6 +42,10 @@ export const AUDIT_ACTIONS = [
   "badge.archive",
   "badge.restore",
   "badge.delete",
+  "benefit.create",
+  "benefit.update",
+  "benefit.archive",
+  "benefit.restore",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -113,6 +118,8 @@ const REVEAL_FIELDS = ["dni", "phone"] as const;
 const BADGES = ["volunteer_egara_joga", "ludoteca_donor"] as const;
 /** `admin_update_badge` fields, in the order they are listed. */
 const BADGE_FIELDS = ["name", "earned_text", "locked_text", "icon", "sort_order", "show_locked"] as const;
+/** `admin_update_benefit` fields, in the order they are listed (never the code itself). */
+const BENEFIT_FIELDS = ["name", "description", "discount_code", "url", "collaborator_id", "sort_order"] as const;
 const ROLES = ["member", "admin", "board", "superadmin"] as const;
 const CHANNELS = ["form", "email", "in_person", "other"] as const;
 const EMAIL_LISTS = ["association", "newsletter"] as const;
@@ -223,6 +230,24 @@ function describeKnown(action: AuditAction, row: AdminActivityRow, actor: AuditA
       if (holders !== null) details.push(detail("active_holders", { count: holders }));
       return badge
         ? { sentence: sentence(name, { badge }), details }
+        : { sentence: sentence(`${name}_generic`), details };
+    }
+    case "benefit.create":
+    case "benefit.update":
+    case "benefit.archive":
+    case "benefit.restore": {
+      // No target member: the benefit is named by its stored Catalan name.
+      const benefit = text(d.name, 60);
+      const name = action.replace(".", "_");
+      const details: AuditText[] = [];
+      if (action === "benefit.update" && Array.isArray(d.fields)) {
+        const fields = BENEFIT_FIELDS.filter((field) => (d.fields as unknown[]).includes(field));
+        if (fields.length > 0) {
+          details.push(detail("fields", { fields: fields.map((f) => ({ i18n: `field.benefit_${f}` })) }));
+        }
+      }
+      return benefit
+        ? { sentence: sentence(name, { benefit }), details }
         : { sentence: sentence(`${name}_generic`), details };
     }
     case "card.regenerate":

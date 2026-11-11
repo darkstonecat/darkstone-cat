@@ -33,7 +33,7 @@ describe('parseActivityParams', () => {
   })
 
   it('accepts exactly the 18 keys and the 2 groups', () => {
-    for (const action of [...AUDIT_ACTIONS, 'badge.*', 'role.*']) {
+    for (const action of [...AUDIT_ACTIONS, 'badge.*', 'benefit.*', 'role.*']) {
       expect(parseActivityParams({ action }).action).toBe(action)
     }
     for (const action of ['made.up', 'badge.', '*', 'member.%', "member.update' or 1=1", '__proto__', '']) {
@@ -42,7 +42,7 @@ describe('parseActivityParams', () => {
   })
 
   it('offers 16 filter options, all accepted by the sanitiser', () => {
-    expect(ACTION_FILTERS).toHaveLength(16)
+    expect(ACTION_FILTERS).toHaveLength(17)
     for (const action of ACTION_FILTERS) expect(parseActivityParams({ action }).action).toBe(action)
     // Every one of the 18 keys is reachable from some option.
     const covered = AUDIT_ACTIONS.filter((key) => ACTION_FILTERS.some((o) => o === key || (o.endsWith('.*') && key.startsWith(o.slice(0, -1)))))

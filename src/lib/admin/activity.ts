@@ -2,7 +2,7 @@
  * V-4 activity log: URL parameters, their sanitiser and the arguments of `admin_list_activity`.
  *
  * Nothing from the URL reaches the RPC unchecked: the action must be one of the `AUDIT_ACTIONS`
- * keys or a group (the badge catalogue actions are inside `badge.*`), the actor a UUID or
+ * keys or a group (the badge catalogue actions are inside `badge.*`, benefits inside `benefit.*`), the actor a UUID or
  * `system` / `self`, the member a member number, the dates real `YYYY-MM-DD` days and the cursor
  * a plain integer. Pure module (no `server-only`).
  */
@@ -11,11 +11,11 @@ import { AUDIT_ACTIONS } from "./audit-format";
 import { MEMBER_NUMBER_PATTERN } from "./member-file";
 
 /** Group filters understood by `admin_list_activity`. */
-export const ACTION_GROUPS = ["badge.*", "role.*"] as const;
+export const ACTION_GROUPS = ["badge.*", "benefit.*", "role.*"] as const;
 
 /**
  * Options of the "Acció" select, in the mockup's order (README §4, V-4): 14 single keys plus the
- * two groups, 16 entries. Each value is accepted by the RPC.
+ * two groups, 16 entries, plus the member benefit group (17). Each value is accepted by the RPC.
  */
 export const ACTION_FILTERS = [
   "member.update",
@@ -23,6 +23,7 @@ export const ACTION_FILTERS = [
   "membership.leave",
   "membership.rejoin",
   "badge.*",
+  "benefit.*",
   "card.regenerate",
   "member.send_access_link",
   "export.members_csv",

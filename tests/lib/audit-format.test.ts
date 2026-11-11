@@ -56,6 +56,10 @@ const SAMPLES: Record<string, AdminActivityRow> = {
   'badge.create': row('badge.create', { badge: 'fira_2026', name: 'Fira 2026' }, NO_TARGET),
   'badge.update': row('badge.update', { badge: 'fira_2026', name: 'Fira 2026', fields: ['name', 'icon'] }, NO_TARGET),
   'badge.archive': row('badge.archive', { badge: 'fira_2026', name: 'Fira 2026', active_holders: 12 }, NO_TARGET),
+  'benefit.create': row('benefit.create', { benefit: '00000000-0000-4000-8000-0000000000b1', name: 'Outlet Games' }, NO_TARGET),
+  'benefit.update': row('benefit.update', { benefit: '00000000-0000-4000-8000-0000000000b1', name: 'Outlet Games', fields: ['discount_code', 'url'] }, NO_TARGET),
+  'benefit.archive': row('benefit.archive', { benefit: '00000000-0000-4000-8000-0000000000b1', name: 'Outlet Games' }, NO_TARGET),
+  'benefit.restore': row('benefit.restore', { benefit: '00000000-0000-4000-8000-0000000000b1', name: 'Outlet Games' }, NO_TARGET),
   'badge.restore': row('badge.restore', { badge: 'fira_2026', name: 'Fira 2026' }, NO_TARGET),
   'badge.delete': row('badge.delete', { badge: 'fira_2026', name: 'Fira 2026' }, NO_TARGET),
 }
@@ -77,7 +81,7 @@ function collectKeys(text: AuditText): string[] {
 describe('describeAuditEntry', () => {
   it('has a sample for every one of the 23 action keys', () => {
     expect(Object.keys(SAMPLES).sort()).toEqual([...AUDIT_ACTIONS].sort())
-    expect(AUDIT_ACTIONS).toHaveLength(23)
+    expect(AUDIT_ACTIONS).toHaveLength(27)
   })
 
   it.each(Object.keys(SAMPLES))('%s gets its own sentence, not the generic one', (action) => {
@@ -100,7 +104,7 @@ describe('describeAuditEntry', () => {
     }
     for (const messages of [ca, es, en]) {
       const activity = (messages as any).admin.activity
-      for (const key of ['sentence.unknown', 'sentence.unknown_target', 'sentence.badge_award_generic', 'sentence.badge_create_generic', 'sentence.badge_update_generic', 'sentence.badge_archive_generic', 'sentence.badge_restore_generic', 'sentence.badge_delete_generic', 'field.badge_name', 'field.badge_earned_text', 'field.badge_locked_text', 'field.badge_icon', 'field.badge_sort_order', 'field.badge_show_locked', 'sentence.role_grant_generic', 'sentence.member_reveal_sensitive_generic', 'sentence.account_purge_unconfirmed_generic']) {
+      for (const key of ['sentence.unknown', 'sentence.unknown_target', 'sentence.badge_award_generic', 'sentence.badge_create_generic', 'sentence.badge_update_generic', 'sentence.badge_archive_generic', 'sentence.badge_restore_generic', 'sentence.badge_delete_generic', 'field.badge_name', 'field.badge_earned_text', 'field.badge_locked_text', 'field.badge_icon', 'field.badge_sort_order', 'field.badge_show_locked', 'sentence.benefit_create_generic', 'sentence.benefit_update_generic', 'sentence.benefit_archive_generic', 'sentence.benefit_restore_generic', 'field.benefit_name', 'field.benefit_description', 'field.benefit_discount_code', 'field.benefit_url', 'field.benefit_collaborator_id', 'field.benefit_sort_order', 'sentence.role_grant_generic', 'sentence.member_reveal_sensitive_generic', 'sentence.account_purge_unconfirmed_generic']) {
         expect(lookup(activity, key), key).toBeTypeOf('string')
       }
     }
@@ -323,5 +327,20 @@ describe('describeAuditTime', () => {
 
   it('is null for an invalid date', () => {
     expect(describeAuditTime('not a date', now)).toBeNull()
+  })
+})
+
+describe('benefit entries', () => {
+  it('name the benefit by its stored Catalan name and list changed fields, never the code', () => {
+    const { sentence, details } = describeAuditEntry(SAMPLES['benefit.update'])
+    expect(sentence).toEqual({ key: 'sentence.benefit_update', params: { benefit: 'Outlet Games' } })
+    expect(details).toEqual([
+      { key: 'detail.fields', params: { fields: [{ i18n: 'field.benefit_discount_code' }, { i18n: 'field.benefit_url' }] } },
+    ])
+  })
+
+  it('falls back to the generic sentence without a name', () => {
+    const entry = row('benefit.archive', { benefit: '00000000-0000-4000-8000-0000000000b1' }, NO_TARGET)
+    expect(describeAuditEntry(entry).sentence).toEqual({ key: 'sentence.benefit_archive_generic', params: {} })
   })
 })

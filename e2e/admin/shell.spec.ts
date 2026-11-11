@@ -8,7 +8,7 @@ test.describe('Admin shell', () => {
     await expect(page.getByText('Has entrat com a')).toBeVisible()
 
     const tabs = page.getByRole('navigation', { name: 'Administració' })
-    await expect(tabs.getByRole('link')).toHaveText(['Resum', 'Socis', 'Activitat', 'Insígnies', 'Procediments', 'Eines'])
+    await expect(tabs.getByRole('link')).toHaveText(['Resum', 'Socis', 'Activitat', 'Insígnies', 'Beneficis', 'Procediments', 'Eines'])
     await expect(tabs.getByRole('link', { name: 'Resum' })).toHaveAttribute('aria-current', 'page')
   })
 
