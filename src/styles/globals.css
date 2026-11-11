@@ -136,6 +136,8 @@
 @layer base {
   html {
     @apply relative;
+    /* Reserve the scrollbar space so short pages (e.g. /profile/card) do not shift sideways */
+    scrollbar-gutter: stable;
   }
 
   body {
