@@ -91,8 +91,15 @@ async function resolveCoversWithin(shown: LudoyaSessionPlay[], budgetMs: number)
   }
 }
 
-async function withCovers(sessions: LudoyaSession[]): Promise<MemberSession[]> {
-  const shown = sessions.flatMap((s) => s.plannedPlays.slice(0, MAX_PLAYS_SHOWN));
+/**
+ * Adds a cover to every play; only the first `playsPerSession` plays of each
+ * session are looked up on BGG, the rest keep Ludoya's image.
+ */
+export async function withCovers(
+  sessions: LudoyaSession[],
+  playsPerSession: number = MAX_PLAYS_SHOWN
+): Promise<MemberSession[]> {
+  const shown = sessions.flatMap((s) => s.plannedPlays.slice(0, playsPerSession));
   const covers = shown.length > 0 ? await resolveCoversWithin(shown, COVER_BUDGET_MS) : new Map<string, string | null>();
 
   return sessions.map((session) => ({
