@@ -66,6 +66,17 @@ describe('GET /api/events/calendar', () => {
     expect(JSON.stringify(body)).not.toContain('ONLY_GROUP')
   })
 
+  it.each([
+    // Madrid is UTC+1 in November.
+    ['an hour before midnight', '2026-11-11T22:00:00Z', 'public, max-age=60, s-maxage=60, stale-while-revalidate=300'],
+    ['three minutes before midnight', '2026-11-11T22:57:00Z', 'public, max-age=60, s-maxage=60, stale-while-revalidate=120'],
+    ['30 seconds before midnight', '2026-11-11T22:59:30Z', 'public, max-age=30, s-maxage=30, stale-while-revalidate=0'],
+  ])('never caches past Madrid midnight (%s), so "today" moves on time', async (_name, now, header) => {
+    vi.setSystemTime(new Date(now))
+    const res = await call('month=2026-12')
+    expect(res.headers.get('cache-control')).toBe(header)
+  })
+
   it('falls back to Catalan for an unknown locale', async () => {
     const body = (await (await call('month=2026-12&locale=fr')).json()) as EventsCalendarMonth
     expect(body.title).toBe('Desembre 2026')

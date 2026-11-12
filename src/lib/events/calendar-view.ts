@@ -20,9 +20,24 @@ import {
   type CalendarNeighbour,
   type YearMonth,
 } from "./month-grid";
+import { secondsUntilMadridMidnight } from "./madrid-day";
+
+const MAX_AGE = 60;
+const STALE_WHILE_REVALIDATE = 300;
+
+/**
+ * Cache-Control of a calendar month. A month carries `isToday` / `isPast`, so no cache (browser
+ * or CDN, stale copies included) may serve it past the next Madrid midnight.
+ */
+export function calendarCacheControl(now: Date): string {
+  const left = secondsUntilMadridMidnight(now);
+  const maxAge = Math.min(MAX_AGE, left);
+  const stale = Math.min(STALE_WHILE_REVALIDATE, left - maxAge);
+  return `public, max-age=${maxAge}, s-maxage=${maxAge}, stale-while-revalidate=${stale}`;
+}
 
 /** The session fields the calendar reads. */
-export type CalendarSession = Pick<LudoyaSession, "id" | "title" | "startsAt" | "type" | "visibility" | "ludoyaUrl">;
+export type CalendarSession = Pick<LudoyaSession, "id" | "title" | "startsAt" | "endsAt" | "type" | "visibility" | "ludoyaUrl">;
 
 export interface EventsCalendarDay {
   /** `YYYY-MM-DD` */
@@ -78,6 +93,7 @@ export function toEventsCalendar(
       id: s.id,
       title: s.title,
       startsAt: s.startsAt,
+      endsAt: s.endsAt,
       special: s.type === "special",
       ludoyaUrl: s.ludoyaUrl,
     }));

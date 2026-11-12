@@ -88,12 +88,16 @@ A light pill at the top of the 3:4 cover, always on one line, with `X/N` on the 
 
 There is no status text under the cover (the pill already shows the seats); a full play only changes the button to "A la cua". The pill is `role="img"` with a label such as "3 de 4 places ocupades, en falta 1 per començar". Edge cases: a capacity ≤ 0 counts as no limit, needed seats never exceed free seats, an over-booked play is full.
 
+### Event end
+
+An event that ends before **06:00** (Madrid) counts as ending the day before (`madridLastDay`, `NIGHT_END_HOUR` in `src/lib/events/madrid-day.ts`): an evening session from 17:00 to 00:00 or 02:00 is one day on the date tile, the card dates, the mobile strip, the program and the calendar. The time still reads "17:00 – 02:00".
+
 ### Calendar
 
 | Rule | Value |
 |---|---|
 | Range | Current month up to 6 months ahead; the previous arrow is disabled on the current month. |
-| Cells | Session days dark, special days orange, today ringed, past days faded. A special spanning several days is marked on its start day. |
+| Cells | Session days dark, special days orange, today ringed, past days faded. An event spanning several days is marked on each of its days, and each of those days opens its card. |
 | Click | A day whose event is in the timeline opens that card and scrolls to it (the URL hash becomes `#event-<id>`). Any other day with an event opens Ludoya in a new tab. A day with a session and a special opens the special. |
 | Month change | Loads the month from `/api/events/calendar`; the timeline and the scroll position do not move. On failure the grid stays and offers Ludoya. |
 
@@ -147,7 +151,7 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
 | Case | Answer |
 |---|---|
 | `month` malformed or outside current..+6 | `400 {"error":"invalid_month"}`, `Cache-Control: no-store`, Ludoya not called |
-| Valid month | `200` `EventsCalendarMonth` (`monthKey`, `title`, `prev`, `next`, `weekdays`, `weeks[][]` of days with `kind`, `label`, `titles`, `eventId`, `ludoyaUrl`), `Cache-Control: public, max-age=60, s-maxage=60, stale-while-revalidate=300` |
+| Valid month | `200` `EventsCalendarMonth` (`monthKey`, `title`, `prev`, `next`, `weekdays`, `weeks[][]` of days with `kind`, `label`, `titles`, `eventId`, `ludoyaUrl`), `Cache-Control: public, max-age=60, s-maxage=60, stale-while-revalidate=300`, shortened near midnight so no copy outlives the next Madrid 00:00 (the month carries `isToday` / `isPast`; `calendarCacheControl`) |
 | Ludoya failed | `200` with the empty grid and `error: "api_error" \| "timeout"`, `no-store` |
 | `locale` unknown | Catalan |
 
@@ -157,7 +161,7 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
 |---|---|
 | `src/lib/events/agenda-view.ts` | Pure: selection, weeks, countdown, place rule, view model, summaries |
 | `src/lib/events/program/` | Pure: `classifyProgram` (tree → plays, tournaments, activities, demos), `layoutProgram` (days, slots above 8, always-open groups), `programItems`, `seatedItems` |
-| `src/lib/events/madrid-day.ts` | `madridDay()`, shared by the view model and the program layout |
+| `src/lib/events/madrid-day.ts` | `madridDay()`, `madridLastDay()` (06:00 cut-off), `secondsUntilMadridMidnight()`, shared by the view model, the program layout and the calendar |
 | `src/lib/sub-event-covers.ts` | Pure: cover requests for the tree and their answers |
 | `src/lib/events/agenda-format.ts` | Pure: date texts, date tiles and strip days, formatted on the server |
 | `src/lib/events/agenda.ts` | Server: `fetchEventsAgenda(now)` |

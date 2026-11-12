@@ -11,10 +11,11 @@ import {
   type CalendarEvent,
 } from '@/lib/events/month-grid'
 
-const event = (id: string, startsAt: string, special = false): CalendarEvent => ({
+const event = (id: string, startsAt: string, special = false, endsAt = new Date(Date.parse(startsAt) + 4 * 3600_000).toISOString()): CalendarEvent => ({
   id,
   title: id,
   startsAt,
+  endsAt,
   special,
   ludoyaUrl: `https://ludoya.test/${id}`,
 })
@@ -92,6 +93,25 @@ describe('buildMonthGrid', () => {
     expect(days.find((d) => d.date === '2026-10-02')?.events.map((e) => e.id)).toEqual(['early', 'late'])
     expect(days.find((d) => d.date === '2026-10-31')?.events.map((e) => e.id)).toEqual(['night'])
     expect(madridDayKey('2026-03-27T23:30:00Z')).toBe('2026-03-28')
+  })
+
+  it('places a multi-day event on each of its days in the month, up to the last day of the event', () => {
+    const weeks = buildMonthGrid(
+      { year: 2026, month: 10 },
+      [
+        // 30 Oct 10:00 to 2 Nov 18:00 Madrid: the November days fall outside the grid's month.
+        event('camp', '2026-10-30T09:00:00Z', true, '2026-11-02T17:00:00Z'),
+        // 9 Oct 17:00 to 10 Oct 02:00 Madrid: an evening session, one day (06:00 cut-off).
+        event('late', '2026-10-09T15:00:00Z', false, '2026-10-10T00:00:00Z'),
+      ],
+      ''
+    )
+    const marked = weeks.flat().filter((d) => d.events.length > 0).map((d) => [d.date, d.events.map((e) => e.id)])
+    expect(marked).toEqual([
+      ['2026-10-09', ['late']],
+      ['2026-10-30', ['camp']],
+      ['2026-10-31', ['camp']],
+    ])
   })
 
   it('ignores events outside the month and never puts events on padding days', () => {

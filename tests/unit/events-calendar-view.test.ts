@@ -5,20 +5,50 @@ import { isEventsMonth, parseMonthKey, toEventsCalendar, type CalendarSession } 
 const NOW = new Date('2026-11-11T11:00:00Z')
 const NOV = { year: 2026, month: 11 }
 
-const session = (over: Partial<CalendarSession> & { id: string }): CalendarSession => ({
-  title: 'Sessió oberta',
-  startsAt: '2026-11-13T15:00:00Z',
-  type: 'regular',
-  visibility: 'PUBLIC',
-  ludoyaUrl: `https://app.ludoya.test/events/${over.id}`,
-  ...over,
-})
+const session = (over: Partial<CalendarSession> & { id: string }): CalendarSession => {
+  const startsAt = over.startsAt ?? '2026-11-13T15:00:00Z'
+  return {
+    title: 'Sessió oberta',
+    startsAt,
+    endsAt: new Date(Date.parse(startsAt) + 4 * 3600_000).toISOString(),
+    type: 'regular',
+    visibility: 'PUBLIC',
+    ludoyaUrl: `https://app.ludoya.test/events/${over.id}`,
+    ...over,
+  }
+}
 
 const day = (cal: ReturnType<typeof toEventsCalendar>, date: string) => {
   const found = cal.weeks.flat().find((d) => d.date === date)
   if (!found) throw new Error(`no cell ${date}`)
   return found
 }
+
+describe('toEventsCalendar · multi-day events', () => {
+  it('marks every day of a multi-day special, each opening its card', () => {
+    const cal = toEventsCalendar(
+      NOV,
+      [session({ id: 'egara', type: 'special', startsAt: '2026-11-21T09:00:00Z', endsAt: '2026-11-22T17:00:00Z' })],
+      NOW,
+      'ca'
+    )
+    for (const date of ['2026-11-21', '2026-11-22']) {
+      expect(day(cal, date), date).toMatchObject({ kind: 'special', eventId: 'egara', titles: ['Sessió oberta'] })
+    }
+    expect(day(cal, '2026-11-23')).toMatchObject({ kind: 'none', eventId: null })
+  })
+
+  it('marks an evening session that ends at 00:00 on its own day only', () => {
+    const cal = toEventsCalendar(
+      NOV,
+      [session({ id: 'fri', startsAt: '2026-11-13T16:00:00Z', endsAt: '2026-11-13T23:00:00Z' })],
+      NOW,
+      'ca'
+    )
+    expect(day(cal, '2026-11-13')).toMatchObject({ kind: 'session', eventId: 'fri' })
+    expect(day(cal, '2026-11-14')).toMatchObject({ kind: 'none', eventId: null })
+  })
+})
 
 describe('toEventsCalendar', () => {
   it('marks session, special, past and today days on a Monday-first grid', () => {

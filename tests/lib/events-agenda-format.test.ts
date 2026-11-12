@@ -108,9 +108,9 @@ describe("formatAgenda", () => {
   });
 
   it("reads tile days on the Madrid calendar, across a month change", () => {
-    // 31 Oct 23:30 Madrid (22:30 UTC) to 1 Nov 01:00 Madrid: two Madrid days.
-    const night = event({ id: "night", startsAt: "2026-10-31T22:30:00Z", endsAt: "2026-11-01T00:00:00Z" });
-    const tile = formatAgenda({ weeks: [{ start: "2026-10-26", end: "2026-11-01", isCurrent: false, events: [night] }], specials: [] }, "ca")
+    // 31 Oct 10:00 Madrid to 1 Nov 18:00 Madrid: two Madrid days.
+    const weekend = event({ id: "weekend", startsAt: "2026-10-31T09:00:00Z", endsAt: "2026-11-01T17:00:00Z" });
+    const tile = formatAgenda({ weeks: [{ start: "2026-10-26", end: "2026-11-01", isCurrent: false, events: [weekend] }], specials: [] }, "ca")
       .weeks[0].events[0].tile;
 
     expect(tile).toEqual({
@@ -120,6 +120,39 @@ describe("formatAgenda", () => {
       ],
       gap: false,
     });
+  });
+
+  it.each([
+    ["at 00:00", "2026-11-13T23:00:00Z", "17:00 – 00:00"],
+    ["at 02:00", "2026-11-14T01:00:00Z", "17:00 – 02:00"],
+  ])("an evening session ending %s is one day: tile, dates and strip", (_name, endsAt, time) => {
+    const late = event({ id: "late", startsAt: "2026-11-13T16:00:00Z", endsAt });
+    const view = formatAgenda(
+      { weeks: [{ start: "2026-11-09", end: "2026-11-15", isCurrent: true, events: [late] }], specials: [] },
+      "ca",
+      new Date("2026-11-11T11:00:00Z")
+    );
+    const card = view.weeks[0].events[0];
+
+    expect(card.tile).toEqual({ days: [{ weekday: "DV", day: "13" }], gap: false });
+    expect(card.dates).toBe("Divendres 13 de novembre");
+    expect(card.time).toBe(time);
+    expect(view.strip.flatMap((w) => w.days.map((d) => d.date))).toEqual(["2026-11-13"]);
+  });
+
+  it("a two-day special ending before 06:00 of a third day keeps two days in its range", () => {
+    const camp = event({ id: "camp", type: "special", startsAt: "2026-11-28T09:00:00Z", endsAt: "2026-11-30T02:00:00Z" });
+    const card = formatAgenda({ weeks: [{ start: "2026-11-23", end: "2026-11-29", isCurrent: false, events: [camp] }], specials: [] }, "ca")
+      .weeks[0].events[0];
+
+    expect(card.tile).toEqual({
+      days: [
+        { weekday: "DS", day: "28" },
+        { weekday: "DG", day: "29" },
+      ],
+      gap: false,
+    });
+    expect(card.dates).not.toContain("30");
   });
 
   it("labels each week with its range and the parts of its title", () => {

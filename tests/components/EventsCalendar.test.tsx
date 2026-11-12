@@ -19,6 +19,7 @@ const session = (id: string, startsAt: string, over: Partial<CalendarSession> = 
   id,
   title: `Title ${id}`,
   startsAt,
+  endsAt: new Date(Date.parse(startsAt) + 4 * 3600_000).toISOString(),
   type: 'regular',
   visibility: 'PUBLIC',
   ludoyaUrl: `https://ludoya.test/${id}`,

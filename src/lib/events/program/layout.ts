@@ -12,7 +12,7 @@
 //   variants keep their order. The grid stays in start order.
 // - Always-open items are grouped by zone in tree order, zone-less ones last.
 
-import { madridDay } from "../madrid-day";
+import { madridDay, madridLastDay } from "../madrid-day";
 import type { AlwaysOpenGroup, ProgramCounts, ProgramDay, ProgramEvent, ProgramItem, ProgramLayout, SeatedItem } from "./types";
 
 /** More timed items than this in one day put the whole event in slots. */
@@ -84,7 +84,7 @@ export function layoutProgram<T extends ProgramItem>(items: readonly T[], event:
   }
   const mode = [...byDay.values()].some((dayItems) => dayItems.length > PROGRAM_SLOT_THRESHOLD) ? "slots" : "grid";
   return {
-    multiDay: madridDay(event.startsAt) !== madridDay(event.endsAt),
+    multiDay: madridDay(event.startsAt) !== madridLastDay(event.startsAt, event.endsAt),
     days: [...byDay.entries()].map(([day, dayItems]) => layoutDay(day, dayItems, mode)),
     alwaysOpen: alwaysOpenGroups(items.filter((item) => item.placement === "alwaysOpen")),
     counts: countItems(items),

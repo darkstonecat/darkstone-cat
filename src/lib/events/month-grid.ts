@@ -6,6 +6,8 @@
 // plain `YYYY-MM-DD` strings on the Madrid calendar and all date arithmetic is
 // done in UTC on those strings, so DST changes cannot shift a day.
 
+import { madridLastDay } from "./madrid-day";
+
 const TIME_ZONE = "Europe/Madrid";
 const INTL_LOCALES: Record<string, string> = { ca: "ca-ES", es: "es-ES", en: "en-GB" };
 const intlLocale = (locale: string) => INTL_LOCALES[locale] ?? locale;
@@ -24,6 +26,7 @@ export interface CalendarEvent {
   id: string;
   title: string;
   startsAt: string;
+  endsAt: string;
   special: boolean;
   ludoyaUrl: string;
 }
@@ -83,8 +86,9 @@ const dayKey = (date: Date) => date.toISOString().slice(0, 10);
 
 /**
  * Monday-first weeks covering the month, padded with the neighbouring months'
- * days so every week has seven cells. Events are placed on the Madrid day they
- * start.
+ * days so every week has seven cells. Events are placed on every Madrid day from
+ * the one they start to their last day (`madridLastDay`: an evening ending before
+ * 06:00 stays on its own day).
  */
 export function buildMonthGrid(
   { year, month }: YearMonth,
@@ -98,8 +102,10 @@ export function buildMonthGrid(
 
   const byDay = new Map<string, CalendarEvent[]>();
   for (const event of events) {
-    const key = madridDayKey(event.startsAt);
-    byDay.set(key, [...(byDay.get(key) ?? []), event]);
+    const last = madridLastDay(event.startsAt, event.endsAt);
+    for (let key = madridDayKey(event.startsAt); key <= last; key = dayKey(new Date(utcDate(key).getTime() + 86_400_000))) {
+      byDay.set(key, [...(byDay.get(key) ?? []), event]);
+    }
   }
   for (const list of byDay.values()) list.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 

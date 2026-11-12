@@ -197,3 +197,13 @@ describe("layoutProgram", () => {
     expect(layout).toEqual({ multiDay: false, days: [], alwaysOpen: [], counts: { plays: 0, tournaments: 0, activities: 0, demos: 0 } });
   });
 });
+
+describe("layoutProgram · end of the event", () => {
+  it.each([
+    ["ends at 00:00", "2026-12-04T23:00:00Z", false],
+    ["ends at 02:00", "2026-12-05T01:00:00Z", false],
+    ["ends the next afternoon", "2026-12-05T15:00:00Z", true],
+  ])("an evening event that %s: multiDay %s", (_name, endsAt, multiDay) => {
+    expect(layoutProgram([], { startsAt: "2026-12-04T16:00:00Z", endsAt }).multiDay).toBe(multiDay);
+  });
+});

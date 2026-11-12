@@ -6,6 +6,7 @@
 // components only print it. Pure: no React, no server-only imports.
 
 import type { Agenda, AgendaEvent, AgendaWeek } from "./agenda-view";
+import { madridLastDay } from "./madrid-day";
 import type { AlwaysOpenGroup, ProgramDay, ProgramGroup, ProgramItem, ProgramLayout } from "./program";
 
 const TIME_ZONE = "Europe/Madrid";
@@ -124,7 +125,6 @@ export function formatAgenda(agenda: Agenda, locale: string, now: Date = new Dat
   const shortRange = fmt({ weekday: "short", day: "numeric", month: "long" });
   const weekday = fmt({ weekday: "short" });
   const clock = fmt({ hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
-  const calendarDay = fmt({ year: "numeric", month: "2-digit", day: "2-digit" });
   const shortMonth = fmt({ day: "numeric", month: "short" });
   /** `YYYY-MM-DD` of an instant in Madrid (en-CA prints ISO order). */
   const isoDay = (instant: Date | string) =>
@@ -134,12 +134,12 @@ export function formatAgenda(agenda: Agenda, locale: string, now: Date = new Dat
 
   const tileWeekday = (instant: Date) => weekday.format(instant).replace(/\./g, "").toLocaleUpperCase();
 
-  function formatTile(start: Date, end: Date): EventTile {
+  /** `last` is the event's last Madrid day (madridLastDay): an evening ending at 00:00 is one day. */
+  function formatTile(start: Date, last: string): EventTile {
     const tileDay = (instant: Date) => ({ weekday: tileWeekday(instant), day: dayNumber.format(instant) });
     const first = isoDay(start);
-    const last = isoDay(end);
     if (first === last) return { days: [tileDay(start)], gap: false };
-    return { days: [tileDay(start), tileDay(end)], gap: nextDay(first) !== last };
+    return { days: [tileDay(start), tileDay(dayInstant(last))], gap: nextDay(first) !== last };
   }
 
   const dayTitle = (instant: Date) => capitalize(longDate.format(instant).replace(",", ""));
@@ -170,14 +170,15 @@ export function formatAgenda(agenda: Agenda, locale: string, now: Date = new Dat
   function formatEvent(event: AgendaEvent): EventView {
     const start = new Date(event.startsAt);
     const end = new Date(event.endsAt);
-    const multiDay = calendarDay.format(start) !== calendarDay.format(end);
+    const last = madridLastDay(start, end);
+    const multiDay = isoDay(start) !== last;
     const dates = multiDay
-      ? capitalize(plainSpaces(shortRange.formatRange(start, end)))
+      ? capitalize(plainSpaces(shortRange.formatRange(start, dayInstant(last))))
       : dayTitle(start);
     const time = `${clock.format(start)} – ${clock.format(end)}`;
     return {
       ...event,
-      tile: formatTile(start, end),
+      tile: formatTile(start, last),
       dates,
       time,
       when: `${dates} · ${time}`,
@@ -208,7 +209,7 @@ export function formatAgenda(agenda: Agenda, locale: string, now: Date = new Dat
     const byDay = new Map<string, AgendaEvent[]>();
     for (const event of week.events) {
       // A multi-day event shows on each of its days still to come.
-      const last = isoDay(event.endsAt);
+      const last = madridLastDay(event.startsAt, event.endsAt);
       for (let day = isoDay(event.startsAt); day <= last; day = nextDay(day)) {
         if (day >= today) byDay.set(day, [...(byDay.get(day) ?? []), event]);
       }

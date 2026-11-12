@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
 import { fetchEventsCalendar } from "@/lib/events/calendar";
-import { isEventsMonth, parseMonthKey } from "@/lib/events/calendar-view";
+import { calendarCacheControl, isEventsMonth, parseMonthKey } from "@/lib/events/calendar-view";
 import { agendaNow } from "@/lib/events/clock";
 
 const noStore = { "Cache-Control": "no-store" } as const;
-/** The month is public data and its Ludoya request is cached 60 s anyway. */
-const cacheable = { "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=300" } as const;
 
 /**
  * GET ?month=YYYY-MM&locale=ca — one pre-formatted month of the /events
@@ -23,5 +21,6 @@ export async function GET(request: Request) {
   const locale = routing.locales.find((l) => l === params.get("locale")) ?? routing.defaultLocale;
 
   const payload = await fetchEventsCalendar(month, locale, now);
-  return NextResponse.json(payload, { headers: payload.error ? noStore : cacheable });
+  // Public data, its Ludoya request is cached 60 s anyway; never cached past Madrid midnight.
+  return NextResponse.json(payload, { headers: payload.error ? noStore : { "Cache-Control": calendarCacheControl(now) } });
 }
