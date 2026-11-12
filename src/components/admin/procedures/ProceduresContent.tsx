@@ -25,15 +25,15 @@ export default function ProceduresContent() {
   return (
     <div className="mx-auto max-w-[1120px] px-4 pt-10 sm:px-6 md:pt-16">
       <p className="mb-8 text-base text-stone-custom/75">{t("intro")}</p>
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr] lg:items-start">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[260px_minmax(0,1fr)] xl:items-start">
         <nav
           aria-label={t("index_aria")}
-          className="rounded-2xl bg-brand-white p-4 md:p-6 lg:sticky lg:top-24"
+          className="rounded-2xl bg-brand-white p-4 md:p-6 xl:sticky xl:top-24"
         >
           <p className="mb-3 text-xs font-bold tracking-[0.2em] text-stone-custom/65 uppercase">
             {t("index_label")}
           </p>
-          <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:gap-0 lg:overflow-visible">
+          <ul className="flex gap-2 overflow-x-auto xl:flex-col xl:gap-0 xl:overflow-visible">
             {PROCEDURES.map(({ n }) => (
               <li key={n} className="shrink-0">
                 <a
@@ -43,7 +43,7 @@ export default function ProceduresContent() {
                   <span className="shrink-0 whitespace-nowrap rounded-full bg-brand-orange/12 px-2.5 py-1 text-xs font-bold text-brand-orange-text">
                     P-{n}
                   </span>
-                  <span className="hidden lg:inline">{t(`p${n}.title`)}</span>
+                  <span className="hidden xl:inline">{t(`p${n}.title`)}</span>
                 </a>
               </li>
             ))}

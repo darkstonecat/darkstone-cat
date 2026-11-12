@@ -383,7 +383,7 @@ The CSV holds active members only. Blocked records are never exported (BR-21). I
 
 ## 8. Views
 
-All admin views use the dark header pattern of the member area (eyebrow "ADMINISTRACIÓ", title, tabs), `noindex`, not in the sitemap. Tabs: **Resum · Socis · Activitat · Procediments · Eines**, plus **Rols** for superadmins.
+All admin views share one frame (compact dark header, grouped sidebar on desktop, section switcher on phones), are `noindex` and are not in the sitemap. The frame, the section groups and how to add a section are in [`navigation.md`](navigation.md).
 
 ### V-1 · Resum — `/admin`
 - Stat cards:

@@ -1,6 +1,6 @@
 # Admin panel — interface and navigation
 
-Status: **approved, not implemented yet** (2026-11-12). Implementation plan: `odd/tasks/admin-navigation.md`. When it ships, this document describes the delivered behaviour, and the status line changes.
+Status: **implemented** (2026-11-12, branch `feat/admin-navigation`). Plan and evidence: `odd/tasks/admin-navigation.md`. This document describes the delivered behaviour.
 
 This document covers the panel's frame: header, sections, how a board member moves between them, and how to add a new section. What each view does is in [`spec.md`](spec.md) §8. The approved mockup is proposal **A** of the design canvas (grouped sidebar plus a section switcher on phones).
 
@@ -32,8 +32,8 @@ The sections are grouped by what the board uses them for. The order is fixed: fi
 One compact dark header on every admin page, below the site NavBar:
 
 - Eyebrow "ADMINISTRACIÓ".
-- `h1` with the active section's name (Resum on an unknown path).
-- The signed-in line: name and role ("Junta" or "Superadmin"). On a phone the role goes into the eyebrow line and the name is left out, to save height.
+- `h1` with the active section's name (Resum on an unknown path). Below `lg` it is `sr-only`: the section switcher shows the name instead, so it is not printed twice.
+- The signed-in line: name and role ("Junta" or "Superadmin"), from `lg`. Below `lg` the role goes into the eyebrow line and the name is left out, to save height.
 - No tabs: navigation moves to the sidebar (desktop) or the section switcher (phone).
 
 ## 4. Desktop, from `lg` (1024 px)
@@ -41,13 +41,14 @@ One compact dark header on every admin page, below the site NavBar:
 - Two columns under the header: a white sidebar about 224 px wide on the left, the page content on the right.
 - The sidebar is a `<nav aria-label="Administració">` with the groups of §2: a small uppercase group label, then one link per section (icon and name, at least 40 px tall). The active link is dark (stone background, white text).
 - Procediments sits at the bottom of the sidebar, under a thin divider.
-- The sidebar sticks under the NavBar while the content scrolls (assumption: confirm during implementation that it fits with Lenis and the fixed NavBar).
-- Page containers keep their own `max-w-[1120px]` and padding; the shell only places them in the right column.
+- The sidebar is a white rounded card that sticks under the NavBar (`lg:sticky lg:top-24`) while the content scrolls, aligned with the top of the page content.
+- The shell is `max-w-[1360px]` with `px-6`, the header uses the same inner width, so their left edges line up. Page containers keep their own `max-w-[1120px]` and padding; the shell only places them in the right column.
+- At 1024 px the content column is about 720 px. Page-internal side columns that would be cramped there start at `xl` instead (the Procediments index).
 
 ## 5. Phone and tablet, below `lg`
 
 - The header holds one full-width button: the active section's icon and name, the word "Canvia" and a chevron. It has `aria-haspopup="dialog"` and `aria-expanded`.
-- The button opens a bottom sheet (`role="dialog"`, `aria-modal`, title "Administració") with the same groups and links as the sidebar, links at least 48 px tall, the active one dark, and a close button.
+- The button opens a bottom sheet (`role="dialog"`, `aria-modal`, title "Administració") with the same groups and links as the sidebar, links at least 48 px tall, the active one dark and focused on open, and a close button. A tap on the backdrop closes it too.
 - The sheet is built on `useModalDialog` (page inert, Lenis stopped, focus trap, Escape closes, focus returns to the button), like `AdminDialog`, and renders in a portal to `body`.
 - Choosing a link closes the sheet and navigates. A change of path closes it too.
 - No section is hidden behind "more": every visible section is one tap away from the sheet.
@@ -58,6 +59,7 @@ One compact dark header on every admin page, below the site NavBar:
 |---|---|
 | `src/app/[locale]/admin/layout.tsx` | Guard (`requireRole("board")`), NavBar, `AdminHeader`, the two-column shell, Footer |
 | `src/components/admin/nav/adminNav.ts` | Pure: the sections, groups, icons and `superadminOnly` flags; `visibleAdminNav(isSuperadmin)` and `activeAdminSection(pathname)` |
+| `src/components/admin/nav/AdminNavList.tsx` | The grouped links, shared by the sidebar and the sheet (`size` `sidebar` or `sheet`) |
 | `src/components/admin/nav/AdminSidebar.tsx` | Desktop sidebar (`hidden lg:block`) |
 | `src/components/admin/nav/AdminSectionSwitcher.tsx` | Phone button and bottom sheet (`lg:hidden`) |
 | `src/components/admin/AdminHeader.tsx` | Compact header: eyebrow, title, signed-in line, the switcher on phones |
@@ -75,6 +77,6 @@ One compact dark header on every admin page, below the site NavBar:
 
 ## 8. Tests
 
-- Unit (`tests/components/admin-nav/`): grouping and order, Rols only for superadmins, empty groups hidden, active section on nested paths and on `/admin`.
-- Components: sidebar links, `aria-current`, the "Super" chip; switcher opens and closes (button, Escape, link, path change) and returns focus.
-- E2E (`e2e/admin/shell.spec.ts`): desktop sidebar order for board and superadmin; on a phone viewport the switcher opens the sheet and navigates; no horizontal overflow at 360 px in `ca` and `es`.
+- Unit (`tests/components/admin-nav/adminNav.test.ts`): grouping and order, Rols only for superadmins, labelled groups, active section on nested paths and on `/admin`.
+- Components (`tests/components/admin-nav/AdminNav.test.tsx`): sidebar order and group lists, `aria-current`, the "Super" chip; the switcher opens and closes (Escape, close button, link, backdrop, path change), focuses the current link and returns focus; the header.
+- E2E (`e2e/admin/shell.spec.ts`, desktop project): sidebar order and groups for a board member; on a 360 px viewport the switcher opens the sheet and navigates; no horizontal overflow at 360 px (`ca` and `es`, sheet labels not clipped) nor at 1024 px on every admin page. There is no superadmin E2E fixture, so Rols in the navigation is covered by the component tests.
