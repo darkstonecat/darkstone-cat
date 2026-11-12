@@ -256,4 +256,17 @@ test.describe('Events page on mobile', () => {
     await openEvents(page)
     await expectContinuousRail(page)
   })
+
+  test('keeps the day strip overflow inside its track on a narrow screen', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 700 })
+    await openEvents(page)
+    const track = page.getByRole('region', { name: 'Properes dates' }).getByRole('list', { name: 'Properes dates' })
+    await expect(track).toBeVisible()
+    // Precondition: the strip scrolls, so some days (and their screen-reader labels) sit off screen.
+    const trackOverflow = await track.evaluate((el) => el.scrollWidth - el.clientWidth)
+    expect(trackOverflow).toBeGreaterThan(100)
+    // The off-screen days must not widen the page (their absolute sr-only labels used to escape the track).
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+    expect(overflow).toBeLessThanOrEqual(0)
+  })
 })

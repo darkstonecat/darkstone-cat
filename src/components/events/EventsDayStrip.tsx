@@ -111,7 +111,9 @@ export default function EventsDayStrip({
             ref={trackRef}
             aria-labelledby={titleId}
             onScroll={measure}
-            className="no-scrollbar flex snap-x snap-mandatory scroll-pl-4 gap-2 overflow-x-auto overscroll-x-contain py-0.5 pr-11 pl-4 sm:scroll-pl-6 sm:pl-6"
+            // `relative` makes the track the containing block of the tiles' absolute
+            // sr-only labels, so it clips them; otherwise off-screen days widen the page.
+            className="no-scrollbar relative flex snap-x snap-mandatory scroll-pl-4 gap-2 overflow-x-auto overscroll-x-contain py-0.5 pr-11 pl-4 sm:scroll-pl-6 sm:pl-6"
           >
             {strip.map((week) => (
               <li key={week.start} className="flex shrink-0 flex-col gap-1">
