@@ -332,12 +332,12 @@ describe('admin_reveal_sensitive() (A-5)', () => {
     expect(unknown.error?.message).toContain('admin:not_found')
   })
 
-  it('log_admin_event() no longer accepts member.reveal_sensitive', async () => {
-    const { error } = await board.rpc('log_admin_event', {
+  it('log_admin_event_for() does not accept member.reveal_sensitive', async () => {
+    const { error } = await supabaseAdmin.rpc('log_admin_event_for', {
+      p_actor: users.board.id,
       p_action: 'member.reveal_sensitive',
       p_target: users.reveal.id,
       p_details: { field: 'dni' },
-      p_reason: null,
     })
     expect(error?.code).toBe('22023')
     expect(error?.message).toContain('audit:action_not_allowed')

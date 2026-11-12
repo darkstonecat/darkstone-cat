@@ -112,8 +112,8 @@ const PREFIXED_CODES: Record<string, AdminActionError> = {
   "admin:confirm_mismatch": "confirm_mismatch",
   "admin:not_former": "not_former",
   "admin:already_anonymised": "already_anonymised",
-  // `log_admin_event` refusing the target: only the access link (A-15) logs with a target, and
-  // its target must be an active, not purged member (20261005100200_audit_log.sql).
+  // `log_admin_event_for` refusing the target: only the access link (A-15) logs with a target, and
+  // its target must be an active, not purged member (20261112110000_audit_server_events.sql).
   "audit:invalid_target": "not_active",
 };
 

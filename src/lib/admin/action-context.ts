@@ -10,19 +10,24 @@ import { isMemberId, type AdminActionError } from "@/lib/admin/action-errors";
  * callable from the browser.
  */
 
-/** Role check first (`getAdminAccess(min)`), then the member id. Returns the canonical (lower-case) id. */
+/**
+ * Role check first (`getAdminAccess(min)`), then the member id. Returns the canonical (lower-case)
+ * id and the verified actor id.
+ */
 export async function authoriseOnMember(
   min: AdminLevel,
   memberId: unknown
-): Promise<{ id: string } | { error: AdminActionError }> {
+): Promise<{ id: string; actorId: string } | { error: AdminActionError }> {
   const access = await getAdminAccess(min);
   if (access.status !== "ok") return { error: access.status };
   if (!isMemberId(memberId)) return { error: "invalid" };
-  return { id: memberId.toLowerCase() };
+  return { id: memberId.toLowerCase(), actorId: access.actor.id };
 }
 
 /** `authoriseOnMember('board', …)`: the level of every A-* action. */
-export function authoriseBoardOnMember(memberId: unknown): Promise<{ id: string } | { error: AdminActionError }> {
+export function authoriseBoardOnMember(
+  memberId: unknown
+): Promise<{ id: string; actorId: string } | { error: AdminActionError }> {
   return authoriseOnMember("board", memberId);
 }
 

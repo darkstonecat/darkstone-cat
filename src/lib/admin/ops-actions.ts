@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminAccess } from "@/lib/admin/guard";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { allowRequestShared } from "@/lib/rate-limit";
 import { REFRESH_JOBS, runRefreshJobs } from "@/lib/cache-refresh";
 import { recordManualRuns } from "@/lib/ops/job-runs";
@@ -20,8 +20,9 @@ import type { AdminActionError } from "@/lib/admin/action-errors";
  *   5. Record each run in ops_job_runs through the service role (`ops_record_manual_job_run`)
  *      with the actor id verified in step 1: no API user can write the history themselves.
  *      Best effort, logged only.
- *   6. One `ops.cache_refresh` audit entry (SESSION client) with `{"jobs":[…],"ok":bool}` (job names and a
- *      boolean: BR-15-safe). It is written after the run because it records the result. If it
+ *   6. One `ops.cache_refresh` audit entry through `log_admin_event_for` (service role, actor
+ *      verified in step 1; no session can write it) with `{"jobs":[…],"ok":bool}` (job names and a
+ *      boolean: BR-15-safe; the database refuses any other shape). It is written after the run because it records the result. If it
  *      fails, the refresh has already happened and is harmless, so the results are still
  *      returned and only the Postgres code is logged.
  *   7. Revalidate the tools page.
@@ -58,13 +59,11 @@ export async function refreshCaches(
 
   await recordManualRuns(access.actor.id, runs);
 
-  const supabase = await createClient();
-
-  const logged = await supabase.rpc("log_admin_event", {
+  const logged = await createAdminClient().rpc("log_admin_event_for", {
+    p_actor: access.actor.id,
     p_action: "ops.cache_refresh",
     p_target: null,
     p_details: { jobs: runs.map((r) => r.name), ok: runs.every((r) => r.ok) },
-    p_reason: null,
   });
   if (logged.error) {
     console.error("[admin-ops] cache_refresh_audit failed code=%s", logged.error.code || "unknown");

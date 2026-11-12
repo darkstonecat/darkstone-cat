@@ -1,7 +1,7 @@
 import { format } from 'node:util'
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest'
 
-// A-14 · refreshCaches (src/lib/admin/ops-actions.ts). The guard, the session client, the shared
+// A-14 · refreshCaches (src/lib/admin/ops-actions.ts). The guard, the service-role client, the shared
 // limiter, the refresh runner and the run recorder are mocked; every step is pushed to
 // `db.steps` so the order (guard → limit → refresh → record → audit) can be asserted.
 
@@ -12,13 +12,12 @@ const db = vi.hoisted(() => ({
     | { status: 'forbidden' },
   getAdminAccess: vi.fn(),
   steps: [] as string[],
-  sessionRpc: vi.fn(),
+  adminRpc: vi.fn(),
   auditResult: { data: 1, error: null } as { data: unknown; error: { code?: string; message: string } | null },
   allow: vi.fn(),
   runRefreshJobs: vi.fn(),
   recordManualRuns: vi.fn(),
   revalidatePath: vi.fn(),
-  session: null as unknown,
 }))
 
 vi.mock('next/cache', () => ({ revalidatePath: db.revalidatePath }))
@@ -27,15 +26,18 @@ vi.mock('@/lib/admin/guard', () => ({
 }))
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => {
-    db.session = {
-      rpc: async (fn: string, args: unknown) => {
-        db.steps.push(`session:${fn}`)
-        db.sessionRpc(fn, args)
-        return db.auditResult
-      },
-    }
-    return db.session
+    db.steps.push('session')
+    throw new Error('refreshCaches needs no session client')
   },
+}))
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: () => ({
+    rpc: async (fn: string, args: unknown) => {
+      db.steps.push(`admin:${fn}`)
+      db.adminRpc(fn, args)
+      return db.auditResult
+    },
+  }),
 }))
 vi.mock('@/lib/rate-limit', () => ({
   allowRequestShared: async (...args: unknown[]) => (db.steps.push('limit'), db.allow(...args)),
@@ -121,14 +123,14 @@ describe('refreshCaches run', () => {
         { job: 'bgg', ok: true, durationMs: 900, errorCode: null },
       ],
     })
-    expect(db.steps).toEqual(['guard', 'limit', 'refresh', 'record', 'session:log_admin_event'])
+    expect(db.steps).toEqual(['guard', 'limit', 'refresh', 'record', 'admin:log_admin_event_for'])
     expect(db.runRefreshJobs.mock.calls[0][0].map((j: { name: string }) => j.name)).toEqual(['ludoya', 'bgg'])
     expect(db.recordManualRuns).toHaveBeenCalledWith('actor-id', OK_RESULTS)
-    expect(db.sessionRpc).toHaveBeenCalledWith('log_admin_event', {
+    expect(db.adminRpc).toHaveBeenCalledWith('log_admin_event_for', {
+      p_actor: 'actor-id',
       p_action: 'ops.cache_refresh',
       p_target: null,
       p_details: { jobs: ['ludoya', 'bgg'], ok: true },
-      p_reason: null,
     })
     expect(db.revalidatePath).toHaveBeenCalledWith('/[locale]/admin/tools', 'page')
   })
@@ -138,7 +140,7 @@ describe('refreshCaches run', () => {
 
     expect(db.runRefreshJobs.mock.calls[0][0].map((j: { name: string }) => j.name)).toEqual(['ludoya'])
     expect(result).toEqual({ ok: true, results: [{ job: 'ludoya', ok: true, durationMs: 2100, errorCode: null }] })
-    expect(db.sessionRpc).toHaveBeenCalledWith('log_admin_event', expect.objectContaining({
+    expect(db.adminRpc).toHaveBeenCalledWith('log_admin_event_for', expect.objectContaining({
       p_details: { jobs: ['ludoya'], ok: true },
     }))
   })
@@ -152,7 +154,7 @@ describe('refreshCaches run', () => {
 
     expect(result).toEqual({ ok: true, results: [{ job: 'bgg', ok: false, durationMs: 30000, errorCode: 'timeout' }] })
     expect(JSON.stringify(result)).not.toContain('example.com')
-    expect(db.sessionRpc).toHaveBeenCalledWith('log_admin_event', expect.objectContaining({
+    expect(db.adminRpc).toHaveBeenCalledWith('log_admin_event_for', expect.objectContaining({
       p_details: { jobs: ['bgg'], ok: false },
     }))
     expect(output()).not.toContain('example.com')

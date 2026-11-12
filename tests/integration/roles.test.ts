@@ -349,13 +349,12 @@ describe('BR-10: at least two superadmins', () => {
 // because this is the only file allowed to create superadmins; the rest is in audit-log.test.ts.
 // At this point superA and superB are the two active superadmins.
 describe('audit log as a superadmin', () => {
-  it('not even a superadmin can log the register export directly (admin_export_register logs it)', async () => {
-    const client = await createAuthenticatedClient(emails.superA, password)
-    const { data, error } = await client.rpc('log_admin_event', {
+  it('not even for a superadmin can the register export be logged directly (admin_export_register logs it)', async () => {
+    const { data, error } = await supabaseAdmin.rpc('log_admin_event_for', {
+      p_actor: users.superA.id,
       p_action: 'export.member_register',
       p_target: null,
       p_details: { rows: 12 },
-      p_reason: null,
     })
     expect(error?.code).toBe('22023')
     expect(error?.message).toContain('audit:action_not_allowed')

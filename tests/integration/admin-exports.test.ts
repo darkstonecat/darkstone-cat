@@ -13,8 +13,8 @@ import { fakeMemberCipher } from '../helpers/cipher'
 // audited exports A-10 (admin_export_members, member CSV), A-11 (admin_export_member_data, one
 // member's data, optional reason), A-16 (admin_export_emails, e-mail lists) and S-4
 // (admin_export_register, superadmin only). Each function writes its audit entry in the same
-// transaction as the read, so no export is ever served without one, and log_admin_event() no
-// longer accepts any export key.
+// transaction as the read, so no export is ever served without one, and log_admin_event_for()
+// accepts no export key.
 //
 // The exports cover every member in the database, also other files' users running in
 // parallel: assertions look only at this file's own ids/addresses. Superadmin cases (A-11 on a
@@ -508,18 +508,18 @@ describe('exports fail closed when the audit entry cannot be written', () => {
 })
 
 // ---------------------------------------------------------------------------------------------
-describe('log_admin_event() no longer logs these exports', () => {
+describe('log_admin_event_for() does not log these exports', () => {
   it.each([
     ['export.members_csv', null, { filter: { state: 'active' }, rows: 3 }],
     ['export.member_data', 'active', {}],
     ['export.emails', null, { list: 'newsletter', rows: 2 }],
     ['export.member_register', null, { rows: 10 }],
   ] as const)('rejects %s (the export functions log it)', async (action, target, details) => {
-    const { error } = await board.rpc('log_admin_event', {
+    const { error } = await supabaseAdmin.rpc('log_admin_event_for', {
+      p_actor: users.board.id,
       p_action: action,
       p_target: target ? users[target].id : null,
       p_details: details,
-      p_reason: null,
     })
     expect(error?.code).toBe('22023')
     expect(error?.message).toContain('audit:action_not_allowed')

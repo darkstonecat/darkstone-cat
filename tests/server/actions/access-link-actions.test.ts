@@ -45,7 +45,11 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
-    rpc: db.adminRpc,
+    rpc: async (fn: string, args: unknown) => {
+      db.steps.push(`admin:${fn}`)
+      db.adminRpc(fn, args)
+      return db.rpcResults[fn] ?? { data: null, error: null }
+    },
     // members lookup: .select().eq().maybeSingle(); audit_log read for the retry time (the board
     // cannot read the table): .select().eq().eq().order().limit()
     from: (table: string) => {
@@ -96,7 +100,7 @@ beforeEach(() => {
   db.adminLookup = { data: { member_number: NUMBER }, error: null }
   db.rpcResults = {
     admin_get_member: { data: [activeRow], error: null },
-    log_admin_event: { data: 42, error: null },
+    log_admin_event_for: { data: 42, error: null },
   }
   db.auditRead = { data: [], error: null }
   db.allow.mockResolvedValue(true)
@@ -136,25 +140,26 @@ describe('sendAccessLink · happy path', () => {
       'admin:from:members',
       'session:admin_get_member',
       'limit',
-      'session:log_admin_event',
+      'admin:log_admin_event_for',
       'send',
     ])
     expect(db.adminFrom).toHaveBeenCalledWith('members')
     expect(db.sessionRpc).toHaveBeenCalledWith('admin_get_member', { p_member_number: NUMBER })
     expect(db.allow).toHaveBeenCalledWith(`access-link:${TARGET}`, null, 1, 10 * 60 * 1000)
-    expect(db.sessionRpc).toHaveBeenCalledWith('log_admin_event', {
+    expect(db.adminRpc).toHaveBeenCalledWith('log_admin_event_for', {
+      p_actor: 'actor-id',
       p_action: 'member.send_access_link',
       p_target: TARGET,
       p_details: {},
-      p_reason: null,
     })
     expect(db.send).toHaveBeenCalledWith(EMAIL)
   })
 
-  it('uses the SESSION client for admin_get_member and log_admin_event, never the service role', async () => {
+  it('reads the member with the SESSION client and logs with the service role and the verified actor', async () => {
     await sendAccessLink(TARGET)
-    expect(db.adminRpc).not.toHaveBeenCalled()
-    expect(db.sessionRpc.mock.calls.map((c) => c[0])).toEqual(['admin_get_member', 'log_admin_event'])
+    expect(db.sessionRpc.mock.calls.map((c) => c[0])).toEqual(['admin_get_member'])
+    expect(db.adminRpc.mock.calls.map((c) => c[0])).toEqual(['log_admin_event_for'])
+    expect(db.adminRpc.mock.calls[0][1]).toMatchObject({ p_actor: 'actor-id' })
   })
 
   it('never returns or logs the address', async () => {
@@ -229,7 +234,7 @@ describe('sendAccessLink · per-member limit', () => {
       order: ['id', { ascending: false }],
       limit: 1,
     })
-    expect(db.sessionRpc).not.toHaveBeenCalledWith('log_admin_event', expect.anything())
+    expect(db.adminRpc).not.toHaveBeenCalledWith('log_admin_event_for', expect.anything())
     expect(db.send).not.toHaveBeenCalled()
   })
 
@@ -247,7 +252,7 @@ describe('sendAccessLink · per-member limit', () => {
 
 describe('sendAccessLink · audit entry first, fail closed', () => {
   it('sends nothing when the audit entry cannot be written', async () => {
-    db.rpcResults.log_admin_event = { data: null, error: { code: 'XX000', message: `audit_write failed for ${EMAIL}` } }
+    db.rpcResults.log_admin_event_for = { data: null, error: { code: 'XX000', message: `audit_write failed for ${EMAIL}` } }
     expect(await sendAccessLink(TARGET)).toEqual({ error: 'failed' })
     expect(db.send).not.toHaveBeenCalled()
     expect(consoleOutput()).toContain('send_access_link failed code=XX000')
@@ -255,7 +260,7 @@ describe('sendAccessLink · audit entry first, fail closed', () => {
   })
 
   it('maps a target that left meanwhile (audit:invalid_target) to not_active, sending nothing', async () => {
-    db.rpcResults.log_admin_event = {
+    db.rpcResults.log_admin_event_for = {
       data: null,
       error: { code: '22023', message: 'audit:invalid_target: an access link goes to active members only' },
     }
@@ -264,7 +269,7 @@ describe('sendAccessLink · audit entry first, fail closed', () => {
   })
 
   it('maps a lost role at logging time to forbidden, sending nothing', async () => {
-    db.rpcResults.log_admin_event = { data: null, error: { code: '42501', message: 'audit:forbidden: board role required' } }
+    db.rpcResults.log_admin_event_for = { data: null, error: { code: '42501', message: 'audit:forbidden: the actor must be an active board member' } }
     expect(await sendAccessLink(TARGET)).toEqual({ error: 'forbidden' })
     expect(db.send).not.toHaveBeenCalled()
   })

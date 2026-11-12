@@ -20,8 +20,9 @@ import { authoriseBoardOnMember, logAdminFailure } from "@/lib/admin/action-cont
  *   4. One link per member every 10 minutes, shared by every instance (bucket
  *      `access-link:<member uuid>`). The bucket is consumed before the audit entry, so a refused
  *      attempt never leaves an entry that claims a link was sent.
- *   5. `log_admin_event('member.send_access_link', target)` with the SESSION client BEFORE
- *      sending (fail closed: no entry, no mail).
+ *   5. `log_admin_event_for(actor, 'member.send_access_link', target)` with the service role and
+ *      the actor verified in step 1, BEFORE sending (fail closed: no entry, no mail). No session
+ *      can write this entry itself, so it never exists without this action.
  *   6. Send. A failure after the entry is reported (`send_failed`); the entry stays, as the
  *      record of the attempt.
  */
@@ -102,11 +103,11 @@ export async function sendAccessLink(memberId: string): Promise<{ ok: true } | R
     return { error: "rate_limited", retryAfter: await secondsUntilNextLink(auth.id) };
   }
 
-  const logged = await supabase.rpc("log_admin_event", {
+  const logged = await createAdminClient().rpc("log_admin_event_for", {
+    p_actor: auth.actorId,
     p_action: AUDIT_ACTION,
     p_target: auth.id,
     p_details: {},
-    p_reason: null,
   });
   if (logged.error) {
     logAdminFailure(LOG_NAME, logged.error.code);

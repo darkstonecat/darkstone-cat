@@ -9,7 +9,8 @@ import {
 } from '../helpers/supabase'
 
 // Migration 20261005100200_audit_log.sql: the append-only audit log (spec §5, BR-14, BR-15),
-// the internal audit_write() and log_admin_event() for the events the app logs directly.
+// the internal audit_write() and log_admin_event_for() (service role only, since
+// 20261112110000) for the events the app logs itself.
 //
 // Entries cannot be deleted (that is the point), so they stay in the local database after the
 // run. Every assertion filters by this file's own target members; never count the whole table.
@@ -35,20 +36,24 @@ const anon = createClient(
   { auth: { persistSession: false } }
 )
 
+// log_admin_event_for() (20261112110000_audit_server_events.sql): service role only, the actor
+// verified by the server action and passed in.
 async function logEvent(
   client: SupabaseClient,
+  actor: string | null,
   action: string,
   target: string | null,
-  details: Record<string, unknown> = {},
-  reason: string | null = null
+  details: unknown = {}
 ) {
-  return client.rpc('log_admin_event', {
+  return client.rpc('log_admin_event_for', {
+    p_actor: actor,
     p_action: action,
     p_target: target,
     p_details: details,
-    p_reason: reason,
   })
 }
+
+const REFRESH = { jobs: ['ludoya', 'bgg'], ok: true }
 
 async function entry(id: number) {
   const { data, error } = await supabaseAdmin.from('audit_log').select('*').eq('id', id).single()
@@ -81,14 +86,14 @@ beforeAll(async () => {
   clients.board = await createAuthenticatedClient(emails.board, password)
   clients.legacy = await createAuthenticatedClient(emails.legacy, password)
 
-  const { data, error } = await logEvent(clients.board, 'member.send_access_link', users.target.id)
+  const { data, error } = await logEvent(supabaseAdmin, users.board.id, 'member.send_access_link', users.target.id)
   expect(error).toBeNull()
   boardEntryId = data as number
 })
 
 afterAll(() => cleanupUsers(userIds))
 
-describe('log_admin_event()', () => {
+describe('log_admin_event_for()', () => {
   it('records a whitelisted event and snapshots actor and target', async () => {
     const row = await entry(boardEntryId)
     expect(row).toMatchObject({
@@ -105,81 +110,120 @@ describe('log_admin_event()', () => {
   })
 
   it('accepts a second board member, recording the role held at that moment', async () => {
-    const { data, error } = await logEvent(clients.legacy, 'member.send_access_link', users.target.id)
+    const { data, error } = await logEvent(supabaseAdmin, users.legacy.id, 'member.send_access_link', users.target.id)
     expect(error).toBeNull()
-    expect(await entry(data as number)).toMatchObject({ actor_role: 'board', target_member_id: users.target.id })
+    expect(await entry(data as number)).toMatchObject({ actor_id: users.legacy.id, actor_role: 'board' })
   })
 
-  it('accepts every event the app logs directly, with the details it needs', async () => {
-    const ok: [string, string | null, Record<string, unknown>][] = [
-      ['ops.cache_refresh', null, { jobs: ['ludoya'], result: 'ok', duration_ms: 2100 }],
-    ]
-    for (const [action, target, details] of ok) {
-      const { data, error } = await logEvent(clients.board, action, target, details)
-      expect(error, action).toBeNull()
-      expect(await entry(data as number)).toMatchObject({ action, target_member_id: target, details })
+  it.each([
+    [{ jobs: ['ludoya'], ok: true }],
+    [{ jobs: ['bgg'], ok: false }],
+    [{ jobs: ['ludoya', 'bgg'], ok: true }],
+  ])('records a cache refresh with details %j', async (details) => {
+    const { data, error } = await logEvent(supabaseAdmin, users.board.id, 'ops.cache_refresh', null, details)
+    expect(error).toBeNull()
+    expect(await entry(data as number)).toMatchObject({
+      action: 'ops.cache_refresh',
+      actor_id: users.board.id,
+      target_member_id: null,
+      details,
+      reason: null,
+    })
+  })
+
+  it('no session can call it, not even board (only the server writes these entries)', async () => {
+    for (const client of [clients.board, clients.legacy, clients.member, anon]) {
+      const { data, error } = await logEvent(client, users.board.id, 'member.send_access_link', users.target.id)
+      expect(error?.code).toBe('42501')
+      expect(data).toBeNull()
     }
   })
 
-  it('rejects the actions that only database functions may write', async () => {
-    // member.reveal_sensitive left the whitelist in 20261005100500 (admin_reveal_sensitive logs
-    // it); export.members_csv and export.member_data in 20261005100800, export.emails and
-    // export.member_register in 20261005100900 (admin_export_* log them)
+  it('log_admin_event() is gone (20261112110100_drop_log_admin_event.sql)', async () => {
+    const { error } = await clients.board.rpc('log_admin_event', {
+      p_action: 'ops.cache_refresh',
+      p_target: null,
+      p_details: REFRESH,
+      p_reason: null,
+    })
+    expect(error?.code).toBe('PGRST202')
+  })
+
+  it('refuses an actor who is not an active board member', async () => {
+    const unknownId = '00000000-0000-0000-0000-000000000000'
+    for (const actor of [null, unknownId, users.member.id, users.former.id]) {
+      const { error } = await logEvent(supabaseAdmin, actor, 'ops.cache_refresh', null, REFRESH)
+      expect(error?.code, String(actor)).toBe('42501')
+      expect(error?.message).toContain('audit:forbidden')
+    }
+  })
+
+  it('rejects the actions that only database functions may write, and unknown keys', async () => {
     for (const action of [
       'member.update', 'member.reveal_sensitive', 'membership.leave', 'role.grant', 'member.purge', 'badge.award',
-      'export.members_csv', 'export.member_data', 'export.emails', 'export.member_register',
+      'export.members_csv', 'export.member_data', 'export.emails', 'export.member_register', 'member.delete',
     ]) {
-      const { error } = await logEvent(clients.board, action, users.target.id)
+      const { error } = await logEvent(supabaseAdmin, users.board.id, action, users.target.id)
+      expect(error?.code, action).toBe('22023')
       expect(error?.message, action).toContain('audit:action_not_allowed')
     }
   })
 
-  it('rejects an unknown action key', async () => {
-    const { error } = await logEvent(clients.board, 'member.delete', users.target.id)
-    expect(error?.message).toContain('audit:action_not_allowed')
-  })
-
-  it('rejects the register export, which only admin_export_register() logs (20261005100900)', async () => {
-    const { error } = await logEvent(clients.board, 'export.member_register', null, { rows: 10 })
-    expect(error?.code).toBe('22023')
-    expect(error?.message).toContain('audit:action_not_allowed')
-  })
-
-  it('rejects a plain member and an anonymous caller', async () => {
-    const asMember = await logEvent(clients.member, 'member.send_access_link', users.target.id)
-    expect(asMember.error?.message).toContain('audit:forbidden')
-
-    const asAnon = await logEvent(anon, 'member.send_access_link', users.target.id)
-    expect(asAnon.error?.code).toBe('42501')
-    expect(asAnon.data).toBeNull()
-  })
-
   it('requires a target where the event has one, and none where it has not', async () => {
-    const missing = await logEvent(clients.board, 'member.send_access_link', null)
+    const missing = await logEvent(supabaseAdmin, users.board.id, 'member.send_access_link', null)
     expect(missing.error?.message).toContain('audit:invalid_target')
 
-    const unknown = await logEvent(clients.board, 'member.send_access_link', '00000000-0000-0000-0000-000000000000')
+    const unknown = await logEvent(
+      supabaseAdmin, users.board.id, 'member.send_access_link', '00000000-0000-0000-0000-000000000000'
+    )
     expect(unknown.error?.message).toContain('audit:invalid_target')
 
-    const extra = await logEvent(clients.board, 'ops.cache_refresh', users.target.id, { jobs: ['ludoya'], result: 'ok' })
+    const extra = await logEvent(supabaseAdmin, users.board.id, 'ops.cache_refresh', users.target.id, REFRESH)
     expect(extra.error?.message).toContain('audit:invalid_target')
   })
 
   it('sends an access link only to an active member', async () => {
-    const { error } = await logEvent(clients.board, 'member.send_access_link', users.former.id)
+    const { error } = await logEvent(supabaseAdmin, users.board.id, 'member.send_access_link', users.former.id)
     expect(error?.message).toContain('audit:invalid_target')
   })
 
-  it('details must be a JSON object', async () => {
-    const { error } = await clients.board.rpc('log_admin_event', {
-      p_action: 'ops.cache_refresh',
-      p_target: null,
-      p_details: ['ludoya'],
-      p_reason: null,
-    })
-    expect(error?.message).toContain('audit:invalid_details')
+  it('an access link entry takes no details', async () => {
+    for (const details of [{ note: 'x' }, { field: 'dni' }, ['x']]) {
+      const { error } = await logEvent(supabaseAdmin, users.board.id, 'member.send_access_link', users.target.id, details)
+      expect(error?.code, JSON.stringify(details)).toBe('22023')
+      expect(error?.message).toContain('audit:invalid_details')
+    }
   })
 
+  it.each([
+    [['ludoya']],
+    [{}],
+    [{ jobs: ['ludoya'] }],
+    [{ ok: true }],
+    [{ jobs: [], ok: true }],
+    [{ jobs: ['other'], ok: true }],
+    [{ jobs: ['ludoya', 'ludoya'], ok: true }],
+    [{ jobs: 'ludoya', ok: true }],
+    [{ jobs: [1], ok: true }],
+    [{ jobs: ['ludoya'], ok: 'true' }],
+    [{ jobs: ['ludoya'], ok: true, result: 'ok' }],
+  ])('a cache refresh entry refuses details %j', async (details) => {
+    const { error } = await logEvent(supabaseAdmin, users.board.id, 'ops.cache_refresh', null, details)
+    expect(error?.code).toBe('22023')
+    expect(error?.message).toContain('audit:invalid_details')
+  })
+})
+
+// audit_write() is internal (no API role can execute it); the table owner runs it here to check
+// the rules every entry keeps, whatever function writes it.
+async function writeAsOwner(details: Record<string, unknown>, reason: string | null = null) {
+  return runSqlAsPostgres("SELECT public.audit_write('member.update', NULL, $1::jsonb, $2)", [
+    JSON.stringify(details),
+    reason,
+  ])
+}
+
+describe('every entry', () => {
   it('never stores a DNI or phone value in the details (BR-15)', async () => {
     const leaks: Record<string, unknown>[] = [
       { field: 'dni', dni: '12345678Z' },
@@ -190,15 +234,13 @@ describe('log_admin_event()', () => {
       { field: 'phone', shown: '+34 612 345 678' },
     ]
     for (const details of leaks) {
-      const { error } = await logEvent(clients.board, 'member.send_access_link', users.target.id, details)
-      expect(error?.code, JSON.stringify(details)).toBe('23514')
-      expect(error?.message).toContain('audit:sensitive_details')
+      const { error } = await writeAsOwner(details)
+      expect(error?.message, JSON.stringify(details)).toContain('audit:sensitive_details')
     }
   })
 
   it('a reason is capped at 1000 characters', async () => {
-    const { error } = await logEvent(clients.board, 'member.send_access_link', users.target.id, {}, 'x'.repeat(1001))
-    expect(error?.code).toBe('23514')
+    const { error } = await writeAsOwner({}, 'x'.repeat(1001))
     expect(error?.message).toContain('audit_log_reason_length')
   })
 })

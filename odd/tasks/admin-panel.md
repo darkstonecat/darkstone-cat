@@ -2447,6 +2447,12 @@ delivery, no PR slicing):
   and the access-link cooldown with the service role. Accepted residual (user decision): those
   names stay stored, readable only by the service role, until the 3-year retention deletes the
   entry; redacting them would need an exception to the append-only trigger.
+- Forged app-side audit entries (fixed 2026-11-12): `log_admin_event()` was executable by any
+  board session, which could write `member.send_access_link` for a link never sent or
+  `ops.cache_refresh` with made-up details and reason, without limit. Now the server actions
+  write them through `log_admin_event_for(actor, …)` (service role only, actor re-checked as an
+  active board member, exact details shape, no reason) and `log_admin_event()` is dropped.
+  Production order: `20261112110000_audit_server_events` → deploy → `20261112110100_drop_log_admin_event`.
 - Other known gaps carried from earlier tasks: the audit `reason` column is not scanned for
   DNI/phone (dialogs warn); the detector misses compound keys (`telefono_movil`); a 9-digit id
   starting 6–9 in audit details reads as a phone; PostgREST `max_rows` 1000 caps exports (they
