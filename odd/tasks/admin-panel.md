@@ -2547,6 +2547,16 @@ was Ready before the migrations.
   before the renumbering keep the old numbers (append-only).
 - So production numbers are sheet positions, not the sheet's own number column. Re-running the
   import is still safe (it skips existing emails), but compare by email, not by number.
+- 2026-11-12, user: "Quiero actualizar la base de datos de usuario con el fichero que viene del
+  antiguo formulario de google." `migrate-members.mjs` changed: new members ignore the sheet's
+  number column (the `handle_new_user` trigger takes `member_number_seq`, created in sheet date
+  order), duplicates are matched by email and by decrypted DNI (same DNI with a new email is
+  skipped for a manual check), former members are reported; `--renumber` and the `setval` SQL
+  were removed. Tested on local Supabase (208 created, re-run 0). New sheet export: 212 rows,
+  208 emails (new repeated sign-up: sheet 000-206 + 000-207, merged). Production `--execute`:
+  6 created as 000-203 … 000-208 (sheet 000-206, 000-208 … 000-212), 202 skipped, 0 errors.
+  Read-back: DNI, phone, postal code, newsletter and dates of the 6 match the sheet; a second
+  dry run creates nothing. Not in the audit log (service role).
 
 ## Next step: go live
 

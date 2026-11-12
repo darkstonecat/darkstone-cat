@@ -30,23 +30,24 @@
 //                - Bools  → "Sí" / "Accepto." → true, else false.
 //              Emits non-blocking warnings for unusual formats.
 //
-// 4. IMPORT    INSERT-ONLY. A row whose email (auth user) or member_number already
-//              exists in Supabase is SKIPPED and never touched: the database is the
-//              source of truth, so data members edited on the web, leaves and roles
-//              are never overwritten. For each new member:
+// 4. IMPORT    INSERT-ONLY. A row whose email (auth user) already exists in Supabase
+//              is SKIPPED and never touched: the database is the source of truth, so
+//              data members edited on the web, leaves and roles are never overwritten.
+//              A row whose email is new but whose DNI already belongs to a member is
+//              also SKIPPED (probably the same person with a new email): fix it by hand.
+//              New members are created in sheet date order. For each one:
 //                a) Creates a Supabase Auth user (email_confirm: true, no password).
-//                   → Members must use "Forgot password" to set their first password.
-//                b) The DB trigger `handle_new_user` auto-creates a `members` row.
-//                c) UPDATEs that new row with the original member_number, encrypted
-//                   DNI/phone (AES-256-GCM), postal_code, consents, and dates
-//                   (membership_start_date and current_joined_on).
+//                   → Members must use the magic link or "Forgot password".
+//                b) The DB trigger `handle_new_user` auto-creates a `members` row and
+//                   gives it the next number of `member_number_seq`, like a web sign-up.
+//                c) UPDATEs that new row with the encrypted DNI/phone (AES-256-GCM v2),
+//                   postal_code, consents, and dates (membership_start_date and
+//                   current_joined_on = the sheet date).
 //
-// 5. SEQUENCE  Prints the SQL that moves `member_number_seq` to the highest existing
-//              number, so the next web registration gets the next free ID.
-//
-// Note (2026-11-03): production was renumbered after the import to 000-001 … 000-202
-// in sheet order with no gaps (merged duplicates left holes). Production numbers are
-// therefore sheet positions, not the sheet's own number column: match members by email.
+// Member numbers (since 2026-11-12): the sheet's own number column is IGNORED for new
+// members. Production was renumbered on 2026-11-03 to 000-001 … 000-202 in sheet order, so
+// sheet numbers no longer match production numbers, and a sheet number could collide with a
+// web sign-up's number. Match members by email (and DNI), never by number.
 // See odd/tasks/admin-panel.md, "Member list import and renumbering".
 //
 // ─── Modes ──────────────────────────────────────────────────────────────────
@@ -71,7 +72,6 @@
 //
 //   npm run migrate                    # Dry-run
 //   npm run migrate -- --execute       # Import the new members
-//   npm run migrate -- --renumber 000-168=000-206   # Sheet number taken in Supabase
 //
 // ─── Exit codes ─────────────────────────────────────────────────────────────
 //
@@ -85,7 +85,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { parse } from "csv-parse/sync";
 import { createClient } from "@supabase/supabase-js";
-import { encryptForMember, parseKey } from "./reencrypt-member-secrets.mjs";
+import { decryptForMember, encryptForMember, parseKey } from "./reencrypt-member-secrets.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -127,6 +127,16 @@ let encryptionKey = null;
 function encrypt(plainText, memberId) {
   encryptionKey ??= parseKey(process.env.ENCRYPTION_KEY);
   return encryptForMember(plainText, memberId, encryptionKey);
+}
+
+// Null when the stored value cannot be read (legacy or foreign ciphertext).
+function decryptOrNull(value, memberId) {
+  encryptionKey ??= parseKey(process.env.ENCRYPTION_KEY);
+  try {
+    return decryptForMember(value, memberId, encryptionKey);
+  } catch {
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -329,62 +339,50 @@ async function fetchExistingState(supabase) {
     page++;
   }
 
-  // Fetch all members
-  const membersByNumber = new Map();
-  const { data: members, error: membersError } = await supabase
-    .from("members")
-    .select("id, member_number");
-  if (membersError) throw new Error(`Failed to list members: ${membersError.message}`);
-  for (const m of members) {
-    membersByNumber.set(m.member_number, m.id);
+  // Fetch all members (paginated: PostgREST caps a response at max_rows)
+  const membersById = new Map();
+  const membersByDni = new Map();
+  let unreadableDni = 0;
+  for (let from = 0; ; from += perPage) {
+    const { data: members, error: membersError } = await supabase
+      .from("members")
+      .select("id, member_number, left_on, dni_nie_encrypted")
+      .order("member_number")
+      .range(from, from + perPage - 1);
+    if (membersError) throw new Error(`Failed to list members: ${membersError.message}`);
+    for (const m of members) {
+      membersById.set(m.id, { member_number: m.member_number, left_on: m.left_on });
+      if (!m.dni_nie_encrypted) continue;
+      const dni = decryptOrNull(m.dni_nie_encrypted, m.id);
+      if (dni === null) unreadableDni++;
+      else membersByDni.set(normalizeDni(dni), m.member_number);
+    }
+    if (members.length < perPage) break;
   }
 
-  return { usersByEmail, membersByNumber };
+  return { usersByEmail, membersById, membersByDni, unreadableDni };
 }
 
 // ---------------------------------------------------------------------------
 // Import a single member
 // ---------------------------------------------------------------------------
 
-// --renumber 000-168=000-206,000-169=000-207 gives a sheet row a new number when its
-// sheet number already belongs to someone else in Supabase.
-function parseRenumber(args) {
-  const idx = args.indexOf("--renumber");
-  if (idx === -1) return new Map();
-  const map = new Map();
-  for (const pair of (args[idx + 1] || "").split(",")) {
-    const [from, to] = pair.split("=").map((s) => s?.trim());
-    if (!/^000-\d{3,}$/.test(from || "") || !/^000-\d{3,}$/.test(to || "")) {
-      console.error(`ERROR: invalid --renumber pair "${pair}" (expected 000-168=000-206)`);
-      process.exit(1);
-    }
-    map.set(from, to);
-  }
-  return map;
-}
-
-function applyRenumber(members, renumber, existingState) {
-  const sheetNumbers = new Set(members.map((m) => m.member_number));
-  for (const [from, to] of renumber) {
-    const member = members.find((m) => m.member_number === from);
-    if (!member) {
-      console.error(`ERROR: --renumber ${from}: no such number in the sheet`);
-      process.exit(1);
-    }
-    if (sheetNumbers.has(to) || existingState.membersByNumber.has(to)) {
-      console.error(`ERROR: --renumber ${from}=${to}: ${to} is already used`);
-      process.exit(1);
-    }
-    console.log(`  RENUMBER: ${from} → ${to}`);
-    member.member_number = to;
-    sheetNumbers.add(to);
-  }
+// Same comparison form for sheet and stored DNIs.
+function normalizeDni(dni) {
+  return dni.toUpperCase().replace(/[\s.-]/g, "");
 }
 
 // Why a member is not imported, or null when it is new.
 function skipReason(member, existingState) {
-  if (existingState.usersByEmail.has(member.email)) return "email exists";
-  if (existingState.membersByNumber.has(member.member_number)) return "number exists";
+  const userId = existingState.usersByEmail.get(member.email);
+  if (userId) {
+    const stored = existingState.membersById.get(userId);
+    if (!stored) return "email exists (auth user without a members row)";
+    const former = stored.left_on ? `, FORMER member since ${stored.left_on}` : "";
+    return `email exists as ${stored.member_number}${former}`;
+  }
+  const dniOwner = member.dni ? existingState.membersByDni.get(normalizeDni(member.dni)) : null;
+  if (dniOwner) return `DNI already belongs to ${dniOwner}, new email: check by hand`;
   return null;
 }
 
@@ -406,13 +404,12 @@ async function importMember(supabase, member, existingState) {
 
   const userId = data.user.id;
   existingState.usersByEmail.set(member.email, userId);
-  existingState.membersByNumber.set(member.member_number, userId);
 
   // The trigger handle_new_user creates the members row; give it a moment.
   await sleep(100);
 
+  // member_number stays the one the trigger took from member_number_seq.
   const updateData = {
-    member_number: member.member_number,
     first_name: member.first_name,
     last_name: member.last_name,
     postal_code: member.postal_code,
@@ -430,28 +427,19 @@ async function importMember(supabase, member, existingState) {
     updateData.phone_encrypted = encrypt(member.phone, userId);
   }
 
-  const { error: updateError } = await supabase
+  const { data: updated, error: updateError } = await supabase
     .from("members")
     .update(updateData)
-    .eq("id", userId);
+    .eq("id", userId)
+    .select("member_number")
+    .single();
 
   if (updateError) {
     // The auth user exists but its row kept the defaults: fix it by hand.
     return { status: "error", error: `UPDATE failed for user ${userId}: ${updateError.message}` };
   }
 
-  return { status: "ok", userId };
-}
-
-// ---------------------------------------------------------------------------
-// Sequence: PostgREST cannot run raw SQL, so print it for the SQL editor / MCP
-// ---------------------------------------------------------------------------
-
-function printSequenceSql() {
-  console.log("\nRun this SQL so the next web sign-up gets the next free number:");
-  console.log(`  SELECT setval('member_number_seq',
-    (SELECT COALESCE(MAX(CAST(SPLIT_PART(member_number, '-', 2) AS INTEGER)), 0)
-     FROM public.members), true);`);
+  return { status: "ok", userId, memberNumber: updated.member_number };
 }
 
 // ---------------------------------------------------------------------------
@@ -482,7 +470,6 @@ async function retryOnError(fn, retries = 1, delayMs = 2000) {
 async function main() {
   const args = process.argv.slice(2);
   const executeMode = args.includes("--execute");
-  const renumber = parseRenumber(args);
   if (args.includes("--clean")) {
     console.error("ERROR: --clean was removed (it deleted every member). Nothing was done.");
     process.exit(1);
@@ -537,18 +524,32 @@ async function main() {
   console.log("\nFetching existing state...");
   const existingState = await fetchExistingState(supabase);
   console.log(`  Auth users: ${existingState.usersByEmail.size}`);
-  console.log(`  Members: ${existingState.membersByNumber.size}`);
-  applyRenumber(members, renumber, existingState);
+  console.log(`  Members: ${existingState.membersById.size}`);
+  if (existingState.unreadableDni > 0) {
+    console.log(`  ⚠ ${existingState.unreadableDni} stored DNIs could not be decrypted (not compared)`);
+  }
+
+  // Sheet rows sharing a DNI under different emails: the same person signed up twice.
+  const sheetDni = new Map();
+  for (const m of members) {
+    if (!m.dni) continue;
+    const key = normalizeDni(m.dni);
+    if (sheetDni.has(key)) console.log(`  ⚠ sheet ${sheetDni.get(key)} and ${m.member_number} share a DNI (different emails)`);
+    else sheetDni.set(key, m.member_number);
+  }
+
+  // New members get sequence numbers in sheet date order.
+  members.sort((a, b) => (a.timestamp_iso ?? "").localeCompare(b.timestamp_iso ?? ""));
 
   // 6. Import the new members only
-  console.log("\nImporting new members...\n");
+  console.log("\nImporting new members (sheet number shown for reference only)...\n");
 
   let created = 0;
   let skipped = 0;
   let errors = 0;
 
   for (const member of members) {
-    const label = `${member.member_number} ${member.first_name} ${member.last_name} <${member.email}>`;
+    const label = `sheet ${member.member_number} ${member.first_name} ${member.last_name} <${member.email}>`;
     const reason = skipReason(member, existingState);
     if (reason) {
       console.log(`  [=] ${label} → skipped (${reason})`);
@@ -557,7 +558,7 @@ async function main() {
     }
 
     if (!executeMode) {
-      console.log(`  [DRY] ${label} → WOULD CREATE`);
+      console.log(`  [DRY] ${label} (${member.membership_start_date}) → WOULD CREATE with the next free number`);
       created++;
       continue;
     }
@@ -571,14 +572,12 @@ async function main() {
       console.log(`  [=] ${label} → skipped (${result.reason})`);
       skipped++;
     } else {
-      console.log(`  [+] ${label} → created`);
+      console.log(`  [+] ${label} → created as ${result.memberNumber}`);
       created++;
     }
 
     await sleep(50);
   }
-
-  if (executeMode && created > 0) printSequenceSql();
 
   // 7. Summary
   console.log("\n" + "=".repeat(60));
