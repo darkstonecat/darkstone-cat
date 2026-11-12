@@ -3,7 +3,8 @@ export type CollaboratorCategory =
   | "publishers"
   | "shops"
   | "clubs"
-  | "creators";
+  | "creators"
+  | "media";
 
 export interface Collaborator {
   id: string;
@@ -22,6 +23,7 @@ export const CATEGORY_ORDER: CollaboratorCategory[] = [
   "shops",
   "clubs",
   "creators",
+  "media",
 ];
 
 export const collaborators: Collaborator[] = [
@@ -324,6 +326,16 @@ export const collaborators: Collaborator[] = [
     category: "creators",
     logo: "/images/logos/collaborators/influencers/logo_barbut_indepe.webp",
     url: "https://www.instagram.com/barbutindepe",
+  },
+
+  // ── Local Guides & Media ───────────────────────────────────────
+  {
+    id: "terrassa-amb-plans",
+    name: "Terrassa amb Plans",
+    slug: "terrassa-amb-plans",
+    category: "media",
+    logo: "/images/logos/collaborators/media/logo_terrassa_amb_plans.webp",
+    url: "https://terrassambplans.cat/",
   },
 ];
 

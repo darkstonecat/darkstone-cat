@@ -466,7 +466,8 @@
       "publishers": "Publishers",
       "shops": "Shops",
       "clubs": "Clubs, associations & communities",
-      "creators": "Content creators"
+      "creators": "Content creators",
+      "media": "Local guides & media"
     },
     "descriptions": {
       "ajuntament-terrassa": "Terrassa City Council supports the city's cultural and gaming organisations, providing spaces and resources for our activities.",
@@ -501,7 +502,8 @@
       "professor-mompi": "Our go-to game educator. A channel dedicated to board game tutorials in Catalan, especially expert-level games. A key reference for the Catalan-speaking gaming community.",
       "jugador-inicial": "A board game outreach portal in Catalan created by Àlex in 2020. Tutorials, recommendations and the latest releases for anyone who loves board games. A project that keeps growing thanks to its community.",
       "cunyadisme-ludic": "The gaming podcast nobody asked for but you need to hear. Hosted by Adrià alongside Karen, Alberto and Àlex, it was born from a group of friends brought together by board games who ended up talking about everything. Humour, friendship and board games in Catalan.",
-      "barbut-indepe": "A Darkstone Catalunya member, die-hard eurogamer who hates dice and advocate for the use of Catalan in the board gaming world. On his Instagram he reviews and analyses the games he plays."
+      "barbut-indepe": "A Darkstone Catalunya member, die-hard eurogamer who hates dice and advocate for the use of Catalan in the board gaming world. On his Instagram he reviews and analyses the games he plays.",
+      "terrassa-amb-plans": "Terrassa amb Plans is Carla's homemade agenda of what's on in Terrassa: workshops, concerts, fairs, talks and activities by local groups, shops and people who organise lovely things, all gathered in one place."
     }
   },
   "cookie_policy": {

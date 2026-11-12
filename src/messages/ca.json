@@ -466,7 +466,8 @@
       "publishers": "Editorials",
       "shops": "Botigues",
       "clubs": "Clubs, associacions i comunitats",
-      "creators": "Creadors de contingut"
+      "creators": "Creadors de contingut",
+      "media": "Agendes i mitjans locals"
     },
     "descriptions": {
       "ajuntament-terrassa": "L'Ajuntament de Terrassa dóna suport a les entitats culturals i lúdiques de la ciutat, facilitant espais i recursos per a les nostres activitats.",
@@ -501,7 +502,8 @@
       "professor-mompi": "El nostre divulgador de capçalera. Canal dedicat a la divulgació lúdica mitjançant tutorials de jocs de taula en català, especialment jocs experts. Un referent per a la comunitat jugadora catalanoparlant.",
       "jugador-inicial": "Portal de divulgació de jocs de taula en català creat per l'Àlex el 2020. Tutorials, recomanacions i novetats per a tothom qui estimi els jocs de taula. Un projecte que no para de créixer gràcies a la comunitat.",
       "cunyadisme-ludic": "El pòdcast lúdic que ningú ha demanat però necessites escoltar. Moderat per l'Adrià i acompanyat per la Karen, l'Alberto i l'Àlex, neix d'un grup d'amics units pels jocs de taula que van acabar parlant de tot. Humor, amistat i jocs de taula en català.",
-      "barbut-indepe": "Soci de Darkstone Catalunya, eurogamer convençut que odia els daus i promotor de l'ús del català en el món dels jocs de taula. Al seu Instagram publica i analitza els jocs que va jugant."
+      "barbut-indepe": "Soci de Darkstone Catalunya, eurogamer convençut que odia els daus i promotor de l'ús del català en el món dels jocs de taula. Al seu Instagram publica i analitza els jocs que va jugant.",
+      "terrassa-amb-plans": "Terrassa amb Plans és l'agenda casolana de la Carla per descobrir què es mou a Terrassa: tallers, concerts, fires, xerrades i activitats d'entitats, comerços i gent que organitza coses boniques, tot aplegat en un sol lloc."
     }
   },
   "cookie_policy": {
