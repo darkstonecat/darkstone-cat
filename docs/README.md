@@ -20,6 +20,7 @@ The repository is public: never put secrets, real member data or copies of third
 | Document | Summary |
 |---|---|
 | [`features/admin-panel/spec.md`](features/admin-panel/spec.md) | Admin panel: actors, membership lifecycle, business rules (BR-*), use cases and views |
+| [`features/admin-panel/navigation.md`](features/admin-panel/navigation.md) | Admin panel frame: header, grouped sections, desktop sidebar, phone section switcher, how to add a section |
 | [`features/events/spec.md`](features/events/spec.md) | Public agenda `/events`: listing rules, cards, seat counter, calendar, data flow and privacy |
 
 ### Integrations

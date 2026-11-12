@@ -1,0 +1,31 @@
+# Admin navigation: grouped sidebar and phone section switcher
+
+Objective: replace the 8 flat admin pill tabs with grouped navigation (desktop sidebar, phone bottom sheet) and a compact header, per proposal A of the canvas https://claude.ai/artifact/MpyvbbwnBTyRdoMQ8tBRK2.
+Branch: `feat/admin-navigation` (from `develop`). Delivery: `ask-on-risk`, `feature-branch-chain` (as previous features): one work-unit commit per task, merged into `develop` when done. Forecast ~550 authored lines. Test runner: Vitest (`npm run test:unit`), Playwright (`npm run test:e2e`). No migration.
+
+## Specs
+
+- **S1 Groups.** User (L2): "Vamos con A, los grupos me parecen correctos." Sections and groups exactly as `docs/features/admin-panel/navigation.md` §2: Resum (no group) · Junta (Socis, Activitat, Rols superadmin only) · Contingut del web (Insígnies, Beneficis) · Manteniment (Eines) · Procediments as a help link at the end. Active section = longest path prefix (nested pages keep their section).
+- **S2 Desktop sidebar.** From `lg`: two columns, grouped sidebar on the left with icons, active link dark, Procediments at the bottom, sticky under the NavBar (assumption). Page containers unchanged. Spec: navigation.md §4.
+- **S3 Phone switcher.** Below `lg`: one full-width button with the active section that opens a bottom sheet with the same groups, built on `useModalDialog` (focus trap, Escape, inert page, focus return), closes on link or path change. No label overflows at 360 px in `ca` and `es`. Spec: navigation.md §5.
+- **S4 Compact header.** Eyebrow, `h1` with the section, signed-in line (role only on phones), no tabs. Spec: navigation.md §3.
+- **S5 Documentation.** User (L2): "Seria necesario un nuevo documento para la especificación e implementación de esta vista admin para que en un futuro sea mas facil saber como está y como funciona." `docs/features/admin-panel/navigation.md` (spec, code map, "adding a section" checklist, tests), indexed in `docs/README.md`; updated to delivered behaviour at the end; `spec.md` §8 and `CLAUDE.md` point to it.
+
+## Tasks
+
+| ID | Specs | Route | Status | Commit |
+|---|---|---|---|---|
+| T0 | S5 | inline | done (spec doc + index + this plan) | — |
+| T1 | S1 | inline: `adminNav.ts` (pure model replacing `ADMIN_TABS`), unit tests RED → GREEN | pending | |
+| T2 | S2, S4 | inline: `AdminSidebar`, shell in `admin/layout.tsx`, compact `AdminHeader`, component tests | pending | |
+| T3 | S3 | inline: `AdminSectionSwitcher` + sheet on `useModalDialog`, translations `admin.nav_*` (ca/es/en), component tests | pending | |
+| T4 | S1-S5 | inline: remove `AdminTabs` and its test, update E2E (`shell`, `badges`, `benefits`, `roles` specs; phone viewport + no-overflow check), docs to delivered behaviour (navigation.md status, `spec.md` §8 tabs line, `CLAUDE.md` Pages/Component Structure/namespaces) | pending | |
+
+Route evidence: one coherent change, no parallel units of several minutes each with disjoint surfaces (T2 and T3 share `AdminHeader` and `adminNav.ts`), so no writer trigger; everything inline. Expected Risk: none (no data, auth guard untouched: `requireRole` stays in the layout and every page). Checks per task: `npx tsc --noEmit`, `npm run lint`, focused Vitest; at the end `npm run test:unit` and the admin E2E specs.
+
+## Log
+
+- L1 (2026-11-12, user): "En la vista de admin hay un seguido de pildoras a las diferentes secciones, estas ya son 8, algunas mas importantes como el resumen que es su home y socis. Otras mas de mantenimiento de la web como son insigneas, beneficis, eines. Otras de la junta propiamente como rol, aunque socis tambien es, o procediments como informativa. Y tambien tenemos los logs de activitat. Ahora son 8, quizá en un futuro se añada alguna herramienta mas. Pero ya con las actuales son muchas para mostrar todas seguidas y mas en movil, donde incluso algunos textos escapan de su pildora por ser demasiado largos al hacerse pequeño. Ya hay el menu desplegable de arriva a la derecha en movil, pero quizá esto deberia ser una clase de menu o ligeramente distinto. Desconozco como se hacen herramientas internas como esta y cual es la mejor forma de hacer su interfaz, pero seguramente lo actual es muy mejorable. Analiza como está actualmente. ANaliza y busca propuestas que puedan ayudar a la mejor visualización y uso de esto. Hazme pregutnas de forma interactiva si es necesario. Haz varias propuestas mediante un artefacto para poder cambiar y mejorar lo actual."
+- L2 (2026-11-12, user): "Vamos con A, los grupos me parecen correctos. Haz una planificación para la ejecución de los cambios. Seria necesario un nuevo documento para la especificación e implementación de esta vista admin para que en un futuro sea mas facil saber como está y como funciona."
+- L3 (2026-11-12): analysis. Current nav: `AdminTabs.tsx` (8 pills, `grid-cols-3`/`grid-cols-4` on phones), rendered by `AdminHeader.tsx` from `admin/layout.tsx`. Dependants: `tests/components/AdminTabs.test.tsx`, `AdminHeader.test.tsx`, E2E `e2e/admin/{shell,badges,benefits,roles}.spec.ts` (they look up `navigation` named "Administració" and assert the tab order; the new order puts Rols after Activitat and Procediments last). All admin pages use `mx-auto max-w-[1120px] px-4 sm:px-6`, so a shell column needs no page changes. Icons verified in `react-icons/md`. Not in scope: the NavBar user menu (keeps one "Administració" link).
+- L4 (2026-11-12): develop has uncommitted changes from the previous session (`CLAUDE.md`, `package.json`, `scripts/dev-users.mjs`, `AGENTS.md`); they must be committed or set aside before branching. Next step: T1.
