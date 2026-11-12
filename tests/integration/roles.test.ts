@@ -888,9 +888,11 @@ describe('admin_export_register (S-4)', () => {
     ])
 
     const client = await createAuthenticatedClient(emails.superA, password)
-    const read = await client.from('audit_log').select('action, details').eq('id', added[0].id)
+    const read = await client.rpc('admin_list_activity', { p_action: 'export.member_register', p_limit: 200 })
     expect(read.error).toBeNull()
-    expect(read.data).toEqual([{ action: 'export.member_register', details: added[0].details }])
+    expect((read.data as { id: number; details: unknown }[]).find((row) => row.id === added[0].id)?.details).toEqual(
+      added[0].details
+    )
   })
 })
 

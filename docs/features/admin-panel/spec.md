@@ -233,7 +233,7 @@ Reading is recorded only when it exposes sensitive data: revealing DNI/phone and
 
 - Append-only: nobody can edit or delete an entry, including superadmins (BR-14). The only deletion is the retention rule below.
 - Entries survive the anonymisation and the purge of their target. The target is then shown by member number only.
-- Readable by every `board` and `superadmin` user (D-3, resolved).
+- Readable by every `board` and `superadmin` user (D-3, resolved), only through the activity screens (`admin_list_activity`). The table itself cannot be read through the API, so the past names that an entry keeps for an anonymised or purged member are never shown. They stay stored until the 3-year retention deletes the entry; only the service role can read them.
 - Retention: entries are deleted 3 years after they were written, by the same daily job as the purge. The log contains personal data too, and 3 years covers the same liabilities as the register (§4.5).
 
 ## 6. Business rules

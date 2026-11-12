@@ -40,16 +40,15 @@ function firstRow(data: unknown): Record<string, unknown> | null {
   return row && typeof row === "object" ? (row as Record<string, unknown>) : null;
 }
 
-type SessionClient = Awaited<ReturnType<typeof createClient>>;
-
 /**
  * Seconds until the next link is allowed, from the last `member.send_access_link` entry for this
- * member (the board can read the audit log). Null when it cannot be told: no readable entry, or
- * the limiter fell back to memory after an entry older than the window.
+ * member. Read with the service role: no session can read `audit_log` directly (only through
+ * `admin_list_activity`), and this runs after the board check. Null when it cannot be told: no
+ * readable entry, or the limiter fell back to memory after an entry older than the window.
  */
-async function secondsUntilNextLink(supabase: SessionClient, memberId: string): Promise<number | null> {
+async function secondsUntilNextLink(memberId: string): Promise<number | null> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await createAdminClient()
       .from("audit_log")
       .select("created_at")
       .eq("action", AUDIT_ACTION)
@@ -100,7 +99,7 @@ export async function sendAccessLink(memberId: string): Promise<{ ok: true } | R
   if (row.has_login !== true || !email) return { error: "no_login" };
 
   if (!(await allowRequestShared(`access-link:${auth.id}`, null, 1, WINDOW_MS))) {
-    return { error: "rate_limited", retryAfter: await secondsUntilNextLink(supabase, auth.id) };
+    return { error: "rate_limited", retryAfter: await secondsUntilNextLink(auth.id) };
   }
 
   const logged = await supabase.rpc("log_admin_event", {

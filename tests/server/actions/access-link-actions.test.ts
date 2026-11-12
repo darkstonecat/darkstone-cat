@@ -37,33 +37,31 @@ vi.mock('@/lib/supabase/server', () => ({
       db.sessionRpc(fn, args)
       return db.rpcResults[fn] ?? { data: null, error: null }
     },
-    // audit_log read for the retry time: .select().eq().eq().order().limit()
     from: (table: string) => {
-      const query: Record<string, unknown> = {}
-      const chain = {
-        select: (cols: string) => ((query.select = cols), chain),
-        eq: (col: string, value: unknown) => ((query[col] = value), chain),
-        order: (col: string, opts: unknown) => ((query.order = [col, opts]), chain),
-        limit: async (n: number) => {
-          query.limit = n
-          db.steps.push(`session:from:${table}`)
-          db.auditQuery(table, query)
-          return db.auditRead
-        },
-      }
-      return chain
+      db.steps.push(`session:from:${table}`)
+      throw new Error(`unexpected session read of ${table}`)
     },
   }),
 }))
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
     rpc: db.adminRpc,
+    // members lookup: .select().eq().maybeSingle(); audit_log read for the retry time (the board
+    // cannot read the table): .select().eq().eq().order().limit()
     from: (table: string) => {
       db.adminFrom(table)
+      const query: Record<string, unknown> = {}
       const chain = {
-        select: () => chain,
-        eq: () => chain,
+        select: (cols: string) => ((query.select = cols), chain),
+        eq: (col: string, value: unknown) => ((query[col] = value), chain),
+        order: (col: string, opts: unknown) => ((query.order = [col, opts]), chain),
         maybeSingle: async () => (db.steps.push(`admin:from:${table}`), db.adminLookup),
+        limit: async (n: number) => {
+          query.limit = n
+          db.steps.push(`admin:from:${table}`)
+          db.auditQuery(table, query)
+          return db.auditRead
+        },
       }
       return chain
     },

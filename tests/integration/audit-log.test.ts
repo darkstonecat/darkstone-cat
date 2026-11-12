@@ -215,17 +215,24 @@ describe('audit_write() is internal', () => {
   })
 })
 
+// Migration 20261112100000_audit_log_no_direct_read.sql: nobody reads the table through the API.
+// The board reads it only through admin_list_activity, which drops the past names of an
+// anonymised or purged member (spec 5.3); a direct read would return them.
 describe('reading the audit log', () => {
-  it.each(['board', 'legacy'] as const)('%s reads the entries', async (key) => {
+  it.each(['board', 'legacy', 'member'] as const)('%s cannot read the table directly', async (key) => {
     const { data, error } = await clients[key].from('audit_log').select('id, action').eq('id', boardEntryId)
-    expect(error).toBeNull()
-    expect(data).toEqual([{ id: boardEntryId, action: 'member.send_access_link' }])
+    expect(error?.code).toBe('42501')
+    expect(data).toBeNull()
   })
 
-  it('a plain member reads nothing, not even entries about themselves', async () => {
-    const { data, error } = await clients.member.from('audit_log').select('id').eq('target_member_id', users.target.id)
+  it('the board still reads the entry through admin_list_activity', async () => {
+    const { data, error } = await clients.board.rpc('admin_list_activity', { p_target: users.target.id, p_limit: 200 })
     expect(error).toBeNull()
-    expect(data).toEqual([])
+    expect((data as { id: number }[]).map((row) => row.id)).toContain(boardEntryId)
+  })
+
+  it('the service role still reads the table (cron, retention, the access link cooldown)', async () => {
+    expect((await entry(boardEntryId)).action).toBe('member.send_access_link')
   })
 
   it('an anonymous client is refused', async () => {
