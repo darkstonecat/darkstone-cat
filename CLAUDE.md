@@ -25,6 +25,7 @@ npm run analyze          # Production build with the bundle analyzer (ANALYZE=tr
 npm run lighthouse       # Lighthouse audit — local (build + start + audit + cleanup)
 npm run lighthouse:prod  # Lighthouse audit — production (darkstone.cat)
 npm run ludoya:check     # Verify Ludoya API endpoints and response shapes (live)
+npm run migrate          # Import new members from the Google Form CSV (dry run; -- --execute writes). Runbook: docs/operations/member-import.md
 ```
 
 ### Testing
@@ -405,7 +406,7 @@ Migrations: new `CHECK` constraints are added `NOT VALID` (length-only) so legac
 - **clsx** + **tailwind-merge** — class utilities (via `cn()`)
 - **@vercel/analytics** + **@vercel/speed-insights** — Vercel monitoring. Web Analytics reports normally; **Speed Insights needs a paid Vercel plan, which the project does not have**, so its `POST /<hash>/vitals` answers `503` and no metric is ever stored. The component stays mounted so it starts working if the plan changes — the 503s are expected, not a bug. Both scripts load from obfuscated paths (`/<16-hex>/script.js`), not `/_vercel/insights/…`, and both ignore automated browsers, so they can only be verified in a real one
 - **uqr** — QR code matrix generator (pure JS, zero deps, `src/lib/member-card/qr.ts`); **jsqr** (dev) decodes a rasterised QR in unit tests
-- **csv-parse** (dev) — CSV parsing for member migration script
+- **csv-parse** (dev) — CSV parsing for the member import script (`scripts/migrate-members.mjs`)
 
 ## Gotchas
 

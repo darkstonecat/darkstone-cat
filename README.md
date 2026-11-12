@@ -160,6 +160,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the site.
 | `npm run db:start` | Start local Supabase (requires Docker) |
 | `npm run db:stop` | Stop local Supabase |
 | `npm run ludoya:check` | Verify the Ludoya public API still matches what the site expects (needs `LUDOYA_API_KEY`) |
+| `npm run migrate` | Import new members from the Google Form CSV (dry run by default; see `docs/operations/member-import.md`) |
 
 ### Testing
 
