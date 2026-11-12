@@ -6,6 +6,8 @@ import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import AdminHeader from "@/components/admin/AdminHeader";
+import AdminSidebar from "@/components/admin/nav/AdminSidebar";
+import { isSuperadmin } from "@/lib/auth/roles";
 
 // Every admin view is private: pages add their own title/description on top of this.
 export const metadata: Metadata = {
@@ -13,7 +15,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * Shell of the admin panel: navbar, dark header with the view title and tabs, content, footer.
+ * Shell of the admin panel: navbar, compact dark header, then the grouped sidebar (from `lg`) next
+ * to the page content, footer (docs/features/admin-panel/navigation.md). Pages keep their own
+ * `max-w-[1120px]` container inside the content column.
  * The guard runs here (404 for anyone without a board role) and again, memoised per request,
  * in every page. The layout cannot read the pathname, so a session that expired between the
  * proxy and this render comes back to `/admin` after login.
@@ -33,7 +37,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     <main id="main-content" className="relative flex min-h-screen flex-col font-sans selection:bg-stone-300">
       <NavBar />
       <AdminHeader memberName={memberName} role={actor.role} />
-      <section className="flex-1 bg-brand-beige pb-20">{children}</section>
+      <section className="flex-1 bg-brand-beige pb-20">
+        <div className="lg:mx-auto lg:flex lg:max-w-[1360px] lg:items-start lg:gap-2 lg:px-6">
+          <AdminSidebar isSuperadmin={isSuperadmin(actor.role)} />
+          <div className="min-w-0 flex-1">{children}</div>
+        </div>
+      </section>
       <Footer />
       <ScrollToTop />
     </main>
