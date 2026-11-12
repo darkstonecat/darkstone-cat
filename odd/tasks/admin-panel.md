@@ -2452,7 +2452,8 @@ delivery, no PR slicing):
   `ops.cache_refresh` with made-up details and reason, without limit. Now the server actions
   write them through `log_admin_event_for(actor, …)` (service role only, actor re-checked as an
   active board member, exact details shape, no reason) and `log_admin_event()` is dropped.
-  Production order: `20261112110000_audit_server_events` → deploy → `20261112110100_drop_log_admin_event`.
+  Production order: `20261112110000_audit_server_events` → deploy → `20261112110100_drop_log_admin_event`;
+  done 2026-11-12 (`b749c1c`, CI and Vercel green between the two pushes).
 - Other known gaps carried from earlier tasks: the audit `reason` column is not scanned for
   DNI/phone (dialogs warn); the detector misses compound keys (`telefono_movil`); a 9-digit id
   starting 6–9 in audit details reads as a phone; PostgREST `max_rows` 1000 caps exports (they
