@@ -2440,6 +2440,13 @@ delivery, no PR slicing):
     (same trade-off as the magic link).
   - Hardening idea, not done: build the reset `redirectTo` from a fixed configured origin instead
     of the request `Origin`/host headers (the Supabase allow-list already limits where it can go).
+- Audit log direct read (fixed 2026-11-12, `e80ad01`, migration
+  `20261112100000_audit_log_no_direct_read` applied to production the same day): the board could
+  `GET /rest/v1/audit_log` and read `details.changes` (past names) of anonymised or purged members.
+  The board SELECT policy and grant are gone; the panel reads only through `admin_list_activity`
+  and the access-link cooldown with the service role. Accepted residual (user decision): those
+  names stay stored, readable only by the service role, until the 3-year retention deletes the
+  entry; redacting them would need an exception to the append-only trigger.
 - Other known gaps carried from earlier tasks: the audit `reason` column is not scanned for
   DNI/phone (dialogs warn); the detector misses compound keys (`telefono_movil`); a 9-digit id
   starting 6–9 in audit details reads as a phone; PostgREST `max_rows` 1000 caps exports (they
