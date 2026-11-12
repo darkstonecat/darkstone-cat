@@ -47,8 +47,8 @@ There is no section link bar ("Aquesta setmana / Properes setmanes / Especials")
 | Rule | Value |
 |---|---|
 | Format | Every event, session or special, is a collapsible card (`aria-expanded`, `aria-controls`). |
-| Date tile | Left of the card: weekday and day ("DV 13"). A multi-day event stacks its first and last day ("DS 28", "DG 29") with a thin line between them, or "⋮" when days lie between ("DV 27 ⋮ DL 30"), on the Madrid calendar. The full range is in the card. |
-| Timeline line | One continuous line joins the tiles, through the week headers, from the first tile to the last. |
+| Date tile | Left of the card from 640 px; below 640 px inside the card, next to the title, and the line under the title shows only the time ("16:00 – 20:30"). Weekday and day ("DV 13"). A multi-day event stacks its first and last day ("DS 28", "DG 29") with a thin line between them, or "⋮" when days lie between ("DV 27 ⋮ DL 30"), on the Madrid calendar. The full range is in the card. |
+| Timeline line | From 640 px, one continuous line joins the tiles, through the week headers, from the first tile to the last. Below 640 px there is no line and no left column: the cards and week headers take the whole width. |
 | Default state | This week's events open; later sessions closed; specials always open. |
 | Toggle all | Each later week has "Desplega-ho tot / Plega-ho tot". |
 | Closed card | Title, date and time, play count, free seats, a stack of small covers. |
@@ -169,7 +169,7 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
 | `src/lib/events/clock.ts` | `agendaNow()` |
 | `src/components/events/EventsHeader.tsx` | Header chips and special banners |
 | `src/components/events/EventsTimeline.tsx` | Week groups, open state, toggle all, `#event-` handling and scroll |
-| `src/components/events/EventCard.tsx` | Session and special cards, the date tile and its segment of the timeline line (`RAIL`) |
+| `src/components/events/EventCard.tsx` | Session and special cards, the date tile (`DateTile`: beside the card from 640 px, inside it below) and its segment of the timeline line (`RAIL`, hidden below 640 px) |
 | `src/components/events/program/` | `EventProgram` (days or one day, then the always-open block), `DayItems` (grid or slots), `CollapsibleSection`, `AlwaysOpenSection`, `ItemCard` (play, tournament, activity, demo; the same full card in the days and the always-open block), `grid.ts` (`PROGRAM_GRID`, 140px minimum: four cards per row at the widest card), `ProgramRow` (left column with the time, or the always-open clock in an event that goes by start time, so every grid has the same width), `CoverFrame`, `ItemBadge`, `ProposeTile`, `useCountsSummary` |
 | `src/components/events/SeatPill.tsx` | Seat counter on play and tournament covers |
 | `src/components/events/EventsCalendar.tsx` | Month grid, `sidebar` and `inline` variants |
@@ -189,7 +189,7 @@ Messages: `events.*` (header, banners, timeline, cards), `events.program` (badge
   - "Egara Juga 2026", 28–29 November (special);
   - drafts on 10 October and 8 November are never shown; Friday 25 December is outside the four weeks, so its calendar day opens Ludoya.
   - Egara's program: count chips, one open section per day, start-time rows on both days, the zone subtitle, the tournament badge and the "Entrada" button, the always-open block with "Altres activitats" last, drafts absent, folding;
-  - the timeline line is checked geometrically (`expectContinuousRail`: segments touch within 1 px, and the line starts and ends inside the first and last tile), on desktop and mobile.
+  - the timeline line is checked geometrically (`expectContinuousRail`: segments touch within 1 px, and the line starts and ends inside the first and last tile), on desktop; on mobile (390 px) the line and the left tiles are hidden, the tile sits inside the card and the card fills the column.
 - Run: `npm run test:unit`, `npx playwright test e2e/pages/events.spec.ts`.
 
 ## 8. Quality at delivery (11 November 2026)

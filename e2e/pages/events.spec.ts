@@ -171,6 +171,8 @@ test.describe('Events page (/events)', () => {
     await openEvents(page)
     const tile = page.locator('[id^="event-"]').filter({ has: card(page, 'Egara Juga 2026') }).locator('[data-timeline-tile]')
     await expect(tile).toHaveText(/DS\s*28\s*DG\s*29/)
+    // The tile inside the card is for phones only.
+    await expect(card(page, 'Egara Juga 2026').locator('[data-card-tile]')).toBeHidden()
   })
 
   test('a special shows its whole program: one section per day, tournaments, the always-open block', async ({ page }) => {
@@ -252,9 +254,26 @@ test.describe('Events page on mobile', () => {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
     expect(overflow).toBeLessThanOrEqual(0)
   })
-  test('draws one continuous timeline line', async ({ page }) => {
+  test('puts the date tile inside the card and drops the timeline line', async ({ page }) => {
     await openEvents(page)
-    await expectContinuousRail(page)
+    await expect(page.locator('[data-timeline-rail]:visible')).toHaveCount(0)
+    await expect(page.locator('[data-timeline-tile]:visible')).toHaveCount(0)
+
+    const friday = card(page, 'Divendres de jocs!')
+    await expect(friday.locator('[data-card-tile]')).toBeVisible()
+    await expect(friday.locator('[data-card-tile]')).toHaveText(/DV\s*2/)
+    // Only the time under the title: the tile already says the day.
+    await expect(friday.getByText(/^Divendres 2 d.octubre/)).toBeHidden()
+    await expect(friday.getByText('16:00 – 20:30', { exact: true })).toBeVisible()
+    await expect(card(page, 'Egara Juga 2026').locator('[data-card-tile]')).toHaveText(/DS\s*28\s*DG\s*29/)
+
+    // The card takes the whole column, aligned with the week title.
+    const agenda = await page.getByRole('region', { name: 'Agenda' }).boundingBox()
+    const box = await friday.boundingBox()
+    expect(Math.abs(box!.x - agenda!.x)).toBeLessThanOrEqual(1)
+    expect(Math.abs(box!.width - agenda!.width)).toBeLessThanOrEqual(1)
+    const heading = await page.getByRole('heading', { level: 2, name: 'Aquesta setmana' }).boundingBox()
+    expect(Math.abs(heading!.x - agenda!.x)).toBeLessThanOrEqual(1)
   })
 
   test('keeps the day strip overflow inside its track on a narrow screen', async ({ page }) => {

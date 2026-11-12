@@ -123,6 +123,18 @@ describe('EventsTimeline cards', () => {
     expect(tile('egara').textContent).toBe('DS28DG29')
   })
 
+  it('repeats the date tile inside the card next to the title, with the time alone, for phones', () => {
+    render(<EventsTimeline weeks={weeks()} />)
+    const article = (id: string) => card(id).querySelector('article')!
+
+    expect(article('fri').querySelector('[data-card-tile]')!.textContent).toBe('DV13')
+    expect(article('egara').querySelector('[data-card-tile]')!.textContent).toBe('DS28DG29')
+    expect(within(article('fri')).getByText('16:00 – 20:30')).toBeInTheDocument()
+    expect(within(article('egara')).getByText('10:00 – 17:00')).toBeInTheDocument()
+    // The full date stays for wider screens.
+    expect(within(article('fri')).getByText('Divendres 13 de novembre · 16:00 – 20:30')).toBeInTheDocument()
+  })
+
   it('marks the days left out between the first and last day of a longer event', () => {
     const camp = event({ id: 'camp', type: 'special', tile: { days: [{ weekday: 'DV', day: '27' }, { weekday: 'DL', day: '30' }], gap: true } })
     render(<EventsTimeline weeks={[week({ events: [camp] })]} />)

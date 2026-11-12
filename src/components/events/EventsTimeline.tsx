@@ -39,7 +39,7 @@ function WeekHeader({
       ];
   return (
     // Padding, not margin: the line has to cover the space under the header too.
-    <div className="relative flex flex-wrap items-baseline justify-between gap-2 pb-4 pl-[60px] sm:pl-[84px]">
+    <div className="relative flex flex-wrap items-baseline justify-between gap-2 pb-4 sm:pl-[84px]">
       {rail && <span aria-hidden="true" data-timeline-rail className={cn(RAIL, "top-0 bottom-0")} />}
       <span className="flex flex-col gap-0.5">
         <h2 className={week.isCurrent ? "text-2xl font-extrabold sm:text-3xl" : "text-xl font-extrabold"}>
@@ -157,7 +157,7 @@ export default function EventsTimeline({ weeks }: { weeks: WeekView[] }) {
         href={LUDOYA_AGENDA_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="ml-[60px] inline-flex min-h-11 items-center self-start text-sm font-bold text-brand-orange-text hover:underline sm:ml-[84px]"
+        className="inline-flex min-h-11 items-center self-start text-sm font-bold text-brand-orange-text hover:underline sm:ml-[84px]"
       >
         {t("more_on_ludoya")}&nbsp;<LudoyaIcon />
         <span className="sr-only"> {t("new_tab")}</span>

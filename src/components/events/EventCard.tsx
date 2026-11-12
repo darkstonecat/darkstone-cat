@@ -29,9 +29,9 @@ interface EventCardProps {
 /**
  * One segment of the timeline line, centred on the date tile column (48 px, 64 px from sm).
  * Every row and week header draws its own segment edge to edge, so they join into one line;
- * the tile sits on top of it.
+ * the tile sits on top of it. Phones have no line: the tile moves into the card.
  */
-export const RAIL = "pointer-events-none absolute left-[23px] w-0.5 bg-stone-300 sm:left-[31px]";
+export const RAIL = "pointer-events-none absolute left-[23px] w-0.5 bg-stone-300 max-sm:hidden sm:left-[31px]";
 
 /** Trailing icon and screen-reader note of a link that opens in a new tab; `ludoya` shows the Ludoya mark. */
 function NewTab({ ludoya = false }: { ludoya?: boolean }) {
@@ -41,6 +41,54 @@ function NewTab({ ludoya = false }: { ludoya?: boolean }) {
       &nbsp;{ludoya ? <LudoyaIcon /> : <ArrowOutwardIcon />}
       <span className="sr-only"> {t("new_tab")}</span>
     </>
+  );
+}
+
+/**
+ * Date tile: one day fills a square; a multi-day tile stacks its first and last day and grows taller.
+ * Beside the card on the timeline from sm, inside the card next to the title on phones.
+ */
+function DateTile({
+  event,
+  isCurrentWeek,
+  className,
+  ...data
+}: {
+  event: EventView;
+  isCurrentWeek: boolean;
+  className?: string;
+  "data-timeline-tile"?: string;
+  "data-card-tile"?: string;
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      {...data}
+      className={cn(
+        "relative flex min-h-12 w-12 shrink-0 flex-col items-center justify-center gap-1.5 rounded-2xl py-2 leading-none sm:min-h-16 sm:w-16",
+        event.type === "special"
+          ? "bg-brand-orange text-white"
+          : isCurrentWeek
+            ? "bg-stone-custom text-stone-white-hover"
+            : "border border-stone-300 bg-white text-stone-custom",
+        className
+      )}
+    >
+      {event.tile.days.map((day, index) => (
+        <Fragment key={index}>
+          {index > 0 &&
+            (event.tile.gap ? (
+              <span className="text-sm leading-none font-extrabold opacity-70">⋮</span>
+            ) : (
+              <span className="h-px w-5 bg-current opacity-40" />
+            ))}
+          <span className="flex flex-col items-center gap-0.5">
+            <span className="text-[10px] font-bold sm:text-[11px]">{day.weekday}</span>
+            <span className="text-xl font-extrabold sm:text-2xl">{day.day}</span>
+          </span>
+        </Fragment>
+      ))}
+    </span>
   );
 }
 
@@ -115,14 +163,19 @@ function SessionSummary({ event, open }: { event: EventView; open: boolean }) {
   );
 }
 
-function SessionCard({ event, open, onToggle, panelId }: EventCardProps & { panelId: string }) {
+function SessionCard({ event, isCurrentWeek, open, onToggle, panelId }: EventCardProps & { panelId: string }) {
   return (
     <article className="mb-5 min-w-0 flex-1 overflow-hidden rounded-[22px] bg-white">
       <div className="flex flex-wrap items-center justify-between gap-3.5 px-5 py-5 sm:px-[22px]">
-        <div className="flex min-w-0 flex-col gap-1">
-          <h3 className="text-xl font-extrabold sm:text-[22px]">{event.title}</h3>
-          <span className="text-[15px] text-stone-600">{event.when}</span>
-          {event.place && <AwayPlace place={event.place} />}
+        <div className="flex min-w-0 items-start gap-3">
+          <DateTile event={event} isCurrentWeek={isCurrentWeek} className="sm:hidden" data-card-tile="" />
+          <div className="flex min-w-0 flex-col gap-1">
+            <h3 className="text-xl font-extrabold sm:text-[22px]">{event.title}</h3>
+            {/* Phones show the time alone: the tile beside the title already says the day. */}
+            <span className="text-[15px] text-stone-600 sm:hidden">{event.time}</span>
+            <span className="text-[15px] text-stone-600 max-sm:hidden">{event.when}</span>
+            {event.place && <AwayPlace place={event.place} />}
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <SessionSummary event={event} open={open} />
@@ -136,24 +189,29 @@ function SessionCard({ event, open, onToggle, panelId }: EventCardProps & { pane
   );
 }
 
-function SpecialCard({ event, open, onToggle, panelId }: EventCardProps & { panelId: string }) {
+function SpecialCard({ event, isCurrentWeek, open, onToggle, panelId }: EventCardProps & { panelId: string }) {
   const t = useTranslations("events");
   const countsSummary = useCountsSummary();
   const hasItems = programItems(event.program).length > 0;
   return (
     <article className="mb-5 min-w-0 flex-1 overflow-hidden rounded-[22px] bg-stone-custom text-stone-white-hover">
       <div className="flex flex-wrap items-center justify-between gap-3.5 px-5 py-5 sm:px-[22px]">
-        <div className="flex min-w-0 flex-col gap-1">
-          <span className="text-[13px] font-extrabold text-brand-orange-light uppercase">
-            <span aria-hidden="true">★ </span>
-            {t("special_badge")}
-            {event.countdown && ` · ${countdownText(t, event.countdown)}`}
-          </span>
-          <h3 className="text-xl font-extrabold sm:text-2xl">{event.title}</h3>
-          <span className="text-[15px] text-stone-white-base">
-            {event.dates}
-            {event.place && ` · ${event.place.name}`}
-          </span>
+        <div className="flex min-w-0 items-start gap-3">
+          <DateTile event={event} isCurrentWeek={isCurrentWeek} className="sm:hidden" data-card-tile="" />
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="text-[13px] font-extrabold text-brand-orange-light uppercase">
+              <span aria-hidden="true">★ </span>
+              {t("special_badge")}
+              {event.countdown && ` · ${countdownText(t, event.countdown)}`}
+            </span>
+            <h3 className="text-xl font-extrabold sm:text-2xl">{event.title}</h3>
+            <span className="text-[15px] text-stone-white-base">
+              {/* Phones show the time alone: the tile beside the title already says the days. */}
+              <span className="sm:hidden">{event.time}</span>
+              <span className="max-sm:hidden">{event.dates}</span>
+              {event.place && ` · ${event.place.name}`}
+            </span>
+          </div>
         </div>
         <ToggleButton open={open} special panelId={panelId} onToggle={onToggle} />
       </div>
@@ -247,35 +305,8 @@ export default function EventCard(props: EventCardProps) {
           )}
         />
       )}
-      <div className="w-12 shrink-0 sm:w-16">
-        <span
-          aria-hidden="true"
-          data-timeline-tile
-          className={cn(
-            // One day fills a square; a multi-day tile stacks its first and last day and grows taller.
-            "relative flex min-h-12 w-12 flex-col items-center justify-center gap-1.5 rounded-2xl py-2 leading-none sm:min-h-16 sm:w-16",
-            special
-              ? "bg-brand-orange text-white"
-              : isCurrentWeek
-                ? "bg-stone-custom text-stone-white-hover"
-                : "border border-stone-300 bg-white text-stone-custom"
-          )}
-        >
-          {event.tile.days.map((day, index) => (
-            <Fragment key={index}>
-              {index > 0 &&
-                (event.tile.gap ? (
-                  <span className="text-sm leading-none font-extrabold opacity-70">⋮</span>
-                ) : (
-                  <span className="h-px w-5 bg-current opacity-40" />
-                ))}
-              <span className="flex flex-col items-center gap-0.5">
-                <span className="text-[10px] font-bold sm:text-[11px]">{day.weekday}</span>
-                <span className="text-xl font-extrabold sm:text-2xl">{day.day}</span>
-              </span>
-            </Fragment>
-          ))}
-        </span>
+      <div className="w-12 shrink-0 max-sm:hidden sm:w-16">
+        <DateTile event={event} isCurrentWeek={isCurrentWeek} data-timeline-tile="" />
       </div>
       {special ? <SpecialCard {...props} panelId={panelId} /> : <SessionCard {...props} panelId={panelId} />}
     </div>
