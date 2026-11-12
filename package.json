@@ -26,7 +26,8 @@
     "test:e2e:headed": "playwright test --headed",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "db:dev-users": "node scripts/dev-users.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

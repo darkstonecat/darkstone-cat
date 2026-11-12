@@ -43,7 +43,10 @@ npm run test:e2e:headed  # Playwright in headed browser mode
 npm run db:start         # Start local Supabase (Docker required)
 npm run db:stop          # Stop local Supabase
 npm run db:reset         # Reset local DB (re-applies migrations + seed)
+npm run db:dev-users     # Local-only login accounts for `npm run dev`: admin@ / junta@ / usuario@darkstone.local, password = the name (superadmin / board / member)
 ```
+
+`db:dev-users` (`scripts/dev-users.mjs`) refuses any non-local host and is safe to re-run. It adds a superadmin, and `tests/integration/roles.test.ts` asserts the global superadmin count, so run `npm run db:reset` before integration tests.
 
 Test structure: `tests/` (Vitest — unit, hooks, components, server, integration) and `e2e/` (Playwright — 36 specs). Config: `vitest.config.mts` (two projects: `dom` runs under jsdom, `node` runs `tests/server`, `tests/lib` and `tests/integration` under Node), `playwright.config.ts`. CI: `.github/workflows/ci.yml` (5 parallel jobs; Node from `.nvmrc`, Supabase CLI via `npx` from the lockfile). The scheduled workflows `cache-refresh.yml` and `retention.yml` run with `permissions: {}` and a `concurrency` group.
 
