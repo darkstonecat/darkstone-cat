@@ -2590,5 +2590,5 @@ was Ready before the migrations.
    `/admin` as a superadmin.
 5. Run `ludoya-check.yml` and `cache-refresh.yml` by hand once from `main`. `RETENTION_APPLY`
    stays unset until the board decides.
-6. Still open: user review of the Catalan leave/rejoin e-mail copy (follow-up 5), and rotating
-   `SUPABASE_DB_PASSWORD` (`security-audit.md`).
+6. Still open: user review of the Catalan leave/rejoin e-mail copy (follow-up 5). Rotating
+   `SUPABASE_DB_PASSWORD` (`security-audit.md`) was done on 2026-11-12.
