@@ -107,7 +107,7 @@
   "join_us": {
     "cta_title": "Hazte socio",
     "cta_subtitle": "Es gratuito. Ven cualquier viernes o sábado.",
-    "cta_button": "Rellena el formulario de alta",
+    "cta_button": "Regístrate",
     "subtitle": "Conecta con nosotros",
     "telegram_title": "Telegram",
     "telegram_description": "Tenemos un chat en Telegram donde hablamos de muchas cosas, hacemos planes y comentamos qué nos apetece jugar el fin de semana en Darkstone.",
@@ -203,7 +203,7 @@
 
     "cta_title": "¿Quieres formar parte?",
     "cta_subtitle": "La asociación es gratuita. Ven cualquier viernes o sábado al Centre Cívic Ca N'Aurell y únete a nosotros.",
-    "cta_primary_button": "Formulario de alta",
+    "cta_primary_button": "Regístrate",
     "cta_secondary_button": "Contáctanos",
 
     "registration_note": "Asociación registrada con CIF G19789221"
@@ -713,7 +713,7 @@
     "rpg_q": "¿Hacéis partidas de juegos de rol?",
     "rpg_a": "¡Sí! Organizamos partidas de juegos de rol regularmente. Si quieres dirigir o jugar una partida, habla con nosotros y coordinaremos horarios y mesas.",
     "join_q": "¿Cómo puedo hacerme socio?",
-    "join_a": "Ven a cualquier sesión y habla con nosotros, o contáctanos a través del formulario de contacto de la web. El proceso es rápido y sencillo: solo hay que rellenar un formulario de inscripción. ¡Es gratuito!"
+    "join_a": "Regístrate en la web desde el botón «Hazte socio»: el proceso es rápido y sencillo. Si tienes dudas, ven a cualquier sesión y habla con nosotros o escríbenos desde el formulario de contacto. ¡Es gratuito!"
   },
   "event_images": {
     "title": "Imágenes de eventos",
@@ -762,7 +762,7 @@
     "login_cta_image_alt": "Una partida de juegos de mesa en Darkstone",
 
     "register_title": "Hazte socio",
-    "register_subtitle": "Es gratis y sustituye al formulario de Google. Tres pasos y ya formas parte de Darkstone.",
+    "register_subtitle": "Es gratis. Tres pasos y ya formas parte de Darkstone.",
     "register_steps_label": "Pasos para hacerte socio",
     "register_step_account": "Tu cuenta",
     "register_step_member": "Datos de socio",

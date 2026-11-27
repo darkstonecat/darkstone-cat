@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, within } from '@testing-library/react'
+import type { ReactNode } from 'react'
 
 const authState = vi.hoisted(() => ({
   value: { user: null as { id: string } | null, role: null as string | null, loading: false },
@@ -22,6 +23,31 @@ vi.mock('@/i18n/routing', () => ({
   usePathname: () => '/about',
 }))
 
+// Motion's whileInView needs IntersectionObserver, which jsdom lacks: render
+// every motion.<tag> as the plain tag without its animation props.
+vi.mock('motion/react', async () => {
+  const React = await import('react')
+  const ANIMATION_PROPS = ['initial', 'animate', 'exit', 'whileInView', 'whileHover', 'whileTap', 'viewport', 'transition', 'variants']
+  const motion = new Proxy(
+    {},
+    {
+      get: (_target, tag: string) =>
+        ({ children, ...props }: { children?: ReactNode; [key: string]: unknown }) => {
+          for (const key of ANIMATION_PROPS) delete props[key]
+          return React.createElement(tag, props, children)
+        },
+    },
+  )
+  return { motion }
+})
+
+vi.mock('@/components/TextReveal', () => ({
+  default: ({ children }: { children?: ReactNode }) => <>{children}</>,
+}))
+vi.mock('@/components/home/SocialLinks', () => ({ default: () => null }))
+vi.mock('@/components/documents/DocumentLink', () => ({
+  default: ({ children }: { children?: ReactNode }) => <>{children}</>,
+}))
 vi.mock('@/components/SmoothScroll', () => ({ useLenis: () => null }))
 vi.mock('@/components/LanguageSwitcher', () => ({ default: () => null }))
 vi.mock('@/hooks/useAuthUser', () => ({ useAuthUser: () => authState.value }))
@@ -29,7 +55,9 @@ vi.mock('@/lib/supabase/session-actions', () => ({ signOutCurrentSession: vi.fn(
 
 import NavBar from '@/components/NavBar'
 import LoginSignupCard from '@/components/auth/LoginSignupCard'
-import { MEMBERSHIP_FORM_URL } from '@/lib/member-area'
+import JoinUs from '@/components/home/JoinUs'
+import AboutWhyJoin from '@/components/about/AboutWhyJoin'
+import AboutCTA from '@/components/about/AboutCTA'
 
 type Variant = 'desktop' | 'mobile'
 
@@ -51,73 +79,65 @@ function loginLinks(region: HTMLElement) {
     .filter((a) => a.getAttribute('href') === '/login')
 }
 
+/** A sign-up link: the in-site /register page, in the same tab. */
+function expectRegisterLink(link: HTMLElement) {
+  expect(link.getAttribute('href')).toBe('/register')
+  expect(link.getAttribute('target')).toBeNull()
+}
+
 const VARIANTS: Variant[] = ['desktop', 'mobile']
 
 describe('member area entry points', () => {
   afterEach(() => {
-    vi.unstubAllEnvs()
     authState.value = { user: null, role: null, loading: false }
   })
 
-  describe('while the member area is hidden (flag unset)', () => {
-    // A local .env* may set the flag; Vitest loads it, so clear it here.
-    beforeEach(() => vi.stubEnv('NEXT_PUBLIC_MEMBER_AREA_PUBLIC', ''))
-
-    it.each(VARIANTS)('the %s navbar shows no login link to a visitor', (variant) => {
-      const region = renderNav(variant)
-      expect(loginLinks(region)).toHaveLength(0)
-      expect(within(region).queryByText('login')).toBeNull()
-    })
-
-    it.each(VARIANTS)('the %s navbar shows no login placeholder while the session loads', (variant) => {
-      authState.value = { user: null, role: null, loading: true }
-      const region = renderNav(variant)
-      expect(within(region).queryByText('login')).toBeNull()
-    })
-
-    it('the desktop navbar still shows the user pill to a signed-in member', () => {
-      authState.value = { user: { id: 'u1' }, role: 'member', loading: false }
-      renderNav('desktop')
-      expect(screen.getByRole('button', { name: 'profile' })).toBeTruthy()
-    })
-
-    it('the mobile navbar still shows the profile link and logout to a signed-in member', () => {
-      authState.value = { user: { id: 'u1' }, role: 'member', loading: false }
-      const region = renderNav('mobile')
-      expect(
-        within(region).queryAllByRole('link').some((a) => a.getAttribute('href') === '/profile'),
-      ).toBe(true)
-      expect(within(region).getByText('logout')).toBeTruthy()
-    })
-
-    it('the login page sign-up card links to the Google Form, not /register', () => {
-      render(<LoginSignupCard />)
-      const cta = screen.getByRole('link', { name: /login_cta_button/ })
-      expect(cta.getAttribute('href')).toBe(MEMBERSHIP_FORM_URL)
-      expect(cta.getAttribute('target')).toBe('_blank')
-      expect(cta.getAttribute('rel')).toBe('noopener noreferrer')
-    })
+  it.each(VARIANTS)('the %s navbar shows the login link to a visitor', (variant) => {
+    const region = renderNav(variant)
+    expect(loginLinks(region)).toHaveLength(1)
   })
 
-  describe('once the member area is public (flag "1")', () => {
-    beforeEach(() => vi.stubEnv('NEXT_PUBLIC_MEMBER_AREA_PUBLIC', '1'))
+  it.each(VARIANTS)('the %s navbar shows the login placeholder while the session loads', (variant) => {
+    authState.value = { user: null, role: null, loading: true }
+    const region = renderNav(variant)
+    expect(within(region).getByText('login')).toBeTruthy()
+    expect(loginLinks(region)).toHaveLength(0)
+  })
 
-    it.each(VARIANTS)('the %s navbar shows the login link to a visitor', (variant) => {
-      const region = renderNav(variant)
-      expect(loginLinks(region)).toHaveLength(1)
-    })
+  it('the desktop navbar shows the user pill, not the login link, to a signed-in member', () => {
+    authState.value = { user: { id: 'u1' }, role: 'member', loading: false }
+    const { container } = render(<NavBar />)
+    expect(screen.getByRole('button', { name: 'profile' })).toBeTruthy()
+    expect(loginLinks(container)).toHaveLength(0)
+  })
 
-    it.each(VARIANTS)('the %s navbar shows the login placeholder while the session loads', (variant) => {
-      authState.value = { user: null, role: null, loading: true }
-      const region = renderNav(variant)
-      expect(within(region).getByText('login')).toBeTruthy()
-      expect(loginLinks(region)).toHaveLength(0)
-    })
+  it('the mobile navbar shows the profile link and logout to a signed-in member', () => {
+    authState.value = { user: { id: 'u1' }, role: 'member', loading: false }
+    const region = renderNav('mobile')
+    expect(
+      within(region).queryAllByRole('link').some((a) => a.getAttribute('href') === '/profile'),
+    ).toBe(true)
+    expect(within(region).getByText('logout')).toBeTruthy()
+    expect(loginLinks(region)).toHaveLength(0)
+  })
 
-    it('the login page sign-up card links to /register', () => {
-      render(<LoginSignupCard />)
-      const cta = screen.getByRole('link', { name: /login_cta_button/ })
-      expect(cta.getAttribute('href')).toBe('/register')
-    })
+  it('the login page sign-up card links to /register', () => {
+    render(<LoginSignupCard />)
+    expectRegisterLink(screen.getByRole('link', { name: /login_cta_button/ }))
+  })
+
+  it('the home "join us" button links to /register', () => {
+    render(<JoinUs />)
+    expectRegisterLink(screen.getByRole('link', { name: /cta_button/ }))
+  })
+
+  it('the /about "why join" button links to /register', () => {
+    render(<AboutWhyJoin />)
+    expectRegisterLink(screen.getByRole('link', { name: /why_join_cta/ }))
+  })
+
+  it('the /about closing button links to /register', () => {
+    render(<AboutCTA />)
+    expectRegisterLink(screen.getByRole('link', { name: /cta_primary_button/ }))
   })
 })

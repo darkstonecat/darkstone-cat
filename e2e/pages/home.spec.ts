@@ -19,6 +19,20 @@ test.describe('Home page', () => {
     await expect(cta.first()).toBeVisible({ timeout: 10_000 })
   })
 
+  test('a visitor sees the navbar login link', async ({ page, isMobile }) => {
+    // On phones the login link lives in the menu.
+    if (isMobile) await page.getByRole('button', { name: 'Botó de menú' }).first().click()
+    const login = page.getByRole('link', { name: TEXT.nav_login, exact: true })
+    await expect(login).toBeVisible({ timeout: 10_000 })
+    await expect(login).toHaveAttribute('href', '/login')
+  })
+
+  test('the "join us" button opens the web sign-up', async ({ page }) => {
+    const cta = page.locator('#join-us').getByRole('link', { name: /Registra't/ })
+    await expect(cta).toHaveAttribute('href', '/register')
+    await expect(cta).not.toHaveAttribute('target', '_blank')
+  })
+
   test('about section exists', async ({ page }) => {
     const about = page.locator('#about')
     await expect(about).toBeAttached()

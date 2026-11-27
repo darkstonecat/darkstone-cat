@@ -48,8 +48,8 @@
 | `/legal` | Terms & conditions |
 | `/privacy` | Privacy policy |
 | `/cookies` | Cookie policy |
-| `/login` | Login form (not linked from the navbar until the member area is public, see `docs/operations/member-area-launch.md`) |
-| `/register` | Registration form (direct URL only until the member area is public) |
+| `/login` | Login form (linked from the navbar) |
+| `/register` | Registration form: the only way to join (every "Fes-te soci" button links here) |
 | `/forgot-password` | Password recovery |
 | `/reset-password` | Set new password (protected) |
 | `/profile` | "La meva zona": member home with checklist, badges and member benefits (protected) |
@@ -160,7 +160,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the site.
 | `npm run db:start` | Start local Supabase (requires Docker) |
 | `npm run db:stop` | Stop local Supabase |
 | `npm run ludoya:check` | Verify the Ludoya public API still matches what the site expects (needs `LUDOYA_API_KEY`) |
-| `npm run migrate` | Import new members from the Google Form CSV (dry run by default; see `docs/operations/member-import.md`) |
+| `npm run migrate` | Legacy: import members from the closed Google Form CSV (dry run by default; see `docs/operations/member-import.md`) |
 | `npm run restore -- <csv>` | Rebuild the member list from a backup Sheet CSV into a new database (dry run by default; see `docs/operations/member-restore.md`) |
 
 ### Testing
@@ -198,7 +198,6 @@ CI runs all tests automatically via GitHub Actions on push/PR to `main`.
 | `LUDOYA_API_KEY` | Ludoya public API key (server-side only), see `docs/integrations/ludoya-api.md` |
 | `CRON_SECRET` | Bearer secret for `/api/cron/refresh`, `/api/cron/retention` and `/api/cron/backup` (same value in Vercel Production and the GitHub repository secret) |
 | `GOOGLE_BACKUP_SERVICE_ACCOUNT` / `GOOGLE_BACKUP_FOLDER_ID` | Member backup: service account JSON key (base64) and backup folder id in the Workspace shared drive (Vercel Production only; see `docs/features/member-backup/spec.md`) |
-| `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` | Optional. `1` shows the navbar login button and links `/login` to `/register`; unset hides them (sign-up links go to the Google Form, the pages stay reachable by direct URL). Build-time: redeploy after changing it. Launch steps: `docs/operations/member-area-launch.md` |
 
 ### Development without API keys
 

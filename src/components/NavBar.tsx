@@ -9,7 +9,6 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { isBoardRole } from "@/lib/auth/roles";
 import { signOutCurrentSession } from "@/lib/supabase/session-actions";
-import { isMemberAreaPublic } from "@/lib/member-area";
 
 function hexToRgba(hex: string, alpha: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -80,8 +79,6 @@ export default function NavBar() {
   const lenis = useLenis();
   const isHomePage = pathname === "/";
   const { user, role, loading: authLoading } = useAuthUser();
-  // Hidden until the member area is public; a signed-in member still gets the pill.
-  const showLogin = isMemberAreaPublic();
 
   const [scrolled, setScrolled] = useState(false);
   const [homeActiveSection, setHomeActiveSection] = useState("");
@@ -273,14 +270,14 @@ export default function NavBar() {
 
   const hamburgerColor = mobileOpen ? "#FAFAF9" : theme.text;
 
-  // Auth slot for a visitor: nothing while the member area is hidden, a
-  // placeholder while the session loads (no user yet), then the login link.
+  // Auth slot for a visitor: a placeholder of the same size while the session
+  // loads (no user yet), then the login link.
   const desktopLoginStyle = {
     backgroundColor: theme.text,
     color: theme.bg,
     transition: "background-color 0.4s, color 0.4s",
   };
-  const desktopVisitorEntry = !showLogin ? null : authLoading ? (
+  const desktopVisitorEntry = authLoading ? (
     <span className="rounded-xl px-4 py-2 text-sm font-medium" style={desktopLoginStyle}>
       {t("login")}
     </span>
@@ -293,7 +290,7 @@ export default function NavBar() {
       {t("login")}
     </Link>
   );
-  const mobileVisitorEntry = !showLogin ? null : authLoading ? (
+  const mobileVisitorEntry = authLoading ? (
     <span className="rounded-xl bg-brand-white px-6 py-2.5 text-sm font-semibold text-stone-custom">
       {t("login")}
     </span>

@@ -1,8 +1,9 @@
 # Member import from the Google Form
 
-While the member area is not advertised (`docs/operations/member-area-launch.md`), the "Fes-te
-soci" buttons send people to the old Google Form (`MEMBERSHIP_FORM_URL`). Its answers land in a
-Google Sheet, not in the database, so the board imports them from time to time with
+**Legacy.** Since 2026-11-27 people join only through the web sign-up (`/register`); the
+"Fes-te soci" buttons no longer link to the Google Form (`docs/operations/member-area-launch.md`).
+Use this runbook only for answers the form received before it was closed. Its answers land in a
+Google Sheet, not in the database, so the board imports them with
 `scripts/migrate-members.mjs` (`npm run migrate`).
 
 The script is **insert-only**: it creates the members that are not in the database yet and never

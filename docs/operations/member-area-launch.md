@@ -1,28 +1,27 @@
 # Member area launch
 
-The member area (login, sign-up, La meva zona, member card) is deployed to
-production but **not advertised** until the board has verified it. One build
-flag controls that: `NEXT_PUBLIC_MEMBER_AREA_PUBLIC`.
+The member area (login, sign-up, La meva zona, member card) is public since
+2026-11-27. There is no flag any more: the web sign-up is the only way to join.
 
-## Current state: hidden (flag unset)
+## Entry points
 
 | What | Behaviour |
 |---|---|
-| NavBar, visitor | No login button (desktop and mobile), no loading placeholder |
-| NavBar, signed-in member | User pill and menu as usual |
-| "Fes-te soci" buttons (home, `/about`) | Google Form (`MEMBERSHIP_FORM_URL`, `src/lib/member-area.ts`) |
-| `/login` sign-up card | Google Form instead of `/register` |
-| `/login`, `/register`, `/forgot-password` | Reachable by direct URL; `noindex`, not in the sitemap |
-| Admin panel, `/verify/<token>` | Unchanged |
+| NavBar, visitor | "Iniciar sessió" (desktop and mobile menu); a same-size placeholder while the session loads |
+| NavBar, signed-in member | User pill and menu |
+| "Fes-te soci" buttons (home `JoinUs`, `/about` `AboutWhyJoin` and `AboutCTA`) | `/register`, same tab |
+| `/login` sign-up card (`LoginSignupCard`) | `/register` |
+| Signed-in member opening `/register` | Redirected to `/profile` by the proxy (`AUTH_ROUTES`) |
+| `/login`, `/register`, `/forgot-password` | `noindex`, not in the sitemap |
 
-Hiding is not access control. Anyone with the URL can sign up, and that
-creates a real member (with the next member number) in the production
-database. While the flag is off, check new web sign-ups against the Google
-Form answers so nobody ends up registered twice.
+The old Google Form is no longer linked from the site. Close it (or replace its
+description with a link to `https://www.darkstone.cat/register`) so nobody
+signs up twice. Answers it received before closing can still be imported with
+`docs/operations/member-import.md`.
 
-## Before publishing: verify in production
+## Before announcing: verify in production
 
-Use the direct URLs on `https://www.darkstone.cat`:
+On `https://www.darkstone.cat`:
 
 1. **Sign-up**: `/register` with a real mailbox. The confirmation mail
    arrives, its link goes through `/auth/confirm` and ends on
@@ -38,8 +37,11 @@ Use the direct URLs on `https://www.darkstone.cat`:
 6. **Sign-out** from the NavBar ends the session.
 7. Remove or anonymise the test account from the admin panel afterwards.
 
-If a mail link fails, check the Supabase dashboard (production project):
+## Supabase dashboard (production project)
 
+- **Auth SMTP**: Supabase's built-in sender only allows a few mails per hour.
+  Set a custom SMTP (Google Workspace) before announcing, or confirmation
+  mails get lost.
 - **URL configuration**: Site URL `https://www.darkstone.cat`; the redirect
   allow-list contains `https://www.darkstone.cat/auth/callback` (password
   reset `redirectTo`) and the `/auth/magic-link` URL.
@@ -47,30 +49,15 @@ If a mail link fails, check the Supabase dashboard (production project):
   send the types the callback routes accept (`signup`/`email`/`email_change`
   for `/auth/confirm`, `recovery` for `/auth/callback`); "Magic link" points
   to `{{ .SiteURL }}/auth/magic-link?token_hash={{ .TokenHash }}&type=email`.
-- **Mail sending limits**: Supabase's built-in sender is heavily rate-limited;
-  check the Auth SMTP settings before announcing.
-
-## Publishing
-
-1. Vercel → Project → Settings → Environment Variables: add
-   `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` = `1` (Production).
-2. Redeploy the latest production deployment. The value is inlined at build
-   time, so it has no effect until a new build runs.
-3. Check on `https://www.darkstone.cat`, in a private window: the NavBar shows
-   "Inicia sessió" and the `/login` card goes to `/register`.
-4. Decide separately whether the "Fes-te soci" buttons should move from the
-   Google Form to `/register`. The flag does not change them.
-
-## Rolling back
-
-Delete the variable (or set it to anything other than `1`) and redeploy.
-Accounts and sessions are untouched: signed-in members keep their access.
 
 ## Code
 
-- Flag and form URL: `src/lib/member-area.ts` (`isMemberAreaPublic()`,
-  `MEMBERSHIP_FORM_URL`).
-- Consumers: `src/components/NavBar.tsx` (`desktopVisitorEntry`,
-  `mobileVisitorEntry`), `src/components/auth/LoginSignupCard.tsx`.
-- Tests: `tests/components/MemberAreaEntry.test.tsx` (both modes, desktop and
-  mobile). The Playwright server runs with the flag set to `1`.
+- NavBar login: `src/components/NavBar.tsx` (`desktopVisitorEntry`,
+  `mobileVisitorEntry`).
+- Sign-up links: `src/components/home/JoinUs.tsx`,
+  `src/components/about/AboutWhyJoin.tsx`, `src/components/about/AboutCTA.tsx`,
+  `src/components/auth/LoginSignupCard.tsx`.
+- Tests: `tests/components/MemberAreaEntry.test.tsx`, `e2e/pages/home.spec.ts`,
+  `e2e/auth/login.spec.ts`.
+- The `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` variable is no longer read; delete it
+  from Vercel and local `.env*` files if it is still set.

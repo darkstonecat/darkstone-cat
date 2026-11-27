@@ -107,7 +107,7 @@
   "join_us": {
     "cta_title": "Become a member",
     "cta_subtitle": "It's free. Come any Friday or Saturday.",
-    "cta_button": "Fill in the sign-up form",
+    "cta_button": "Sign up",
     "subtitle": "Connect with us",
     "telegram_title": "Telegram",
     "telegram_description": "We have a chat on Telegram where we talk about many things and also make plans and say what we feel like playing that weekend in Darkstone.",
@@ -203,7 +203,7 @@
 
     "cta_title": "Want to be part of it?",
     "cta_subtitle": "Membership is free. Come any Friday or Saturday to Centre Cívic Ca N'Aurell and join us.",
-    "cta_primary_button": "Sign-up form",
+    "cta_primary_button": "Sign up",
     "cta_secondary_button": "Contact us",
 
     "registration_note": "Registered association with CIF G19789221"
@@ -713,7 +713,7 @@
     "rpg_q": "Do you run role-playing game sessions?",
     "rpg_a": "Yes! We organise role-playing game sessions regularly. If you want to run or join a game, talk to us and we'll coordinate schedules and tables.",
     "join_q": "How can I become a member?",
-    "join_a": "Come to any session and talk to us, or contact us through the contact form on the website. The process is quick and simple: just fill in a registration form. It's free!"
+    "join_a": "Sign up on the website with the \"Become a member\" button: the process is quick and simple. If you have any questions, come to any session and talk to us, or write to us through the contact form. It's free!"
   },
   "event_images": {
     "title": "Event Images",
@@ -762,7 +762,7 @@
     "login_cta_image_alt": "A board game session at Darkstone",
 
     "register_title": "Become a member",
-    "register_subtitle": "It's free and replaces the Google form. Three steps and you're part of Darkstone.",
+    "register_subtitle": "It's free. Three steps and you're part of Darkstone.",
     "register_steps_label": "Steps to become a member",
     "register_step_account": "Your account",
     "register_step_member": "Member details",

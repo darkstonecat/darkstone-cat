@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { Link } from "@/i18n/routing";
 import TextReveal from "@/components/TextReveal";
-import { MEMBERSHIP_FORM_URL } from "@/lib/member-area";
 import DocumentLink from "@/components/documents/DocumentLink";
 
 const docLinkClass =
@@ -43,17 +42,15 @@ export default function AboutCTA() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <a
-              href={MEMBERSHIP_FORM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/register"
               className="group inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105 active:scale-[0.97]"
             >
               {t("cta_primary_button")}
               <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
                 &rarr;
               </span>
-            </a>
+            </Link>
 
             <Link
               href="/contact"

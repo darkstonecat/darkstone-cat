@@ -107,7 +107,7 @@
   "join_us": {
     "cta_title": "Fes-te soci",
     "cta_subtitle": "És gratuït. Vine qualsevol divendres o dissabte.",
-    "cta_button": "Emplena el formulari d'alta",
+    "cta_button": "Registra't",
     "subtitle": "Connecta amb nosaltres",
     "telegram_title": "Telegram",
     "telegram_description": "Tenim un xat a Telegram on parlem de moltes coses, fem plans i comentem què ens ve de gust jugar el cap de setmana a Darkstone.",
@@ -203,7 +203,7 @@
 
     "cta_title": "Vols formar-ne part?",
     "cta_subtitle": "L'associació és gratuïta. Vine qualsevol divendres o dissabte al Centre Cívic Ca N'Aurell i uneix-te a nosaltres.",
-    "cta_primary_button": "Formulari d'alta",
+    "cta_primary_button": "Registra't",
     "cta_secondary_button": "Contacta'ns",
 
     "registration_note": "Associació registrada amb CIF G19789221"
@@ -713,7 +713,7 @@
     "rpg_q": "Feu partides de jocs de rol?",
     "rpg_a": "Sí! Organitzem partides de jocs de rol regularment. Si vols dirigir o jugar una partida, parla amb nosaltres i coordinarem horaris i taules.",
     "join_q": "Com puc fer-me soci?",
-    "join_a": "Vine a qualsevol sessió i parla amb nosaltres, o contacta'ns a través del formulari de contacte de la web. El procés és ràpid i senzill: només cal omplir un formulari d'inscripció. És gratuït!"
+    "join_a": "Registra't al web des del botó «Fes-te soci»: el procés és ràpid i senzill. Si tens dubtes, vine a qualsevol sessió i parla amb nosaltres o escriu-nos des del formulari de contacte. És gratuït!"
   },
   "event_images": {
     "title": "Imatges d'esdeveniments",
@@ -762,7 +762,7 @@
     "login_cta_image_alt": "Una partida de jocs de taula a Darkstone",
 
     "register_title": "Fes-te soci",
-    "register_subtitle": "És gratuït i substitueix el formulari de Google. Tres passos i ja formes part de Darkstone.",
+    "register_subtitle": "És gratuït. Tres passos i ja formes part de Darkstone.",
     "register_steps_label": "Passos per fer-te soci",
     "register_step_account": "El teu compte",
     "register_step_member": "Dades de soci",

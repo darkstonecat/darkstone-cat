@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
-import { MEMBERSHIP_FORM_URL } from "@/lib/member-area";
+import { Link } from "@/i18n/routing";
 
 const POINTS = [
   "why_join_point_1",
@@ -65,17 +65,15 @@ export default function AboutWhyJoin() {
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <a
-            href={MEMBERSHIP_FORM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/register"
             className="group inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105 active:scale-[0.97]"
           >
             {t("why_join_cta")}
             <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
               &rarr;
             </span>
-          </a>
+          </Link>
         </motion.div>
       </div>
     </section>

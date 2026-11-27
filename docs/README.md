@@ -35,8 +35,8 @@ The repository is public: never put secrets, real member data or copies of third
 
 | Document | Summary |
 |---|---|
-| [`operations/member-area-launch.md`](operations/member-area-launch.md) | Publishing the member area: the `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` flag, checklist and rollback |
-| [`operations/member-import.md`](operations/member-import.md) | Importing new members from the Google Form sheet with `npm run migrate`: dry run, reading the output, member numbers |
+| [`operations/member-area-launch.md`](operations/member-area-launch.md) | Member area launch: production checks, Supabase dashboard settings, entry points |
+| [`operations/member-import.md`](operations/member-import.md) | Legacy: importing members from the closed Google Form sheet with `npm run migrate`: dry run, reading the output, member numbers |
 | [`operations/member-restore.md`](operations/member-restore.md) | Rebuilding the member list from the weekly backup Sheet with `npm run restore` after a database loss |
 
 ## Adding a document

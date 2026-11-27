@@ -7,7 +7,7 @@ import { motion } from "motion/react";
 import TextReveal from "@/components/TextReveal";
 
 import SocialLinks from "@/components/home/SocialLinks";
-import { MEMBERSHIP_FORM_URL } from "@/lib/member-area";
+import { Link } from "@/i18n/routing";
 
 export default function JoinUs() {
   const t = useTranslations("join_us");
@@ -44,17 +44,15 @@ export default function JoinUs() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mt-10"
           >
-            <a
-              href={MEMBERSHIP_FORM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/register"
               className="animate-cta-nudge group inline-flex items-center gap-2 rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105 active:scale-[0.97]"
             >
               {t("cta_button")}
               <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
                 &rarr;
               </span>
-            </a>
+            </Link>
           </motion.div>
         </div>
 
