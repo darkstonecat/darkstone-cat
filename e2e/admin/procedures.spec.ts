@@ -7,8 +7,8 @@ test.describe('Admin procedures', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Procediments' })).toBeVisible()
 
     const index = page.getByRole('navigation', { name: 'Índex de procediments' })
-    await expect(index.getByRole('link')).toHaveCount(7)
-    for (let n = 1; n <= 7; n++) {
+    await expect(index.getByRole('link')).toHaveCount(8)
+    for (let n = 1; n <= 8; n++) {
       await expect(page.locator(`article#p-${n}`)).toHaveCount(1)
     }
     await expect(page.getByRole('heading', { level: 2, name: "Reincorporació d'un exsoci" })).toBeVisible()
