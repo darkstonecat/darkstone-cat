@@ -4,19 +4,14 @@ import type { ProgramItem } from "@/lib/events/program";
 import { cn } from "@/lib/utils";
 
 /**
- * Kind badge on a cover: "Torneig · Sistema suís" (orange), "Activitat",
- * "Demo"; plays carry none.
+ * Kind badge on a cover: "Torneig" (orange, no format: Ludoya shows it and
+ * it costs width on phones), "Activitat", "Demo"; plays carry none.
  */
 export default function ItemBadge({ item }: { item: ProgramItem }) {
   const t = useTranslations("events.program");
   if (item.kind === "play") return null;
 
-  const label =
-    item.kind === "tournament"
-      ? item.format
-        ? t("badge_tournament_format", { format: t(`format.${item.format}`) })
-        : t("badge_tournament")
-      : t(`badge_${item.kind}`);
+  const label = t(`badge_${item.kind}`);
 
   return (
     <span

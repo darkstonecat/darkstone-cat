@@ -641,16 +641,8 @@
       "show": "Mostrar",
       "hide": "Ocultar",
       "badge_tournament": "Torneo",
-      "badge_tournament_format": "Torneo · {format}",
       "badge_activity": "Actividad",
       "badge_demo": "Demo",
-      "format": {
-        "SWISS": "Sistema suizo",
-        "SINGLE_ELIM": "Eliminación directa",
-        "DOUBLE_ELIM": "Doble eliminación",
-        "TABLE_KNOCKOUT": "Eliminatoria por mesas",
-        "MIXER": "Mesas rotativas"
-      },
       "cta_tournament": "Inscríbete",
       "cta_tickets": "Entrada",
       "cta_info": "Más info",

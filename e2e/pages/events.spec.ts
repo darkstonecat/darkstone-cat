@@ -190,9 +190,9 @@ test.describe('Events page (/events)', () => {
     await expect(section(/Diumenge 29 de novembre/)).toHaveAttribute('aria-expanded', 'true')
     await expect(egara.locator('[data-program-slot] time')).toHaveText(['10:00', '16:00', '18:00', '10:00'])
 
-    // A play inside a meetup zone, and a tournament with its format.
+    // A play inside a meetup zone, and a tournament (plain badge, no format).
     await expect(egara.getByText('Aquí nunca hubo campanas · Partides de ROL')).toBeVisible()
-    await expect(egara.locator('[data-item-badge="tournament"]').first()).toHaveText(/Torneig · Eliminatòria per taules/)
+    await expect(egara.locator('[data-item-badge="tournament"]').first()).toHaveText(/^Torneig$/)
     await expect(egara.getByRole('link', { name: /^Entrada/ }).first()).toBeVisible()
 
     // Always-open demos grouped by zone, A Risk Cat under "Altres activitats".

@@ -128,10 +128,10 @@ describe('ItemCard: play', () => {
 })
 
 describe('ItemCard: tournament and activity', () => {
-  it('marks a tournament with its format and the sign-up button', () => {
+  it('marks a tournament with a plain "tournament" badge (no format) and the sign-up button', () => {
     inList(<ItemCard item={tournamentView()} />)
 
-    expect(document.querySelector('[data-item-badge="tournament"]')).toHaveTextContent('badge_tournament_format(format.SWISS)')
+    expect(document.querySelector('[data-item-badge="tournament"]')).toHaveTextContent(/^badge_tournament$/)
     expect(screen.getByRole('img', { name: /aria_seats/ })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /program\.cta_tournament/ })).toBeInTheDocument()
   })
@@ -139,7 +139,7 @@ describe('ItemCard: tournament and activity', () => {
   it('says "tickets" for a ticketed tournament and plain "tournament" without a format', () => {
     inList(<ItemCard item={tournamentView({ format: null, tickets: true } as never)} />)
 
-    expect(document.querySelector('[data-item-badge="tournament"]')).toHaveTextContent('badge_tournament')
+    expect(document.querySelector('[data-item-badge="tournament"]')).toHaveTextContent(/^badge_tournament$/)
     expect(screen.getByRole('link', { name: /program\.cta_tickets/ })).toBeInTheDocument()
   })
 

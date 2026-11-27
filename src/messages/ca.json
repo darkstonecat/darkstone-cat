@@ -641,16 +641,8 @@
       "show": "Mostra",
       "hide": "Amaga",
       "badge_tournament": "Torneig",
-      "badge_tournament_format": "Torneig · {format}",
       "badge_activity": "Activitat",
       "badge_demo": "Demo",
-      "format": {
-        "SWISS": "Sistema suís",
-        "SINGLE_ELIM": "Eliminació directa",
-        "DOUBLE_ELIM": "Doble eliminació",
-        "TABLE_KNOCKOUT": "Eliminatòria per taules",
-        "MIXER": "Taules rotatives"
-      },
       "cta_tournament": "Inscriu-t’hi",
       "cta_tickets": "Entrada",
       "cta_info": "Més info",

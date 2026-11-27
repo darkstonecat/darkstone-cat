@@ -641,16 +641,8 @@
       "show": "Show",
       "hide": "Hide",
       "badge_tournament": "Tournament",
-      "badge_tournament_format": "Tournament · {format}",
       "badge_activity": "Activity",
       "badge_demo": "Demo",
-      "format": {
-        "SWISS": "Swiss",
-        "SINGLE_ELIM": "Single elimination",
-        "DOUBLE_ELIM": "Double elimination",
-        "TABLE_KNOCKOUT": "Table knockout",
-        "MIXER": "Mixer"
-      },
       "cta_tournament": "Sign up",
       "cta_tickets": "Tickets",
       "cta_info": "More info",
