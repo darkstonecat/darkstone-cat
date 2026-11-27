@@ -15,10 +15,9 @@ The member area (login, sign-up, La meva zona, member card) is public since
 | Signed-in member opening `/register` | Redirected to `/profile` by the proxy (`AUTH_ROUTES`) |
 | `/login`, `/register`, `/forgot-password` | `noindex`, not in the sitemap |
 
-The old Google Form is no longer linked from the site. Close it (or replace its
-description with a link to `https://www.darkstone.cat/register`) so nobody
-signs up twice. Answers it received before closing can still be imported with
-`docs/operations/member-import.md`.
+The old Google Form is no longer linked from the site and was closed on
+2026-11-27, right after its last answers were imported (one new member,
+000-209; `docs/operations/member-import.md`).
 
 ## Before announcing: verify in production
 
@@ -40,9 +39,13 @@ On `https://www.darkstone.cat`:
 
 ## Supabase dashboard (production project)
 
-- **Auth SMTP**: Supabase's built-in sender only allows a few mails per hour.
-  Set a custom SMTP (Google Workspace) before announcing, or confirmation
-  mails get lost.
+- **Auth SMTP**: custom SMTP with `no-reply@darkstone.cat` (Google Workspace,
+  signed by `darkstone.cat`), the same account as the app's own mail. Never
+  fall back to Supabase's built-in sender: it only allows a few mails per hour.
+- **Email subjects and bodies** are in Catalan (Supabase sends one language to
+  everyone). Subjects: "Confirma el teu correu i fes-te soci de Darkstone",
+  "El teu enllaç per entrar a Darkstone", "Restableix la teva contrasenya de
+  Darkstone", "Confirma el teu nou correu a Darkstone".
 - **URL configuration**: Site URL `https://www.darkstone.cat`; the redirect
   allow-list contains `https://www.darkstone.cat/auth/callback` (password
   reset `redirectTo`) and the `/auth/magic-link` URL.
