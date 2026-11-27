@@ -12,11 +12,13 @@ const FORMULA_TRIGGER = /^[=+\-@\t\r]/;
 const PLAIN_PHONE = /^\+?[0-9 ]+$/;
 const NEEDS_QUOTES = /[",\r\n]/;
 
+/** The value with a leading apostrophe when a spreadsheet would read it as a formula. */
+export function neutralizeFormula(value: string): string {
+  return FORMULA_TRIGGER.test(value) && !PLAIN_PHONE.test(value) ? `'${value}` : value;
+}
+
 export function escapeCsv(value: string): string {
-  let safe = value;
-  if (FORMULA_TRIGGER.test(safe) && !PLAIN_PHONE.test(safe)) {
-    safe = `'${safe}`;
-  }
+  const safe = neutralizeFormula(value);
   if (NEEDS_QUOTES.test(safe)) {
     return `"${safe.replace(/"/g, '""')}"`;
   }
