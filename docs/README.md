@@ -22,7 +22,7 @@ The repository is public: never put secrets, real member data or copies of third
 | [`features/admin-panel/spec.md`](features/admin-panel/spec.md) | Admin panel: actors, membership lifecycle, business rules (BR-*), use cases and views |
 | [`features/admin-panel/navigation.md`](features/admin-panel/navigation.md) | Admin panel frame: header, grouped sections, desktop sidebar, phone section switcher, how to add a section |
 | [`features/events/spec.md`](features/events/spec.md) | Public agenda `/events`: listing rules, cards, seat counter, calendar, data flow and privacy |
-| [`features/member-backup/spec.md`](features/member-backup/spec.md) | Weekly member backup to a Google Sheet in the Workspace shared drive: contents, retention, access, restore, continuity kit (draft for board review) |
+| [`features/member-backup/spec.md`](features/member-backup/spec.md) | Weekly member backup to a Google Sheet in the Workspace shared drive: contents, retention, access (superadmins only), restore, continuity kit |
 
 ### Integrations
 
@@ -37,6 +37,7 @@ The repository is public: never put secrets, real member data or copies of third
 |---|---|
 | [`operations/member-area-launch.md`](operations/member-area-launch.md) | Publishing the member area: the `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` flag, checklist and rollback |
 | [`operations/member-import.md`](operations/member-import.md) | Importing new members from the Google Form sheet with `npm run migrate`: dry run, reading the output, member numbers |
+| [`operations/member-restore.md`](operations/member-restore.md) | Rebuilding the member list from the weekly backup Sheet with `npm run restore` after a database loss |
 
 ## Adding a document
 

@@ -1,6 +1,6 @@
 # Member backup — functional specification
 
-Status: **draft for board review**. This document describes what the board gets, how it is kept up to date, who can read it, and how the member list is rebuilt from it. It is not an implementation plan; route, table and variable names are only there to make the behaviour unambiguous.
+Status: **implemented** on `feat/member-backup` (2026-11-27, `odd/tasks/member-backup.md`). This document describes what the board gets, how it is kept up to date, who can read it, and how the member list is rebuilt from it. Decisions: D-1 superadmins only, D-2 weekly with 4 copies (§10).
 
 ## 1. Why
 
@@ -17,7 +17,7 @@ In scope:
 
 - A Google Sheet with every member row the database holds (active and former members), with DNI/NIE and phone decrypted.
 - Generated automatically every week; old copies deleted automatically.
-- A restore path: the import script reads the Sheet into an empty database.
+- A restore path: `scripts/restore-members.mjs` (`npm run restore`) reads the Sheet into a new database.
 - A continuity kit held by the board (§8) and the privacy policy changes (§9).
 
 Out of scope, not in the backup:
@@ -51,13 +51,13 @@ One Google Sheet per run, named `Darkstone · Socis · YYYY-MM-DD` (date of the 
 Rules:
 
 - A former member's row holds what the database still holds after the *baixa* (admin panel spec §4.2): contact and profile fields are already empty there.
-- Every cell goes through the existing `escapeCsv` (`src/lib/csv.ts`), so a value starting with `=`, `+`, `-` or `@` is never run as a Sheets formula.
+- Every cell is written as plain text (Sheets API, `valueInputOption=RAW`): postal code `08221` and phone `+34 600 123 456` keep their exact text. A value starting with `=`, `+`, `-`, `@`, tab or CR (not a plain phone) gets a leading apostrophe (`neutralizeFormula`, `src/lib/csv.ts`), so it is never run as a formula if the Sheet is downloaded and opened elsewhere; the restore removes it again.
 - If a DNI or phone cannot be decrypted, the cell says `(illegible)` and the run is still a success; the count is reported (§6).
-- The file description says when and how it was generated and that it must not be shared outside the backup folder.
+- The file description says it is the automatic weekly backup, that it holds DNIs and phones and must not be shared or copied outside the folder, and that only the last 4 are kept.
 
 ## 4. Schedule and retention
 
-- **Weekly**, Monday at 03:00 UTC, plus a manual run from GitHub (`workflow_dispatch`).
+- **Weekly**, Monday at 03:17 UTC, plus a manual run from GitHub (`workflow_dispatch`).
 - After a successful upload, the run **permanently deletes** every older backup file in the folder except the newest **4** (the trash is skipped). Only files the job created are touched (marked with a Drive app property), never a file someone else put there.
 - So a person who leaves or asks for erasure disappears from every copy in **at most 5 weeks**. That figure goes in the privacy policy (§9).
 - A copy someone downloads or duplicates outside the folder is outside this guarantee; the folder settings in §5 make that harder, and the procedure says not to do it.
@@ -74,11 +74,11 @@ Rules:
 ```
 GitHub Actions (member-backup.yml, weekly)
   → GET https://www.darkstone.cat/api/cron/backup   (Authorization: Bearer $CRON_SECRET)
-      → read every member row (service role) + badges
+      → backup_member_rows() (service role): every member row, e-mail and badges
       → decrypt DNI/phone (ENCRYPTION_KEY, already in Vercel)
-      → build the CSV
-      → Google Drive API: upload, converted to a Google Sheet, into the backup folder
-      → delete older backup files beyond the newest 4
+      → Drive API: create an empty Google Sheet in the backup folder (marked darkstoneBackup=1)
+      → Sheets API: write the cells, valueInputOption=RAW; bold, frozen header (best effort)
+      → Drive API: delete the job's files beyond the newest 4 (permanently)
       → record the run (ops_job_runs, job 'member_backup')
 ```
 
@@ -86,8 +86,9 @@ Why the work runs on Vercel and not in the GitHub runner: the database key and `
 
 Route `GET /api/cron/backup`:
 
-- Same auth and errors as `/api/cron/refresh`: 500 `not_configured` without `CRON_SECRET` or the Google settings, 401 on a wrong secret, `no-store`, `force-dynamic`.
-- 200 `{ ok: true, rows, illegible, deleted }`; 502 `{ ok: false, error: "backup_failed" }` when the read, the upload or the clean-up fails. A failed clean-up after a successful upload still answers 502, so an old copy that outlives the 4-copy limit is noticed.
+- Same auth and errors as `/api/cron/refresh`: 500 `not_configured` without `CRON_SECRET` or the Google settings, 401 on a wrong secret, `no-store`, `force-dynamic`, `maxDuration` 60 s. A call refused for the secret records nothing; a call without the Google settings records a failed run `not_configured`, so V-6 shows it.
+- 200 `{ ok: true, rows, illegible, deleted }`; 502 `{ ok: false, error: "backup_failed" }` when the read, the sign-in, the upload or the clean-up fails. If the cells cannot be written, the empty Sheet is deleted again (it must not count as a copy). A failed clean-up after a successful upload still answers 502, so an old copy that outlives the 4-copy limit is noticed.
+- Error codes (V-6 and the log): `read_failed` / `db_<code>`, `google_auth_<status>`, `google_key_invalid`, `drive_create_<status>`, `sheets_write_<status>`, `drive_list_<status>`, `drive_delete_<status>`, `timeout`, `network`.
 - Logs counts and Google error codes only: never names, e-mails, DNIs, phones or the file contents.
 - Reads with the service role: there is no user (admin panel gotcha 17 allows the service role for cron jobs).
 
@@ -95,24 +96,26 @@ Workflow `.github/workflows/member-backup.yml`: `permissions: {}`, a `concurrenc
 
 Google access:
 
-- One service account in a Google Cloud project owned by the association's Workspace, Drive API enabled, one JSON key.
+- One service account in a Google Cloud project owned by the association's Workspace, with the **Drive API and the Sheets API enabled**, one JSON key.
 - New Vercel env (Production): `GOOGLE_BACKUP_SERVICE_ACCOUNT` (the JSON key, base64) and `GOOGLE_BACKUP_FOLDER_ID` (the backup folder in the shared drive). Neither is added to `assertProductionEnv`: a missing value makes the backup answer `not_configured`, it does not block deploys.
-- Calls: Drive v3 `files.create` (multipart, `mimeType: application/vnd.google-apps.spreadsheet`, so the CSV is converted), `files.list` and `files.delete`, all with `supportsAllDrives=true`. Token from a JWT signed with the key (Node `crypto`, no `googleapis` dependency). Scope: `drive.file` if it can write into the shared folder, otherwise `drive` (to confirm during implementation).
+- Calls: Drive v3 `files.create` (metadata only, `mimeType: application/vnd.google-apps.spreadsheet`, app property `darkstoneBackup=1`), `files.list` (only files with that property) and `files.delete`, all with `supportsAllDrives=true`; Sheets v4 `values.update` (`RAW`) and `batchUpdate` (header format). A CSV converted by Drive was rejected: it parses values (`08221` → `8221`). Token from a JWT signed with the key (Node `crypto`, no `googleapis` dependency). Scopes `drive` and `spreadsheets`; the service account reaches only the shared drive it is a member of. Code: `src/lib/backup/` (`sheet.ts` cells, `google.ts` client, `job.ts`).
 
 Monitoring:
 
-- `/admin/tools` (V-6) shows the last run and the last success of `member_backup`, next to the cache jobs. This needs the `ops_job_runs` job CHECK and `admin_ops_status()` widened (a migration).
+- `/admin/tools` (V-6) shows the last run and the last success of `member_backup` in its own card, without a run button (migration `20261127100100_ops_member_backup_job.sql`; the database refuses a manual `member_backup` run).
 - A failed workflow run e-mails the repository owner. The board's procedure (§10) includes a monthly look at the folder date, so a silent stop is noticed even without the maintainer.
 
 ## 7. Restore
 
-`npm run migrate -- --from-backup <file.csv>` (the Sheet downloaded as CSV), against a new database with the migrations applied:
+`npm run restore -- <file.csv>` (`scripts/restore-members.mjs`; the Sheet downloaded as CSV), against a new database with the migrations applied. A separate script, not a mode of the Google Form import: that one cleans names, merges answers by e-mail and gives new numbers, the opposite of an exact restore.
 
-- Insert-only, like today's import: it skips a member whose e-mail already exists, and starts with a dry run.
+- Insert-only: it skips a member whose e-mail has an account or whose number exists, and runs as a dry run unless `--execute` is passed. Output names member numbers only.
 - Keeps the member number, first and current *alta*, role, newsletter, usernames, the *baixa* fields (a former member's auth user is created banned, as a *baixa* leaves it) and the anonymised date.
 - Re-awards badges whose key exists in the catalogue; reports the missing keys so the board creates them and runs the import again.
-- Creates confirmed auth users without a password, encrypts DNI/phone with the new database's row ids, and moves `member_number_seq` past the highest number.
-- Roles: the database guards (BR-10, BR-11) must accept the inserted roles on an empty database; confirm during implementation and document the order if they do not.
+- Creates confirmed auth users without a password, encrypts DNI/phone with the new database's row ids, and first moves `member_number_seq` above the highest number of the Sheet (`restore_raise_member_number_seq()`, migration `20261127100200`; it never lowers the sequence). Without it, the sign-up trigger would hand out numbers the Sheet gives to other members.
+- A row without an e-mail (an anonymised former member) comes back as a members row without an account.
+- Roles are set with the service role; the guards accept them (BR-11 does not apply without a JWT subject, BR-10 only guards demotions, BR-12 is checked in the file: a former member with a role is an invalid row).
+- A member that fails half-way is removed again, so a re-run retries it.
 
 Runbook: `docs/operations/member-restore.md` (new), written so a developer who has never seen the project can follow it with the continuity kit.
 
@@ -129,40 +132,39 @@ Held by the board **outside Google Drive and outside the repository** (a shared 
 
 - **Privacy policy** and **data protection document**, in `ca`, `es` and `en`: add Google (Workspace) as a processor of member data for backups, the purpose (continuity of the association's register), and the retention of the copies (at most 5 weeks after a change or erasure).
 - The Workspace admin accepts Google's data processing terms (Cloud Data Processing Addendum) in the admin console, if not done already.
-- Former members' DNI: the admin panel spec (§4.5, "Blocked") hides it from the board and lets only a superadmin reveal it, with a reason. A Sheet readable by the board breaks that rule unless D-1 restricts the access or leaves that column out for former members.
+- Former members' DNI: the admin panel spec (§4.5, "Blocked") hides it from the board and lets only a superadmin reveal it, with a reason. D-1 keeps that rule: only the superadmins can open the backup folder.
 
 ## 10. Open decisions for the board
 
 | ID | Question | Recommendation |
 |---|---|---|
-| D-1 | Who can open the backup folder? | The superadmins only (2 people). If the whole board needs it, leave former members' DNI out of the Sheet. |
-| D-2 | Frequency and number of copies? | Weekly, 4 copies (5-week erasure bound). |
+| D-1 | Who can open the backup folder? | **Decided (2026-11-27): the superadmins only**; the Sheet carries every column, former members' DNI included. |
+| D-2 | Frequency and number of copies? | Weekly, 4 copies (5-week erasure bound). Implemented as recommended. |
 | D-3 | Can readers download, print or copy the Sheet? | No (shared drive setting). The superadmins export by hand if a restore is needed. |
 | D-4 | Who holds the continuity kit? | Two board members, not the maintainer alone. |
 
 ## 11. Prerequisites (Google Workspace admin, not code)
 
 1. Create the shared drive and the backup folder; set the sharing restrictions of §5.
-2. Create a Google Cloud project under the Workspace organisation, enable the Drive API, create the service account and one JSON key. If the organisation policy blocks key creation (`iam.disableServiceAccountKeyCreation`), the Workspace admin allows it for this project.
+2. Create a Google Cloud project under the Workspace organisation, enable the **Drive API and the Sheets API**, create the service account and one JSON key. If the organisation policy blocks key creation (`iam.disableServiceAccountKeyCreation`), the Workspace admin allows it for this project.
 3. Add the service account to the shared drive as Manager.
 4. Add the named accounts (D-1) and require 2-Step Verification for them.
 5. Hand the key and the folder id to the maintainer, who stores them in Vercel; delete any local copy of the key afterwards.
 
 ## 12. Delivery and acceptance
 
-Code changes:
+Delivered (`odd/tasks/member-backup.md`):
 
-- `src/app/api/cron/backup/route.ts` and a backup module in `src/lib/` (build rows, CSV, Drive client).
-- Migration: `member_backup` in the `ops_job_runs` CHECK and in `admin_ops_status()`; V-6 label in the three locales.
-- `.github/workflows/member-backup.yml`.
-- `scripts/migrate-members.mjs`: `--from-backup`.
-- Privacy policy and data protection texts (§9), procedure P-8 "Còpia de seguretat de socis" in `/admin/procedures`.
-- Docs: this spec, `docs/operations/member-restore.md`, `CLAUDE.md` (route, env, workflow, migration).
+- Migrations `20261127100000_member_backup_rows` (`backup_member_rows()`, service role only), `20261127100100_ops_member_backup_job` (job `member_backup`), `20261127100200_restore_member_number_floor` (`restore_raise_member_number_seq()`, service role only). **Apply them to production before deploying the code.**
+- `src/lib/backup/` and `src/app/api/cron/backup/route.ts`; `.github/workflows/member-backup.yml`.
+- V-6 backup card (`ToolsContent`, `admin.tools.backup_*`), procedure P-8 (`admin.procedures.p8`).
+- `scripts/restore-members.mjs` (`npm run restore`) and `docs/operations/member-restore.md`.
+- Privacy texts: `data_protection.data_sharing_backup` (new paragraph in section 6), `privacy_policy.third_parties_text`, both update dates.
 
 Acceptance:
 
-1. A manual workflow run creates one Sheet in the folder with one row per member in the database and the columns of §3; DNI and phone match the admin panel's revealed values for two sample members.
-2. With 5 backup files present, a run leaves exactly the newest 4 plus the new one minus the oldest (4 in total); a file not created by the job is untouched.
-3. A wrong or missing secret answers 401 / 500 without touching Drive; a Drive failure answers 502 and records a failed run in V-6.
-4. Restoring the latest Sheet into a fresh local Supabase gives the same member numbers, roles, states and badge holders as the source, and a dry run afterwards reports 0 to create.
-5. No log line, response body or workflow output contains a name, e-mail, DNI or phone.
+1. A manual workflow run creates one Sheet in the folder with one row per member in the database and the columns of §3; DNI and phone match the admin panel's revealed values for two sample members. *(Pending: first production run.)*
+2. With 5 backup files present, a run leaves exactly 4 (the new one and the 3 newest); a file not created by the job is untouched. *(Unit tests with a fake Drive; production check pending.)*
+3. A wrong or missing secret answers 401 / 500 without touching Drive; a Drive failure answers 502 and records a failed run in V-6. *(Route tests.)*
+4. Restoring a Sheet into a database gives the same cells (numbers, roles, states, badges, decrypted DNI/phone), bans former members, and a second run restores nothing. *(Round-trip integration test, `tests/integration/member-restore.test.ts`.)*
+5. No log line, response body or workflow output contains a name, e-mail, DNI or phone. *(Route and restore tests.)*
