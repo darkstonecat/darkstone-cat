@@ -155,7 +155,7 @@ Held by the board **outside Google Drive and outside the repository** (a shared 
 
 Delivered (`odd/tasks/member-backup.md`):
 
-- Migrations `20261127100000_member_backup_rows` (`backup_member_rows()`, service role only), `20261127100100_ops_member_backup_job` (job `member_backup`), `20261127100200_restore_member_number_floor` (`restore_raise_member_number_seq()`, service role only). **Apply them to production before deploying the code.**
+- Migrations `20261127100000_member_backup_rows` (`backup_member_rows()`, service role only), `20261127100100_ops_member_backup_job` (job `member_backup`), `20261127100200_restore_member_number_floor` (`restore_raise_member_number_seq()`, service role only). Applied to production on 2026-11-27 (`supabase db push --linked`, dry run first), before the deploy.
 - `src/lib/backup/` and `src/app/api/cron/backup/route.ts`; `.github/workflows/member-backup.yml`.
 - V-6 backup card (`ToolsContent`, `admin.tools.backup_*`), procedure P-8 (`admin.procedures.p8`).
 - `scripts/restore-members.mjs` (`npm run restore`) and `docs/operations/member-restore.md`.
