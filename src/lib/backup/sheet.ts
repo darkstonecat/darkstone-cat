@@ -30,8 +30,8 @@ export type BackupMemberRow = {
 };
 
 /**
- * Header row. The restore (`scripts/migrate-members.mjs --from-backup`) reads the columns by
- * these names: renaming one breaks it.
+ * Header row. The restore (`scripts/restore-members.mjs`, which keeps a pinned copy) reads the
+ * columns by these names: renaming one breaks it.
  */
 export const BACKUP_HEADERS = [
   "Número",

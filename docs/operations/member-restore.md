@@ -55,7 +55,9 @@ member without an e-mail comes back as a members row without an account.
    It first moves the member number sequence above the highest number in the Sheet (new
    sign-ups continue after it), then restores in member number order: `[+] 000-NNN: restored`.
    Exit code 0 is success, 2 means some rows were invalid or failed (`ERROR` lines: a failed
-   member is removed again, so fix the cause and run the same command again), 1 is a fatal error.
+   member is removed again, so fix the cause and run the same command again; a line ending in
+   `NOT UNDONE` means it could not be removed: delete that member by hand first), 1 is a fatal
+   error. The role is set as the last step of each member.
 7. **Check.** Run the dry run again: it must say `0 would restore`. Sign in as a superadmin
    (magic link), open two members in `/admin/members` and reveal their DNI to confirm it reads.
 8. **Deploy.** Set the new Supabase values and the same `ENCRYPTION_KEY` in Vercel (Production),
@@ -68,6 +70,8 @@ member without an e-mail comes back as a members row without an account.
 | `FATAL: missing columns: …` | Not a backup Sheet, or columns were renamed | Download the Sheet again without editing it |
 | `invalid (member number)` | The number is not `000-NNN` | Fix that cell in the CSV |
 | `invalid (a former member cannot hold a role)` | A row with a *baixa* date and a role | Set `Rol` to `member` (the database refuses it otherwise, BR-12) |
+| `invalid (Primera alta)` / `invalid (Alta actual)` | A row without an alta date (the database requires both) | Fill in the date from the old records |
+| `invalid (insígnies)` | A badge cell that is not `key@YYYY-MM-DD; …`, or the same key twice | Fix the cell |
 | `invalid (repeated in the file)` | Two rows with the same number or e-mail | Keep the right one |
 | `skipped (e-mail has an account)` | That e-mail already signed up in the new database | Compare by hand; nothing was changed |
 | `ERROR 000-NNN: account (422)` | Supabase refused the e-mail | Check the address in the CSV |

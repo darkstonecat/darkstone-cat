@@ -59,7 +59,7 @@ Rules:
 
 - **Weekly**, Monday at 03:17 UTC, plus a manual run from GitHub (`workflow_dispatch`).
 - After a successful upload, the run **permanently deletes** every older backup file in the folder except the newest **4** (the trash is skipped). Only files the job created are touched (marked with a Drive app property), never a file someone else put there.
-- So a person who leaves or asks for erasure disappears from every copy in **at most 5 weeks**. That figure goes in the privacy policy (§9).
+- So the data deleted on a *baixa* (contact and profile fields, admin spec §4.2), and data erased on request, disappear from every copy in **at most 5 weeks**. That figure is in the privacy texts (§9). A former member's register row (number, name, DNI, dates) stays in the copies, as in the database, until the 3-year purge.
 - A copy someone downloads or duplicates outside the folder is outside this guarantee; the folder settings in §5 make that harder, and the procedure says not to do it.
 
 ## 5. Where it lives and who reads it
@@ -130,7 +130,7 @@ Held by the board **outside Google Drive and outside the repository** (a shared 
 
 ## 9. Privacy and legal
 
-- **Privacy policy** and **data protection document**, in `ca`, `es` and `en`: add Google (Workspace) as a processor of member data for backups, the purpose (continuity of the association's register), and the retention of the copies (at most 5 weeks after a change or erasure).
+- **Privacy policy** and **data protection document**, in `ca`, `es` and `en`: add Google (Workspace) as a processor of member data for backups, the purpose (continuity of the association's register), who can open the copies, and the retention (data deleted on a *baixa* or erased disappears from the copies within 5 weeks).
 - The Workspace admin accepts Google's data processing terms (Cloud Data Processing Addendum) in the admin console, if not done already.
 - Former members' DNI: the admin panel spec (§4.5, "Blocked") hides it from the board and lets only a superadmin reveal it, with a reason. D-1 keeps that rule: only the superadmins can open the backup folder.
 

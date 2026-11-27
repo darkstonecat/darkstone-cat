@@ -43,6 +43,8 @@ const former: Row = {
   "DNI/NIE": "X1234567L",
   Rol: "member",
   Newsletter: "No",
+  "Primera alta": "2019-01-10",
+  "Alta actual": "2019-01-10",
   "Data de baixa": "2026-09-20",
   "Baixa per": "Junta",
   "Motiu de baixa": "'=ha marxat",
@@ -113,11 +115,14 @@ describe("parseBackupCsv", () => {
       [{ ...active, Rol: "admin" }, "role"],
       [{ ...active, Newsletter: "Potser" }, "newsletter"],
       [{ ...active, "Primera alta": "01/03/2020" }, "Primera alta"],
+      [{ ...active, "Primera alta": "" }, "Primera alta"],
+      [{ ...active, "Alta actual": "" }, "Alta actual"],
       [{ ...former, Rol: "board" }, "a former member cannot hold a role"],
       [{ ...former, "Baixa per": "" }, "baixa per"],
       [{ ...active, "Baixa per": "Soci" }, "data de baixa"],
       [{ ...active, Email: "" }, "an active member needs an e-mail"],
       [{ ...active, Insígnies: "Bad Key@2025-01-01" }, "insígnies"],
+      [{ ...active, Insígnies: "ludoteca_donor@2024-01-01; ludoteca_donor@2024-02-01" }, "insígnies"],
     ];
     for (const [row, error] of bad) {
       expect(parseBackupCsv(csv([row])).records[0].errors, error).toContain(error);
@@ -170,6 +175,7 @@ describe("memberColumns", () => {
     const columns = memberColumns(record, id, parseKey(process.env.ENCRYPTION_KEY));
     expect(decrypt(columns.dni_nie_encrypted!, id)).toBe("12345678Z");
     expect(decrypt(columns.phone_encrypted!, id)).toBe("+34 600 123 456");
-    expect(columns).toMatchObject({ member_number: "000-012", role: "board", left_on: null, anonymised_at: null });
+    // The real role is set last by the restore (BR-10, BR-12), never in the first write.
+    expect(columns).toMatchObject({ member_number: "000-012", role: "member", left_on: null, anonymised_at: null });
   });
 });

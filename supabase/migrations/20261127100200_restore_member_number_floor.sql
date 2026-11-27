@@ -6,9 +6,10 @@
 -- the sequence, and without this a restored member could get a number that the backup assigns
 -- to another member (a unique violation), and new sign-ups after the restore would collide too.
 --
--- It never lowers the sequence (a floor below the current value is a no-op), so calling it on
--- a live database cannot make a number repeat. Service role only. Returns the sequence's last
--- value after the call.
+-- A floor below the current value is a no-op. The read and the setval are not atomic against a
+-- concurrent sign-up's nextval, so on a live database a sign-up in that instant could be
+-- followed by a lower value; it is meant for a new database before it opens. Service role
+-- only. Returns the sequence's last value after the call.
 
 CREATE OR REPLACE FUNCTION public.restore_raise_member_number_seq(p_floor bigint)
   RETURNS bigint

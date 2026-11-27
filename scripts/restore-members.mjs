@@ -162,6 +162,9 @@ export function toRecord(row, line) {
   const newsletter = get("Newsletter");
   if (newsletter !== "Sí" && newsletter !== "No" && newsletter !== "") errors.push("newsletter");
 
+  // Both alta dates are NOT NULL in the database: a row without them could not be restored.
+  for (const header of ["Primera alta", "Alta actual"]) if (!get(header)) errors.push(header);
+
   const leftOn = date("Data de baixa");
   const leftByLabel = get("Baixa per");
   const leftBy = leftByLabel ? (LEFT_BY[leftByLabel] ?? null) : null;
@@ -176,8 +179,10 @@ export function toRecord(row, line) {
   const badges = [];
   for (const part of get("Insígnies").split(";").map((p) => p.trim()).filter(Boolean)) {
     const [key, day] = part.split("@");
-    if (BADGE_KEY.test(key ?? "") && DATE.test(day ?? "")) badges.push({ key, date: day });
-    else errors.push("insígnies");
+    // A key twice would fail the insert (UNIQUE member_id, badge_key) half-way through a member.
+    if (BADGE_KEY.test(key ?? "") && DATE.test(day ?? "") && !badges.some((b) => b.key === key)) {
+      badges.push({ key, date: day });
+    } else errors.push("insígnies");
   }
 
   return {
@@ -242,18 +247,24 @@ export function planRestore(records, existing) {
   };
 }
 
-/** The members row values of a record; DNI/phone encrypted for the row `id`. */
+/**
+ * The members row values of a record; DNI/phone encrypted for the row `id`. The role is always
+ * `member` here: restoreOne sets the real role as its last step, because a superadmin's row
+ * cannot be demoted or deleted while fewer than two other superadmins exist (BR-10, BR-12), so a
+ * failed later step could not be undone.
+ */
 export function memberColumns(record, id, key) {
   return {
     member_number: record.memberNumber,
-    first_name: record.firstName,
-    last_name: record.lastName,
+    // NOT NULL columns: an anonymised member may come without names.
+    first_name: record.firstName ?? "",
+    last_name: record.lastName ?? "",
     dni_nie_encrypted: record.dni ? encryptForMember(record.dni, id, key) : null,
     phone_encrypted: record.phone ? encryptForMember(record.phone, id, key) : null,
     postal_code: record.postalCode,
     ludoya_username: record.ludoya,
     bgg_username: record.bgg,
-    role: record.role,
+    role: "member",
     newsletter_accepted: record.newsletter,
     membership_start_date: record.membershipStartDate,
     current_joined_on: record.currentJoinedOn,
@@ -325,25 +336,37 @@ async function restoreOne(supabase, key, record, badgeKeys) {
       const { error: badgeError } = await supabase.from("member_badges").insert(badges);
       if (badgeError) throw new Error(`badges (${badgeError.code ?? "error"})`);
     }
+
+    // Last: after this, the row may be impossible to undo (see memberColumns).
+    if (record.role !== "member") {
+      const { error: roleError } = await supabase.from("members").update({ role: record.role }).eq("id", id);
+      if (roleError) throw new Error(`role (${roleError.code ?? "error"})`);
+    }
     return { ok: true };
   } catch (error) {
     // Undo the half-restored member so a re-run creates it again instead of skipping it.
-    if (id) await undoMember(supabase, id, createdAccount);
-    return { ok: false, reason: error instanceof Error ? error.message : "unknown error" };
+    const reason = error instanceof Error ? error.message : "unknown error";
+    const undone = id ? await undoMember(supabase, id, createdAccount) : true;
+    return { ok: false, reason: undone ? reason : `${reason}; NOT UNDONE, remove it by hand before a re-run` };
   }
 }
 
 /**
- * Best effort. The role goes first (the database refuses to delete a role holder's row, BR-12),
- * then the row (a former member's row outlives its account), then the account.
+ * Removes a member restoreOne created, before its role was set: the row first (a former
+ * member's row outlives its account), then the account. supabase-js returns errors instead of
+ * throwing, so each one is checked. True when everything was removed.
  */
 async function undoMember(supabase, id, createdAccount) {
   try {
-    await supabase.from("members").update({ role: "member" }).eq("id", id).neq("role", "member");
-    await supabase.from("members").delete().eq("id", id);
-    if (createdAccount) await supabase.auth.admin.deleteUser(id);
+    const { error: rowError } = await supabase.from("members").delete().eq("id", id);
+    if (rowError) return false;
+    if (createdAccount) {
+      const { error: accountError } = await supabase.auth.admin.deleteUser(id);
+      if (accountError) return false;
+    }
+    return true;
   } catch {
-    // Reported by the caller as an error; a re-run shows what is left.
+    return false;
   }
 }
 

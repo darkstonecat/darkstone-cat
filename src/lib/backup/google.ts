@@ -18,7 +18,8 @@ const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const DRIVE_FILES = "https://www.googleapis.com/drive/v3/files";
 const SHEETS = "https://sheets.googleapis.com/v4/spreadsheets";
 const SCOPES = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"].join(" ");
-const TIMEOUT_MS = 20_000;
+/** Per call; a run makes up to 6 calls and the route has 60 s (maxDuration). */
+const TIMEOUT_MS = 8_000;
 
 /** Drive app property that marks the files this job made; clean-up never touches other files. */
 export const BACKUP_PROPERTY = { key: "darkstoneBackup", value: "1" } as const;

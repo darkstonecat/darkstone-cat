@@ -167,4 +167,56 @@ describe('backup → restore round trip', () => {
     const again = await run({ supabase: supabaseAdmin, key, csvText, apply: false, log: () => {} })
     expect(again).toMatchObject({ exitCode: 0, counts: { create: 0, skip: 3, invalid: 0 } })
   })
+
+  it('removes a half-restored superadmin again when a later step fails, so a re-run retries it', async () => {
+    const { data: top } = await runSqlAsPostgres<{ v: string }>(
+      "SELECT public.restore_raise_member_number_seq(pg_catalog.nextval('public.member_number_seq') + 5)::text AS v"
+    )
+    const number = `000-${String(Number(top![0].v) - 2).padStart(3, '0')}`
+    const email = `superadmin@${DST}`
+    const row = Object.fromEntries(BACKUP_HEADERS.map((h) => [h, ''])) as Record<string, string>
+    Object.assign(row, {
+      Número: number,
+      Estat: 'Actiu',
+      Nom: 'Super',
+      Email: email,
+      Rol: 'superadmin',
+      Newsletter: 'No',
+      'Primera alta': '2019-01-10',
+      'Alta actual': '2019-01-10',
+      Insígnies: 'ludoteca_donor@2025-01-15',
+    })
+    const csvText = toCsv([[...BACKUP_HEADERS], BACKUP_HEADERS.map((h) => row[h])])
+
+    // The badge insert fails (a network error, say) after the account and the row exist.
+    const failingBadges = new Proxy(supabaseAdmin, {
+      get(target, prop, receiver) {
+        if (prop === 'from') {
+          return (table: string) =>
+            table === 'member_badges'
+              ? { insert: async () => ({ data: null, error: { code: '08006', message: 'connection failure' } }) }
+              : target.from(table)
+        }
+        return Reflect.get(target, prop, receiver)
+      },
+    })
+    const key = parseKey(process.env.ENCRYPTION_KEY)
+    const firstLogs: string[] = []
+    const result = await run({ supabase: failingBadges, key, csvText, apply: true, log: (l: string) => firstLogs.push(l) })
+    expect(result).toMatchObject({ exitCode: 2, counts: { created: 0, errors: 1 } })
+    expect(firstLogs).toContain(`  ERROR ${number}: badges (08006)`)
+
+    const { data: left } = await supabaseAdmin.from('members').select('id').eq('member_number', number)
+    expect(left).toEqual([])
+    const { data: accounts } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+    expect(accounts.users.some((u) => u.email === email)).toBe(false)
+
+    // The re-run restores it, role included.
+    const logs: string[] = []
+    const again = await run({ supabase: supabaseAdmin, key, csvText, apply: true, log: (l: string) => logs.push(l) })
+    expect(again, logs.join('\n')).toMatchObject({ exitCode: 0, counts: { created: 1 } })
+    const { data: restored } = await supabaseAdmin.from('members').select('id, role').eq('member_number', number).single()
+    restoredIds.push(restored!.id)
+    expect(restored!.role).toBe('superadmin')
+  })
 })
