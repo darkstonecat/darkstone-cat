@@ -18,8 +18,8 @@ import { PROCEDURES } from '@/components/admin/procedures/procedures'
 describe('ProceduresContent (V-8)', () => {
   it('renders one article per procedure with its anchor and a heading', () => {
     render(<ProceduresContent />)
-    expect(PROCEDURES).toHaveLength(7)
-    for (let n = 1; n <= 7; n++) {
+    expect(PROCEDURES).toHaveLength(8)
+    for (let n = 1; n <= 8; n++) {
       const article = document.getElementById(`p-${n}`)
       expect(article).not.toBeNull()
       expect(article!.tagName).toBe('ARTICLE')
@@ -31,7 +31,7 @@ describe('ProceduresContent (V-8)', () => {
   it('has an index nav that links every anchor', () => {
     render(<ProceduresContent />)
     const nav = screen.getByRole('navigation', { name: 'index_aria' })
-    for (let n = 1; n <= 7; n++) {
+    for (let n = 1; n <= 8; n++) {
       expect(within(nav).getByRole('link', { name: new RegExp(`P-${n}`) })).toHaveAttribute('href', `#p-${n}`)
     }
   })
@@ -55,5 +55,13 @@ describe('ProceduresContent (V-8)', () => {
     expect(href(4)).toBe('/admin/members?state=former')
     expect(href(2)).toBe('/admin/members')
     expect(href(7)).toBe('/admin/members')
+  })
+
+  it('P-8 (member backup) warns against copies outside the folder and links to the tools page', () => {
+    render(<ProceduresContent />)
+    const p8 = document.getElementById('p-8')!
+    expect(within(p8).getAllByRole('listitem')).toHaveLength(5)
+    expect(within(p8).getByText('p8.s3').closest('[data-kind="warning"]')).not.toBeNull()
+    expect(within(p8).getByRole('link', { name: 'p8.action' })).toHaveAttribute('href', '/admin/tools')
   })
 })

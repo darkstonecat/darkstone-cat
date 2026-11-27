@@ -448,9 +448,9 @@
     "rights_title": "Derechos de los usuarios",
     "rights_text": "Puede ejercer sus derechos de acceso, rectificación, supresión, portabilidad, limitación y oposición enviando un correo a hola@darkstone.cat. También tiene derecho a presentar una reclamación ante la Agencia Española de Protección de Datos (aepd.es).",
     "third_parties_title": "Terceros",
-    "third_parties_text": "Los datos del formulario de contacto se procesan a través del proveedor de alojamiento (Vercel). Los datos analíticos se procesan por Google (Google Analytics) y Vercel (Vercel Analytics). Estos servicios pueden implicar transferencias internacionales de datos amparadas por las cláusulas contractuales tipo de la Comisión Europea.",
+    "third_parties_text": "Los datos del formulario de contacto se procesan a través del proveedor de alojamiento (Vercel). Los datos analíticos se procesan por Google (Google Analytics) y Vercel (Vercel Analytics). Estos servicios pueden implicar transferencias internacionales de datos amparadas por las cláusulas contractuales tipo de la Comisión Europea. La copia de seguridad semanal de la lista de socios se guarda en Google Workspace (Google).",
     "updates_title": "Actualizaciones",
-    "updates_text": "Esta política de privacidad puede ser actualizada periódicamente. Última actualización: febrero de 2026.",
+    "updates_text": "Esta política de privacidad puede ser actualizada periódicamente. Última actualización: noviembre de 2026.",
     "association_policy_title": "Política de protección de datos de la asociación",
     "association_policy_text": "Además de esta política de privacidad del sitio web, la Asociación DarkStone Catalunya dispone de una política de protección de datos que regula el tratamiento de los datos personales de los socios, sus derechos y las obligaciones del responsable del tratamiento. Puede consultar la <dataProtectionLink>política de protección de datos</dataProtectionLink>."
   },
@@ -524,7 +524,7 @@
   },
   "data_protection": {
     "title": "Política de protección de datos",
-    "last_updated": "Última actualización: Octubre 2024.",
+    "last_updated": "Última actualización: Noviembre 2026.",
     "user_info_title": "1. Información al usuario",
     "user_info_p1": "La Asociación DarkStone Catalunya, como Responsable del Tratamiento, le informa que, según lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril, (RGPD) y la L.O. 3/2018, de 5 de diciembre, de protección de datos y garantía de los derechos digitales (LOPDGDD), trataremos sus datos tal como reflejamos en esta Política de Privacidad.",
     "user_info_p2": "En esta Política de Privacidad describimos cómo recogemos sus datos personales y por qué los recogemos, qué hacemos con ellos, con quién los compartimos, cómo los protegemos y sus opciones respecto al tratamiento de sus datos personales.",
@@ -550,6 +550,7 @@
     "legitimacy_legal": "Por requerimiento legal.",
     "data_sharing_title": "6. Comunicación de datos personales",
     "data_sharing_text": "La Asociación DarkStone Catalunya no realizará ninguna cesión de sus datos, excepto por obligación legal.",
+    "data_sharing_backup": "Para garantizar la continuidad del registro de socios, cada semana se guarda una copia de seguridad en Google Workspace (Google), que actúa como encargado del tratamiento y no recibe los datos como cesión. La copia incluye los datos de los socios y exsocios, y solo tienen acceso a ella los superadmins de la junta. Se guardan las 4 últimas copias, de modo que una baja o una supresión desaparece de todas ellas en un máximo de 5 semanas.",
     "rights_title": "7. Sus derechos",
     "rights_intro": "En relación con la recogida y tratamiento de sus datos personales, puede ponerse en contacto con nosotros en cualquier momento para:",
     "rights_access": "Acceder a sus datos personales y a cualquier otra información indicada en el artículo 15.1 del RGPD.",
@@ -1137,6 +1138,15 @@
         "s4": "En un boletín, termina con: «Para dejar de recibir el boletín, desactívalo en Mi zona › Comunicaciones.»",
         "s5": "Borra el archivo exportado cuando hayas enviado el mensaje.",
         "action": "Exportar correos"
+      },
+      "p8": {
+        "title": "Copia de seguridad de socios",
+        "s1": "Cada lunes de madrugada la web guarda una copia de la lista de socios, con DNI y teléfono, en una hoja de cálculo de la unidad compartida de copias de Google Drive. Solo tienen acceso los superadmins.",
+        "s2": "Una vez al mes, comprueba en <b>Herramientas</b> que la última copia ha ido bien, o mira la fecha del archivo más reciente de la carpeta. Si falla dos semanas seguidas, avisa al responsable técnico.",
+        "s3": "No descargues, copies ni compartas las copias fuera de la carpeta. Una copia hecha fuera no se borra sola, y la política de protección de datos promete que una baja desaparece de todas las copias en un máximo de 5 semanas.",
+        "s4": "Si se pierde la base de datos, el responsable técnico restaura la lista con la copia más reciente siguiendo el procedimiento de restauración del repositorio. Un superadmin le descarga la hoja en CSV, y el archivo se borra cuando ha terminado.",
+        "s5": "Una vez al año, revisa el kit de continuidad: la clave de cifrado y los accesos de propietario a Supabase, Vercel, GitHub, el dominio y Google Workspace, guardados fuera de Drive por dos miembros de la junta.",
+        "action": "Abre Herramientas"
       }
     },
     "members": {

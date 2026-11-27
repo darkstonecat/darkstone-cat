@@ -448,9 +448,9 @@
     "rights_title": "Drets dels usuaris",
     "rights_text": "Podeu exercir els vostres drets d'accés, rectificació, supressió, portabilitat, limitació i oposició enviant un correu a hola@darkstone.cat. També teniu dret a presentar una reclamació davant l'Agència Espanyola de Protecció de Dades (aepd.es).",
     "third_parties_title": "Tercers",
-    "third_parties_text": "Les dades del formulari de contacte es processen a través del proveïdor d'allotjament (Vercel). Les dades analítiques es processen per Google (Google Analytics) i Vercel (Vercel Analytics). Aquests serveis poden implicar transferències internacionals de dades emparades per les clàusules contractuals tipus de la Comissió Europea.",
+    "third_parties_text": "Les dades del formulari de contacte es processen a través del proveïdor d'allotjament (Vercel). Les dades analítiques es processen per Google (Google Analytics) i Vercel (Vercel Analytics). Aquests serveis poden implicar transferències internacionals de dades emparades per les clàusules contractuals tipus de la Comissió Europea. La còpia de seguretat setmanal de la llista de socis es desa a Google Workspace (Google).",
     "updates_title": "Actualitzacions",
-    "updates_text": "Aquesta política de privadesa pot ser actualitzada periòdicament. Última actualització: febrer de 2026.",
+    "updates_text": "Aquesta política de privadesa pot ser actualitzada periòdicament. Última actualització: novembre de 2026.",
     "association_policy_title": "Política de protecció de dades de l'associació",
     "association_policy_text": "A més d'aquesta política de privadesa del lloc web, l'Associació DarkStone Catalunya disposa d'una política de protecció de dades que regula el tractament de les dades personals dels socis, els seus drets i les obligacions del responsable del tractament. Podeu consultar la <dataProtectionLink>política de protecció de dades</dataProtectionLink>."
   },
@@ -524,7 +524,7 @@
   },
   "data_protection": {
     "title": "Política de protecció de dades",
-    "last_updated": "Darrera actualització: Octubre 2024.",
+    "last_updated": "Darrera actualització: Novembre 2026.",
     "user_info_title": "1. Informació a l'usuari",
     "user_info_p1": "L'Associació DarkStone Catalunya, com a Responsable del Tractament, us informa que, segons el que disposa el Reglament (UE) 2016/679, de 27 d'abril, (RGPD) i la L.O. 3/2018, de 5 de desembre, de protecció de dades i garantia dels drets digitals (LOPDGDD), tractarem les vostres dades tal com reflectim en aquesta Política de Privadesa.",
     "user_info_p2": "En aquesta Política de Privadesa descrivim com recollim les vostres dades personals i per què les recollim, què fem amb elles, amb qui les compartim, com les protegim i les vostres opcions pel que fa al tractament de les vostres dades personals.",
@@ -550,6 +550,7 @@
     "legitimacy_legal": "Per requeriment legal.",
     "data_sharing_title": "6. Comunicació de dades personals",
     "data_sharing_text": "L'Associació DarkStone Catalunya no realitzarà cap cessió de les vostres dades, excepte per obligació legal.",
+    "data_sharing_backup": "Per garantir la continuïtat del registre de socis, cada setmana se'n desa una còpia de seguretat a Google Workspace (Google), que actua com a encarregat del tractament i no rep les dades com a cessió. La còpia inclou les dades dels socis i exsocis, i només hi tenen accés els superadmins de la junta. Se'n guarden les 4 últimes còpies, de manera que una baixa o una supressió desapareix de totes elles en un màxim de 5 setmanes.",
     "rights_title": "7. Els vostres drets",
     "rights_intro": "En relació amb la recollida i tractament de les vostres dades personals, podeu posar-vos en contacte amb nosaltres en qualsevol moment per:",
     "rights_access": "Accedir a les vostres dades personals i a qualsevol altra informació indicada a l'article 15.1 del RGPD.",
@@ -1137,6 +1138,15 @@
         "s4": "En un butlletí, acaba amb: «Per deixar de rebre el butlletí, desactiva-ho a La meva zona › Comunicacions.»",
         "s5": "Esborra el fitxer exportat quan hagis enviat el missatge.",
         "action": "Exporta correus"
+      },
+      "p8": {
+        "title": "Còpia de seguretat de socis",
+        "s1": "Cada dilluns de matinada la web desa una còpia de la llista de socis, amb DNI i telèfon, en un full de càlcul de la unitat compartida de còpies de Google Drive. Només hi tenen accés els superadmins.",
+        "s2": "Un cop al mes, comprova a <b>Eines</b> que l'última còpia ha anat bé, o mira la data del fitxer més nou de la carpeta. Si falla dues setmanes seguides, avisa el responsable tècnic.",
+        "s3": "No descarreguis, copiïs ni comparteixis les còpies fora de la carpeta. Una còpia feta fora no s'esborra sola, i la política de protecció de dades promet que una baixa desapareix de totes les còpies en un màxim de 5 setmanes.",
+        "s4": "Si es perd la base de dades, el responsable tècnic restaura la llista amb la còpia més nova seguint el procediment de restauració del repositori. Un superadmin li descarrega el full en CSV, i el fitxer s'esborra quan ha acabat.",
+        "s5": "Un cop l'any, revisa el kit de continuïtat: la clau de xifratge i els accessos de propietari a Supabase, Vercel, GitHub, el domini i Google Workspace, guardats fora de Drive per dos membres de la junta.",
+        "action": "Obre Eines"
       }
     },
     "members": {

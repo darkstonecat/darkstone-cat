@@ -46,7 +46,7 @@ const DATA_PROTECTION_SECTIONS: readonly Section[] = [
   },
   { titleKey: "data_collection_title", paragraphs: ["data_collection_p1", "data_collection_p2"] },
   { titleKey: "legitimacy_title", paragraphs: ["legitimacy_p1", "legitimacy_consent", "legitimacy_legal"] },
-  { titleKey: "data_sharing_title", paragraphs: ["data_sharing_text"] },
+  { titleKey: "data_sharing_title", paragraphs: ["data_sharing_text", "data_sharing_backup"] },
   {
     titleKey: "rights_title",
     paragraphs: [

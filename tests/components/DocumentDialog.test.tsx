@@ -95,6 +95,15 @@ describe('document dialog', () => {
     expect(screen.getByText('data_protection.rights_title')).toBeInTheDocument()
   })
 
+  it('names the weekly member backup in the data sharing section (member backup spec §9)', async () => {
+    renderPage()
+    fireEvent.click(screen.getByRole('link', { name: 'Dades' }))
+    await screen.findByRole('dialog', { name: 'data_protection.title' })
+    const sharing = screen.getByText('data_protection.data_sharing_text')
+    const backup = screen.getByText('data_protection.data_sharing_backup')
+    expect(sharing.compareDocumentPosition(backup) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
   it('closes with Escape, unlocks the page and returns focus to the link', async () => {
     renderPage()
     const link = screen.getByRole('link', { name: 'Pautes' })

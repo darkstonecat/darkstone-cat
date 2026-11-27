@@ -448,9 +448,9 @@
     "rights_title": "User rights",
     "rights_text": "You may exercise your rights of access, rectification, erasure, portability, restriction and objection by sending an email to hola@darkstone.cat. You also have the right to lodge a complaint with the Spanish Data Protection Agency (aepd.es).",
     "third_parties_title": "Third parties",
-    "third_parties_text": "Contact form data is processed through the hosting provider (Vercel). Analytics data is processed by Google (Google Analytics) and Vercel (Vercel Analytics). These services may involve international data transfers covered by the European Commission's standard contractual clauses.",
+    "third_parties_text": "Contact form data is processed through the hosting provider (Vercel). Analytics data is processed by Google (Google Analytics) and Vercel (Vercel Analytics). These services may involve international data transfers covered by the European Commission's standard contractual clauses. The weekly backup of the member list is stored in Google Workspace (Google).",
     "updates_title": "Updates",
-    "updates_text": "This privacy policy may be updated periodically. Last updated: February 2026.",
+    "updates_text": "This privacy policy may be updated periodically. Last updated: November 2026.",
     "association_policy_title": "Association data protection policy",
     "association_policy_text": "In addition to this website privacy policy, Associació DarkStone Catalunya has a data protection policy that governs the processing of members' personal data, their rights and the obligations of the data controller. You can read the <dataProtectionLink>data protection policy</dataProtectionLink>."
   },
@@ -524,7 +524,7 @@
   },
   "data_protection": {
     "title": "Data protection policy",
-    "last_updated": "Last updated: October 2024.",
+    "last_updated": "Last updated: November 2026.",
     "user_info_title": "1. Information to the user",
     "user_info_p1": "Associació DarkStone Catalunya, as Data Controller, informs you that, in accordance with the provisions of Regulation (EU) 2016/679, of 27 April, (GDPR) and the Spanish Organic Law 3/2018, of 5 December, on the protection of personal data and guarantee of digital rights (LOPDGDD), we will process your data as set out in this Privacy Policy.",
     "user_info_p2": "In this Privacy Policy we describe how we collect your personal data and why we collect it, what we do with it, who we share it with, how we protect it and your options regarding the processing of your personal data.",
@@ -550,6 +550,7 @@
     "legitimacy_legal": "By legal requirement.",
     "data_sharing_title": "6. Communication of personal data",
     "data_sharing_text": "Associació DarkStone Catalunya will not transfer your data to any third party, except by legal obligation.",
+    "data_sharing_backup": "To keep the member register safe, a backup copy is saved every week in Google Workspace (Google), which acts as a data processor and does not receive the data as a transfer. The copy holds the data of members and former members, and only the board's superadmins can open it. The last 4 copies are kept, so a membership end or an erasure disappears from all of them within 5 weeks at most.",
     "rights_title": "7. Your rights",
     "rights_intro": "In relation to the collection and processing of your personal data, you may contact us at any time to:",
     "rights_access": "Access your personal data and any other information indicated in Article 15.1 of the GDPR.",
@@ -1137,6 +1138,15 @@
         "s4": "In a newsletter, end with: \"To stop receiving the newsletter, switch it off in My area › Communications.\"",
         "s5": "Delete the exported file once the message has been sent.",
         "action": "Export e-mails"
+      },
+      "p8": {
+        "title": "Member backup",
+        "s1": "Every Monday before dawn the site saves a copy of the member list, with ID numbers and phones, as a spreadsheet in the backup shared drive in Google Drive. Only superadmins can open it.",
+        "s2": "Once a month, check in <b>Tools</b> that the last backup succeeded, or look at the date of the newest file in the folder. If it fails two weeks in a row, tell the technical maintainer.",
+        "s3": "Do not download, copy or share the backups outside the folder. A copy made elsewhere is never deleted automatically, and the data protection policy promises that a member who leaves disappears from every copy within 5 weeks.",
+        "s4": "If the database is lost, the technical maintainer restores the list from the newest copy with the restore procedure in the repository. A superadmin downloads the sheet as CSV for them, and the file is deleted when they are done.",
+        "s5": "Once a year, review the continuity kit: the encryption key and owner access to Supabase, Vercel, GitHub, the domain and Google Workspace, kept outside Drive by two board members.",
+        "action": "Open Tools"
       }
     },
     "members": {
