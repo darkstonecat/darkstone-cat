@@ -1,0 +1,41 @@
+name: Member backup
+
+# Weekly member backup (docs/features/member-backup/spec.md): calls
+# /api/cron/backup, which writes a Google Sheet with every member row (DNI and
+# phone decrypted) into the association's Google Drive shared drive and deletes
+# the job's copies beyond the newest 4. The Google key, the database key and
+# ENCRYPTION_KEY live only in Vercel: this workflow holds nothing but
+# CRON_SECRET.
+#
+# Production only (previews sit behind Vercel Authentication). Needs the
+# CRON_SECRET repository secret, with the same value as CRON_SECRET in Vercel
+# (Production). Schedules run from the default branch only; the job refuses any
+# other branch. The last run is shown in /admin/tools (V-6).
+
+on:
+  schedule:
+    # UTC, Monday 03:17 (04:17 or 05:17 in Madrid). A skipped run is caught up
+    # the next week; run it by hand if one fails.
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+# The job only calls the site with curl: no repository access is needed.
+permissions: {}
+
+# One backup at a time; a manual run during the scheduled one waits.
+concurrency:
+  group: member-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Write the production member backup
+        # Block scalar: a plain scalar cannot hold ": " (the Authorization header).
+        run: |
+          curl -fsS --max-time 120 -H "Authorization: Bearer $CRON_SECRET" https://www.darkstone.cat/api/cron/backup
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
