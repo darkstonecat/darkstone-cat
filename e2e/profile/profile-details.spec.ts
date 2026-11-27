@@ -94,7 +94,7 @@ test.describe('Profile details cards', () => {
     await page.locator('#dni').fill('12345678Z')
     await page.locator('#phone').fill('612345412')
     await page.locator('button[type="submit"]').click()
-    await page.waitForURL('**/profile', { timeout: 10_000 })
+    await page.waitForURL('**/profile/details*', { timeout: 10_000 })
 
     const response = await page.goto(PAGES.profileDetails)
     const html = await response!.text()
@@ -111,7 +111,8 @@ test.describe('Profile details cards', () => {
     await page.route('**/auth/v1/recover*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }))
     await page.goto(PAGES.profileDetails)
     await page.getByRole('button', { name: 'Canvia la contrasenya' }).click()
-    await expect(page.getByText(/T'hem enviat un correu/)).toBeVisible()
+    await expect(page.getByTestId('account-notice')).toContainText('Revisa el teu correu.')
+    await expect(page.getByRole('button', { name: 'Correu enviat' })).toBeDisabled()
   })
 
   test('download my data produces a JSON file', async ({ editorPage: page }) => {

@@ -12,6 +12,7 @@ import GamingAccounts from "@/components/profile/GamingAccounts";
 import MemberDataCard from "@/components/profile/MemberDataCard";
 import NewsletterSwitch from "@/components/profile/NewsletterSwitch";
 import AccountActions from "@/components/profile/AccountActions";
+import ProfileSavedNotice from "@/components/profile/ProfileSavedNotice";
 import DocumentList from "@/components/documents/DocumentList";
 
 export const revalidate = false;
@@ -87,6 +88,7 @@ export default async function ProfileDetailsPage({
           />
 
           <div className="flex-1 bg-brand-beige px-4 py-6 sm:px-6 md:px-12 md:pt-12 md:pb-20">
+            <ProfileSavedNotice className="mx-auto max-w-[1120px]" />
             <div className="mx-auto grid max-w-[1120px] grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
               <section aria-labelledby="gaming-title" className={`${cardClass} lg:col-span-3`}>
                 <h2 id="gaming-title" className={`${titleClass} mb-5`}>

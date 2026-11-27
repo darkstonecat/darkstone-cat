@@ -1,18 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { MdFileDownload, MdLogout, MdVpnKey, MdWarningAmber } from "react-icons/md";
+import { MdCheck, MdFileDownload, MdLogout, MdVpnKey, MdWarningAmber } from "react-icons/md";
 import { exportProfileData } from "@/lib/profile/actions";
 import { requestPasswordReset } from "@/lib/supabase/password-reset-actions";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { isBoardRole } from "@/lib/auth/roles";
 import { cn } from "@/lib/utils";
 import LeaveAssociationDialog from "./LeaveAssociationDialog";
-import LiveMessages from "./LiveMessages";
+import ActionNotice from "./ActionNotice";
 
 const BUTTON =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border bg-brand-white px-5 text-sm font-semibold transition-colors aria-disabled:opacity-50 max-sm:w-full";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border bg-brand-white px-5 text-sm font-semibold transition-colors aria-disabled:opacity-50 disabled:cursor-default max-sm:w-full";
+
+/** After a sent recovery e-mail the button rests this long, so repeated clicks do not hit the rate limit. */
+const PASSWORD_COOLDOWN_MS = 60_000;
 
 type AccountActionsProps = {
   email: string;
@@ -33,13 +36,21 @@ export default function AccountActions({ email, memberNumber }: AccountActionsPr
   const [exporting, setExporting] = useState(false);
   const [password, setPassword] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [exportError, setExportError] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
+
+  useEffect(() => {
+    if (!cooldown) return;
+    const timer = setTimeout(() => setCooldown(false), PASSWORD_COOLDOWN_MS);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   async function handlePassword() {
-    if (password === "sending") return;
+    if (password === "sending" || cooldown) return;
     setPassword("sending");
     // Same server action as /forgot-password: a recovery link that opens /auth/callback -> /reset-password.
     const { error } = await requestPasswordReset(email).catch(() => ({ error: "failed" as const }));
     setPassword(error ? "error" : "sent");
+    if (!error) setCooldown(true);
   }
 
   async function handleExport() {
@@ -81,11 +92,19 @@ export default function AccountActions({ email, memberNumber }: AccountActionsPr
         <button
           type="button"
           onClick={handlePassword}
-          aria-disabled={password === "sending"}
-          className={cn(BUTTON, "border-stone-custom/15 text-stone-custom hover:bg-stone-custom/5")}
+          disabled={password === "sending" || cooldown}
+          className={cn(BUTTON, "border-stone-custom/15 text-stone-custom enabled:hover:bg-stone-custom/5 disabled:opacity-70")}
         >
-          <MdVpnKey aria-hidden="true" className="size-[18px]" />
-          {t("change_password")}
+          {cooldown ? (
+            <MdCheck aria-hidden="true" className="size-[18px]" />
+          ) : (
+            <MdVpnKey aria-hidden="true" className="size-[18px]" />
+          )}
+          {password === "sending"
+            ? t("change_password_sending")
+            : cooldown
+              ? t("change_password_sent_button")
+              : t("change_password")}
         </button>
         <button
           type="button"
@@ -111,13 +130,20 @@ export default function AccountActions({ email, memberNumber }: AccountActionsPr
         </button>
       </div>
 
-      <LiveMessages
-        statusClassName="text-stone-custom/65"
-        errorClassName="text-brand-red"
-        status={password === "sent" ? t("change_password_sent") : null}
-        error={
-          password === "error" ? t("change_password_error") : exportError ? t("download_error") : null
+      <ActionNotice
+        testId="account-notice"
+        success={
+          password === "sent" ? (
+            <>
+              <strong className="font-semibold">{t("change_password_sent_title")}</strong>{" "}
+              {t.rich("change_password_sent", {
+                email,
+                strong: (chunks) => <strong className="font-semibold [overflow-wrap:anywhere]">{chunks}</strong>,
+              })}
+            </>
+          ) : null
         }
+        error={password === "error" ? t("change_password_error") : exportError ? t("download_error") : null}
       />
 
       <LeaveAssociationDialog

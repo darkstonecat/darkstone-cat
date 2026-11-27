@@ -82,7 +82,8 @@ export default function ProfileEditForm({
     }
 
     setStatus("success");
-    router.replace("/profile");
+    // "Perfil i compte" shows the saved data; ?saved=1 shows the confirmation once.
+    router.replace("/profile/details?saved=1");
   }
 
   const isSubmitting = status === "submitting";

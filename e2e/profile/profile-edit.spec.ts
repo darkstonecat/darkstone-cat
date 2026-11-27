@@ -40,12 +40,14 @@ test.describe('Profile edit', () => {
 
     await page.locator('button[type="submit"]').click()
 
-    // Should redirect to profile after success
-    await page.waitForURL('**/profile', { timeout: 10_000 })
-    await expect(page).toHaveURL(/\/profile$/)
-
-    // The member home greets by the updated first name
-    await expect(page.getByRole('heading', { level: 1, name: 'Hola, E2E-Updated' })).toBeVisible()
+    // Goes to "Perfil i compte", where the saved data shows, with a visible confirmation
+    await page.waitForURL('**/profile/details*', { timeout: 10_000 })
+    await expect(page.getByTestId('profile-saved-notice')).toHaveText('Perfil desat. Els canvis ja es veuen aquí.')
+    // The flag is dropped from the URL so a reload does not show it again
+    await expect(page).toHaveURL(/\/profile\/details$/)
+    await expect(
+      page.locator('section').filter({ has: page.getByRole('heading', { name: 'Dades de soci' }) }).getByText('E2E-Updated')
+    ).toBeVisible()
   })
 
   // Rejected by the server before any write, so the shared member is safe to use.

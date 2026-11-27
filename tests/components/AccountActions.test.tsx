@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 
 // "Compte" card of /profile/details (AccountActions) and the M-1 leave dialog (spec §7.1, T26).
 
@@ -14,7 +14,12 @@ const m = vi.hoisted(() => ({
 vi.mock('next-intl', () => {
   const t = (key: string, values?: Record<string, unknown>) =>
     values ? `${key}:${JSON.stringify(values)}` : key
-  t.rich = (key: string, values: Record<string, (chunks: string) => unknown>) => values.link(key)
+  // Tags render their chunks; plain values are appended like t() does.
+  t.rich = (key: string, values: Record<string, unknown>) => {
+    if (typeof values.link === 'function') return values.link(key)
+    const plain = Object.fromEntries(Object.entries(values).filter(([, v]) => typeof v !== 'function'))
+    return `${key}:${JSON.stringify(plain)}`
+  }
   return { useTranslations: () => t, useLocale: () => m.locale }
 })
 vi.mock('@/i18n/routing', () => ({
@@ -72,10 +77,44 @@ function openDialog() {
 }
 
 describe('AccountActions', () => {
+  it('shows a visible notice with the address once the recovery e-mail is sent', async () => {
+    render(<AccountActions email="a@b.test" memberNumber="000-001" />)
+    fireEvent.click(screen.getByRole('button', { name: /change_password/ }))
+    const notice = await screen.findByTestId('account-notice')
+    expect(notice).toHaveAttribute('data-kind', 'success')
+    expect(notice).toHaveTextContent('change_password_sent_title')
+    expect(notice).toHaveTextContent('change_password_sent:{"email":"a@b.test"}')
+  })
+
+  it('says it is sending, then keeps the button disabled as "sent" for a minute', async () => {
+    let resolve!: (v: { error: null }) => void
+    m.reset.mockReturnValue(new Promise((r) => (resolve = r)))
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    try {
+      render(<AccountActions email="a@b.test" memberNumber="000-001" />)
+      fireEvent.click(screen.getByRole('button', { name: /change_password/ }))
+      const sending = screen.getByRole('button', { name: /change_password_sending/ })
+      expect(sending).toBeDisabled()
+      resolve({ error: null })
+      const sent = await screen.findByRole('button', { name: /change_password_sent_button/ })
+      expect(sent).toBeDisabled()
+      fireEvent.click(sent)
+      expect(m.reset).toHaveBeenCalledTimes(1)
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(60_000)
+      })
+      expect(await screen.findByRole('button', { name: 'change_password' })).toBeEnabled()
+      // The notice stays after the cooldown.
+      expect(screen.getByTestId('account-notice')).toHaveTextContent('change_password_sent_title')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('sends the recovery e-mail through the neutral server action', async () => {
     render(<AccountActions email="a@b.test" memberNumber="000-001" />)
     fireEvent.click(screen.getByRole('button', { name: /change_password/ }))
-    expect(await screen.findByText('change_password_sent')).toBeInTheDocument()
+    expect(await screen.findByTestId('account-notice')).toBeInTheDocument()
     expect(m.reset).toHaveBeenCalledWith('a@b.test')
   })
 
