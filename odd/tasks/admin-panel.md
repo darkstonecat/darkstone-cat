@@ -2571,6 +2571,14 @@ was Ready before the migrations.
   6 created as 000-203 … 000-208 (sheet 000-206, 000-208 … 000-212), 202 skipped, 0 errors.
   Read-back: DNI, phone, postal code, newsletter and dates of the 6 match the sheet; a second
   dry run creates nothing. Not in the audit log (service role).
+- 2026-11-27, user: "Antes de subirlo a push conviene actualizar nuestra base de datos con los
+  usuarios actuales del formulario." Last import before the web sign-up became the only way to
+  join (`9a6a37b`). New export: 213 rows (the 212 of 2026-11-12 unchanged, plus sheet 000-213).
+  Dry run: 1 would create, 208 skipped, no DNI match, no former member. Production `--execute`:
+  1 created as 000-209, 208 skipped, 0 errors. Read-back: DNI and phone decrypt (v2), start and
+  joined dates match the sheet, role member, newsletter as answered; a second dry run: 0 would
+  create, 209 skipped. Not in the audit log (service role). The Google Form is to be closed
+  before the deploy.
 
 ## Next step: go live
 
