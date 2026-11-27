@@ -16,6 +16,7 @@
     "lighthouse:local": "node scripts/lighthouse/run-audit.mjs",
     "lighthouse:prod": "node scripts/lighthouse/run-audit.mjs --prod",
     "migrate": "node scripts/migrate-members.mjs",
+    "restore": "node scripts/restore-members.mjs",
     "test": "vitest run",
     "test:unit": "vitest run --exclude 'tests/integration/**'",
     "test:integration": "vitest run tests/integration",
