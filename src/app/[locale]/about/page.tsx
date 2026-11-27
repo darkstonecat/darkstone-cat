@@ -1,14 +1,14 @@
+import { Suspense } from "react";
 import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getAlternates, getOgImageUrl, getBreadcrumbJsonLd, getWebPageJsonLd, serializeJsonLd } from "@/lib/seo";
-import { fetchBggCollectionCount } from "@/lib/bgg";
-import { fetchActiveMemberCount } from "@/lib/supabase/member-count";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import AboutHero from "@/components/about/AboutHero";
 import AboutOrigin from "@/components/about/AboutOrigin";
 import AboutStats from "@/components/about/AboutStats";
+import AboutStatsLoader from "@/components/about/AboutStatsLoader";
 import AboutMissionValues from "@/components/about/AboutMissionValues";
 import AboutValues from "@/components/about/AboutValues";
 import AboutBoard from "@/components/about/AboutBoard";
@@ -54,12 +54,11 @@ export default async function AboutPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const [gameCount, memberCount, tNav] = await Promise.all([
-    fetchBggCollectionCount(),
-    fetchActiveMemberCount(),
+  // The game and member counts are not awaited here: AboutStatsLoader streams them in.
+  const [tNav, t] = await Promise.all([
     getTranslations({ locale, namespace: "nav" }),
+    getTranslations({ locale, namespace: "metadata" }),
   ]);
-  const t = await getTranslations({ locale, namespace: "metadata" });
   const breadcrumbJsonLd = getBreadcrumbJsonLd(locale, [
     { name: tNav("about"), path: "/about" },
   ]);
@@ -75,7 +74,9 @@ export default async function AboutPage({
       <AboutHero />
       <SectionDivider topColor="#1C1917" bottomColor="#EEE8DC" variant="curve" flip />
       <AboutOrigin />
-      <AboutStats gameCount={gameCount} memberCount={memberCount} />
+      <Suspense fallback={<AboutStats gameCount={0} memberCount={null} />}>
+        <AboutStatsLoader />
+      </Suspense>
       <AboutMissionValues />
       <AboutValues />
       <AboutBoard />
