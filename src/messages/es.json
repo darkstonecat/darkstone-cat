@@ -29,7 +29,8 @@
   "hero": {
     "tagline": "Juegos de Mesa y Rol en Terrassa",
     "description": "Un espacio para compartir afición, jugar y promover el catalán a través del juego.",
-    "cta": "Hazte socio"
+    "cta": "Hazte socio",
+    "cta_member": "Mira a qué jugamos esta semana"
   },
   "about": {
     "title": "¿Quiénes somos?",

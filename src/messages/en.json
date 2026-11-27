@@ -29,7 +29,8 @@
   "hero": {
     "tagline": "Board Games & RPG in Terrassa",
     "description": "A space to share the hobby, play games, and promote the Catalan language through gaming.",
-    "cta": "Become a member"
+    "cta": "Become a member",
+    "cta_member": "See what we're playing this week"
   },
   "about": {
     "title": "Who are we?",

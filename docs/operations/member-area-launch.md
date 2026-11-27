@@ -9,6 +9,7 @@ The member area (login, sign-up, La meva zona, member card) is public since
 |---|---|
 | NavBar, visitor | "Iniciar sessió" (desktop and mobile menu); a same-size placeholder while the session loads |
 | NavBar, signed-in member | User pill and menu |
+| Home Hero button | Visitor: "Fes-te soci" → `/register`. Signed-in member: "Mira què juguem aquesta setmana" → `/events` (client-side, `useAuthUser`) |
 | "Fes-te soci" buttons (home `JoinUs`, `/about` `AboutWhyJoin` and `AboutCTA`) | `/register`, same tab |
 | `/login` sign-up card (`LoginSignupCard`) | `/register` |
 | Signed-in member opening `/register` | Redirected to `/profile` by the proxy (`AUTH_ROUTES`) |
@@ -54,10 +55,11 @@ On `https://www.darkstone.cat`:
 
 - NavBar login: `src/components/NavBar.tsx` (`desktopVisitorEntry`,
   `mobileVisitorEntry`).
-- Sign-up links: `src/components/home/JoinUs.tsx`,
+- Sign-up links: `src/components/home/Hero.tsx`, `src/components/home/JoinUs.tsx`,
   `src/components/about/AboutWhyJoin.tsx`, `src/components/about/AboutCTA.tsx`,
   `src/components/auth/LoginSignupCard.tsx`.
-- Tests: `tests/components/MemberAreaEntry.test.tsx`, `e2e/pages/home.spec.ts`,
+- Tests: `tests/components/MemberAreaEntry.test.tsx`, `tests/components/HeroCta.test.tsx`,
+  `e2e/pages/home.spec.ts`, `e2e/pages/home-member.spec.ts`,
   `e2e/auth/login.spec.ts`.
 - The `NEXT_PUBLIC_MEMBER_AREA_PUBLIC` variable is no longer read; delete it
   from Vercel and local `.env*` files if it is still set.

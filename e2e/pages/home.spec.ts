@@ -14,9 +14,10 @@ test.describe('Home page', () => {
     await expect(page.getByText(TEXT.hero_tagline)).toBeVisible({ timeout: 10_000 })
   })
 
-  test('has CTA button in hero', async ({ page }) => {
-    const cta = page.locator('a[href*="join-us"], a[href*="register"], a:has-text("Fes-te soci")')
-    await expect(cta.first()).toBeVisible({ timeout: 10_000 })
+  test('the hero button sends a visitor to the web sign-up', async ({ page }) => {
+    const cta = page.locator('#hero').getByRole('link', { name: /Fes-te soci/ })
+    await expect(cta).toBeVisible({ timeout: 10_000 })
+    await expect(cta).toHaveAttribute('href', '/register')
   })
 
   test('a visitor sees the navbar login link', async ({ page, isMobile }) => {

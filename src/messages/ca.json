@@ -29,7 +29,8 @@
   "hero": {
     "tagline": "Jocs de Taula i Rol a Terrassa",
     "description": "Un espai per compartir afició, jugar i promoure el català a través del joc.",
-    "cta": "Fes-te soci"
+    "cta": "Fes-te soci",
+    "cta_member": "Mira què juguem aquesta setmana"
   },
   "about": {
     "title": "Qui som?",

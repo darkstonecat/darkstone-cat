@@ -6,6 +6,8 @@ import * as m from "motion/react-client";
 import { useRef } from "react";
 import { useScroll, useTransform } from "motion/react";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { useAuthUser } from "@/hooks/useAuthUser";
+import { Link } from "@/i18n/routing";
 
 
 
@@ -14,6 +16,10 @@ export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   // Reduced motion freezes the scroll zoom and shift; the fades stay.
   const reduce = usePrefersReducedMotion();
+  // The server renders the visitor button; a signed-in member gets the events
+  // link once the session cookie is read, before the button's entrance starts.
+  const { user, loading } = useAuthUser();
+  const isMember = !loading && user !== null;
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -76,13 +82,13 @@ export default function Hero() {
           <div
             className="mt-10 origin-bottom animate-hero-text-spring [animation-delay:0.7s] [--spring-y:50px] [--spring-r:6deg]"
           >
-            <a
-              href="#join-us"
+            <Link
+              href={isMember ? "/events" : "/register"}
               className="animate-cta-nudge group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-brand-orange px-8 py-4 text-lg font-semibold text-white transition-transform duration-200 hover:scale-105 active:scale-[0.97]"
             >
-              <span className="mr-2">{t("cta")}</span>
+              <span className="mr-2">{t(isMember ? "cta_member" : "cta")}</span>
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-            </a>
+            </Link>
           </div>
         </m.div>
       </m.section>
