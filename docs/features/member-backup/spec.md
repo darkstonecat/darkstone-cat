@@ -163,7 +163,7 @@ Delivered (`odd/tasks/member-backup.md`):
 
 Acceptance:
 
-1. A manual workflow run creates one Sheet in the folder with one row per member in the database and the columns of §3; DNI and phone match the admin panel's revealed values for two sample members. *(Pending: first production run.)*
+1. A manual workflow run creates one Sheet in the folder with one row per member in the database and the columns of §3; DNI and phone match the admin panel's revealed values for two sample members. *(Met: first production run 2026-11-27, 208 rows, 0 illegible; Sheet checked in Drive by the user.)*
 2. With 5 backup files present, a run leaves exactly 4 (the new one and the 3 newest); a file not created by the job is untouched. *(Unit tests with a fake Drive; production check pending.)*
 3. A wrong or missing secret answers 401 / 500 without touching Drive; a Drive failure answers 502 and records a failed run in V-6. *(Route tests.)*
 4. Restoring a Sheet into a database gives the same cells (numbers, roles, states, badges, decrypted DNI/phone), bans former members, and a second run restores nothing. *(Round-trip integration test, `tests/integration/member-restore.test.ts`.)*
