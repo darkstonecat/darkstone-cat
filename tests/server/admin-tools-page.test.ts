@@ -50,7 +50,7 @@ describe('admin tools page', () => {
     mocks.createClient.mockResolvedValue({ rpc })
     const element: any = await ToolsPage(params)
     expect(rpc).toHaveBeenCalledWith('admin_ops_status')
-    expect(toolsContent(element).props.jobs.map((j: any) => j.job)).toEqual(['ludoya', 'bgg'])
+    expect(toolsContent(element).props.jobs.map((j: any) => j.job)).toEqual(['ludoya', 'bgg', 'member_backup'])
     expect(toolsContent(element).props.jobs[0].lastOk).toBe(true)
   })
 

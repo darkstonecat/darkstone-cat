@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { MdArrowForward, MdSync } from "react-icons/md";
 import { Link, useRouter } from "@/i18n/routing";
 import { refreshCaches, type RefreshCachesJob, type RefreshCachesResult } from "@/lib/admin/ops-actions";
-import { OPS_JOBS, type OpsJobStatus } from "@/lib/admin/ops-status";
+import { CACHE_JOBS, type OpsJobStatus } from "@/lib/admin/ops-status";
 import { AuditTimeLabel } from "../activity/AuditParts";
 import { adminButtonClass } from "../adminButtons";
 import Notice from "../Notice";
@@ -105,7 +105,7 @@ type ToolsContentProps = {
   now?: Date;
 };
 
-/** V-6: link to the event images tool and the cache refresh card (A-14). */
+/** V-6: link to the event images tool, the cache refresh card (A-14) and the member backup status. */
 export default function ToolsContent({ jobs, now }: ToolsContentProps) {
   const t = useTranslations("admin.tools");
   const router = useRouter();
@@ -173,7 +173,7 @@ export default function ToolsContent({ jobs, now }: ToolsContentProps) {
         {jobs === null && <Notice kind="blocked">{t("status_error")}</Notice>}
 
         <ul>
-          {OPS_JOBS.map((name) => {
+          {CACHE_JOBS.map((name) => {
             const status = jobs?.find((j) => j.job === name);
             const nameId = `tools-job-${name}`;
             return (
@@ -209,6 +209,19 @@ export default function ToolsContent({ jobs, now }: ToolsContentProps) {
           <Outcomes outcome={outcome} />
         </div>
         <p className="text-[13px] text-stone-custom/65">{t("cache_footnote")}</p>
+      </section>
+
+      <section aria-labelledby="tools-backup" className={`${CARD} flex flex-col gap-4`}>
+        <div className="flex flex-col gap-2">
+          <h2 id="tools-backup" className="text-[22px] font-bold text-stone-custom">
+            {t("backup_title")}
+          </h2>
+          <p className="text-stone-custom/80">{t("backup_intro")}</p>
+        </div>
+        <div aria-live="polite" className="border-t border-stone-custom/8 pt-4">
+          <JobStatusLine status={jobs?.find((j) => j.job === "member_backup")} now={now} />
+        </div>
+        <p className="text-[13px] text-stone-custom/65">{t("backup_footnote")}</p>
       </section>
     </div>
   );

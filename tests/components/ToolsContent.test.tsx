@@ -84,7 +84,8 @@ describe('ToolsContent statuses', () => {
     expect(screen.getAllByText('never_run')).toHaveLength(2)
     rerender(<ToolsContent jobs={null} now={NOW} />)
     expect(screen.getByRole('alert')).toHaveTextContent('status_error')
-    expect(screen.getAllByText('status_unavailable')).toHaveLength(2)
+    expect(within(screen.getByRole('region', { name: 'cache_title' })).getAllByText('status_unavailable')).toHaveLength(2)
+    expect(within(screen.getByRole('region', { name: 'backup_title' })).getAllByText('status_unavailable')).toHaveLength(1)
   })
 })
 
@@ -133,5 +134,40 @@ describe('ToolsContent refresh', () => {
     render(<ToolsContent jobs={jobs} now={NOW} />)
     fireEvent.click(within(row('bgg')).getByRole('button'))
     expect(await screen.findByRole('alert')).toHaveTextContent('error_generic')
+  })
+})
+
+describe('ToolsContent member backup card', () => {
+  const backup: OpsJobStatus = {
+    ...base,
+    job: 'member_backup',
+    lastRunAt: '2026-10-05T03:00:00Z',
+    lastOk: false,
+    lastAutomatic: true,
+    lastDurationMs: 4200,
+    lastErrorCode: 'sheets_write_403',
+    lastSuccessAt: null,
+  }
+
+  it('shows the last backup run in its own card, without a run button', () => {
+    render(<ToolsContent jobs={[...jobs, backup]} now={NOW} />)
+    const card = screen.getByRole('region', { name: 'backup_title' })
+    expect(within(card).getByText('backup_intro')).toBeTruthy()
+    expect(within(card).getByText('run_failed')).toBeTruthy()
+    expect(within(card).getByText(/error_code:\{"code":"sheets_write_403"\}/)).toBeTruthy()
+    expect(within(card).getByText('no_success')).toBeTruthy()
+    expect(within(card).queryByRole('button')).toBeNull()
+  })
+
+  it('keeps the refresh buttons for the cache jobs only', () => {
+    render(<ToolsContent jobs={[...jobs, backup]} now={NOW} />)
+    const cache = screen.getByRole('region', { name: 'cache_title' })
+    expect(within(cache).getAllByRole('button', { name: 'refresh_job' })).toHaveLength(2)
+    expect(within(cache).queryByText('job_member_backup')).toBeNull()
+  })
+
+  it('says the backup never ran when there is no row', () => {
+    render(<ToolsContent jobs={jobs} now={NOW} />)
+    expect(within(screen.getByRole('region', { name: 'backup_title' })).getByText('status_unavailable')).toBeTruthy()
   })
 })

@@ -83,6 +83,16 @@ describe("recordAutomaticRuns", () => {
       p_error_code: "error",
     });
   });
+
+  it("records the member backup job (20261127100100)", async () => {
+    await recordAutomaticRuns([{ name: "member_backup", ok: false, durationMs: 4200, errorCode: "sheets_write_403" }]);
+    expect(adminRpc).toHaveBeenCalledWith("ops_record_job_run", {
+      p_job: "member_backup",
+      p_ok: false,
+      p_duration_ms: 4200,
+      p_error_code: "sheets_write_403",
+    });
+  });
 });
 
 describe("recordManualRuns", () => {

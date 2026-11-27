@@ -194,10 +194,27 @@ describe('recording runs', () => {
   })
 })
 
+describe('member_backup runs (20261127100100)', () => {
+  it('records an automatic backup run and refuses a manual one', async () => {
+    const a = await auto('member_backup', false, 4200, 'sheets_write_403')
+    expect(a.error).toBeNull()
+    const m = await manual('member_backup', true, 1)
+    expect(m.error?.code).toBe('22023')
+    expect(m.error?.message).toMatch(/^ops:invalid_argument/)
+    const saved = await rows('member_backup')
+    expect(saved).toHaveLength(1)
+    expect(saved[0]).toMatchObject({ ok: false, actor_id: null, duration_ms: 4200, error_code: 'sheets_write_403' })
+    const backup = (await status()).find((r) => r.job === 'member_backup')!
+    expect(backup).toMatchObject({ last_ok: false, last_automatic: true, last_error_code: 'sheets_write_403', last_success_at: null })
+    const wipe = await runSqlAsPostgres("DELETE FROM public.ops_job_runs WHERE job = 'member_backup'")
+    expect(wipe.error).toBeNull()
+  })
+})
+
 describe('admin_ops_status', () => {
   it('returns one row per known job, the last run and the last success', async () => {
     const result = await status()
-    expect(result.map((r) => r.job)).toEqual(['ludoya', 'bgg'])
+    expect(result.map((r) => r.job)).toEqual(['ludoya', 'bgg', 'member_backup'])
 
     const [ludoya, bgg] = result
     const saved = await rows('ludoya')

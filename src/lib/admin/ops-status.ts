@@ -1,7 +1,12 @@
-// Last run per cache refresh job, as `admin_ops_status()` returns it (V-6 "Memòria cau").
+// Last run per recorded job, as `admin_ops_status()` returns it (V-6): the cache refresh jobs
+// ("Memòria cau") and the weekly member backup.
 
-export type OpsJobName = "ludoya" | "bgg";
-export const OPS_JOBS: readonly OpsJobName[] = ["ludoya", "bgg"];
+export type CacheJobName = "ludoya" | "bgg";
+export type OpsJobName = CacheJobName | "member_backup";
+/** Jobs with a "Refresca ara" button (A-14). */
+export const CACHE_JOBS: readonly CacheJobName[] = ["ludoya", "bgg"];
+/** Every job `admin_ops_status()` reports, in display order. */
+export const OPS_JOBS: readonly OpsJobName[] = [...CACHE_JOBS, "member_backup"];
 
 export type OpsJobStatus = {
   job: OpsJobName;

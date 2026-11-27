@@ -3,7 +3,8 @@
 // ---------------------------------------------------------------------------
 // One public.ops_job_runs row per job run (supabase/migrations/20261006100200_ops_job_runs.sql),
 // written only through its functions:
-//   - automatic runs (/api/cron/refresh): `ops_record_job_run` with the service role, no actor;
+//   - automatic runs (/api/cron/refresh, /api/cron/backup): `ops_record_job_run` with the service
+//     role, no actor;
 //   - manual runs (A-14, `refreshCaches`): `ops_record_manual_job_run` with the service role and
 //     the actor id that `getAdminAccess` verified (20261006100300: no API user can write the
 //     history themselves, and the database refuses an actor that is not an active board member).
@@ -15,7 +16,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { RefreshJobResult } from "@/lib/cache-refresh";
 
 /** The jobs ops_job_runs accepts (its CHECK). */
-const RECORDED_JOBS = new Set(["ludoya", "bgg"]);
+const RECORDED_JOBS = new Set(["ludoya", "bgg", "member_backup"]);
 const SHORT_CODE = /^[a-z0-9_]{1,40}$/;
 
 type RpcResult = { error: { code?: string | null } | null };

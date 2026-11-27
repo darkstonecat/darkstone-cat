@@ -9,6 +9,9 @@ const job = vi.hoisted(() => ({
   run: vi.fn(),
 }));
 
+const recordAutomaticRuns = vi.hoisted(() => vi.fn(async () => undefined));
+vi.mock("@/lib/ops/job-runs", () => ({ recordAutomaticRuns }));
+
 vi.mock("@/lib/backup/job", () => ({
   getBackupConfig: () => job.config,
   runMemberBackup: job.run,
@@ -75,6 +78,7 @@ describe("GET /api/cron/backup", () => {
     expect(res.headers.get("cache-control")).toBe("no-store");
     expect(await res.json()).toEqual({ ok: true, rows: 208, illegible: 0, deleted: 1 });
     expect(consoleOutput()).toContain("[backup] ok rows=208 illegible=0 deleted=1");
+    expect(recordAutomaticRuns).toHaveBeenCalledWith([{ name: "member_backup", ok: true, durationMs: 1200 }]);
   });
 
   it("returns 502 backup_failed and logs only the step and code", async () => {
@@ -83,5 +87,18 @@ describe("GET /api/cron/backup", () => {
     expect(res.status).toBe(502);
     expect(await res.json()).toEqual({ ok: false, error: "backup_failed" });
     expect(consoleOutput()).toBe("[backup] failed step=write code=sheets_write_403 rows=208");
+    expect(recordAutomaticRuns).toHaveBeenCalledWith([
+      { name: "member_backup", ok: false, durationMs: 900, errorCode: "sheets_write_403" },
+    ]);
+  });
+
+  it("records nothing for a refused request, and a failed run when Google is not configured", async () => {
+    await call("Bearer wrong-secret-xx");
+    expect(recordAutomaticRuns).not.toHaveBeenCalled();
+    job.config = null;
+    await call();
+    expect(recordAutomaticRuns).toHaveBeenCalledWith([
+      { name: "member_backup", ok: false, durationMs: 0, errorCode: "not_configured" },
+    ]);
   });
 });

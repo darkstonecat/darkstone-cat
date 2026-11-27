@@ -2,10 +2,12 @@
 // `Authorization: Bearer $CRON_SECRET` (same auth as /api/cron/refresh). Fails closed: no
 // secret or no Google settings means no work, and the comparison is constant-time. Writes a
 // Google Sheet with every member row in the shared drive (docs/features/member-backup/spec.md).
-// Logs and answers carry counts and short codes only, never member data.
+// Logs and answers carry counts and short codes only, never member data. Each authorised call
+// records one automatic 'member_backup' run in ops_job_runs (V-6); recording never throws.
 
 import { timingSafeEqual } from "node:crypto";
 import { getBackupConfig, runMemberBackup } from "@/lib/backup/job";
+import { recordAutomaticRuns } from "@/lib/ops/job-runs";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -28,10 +30,16 @@ export async function GET(request: Request) {
   const config = getBackupConfig();
   if (!config) {
     console.error("[backup] not configured");
+    await recordAutomaticRuns([{ name: "member_backup", ok: false, durationMs: 0, errorCode: "not_configured" }]);
     return json({ error: "not_configured" }, 500);
   }
 
   const result = await runMemberBackup(config);
+  await recordAutomaticRuns([
+    result.ok
+      ? { name: "member_backup", ok: true, durationMs: result.durationMs }
+      : { name: "member_backup", ok: false, durationMs: result.durationMs, errorCode: result.errorCode },
+  ]);
   if (!result.ok) {
     console.error("[backup] failed step=%s code=%s rows=%s", result.step, result.errorCode, result.rows ?? "-");
     return json({ ok: false, error: "backup_failed" }, 502);

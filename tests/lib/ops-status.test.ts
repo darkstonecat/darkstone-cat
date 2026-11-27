@@ -7,9 +7,9 @@ describe('parseOpsStatus', () => {
     expect(parseOpsStatus({})).toBeNull()
   })
 
-  it('always returns ludoya then bgg, empty when missing, dropping unknown jobs', () => {
+  it('always returns ludoya, bgg then member_backup, empty when missing, dropping unknown jobs', () => {
     const rows = parseOpsStatus([{ job: 'other', last_ok: true }])!
-    expect(rows.map((r) => r.job)).toEqual(['ludoya', 'bgg'])
+    expect(rows.map((r) => r.job)).toEqual(['ludoya', 'bgg', 'member_backup'])
     expect(rows[0]).toMatchObject({ lastRunAt: null, lastOk: null, lastErrorCode: null })
   })
 
