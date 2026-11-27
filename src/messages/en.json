@@ -314,6 +314,7 @@
     "filter_mechanics_placeholder": "Search mechanic...",
     "filter_select_placeholder": "Select...",
     "filter_selected_count": "{count} selected",
+    "sort_added_desc": "Newest",
     "sort_name_asc": "Name (A–Z)",
     "sort_name_desc": "Name (Z–A)",
     "sort_rating_desc": "Rating ↓",

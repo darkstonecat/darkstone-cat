@@ -9,6 +9,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { MdTune, MdSwapVert, MdGridView, MdViewList } from "react-icons/md";
 import type { BggGame } from "@/lib/bgg";
+import { DEFAULT_LUDOTECA_SORT, isLudotecaSort, sortGames, type LudotecaSort } from "@/lib/ludoteca-sort";
 import FilterSidebar from "./FilterSidebar";
 import GameGrid from "./GameGrid";
 import Pagination from "./Pagination";
@@ -63,11 +64,10 @@ const VALID_PAGE_SIZES = new Set(PAGE_SIZE_OPTIONS);
 
 const VALID_GAME_TYPES = new Set(["boardgame", "boardgameexpansion"]);
 const VALID_DURATIONS = new Set(["lt30", "30-60", "60-120", "120-180", "180-240", "240+"]);
-const VALID_SORTS = new Set(["name-asc", "name-desc", "rating-desc", "rating-asc", "weight-desc", "weight-asc"]);
 
 function parseFiltersFromParams(params: Pick<URLSearchParams, "get" | "toString">): {
   filters: Filters;
-  sortBy: string;
+  sortBy: LudotecaSort;
   viewMode: "grid" | "list";
   page: number;
   perPage: number;
@@ -77,7 +77,7 @@ function parseFiltersFromParams(params: Pick<URLSearchParams, "get" | "toString"
   const strs = (key: string) =>
     params.get(key)?.split(",").filter(Boolean) ?? [];
   const type = params.get("type") ?? "";
-  const sort = params.get("sort") ?? "name-asc";
+  const sort = params.get("sort") ?? DEFAULT_LUDOTECA_SORT;
   const view = params.get("view");
   const pp = parseInt(params.get("pp") ?? "", 10);
 
@@ -93,7 +93,7 @@ function parseFiltersFromParams(params: Pick<URLSearchParams, "get" | "toString"
       categories: strs("cat"),
       mechanics: strs("mech"),
     },
-    sortBy: VALID_SORTS.has(sort) ? sort : "name-asc",
+    sortBy: isLudotecaSort(sort) ? sort : DEFAULT_LUDOTECA_SORT,
     viewMode: view === "list" ? "list" : "grid",
     page: Math.max(1, parseInt(params.get("page") ?? "1", 10) || 1),
     perPage: VALID_PAGE_SIZES.has(pp as typeof PAGE_SIZE_OPTIONS[number]) ? pp : DEFAULT_PAGE_SIZE,
@@ -118,7 +118,7 @@ function serializeStateToUrl(
   if (filters.age.length) params.set("age", filters.age.join(","));
   if (filters.categories.length) params.set("cat", filters.categories.join(","));
   if (filters.mechanics.length) params.set("mech", filters.mechanics.join(","));
-  if (sortBy !== "name-asc") params.set("sort", sortBy);
+  if (sortBy !== DEFAULT_LUDOTECA_SORT) params.set("sort", sortBy);
   if (viewMode !== "grid") params.set("view", viewMode);
   if (page > 1) params.set("page", String(page));
   if (perPage !== DEFAULT_PAGE_SIZE) params.set("pp", String(perPage));
@@ -140,7 +140,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
 
   const [filters, setFilters] = useState<Filters>(() => initFromUrl()?.filters ?? DEFAULT_FILTERS);
   const [debouncedSearch, setDebouncedSearch] = useState(() => initFromUrl()?.filters.search ?? "");
-  const [sortBy, setSortBy] = useState(() => initFromUrl()?.sortBy ?? "name-asc");
+  const [sortBy, setSortBy] = useState<LudotecaSort>(() => initFromUrl()?.sortBy ?? DEFAULT_LUDOTECA_SORT);
   const [viewMode, setViewMode] = useState<"grid" | "list">(() => initFromUrl()?.viewMode ?? "grid");
   const [itemsPerPage, setItemsPerPage] = useState(() => initFromUrl()?.perPage ?? DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(() => initFromUrl()?.page ?? 1);
@@ -247,24 +247,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
       );
     }
 
-    // Sort
-    const [sortField, sortDir] = sortBy.split("-") as [string, string];
-    result.sort((a, b) => {
-      let cmp = 0;
-      switch (sortField) {
-        case "rating":
-          cmp = a.rating - b.rating;
-          break;
-        case "weight":
-          cmp = a.weight - b.weight;
-          break;
-        default:
-          cmp = a.name.localeCompare(b.name);
-      }
-      return sortDir === "desc" ? -cmp : cmp;
-    });
-
-    return result;
+    return sortGames(result, sortBy);
   }, [games, debouncedSearch, filters, sortBy, allGamesMap, expansionToBaseMap]);
 
   // Pagination
@@ -362,7 +345,8 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
     [filters]
   );
 
-  const sortOptions = useMemo(() => [
+  const sortOptions = useMemo((): { value: LudotecaSort; label: string }[] => [
+    { value: "added-desc", label: t("sort_added_desc") },
     { value: "name-asc", label: t("sort_name_asc") },
     { value: "name-desc", label: t("sort_name_desc") },
     { value: "rating-desc", label: t("sort_rating_desc") },
@@ -476,7 +460,7 @@ export default function LudotecaClient({ games, error }: LudotecaClientProps) {
                 value={sortBy}
                 options={sortOptions}
                 onChange={(v) => {
-                  setSortBy(v);
+                  if (isLudotecaSort(v)) setSortBy(v);
                   setCurrentPage(1);
                 }}
                 ariaLabel={t("btn_sort")}

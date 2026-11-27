@@ -155,6 +155,22 @@ describe('rawToGame', () => {
     expect(game.weight).toBe(2.8)
     expect(game.rankTypes).toEqual(['strategygames'])
     expect(game.expansions).toEqual([])
+    expect(game.addedAt).toBeUndefined()
+  })
+
+  it('reads the collection status lastmodified as addedAt', () => {
+    const raw = {
+      '@_objectid': '7',
+      '@_subtype': 'boardgame',
+      name: 'New Arrival',
+      status: { '@_own': '1', '@_lastmodified': '2026-11-20 10:15:00' },
+    }
+    expect(rawToGame(raw as any).addedAt).toBe('2026-11-20 10:15:00')
+  })
+
+  it('parses lastmodified from the collection XML', () => {
+    const xml = `<items><item objecttype="thing" objectid="9" subtype="boardgame"><name>X</name><status own="1" lastmodified="2025-01-02 03:04:05" /></item></items>`
+    expect(rawToGame(parseCollectionItems(xml)[0]).addedAt).toBe('2025-01-02 03:04:05')
   })
 
   it('handles missing stats gracefully (defaults to 0)', () => {

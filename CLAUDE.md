@@ -237,7 +237,7 @@ Server-side BGG integration in `src/lib/bgg.ts`:
 
 Client state in `LudotecaClient.tsx`:
 - Filters: search, gameType, rankTypes, players, duration, weight, age, categories, mechanics
-- Sort: name/rating/weight × asc/desc
+- Sort (`src/lib/ludoteca-sort.ts`, `sortGames`): default `added-desc` ("Novetats", newest additions first), plus name/rating/weight × asc/desc. The date is the BGG collection `<status lastmodified>` (`BggGame.addedAt`), compared by day only with name as the tie-break: the original collection was loaded on 2026-10-31 within seconds, so those games read alphabetically. It only stays meaningful while old entries are not edited on BGG (an edit moves a game to the top)
 - View: grid/list, pagination (24/48/96/192 per page)
 - URL serialization: query params (`q`, `type`, `rank`, `players`, `duration`, `weight`, `age`, `cat`, `mech`, `sort`, `view`, `pp`, `page`)
 

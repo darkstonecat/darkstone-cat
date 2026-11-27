@@ -314,6 +314,7 @@
     "filter_mechanics_placeholder": "Buscar mecánica...",
     "filter_select_placeholder": "Seleccionar...",
     "filter_selected_count": "{count} seleccionado/s",
+    "sort_added_desc": "Novedades",
     "sort_name_asc": "Nombre (A–Z)",
     "sort_name_desc": "Nombre (Z–A)",
     "sort_rating_desc": "Valoración ↓",

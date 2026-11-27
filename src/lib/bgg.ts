@@ -31,6 +31,8 @@ export interface BggGame {
   mechanics: string[];
   rankTypes: string[];
   expansions: BggExpansion[];
+  /** BGG collection `lastmodified` ("YYYY-MM-DD HH:MM:SS"): when the game was added, as long as old entries are not edited. */
+  addedAt?: string;
 }
 
 export interface BggCollectionResult {
@@ -115,6 +117,7 @@ export interface RawCollectionItem {
   yearpublished?: string;
   image?: string;
   thumbnail?: string;
+  status?: { "@_lastmodified"?: string };
   stats?: {
     "@_minplayers"?: string;
     "@_maxplayers"?: string;
@@ -181,6 +184,7 @@ export function rawToGame(item: RawCollectionItem): BggGame {
     mechanics: [],
     rankTypes: extractRankTypes(item.stats?.rating?.ranks?.rank),
     expansions: [],
+    addedAt: item.status?.["@_lastmodified"] || undefined,
   };
 }
 
