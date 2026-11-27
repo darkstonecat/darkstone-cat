@@ -578,6 +578,7 @@
   },
   "events": {
     "title": "Events",
+    "loading": "Loading the events…",
     "error_title": "Could not load events",
     "error_description": "You can check our events directly on Ludoya.",
     "error_link": "View events on Ludoya",

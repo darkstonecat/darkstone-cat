@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { MdOutlineLocationOn, MdOutlineSchedule, MdStar } from "react-icons/md";
@@ -57,11 +58,27 @@ function SpecialBanner({ event }: { event: EventView }) {
   );
 }
 
+/** One compact banner per upcoming special event (none: renders nothing). */
+export function SpecialBanners({ specials }: { specials: EventView[] }) {
+  const t = useTranslations("events");
+  if (specials.length === 0) return null;
+  return (
+    <ul aria-label={t("banners_label")} className="flex flex-col gap-2.5">
+      {specials.map((event) => (
+        <li key={event.id}>
+          <SpecialBanner event={event} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /**
  * Short dark header of /events: title, one line of text, the session hours,
- * the venue and "free", then one compact banner per upcoming special event.
+ * the venue and "free". `banners` is the special-event banners slot, which the
+ * page streams in (it depends on Ludoya; the rest of the header does not).
  */
-export default function EventsHeader({ specials }: { specials: EventView[] }) {
+export default function EventsHeader({ banners }: { banners?: ReactNode }) {
   const t = useTranslations("events");
   return (
     <section className="bg-stone-custom px-4 pt-24 pb-8 text-stone-white-hover sm:px-6">
@@ -86,15 +103,7 @@ export default function EventsHeader({ specials }: { specials: EventView[] }) {
             <li className="inline-flex items-center rounded-full bg-stone-800 px-3.5 py-2">{t("free_chip")}</li>
           </ul>
         </div>
-        {specials.length > 0 && (
-          <ul aria-label={t("banners_label")} className="flex flex-col gap-2.5">
-            {specials.map((event) => (
-              <li key={event.id}>
-                <SpecialBanner event={event} />
-              </li>
-            ))}
-          </ul>
-        )}
+        {banners}
       </div>
     </section>
   );

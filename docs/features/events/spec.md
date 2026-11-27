@@ -136,6 +136,7 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
        EventsCalendar (first month with the page, the others via /api/events/calendar)
 ```
 
+- **Streaming**: the page starts `loadEventsPageData(locale, now)` (`src/lib/events/page-data.ts`: agenda + current month + `loadedIds`) without awaiting it and hands the one promise to three `<Suspense>` boundaries in `EventsContent.tsx`: `EventsBanners` (header banners), `EventsSidebarCalendar` (desktop calendar) and `EventsMain` (mobile strip, timeline or status box, and the Event JSON-LD). NavBar, the header chips, "Com funciona" and the footer render at once; the skeletons (`EventsSkeletons.tsx`: one banner, the calendar card, the strip and three cards, with one `role="status"` "Carregant els esdeveniments…") hold their place until Ludoya answers (about 5 s on a cold cache, a few ms when warm). The streamed parts and their JSON-LD are still in the same HTML response.
 - **Dates are formatted on the server only.** Node and browser ICU differ (apostrophes, abbreviations), which would break hydration; client components only print strings.
 - **"Now"** comes from `agendaNow()` (`src/lib/events/clock.ts`): the real time, or `LUDOYA_MOCK_NOW` when `LUDOYA_MOCK=1` (tests only).
 - **Failure**: if Ludoya fails with a cold cache, the page shows `EventsStatus` (error, with a Ludoya link); an empty agenda shows the empty state. A warm cache keeps serving the last good data.
@@ -171,7 +172,10 @@ fetchMemberAreaSessions()          src/lib/member-sessions.ts
 | `src/lib/events/calendar.ts` | Server: `fetchEventsCalendar(month, locale, now)` |
 | `src/lib/events/links.ts` | Anchors, Ludoya agenda URL, directions link, countdown text |
 | `src/lib/events/clock.ts` | `agendaNow()` |
-| `src/components/events/EventsHeader.tsx` | Header chips and special banners |
+| `src/lib/events/page-data.ts` | Server: `loadEventsPageData(locale, now)` (the one data promise of the page), `buildEventJsonLd(events)` |
+| `src/components/events/EventsHeader.tsx` | Header chips, `banners` slot, `SpecialBanners` |
+| `src/components/events/EventsContent.tsx` | Server: the streamed parts (`EventsBanners`, `EventsSidebarCalendar`, `EventsMain`) awaiting the page's data promise |
+| `src/components/events/EventsSkeletons.tsx` | `BannerSkeleton`, `CalendarSkeleton`, `TimelineSkeleton` (Suspense fallbacks) |
 | `src/components/events/EventsTimeline.tsx` | Week groups, open state, toggle all, `#event-` handling and scroll |
 | `src/components/events/EventCard.tsx` | Session and special cards, the date tile (`DateTile`: beside the card from 640 px, inside it below) and its segment of the timeline line (`RAIL`, hidden below 640 px) |
 | `src/components/events/program/` | `EventProgram` (days or one day, then the always-open block), `DayItems` (grid or slots), `CollapsibleSection`, `AlwaysOpenSection`, `ItemCard` (play, tournament, activity, demo; the same full card in the days and the always-open block), `grid.ts` (`PROGRAM_GRID`, 140px minimum: four cards per row at the widest card), `ProgramRow` (left column with the time, or the always-open clock in an event that goes by start time, so every grid has the same width), `CoverFrame`, `ItemBadge`, `ProposeTile`, `useCountsSummary` |

@@ -578,6 +578,7 @@
   },
   "events": {
     "title": "Esdeveniments",
+    "loading": "Carregant els esdeveniments…",
     "error_title": "No s'han pogut carregar els esdeveniments",
     "error_description": "Pots consultar els nostres esdeveniments directament a Ludoya.",
     "error_link": "Veure esdeveniments a Ludoya",

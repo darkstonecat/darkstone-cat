@@ -19,7 +19,7 @@ vi.mock('@/i18n/routing', () => ({
 }))
 
 import EventsTimeline from '@/components/events/EventsTimeline'
-import EventsHeader from '@/components/events/EventsHeader'
+import EventsHeader, { SpecialBanners } from '@/components/events/EventsHeader'
 import type { EventView, WeekView } from '@/lib/events/agenda-format'
 import { activityView, dayView, demoView, playView as play, programView, tournamentView } from '../../helpers/program-view'
 
@@ -316,7 +316,7 @@ describe('EventsTimeline anchors', () => {
 
 describe('EventsHeader', () => {
   it('has the title, hours, venue and one banner per special', () => {
-    render(<EventsHeader specials={[egara]} />)
+    render(<EventsHeader banners={<SpecialBanners specials={[egara]} />} />)
 
     expect(screen.getByRole('heading', { level: 1, name: 'title' })).toBeInTheDocument()
     expect(screen.getByText(/hours_chip/)).toBeInTheDocument()
@@ -329,7 +329,7 @@ describe('EventsHeader', () => {
   })
 
   it('marks the venue link with the outward arrow', () => {
-    render(<EventsHeader specials={[]} />)
+    render(<EventsHeader banners={<SpecialBanners specials={[]} />} />)
 
     const venue = screen.getByRole('link', { name: /Ca N/ })
     expect(icons(venue)).toEqual(['arrow_outward'])
@@ -337,13 +337,13 @@ describe('EventsHeader', () => {
   })
 
   it('shows a word instead of a number tomorrow, today and while running', () => {
-    render(<EventsHeader specials={[{ ...egara, countdown: { kind: 'running', days: 0 } }]} />)
+    render(<EventsHeader banners={<SpecialBanners specials={[{ ...egara, countdown: { kind: 'running', days: 0 } }]} />} />)
 
     expect(screen.getByText('countdown_running')).toBeInTheDocument()
   })
 
   it('has no banner list without specials', () => {
-    render(<EventsHeader specials={[]} />)
+    render(<EventsHeader banners={<SpecialBanners specials={[]} />} />)
 
     expect(screen.queryByRole('list', { name: 'banners_label' })).toBeNull()
   })
